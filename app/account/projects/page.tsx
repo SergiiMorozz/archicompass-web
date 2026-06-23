@@ -14,9 +14,49 @@ type Project = {
   created_at: string;
 };
 
+const fieldClass =
+  "mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal text-foreground outline-none transition focus:border-primary";
+const areaClass =
+  "mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal text-foreground outline-none transition focus:border-primary";
+
+const fallbackImages = [
+  "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=900&q=80",
+];
+
 function textValue(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function imageFor(project: Project, index: number) {
+  return project.image_url || fallbackImages[index % fallbackImages.length];
+}
+
+function projectStatus(projects: Project[]) {
+  if (projects.length >= 6) return "Strong portfolio base";
+  if (projects.length >= 3) return "Good start";
+  if (projects.length >= 1) return "First project live";
+  return "Portfolio not started";
+}
+
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block text-sm font-semibold">
+      <span>{label}</span>
+      {hint ? <span className="ml-2 font-normal text-muted">{hint}</span> : null}
+      {children}
+    </label>
+  );
 }
 
 async function addProject(formData: FormData) {
@@ -42,6 +82,7 @@ async function addProject(formData: FormData) {
 
   if (error) redirect(`/account/projects?error=${encodeURIComponent(error.message)}`);
 
+  revalidatePath("/account");
   revalidatePath("/account/projects");
   revalidatePath(`/designers/${user.id}`);
   redirect("/account/projects?created=1");
@@ -59,125 +100,206 @@ export default async function ManageProjectsPage({
 
   if (!user) redirect("/login");
 
-  const { data: projects, error } = await supabase
+  const { data: projectsData, error } = await supabase
     .from("projects")
     .select("id, title, category, description, image_url, created_at")
     .eq("profile_id", user.id)
     .order("created_at", { ascending: false });
 
+  const projects = (projectsData ?? []) as Project[];
+  const categories = Array.from(
+    new Set(projects.map((project) => project.category).filter(Boolean))
+  ) as string[];
+
   return (
-    <main className="min-h-screen bg-white text-black">
-      <div className="mx-auto max-w-5xl px-6 py-10">
-        <Link href="/account" className="text-sm underline">
-          ← Back to account
-        </Link>
-
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-semibold">Manage projects</h1>
-            <p className="mt-2 text-zinc-600">
-              Add portfolio examples that will appear on your public profile.
-            </p>
-          </div>
-          <Link href={`/designers/${user.id}`} className="rounded-xl border px-4 py-2 text-sm hover:bg-zinc-50">
-            View public profile
+    <main className="bg-background">
+      <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
+        <div className="mx-auto max-w-7xl">
+          <Link
+            href="/account"
+            className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
+          >
+            Back to account
           </Link>
+
+          <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
+            <div>
+              <div className="text-sm font-semibold text-primary">Portfolio Manager</div>
+              <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
+                Manage projects
+              </h1>
+              <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
+                Add portfolio examples that make your public designer profile feel real,
+                specific, and easy to trust.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-line bg-background p-5 shadow-sm">
+              <div className="text-sm font-semibold text-muted">Portfolio status</div>
+              <div className="mt-2 text-2xl font-bold text-primary">
+                {projectStatus(projects)}
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div className="rounded-xl border border-line bg-card p-3">
+                  <div className="text-muted">Projects</div>
+                  <div className="mt-1 text-xl font-bold">{projects.length}</div>
+                </div>
+                <div className="rounded-xl border border-line bg-card p-3">
+                  <div className="text-muted">Categories</div>
+                  <div className="mt-1 text-xl font-bold">{categories.length}</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
 
-        {sp.error ? (
-          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {sp.error}
-          </div>
-        ) : sp.created ? (
-          <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-            Project added.
-          </div>
-        ) : null}
+      <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="grid gap-7">
+          {sp.error ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+              {sp.error}
+            </div>
+          ) : sp.created ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+              Project added. It now appears on your public profile.
+            </div>
+          ) : null}
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
-          <section>
-            <h2 className="text-xl font-semibold">Your projects</h2>
+          <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="text-sm font-semibold text-primary">Your portfolio</div>
+                <h2 className="mt-1 text-3xl font-bold">Public projects</h2>
+              </div>
+              <Link
+                href={`/designers/${user.id}#portfolio`}
+                className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
+              >
+                View public portfolio
+              </Link>
+            </div>
 
             {error ? (
-              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
                 {error.message}
               </div>
-            ) : !projects?.length ? (
-              <div className="mt-4 rounded-2xl border p-6 text-sm text-zinc-600">
-                No projects yet. Add your first portfolio example.
+            ) : !projects.length ? (
+              <div className="mt-6 overflow-hidden rounded-2xl border border-dashed border-line bg-background">
+                <div
+                  className="min-h-[260px] bg-cover bg-center"
+                  style={{
+                    backgroundImage: `linear-gradient(90deg, rgba(31,23,42,0.70), rgba(31,23,42,0.16)), url(${fallbackImages[0]})`,
+                  }}
+                >
+                  <div className="flex min-h-[260px] max-w-xl flex-col justify-end p-6 text-white">
+                    <h3 className="text-3xl font-bold">Start with one strong project</h3>
+                    <p className="mt-3 text-sm leading-6 text-white/80">
+                      Add a title, category, image URL, and short story. This is enough to
+                      make the public profile feel alive.
+                    </p>
+                  </div>
+                </div>
               </div>
             ) : (
-              <div className="mt-4 grid gap-4">
-                {(projects as Project[]).map((project) => (
-                  <div key={project.id} className="rounded-2xl border p-5">
-                    <div className="font-semibold">{project.title || "Untitled project"}</div>
-                    <div className="mt-1 text-sm text-zinc-600">
-                      {project.category || "Uncategorized"}
+              <div className="mt-6 grid gap-5 md:grid-cols-2">
+                {projects.map((project, index) => (
+                  <article
+                    key={project.id}
+                    className="overflow-hidden rounded-2xl border border-line bg-background"
+                  >
+                    <div className="relative aspect-[4/3] bg-primary-soft">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={imageFor(project, index)}
+                        alt={project.title ?? "Portfolio project"}
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#1f172a]/72 via-transparent to-transparent" />
+                      <div className="absolute bottom-4 left-4 right-4 text-white">
+                        <div className="text-xs font-semibold uppercase tracking-wide text-white/70">
+                          {project.category || "Uncategorized"}
+                        </div>
+                        <h3 className="mt-1 text-xl font-bold">
+                          {project.title || "Untitled project"}
+                        </h3>
+                      </div>
                     </div>
-                    {project.description ? (
-                      <p className="mt-2 text-sm text-zinc-700">{project.description}</p>
-                    ) : null}
-                    {project.image_url ? (
-                      <a
-                        href={project.image_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-3 inline-block text-sm underline"
-                      >
-                        Open image
-                      </a>
-                    ) : null}
-                  </div>
+                    <div className="p-5">
+                      {project.description ? (
+                        <p className="text-sm leading-6 text-muted">
+                          {project.description}
+                        </p>
+                      ) : (
+                        <p className="text-sm leading-6 text-muted">
+                          Add a description to explain the brief, style, and result.
+                        </p>
+                      )}
+                      {project.image_url ? (
+                        <a
+                          href={project.image_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-4 inline-flex text-sm font-semibold text-primary hover:underline"
+                        >
+                          Open image
+                        </a>
+                      ) : null}
+                    </div>
+                  </article>
                 ))}
               </div>
             )}
           </section>
-
-          <section className="rounded-2xl border p-6">
-            <h2 className="text-xl font-semibold">Add project</h2>
-            <form action={addProject} className="mt-5 grid gap-4">
-              <label className="text-sm">
-                <span className="text-zinc-600">Title</span>
-                <input name="title" className="mt-1 w-full rounded-xl border px-3 py-2" />
-              </label>
-
-              <label className="text-sm">
-                <span className="text-zinc-600">Category</span>
-                <input
-                  name="category"
-                  placeholder="Apartment, house, office..."
-                  className="mt-1 w-full rounded-xl border px-3 py-2"
-                />
-              </label>
-
-              <label className="text-sm">
-                <span className="text-zinc-600">Image URL</span>
-                <input
-                  name="image_url"
-                  placeholder="https://"
-                  className="mt-1 w-full rounded-xl border px-3 py-2"
-                />
-              </label>
-
-              <label className="text-sm">
-                <span className="text-zinc-600">Description</span>
-                <textarea
-                  name="description"
-                  rows={5}
-                  className="mt-1 w-full rounded-xl border px-3 py-2"
-                />
-              </label>
-
-              <button
-                type="submit"
-                className="rounded-xl bg-black px-5 py-3 text-sm text-white hover:opacity-90"
-              >
-                Add project
-              </button>
-            </form>
-          </section>
         </div>
-      </div>
+
+        <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
+          <div className="text-sm font-semibold text-primary">Add Project</div>
+          <h2 className="mt-1 text-2xl font-bold">Create portfolio card</h2>
+          <p className="mt-3 text-sm leading-6 text-muted">
+            Keep the first version simple. A clear title and one strong image are enough
+            for now.
+          </p>
+
+          <form action={addProject} className="mt-6 grid gap-5">
+            <Field label="Title">
+              <input name="title" placeholder="Modern Warsaw apartment" className={fieldClass} />
+            </Field>
+
+            <Field label="Category" hint="room or project type">
+              <input
+                name="category"
+                placeholder="Apartment, house, office..."
+                className={fieldClass}
+              />
+            </Field>
+
+            <Field label="Image URL">
+              <input name="image_url" placeholder="https://" className={fieldClass} />
+            </Field>
+
+            <Field label="Description">
+              <textarea
+                name="description"
+                rows={5}
+                placeholder="Describe the brief, design direction, and what changed for the client."
+                className={areaClass}
+              />
+            </Field>
+
+            <button
+              type="submit"
+              className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90"
+            >
+              Add project
+            </button>
+          </form>
+
+          <div className="mt-6 rounded-2xl border border-line bg-background p-4 text-sm leading-6 text-muted">
+            Tip: later we can replace image URLs with direct uploads to Supabase Storage.
+          </div>
+        </aside>
+      </section>
     </main>
   );
 }

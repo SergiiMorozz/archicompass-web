@@ -5,6 +5,34 @@ import SignOutButton from "@/components/SignOutButton";
 
 export const revalidate = 0;
 
+type Profile = {
+  full_name: string | null;
+  location: string | null;
+  profession_type: string | null;
+  user_type: string | null;
+  specialties: string[] | null;
+  bio: string | null;
+};
+
+type Project = {
+  id: string;
+};
+
+function profileName(profile: Partial<Profile>, email?: string) {
+  return profile.full_name || email || "Your ArchiCompass account";
+}
+
+function profileScore(profile: Partial<Profile>) {
+  const fields = [
+    profile.full_name,
+    profile.location,
+    profile.profession_type,
+    profile.bio,
+    profile.specialties?.length ? "specialties" : null,
+  ];
+  return Math.round((fields.filter(Boolean).length / fields.length) * 100);
+}
+
 export default async function AccountPage() {
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -12,69 +40,179 @@ export default async function AccountPage() {
 
   if (!user) redirect("/login");
 
-  // Если у тебя profiles.id = auth.users.id (типичный кейс), то профиль = user.id
   const myProfileId = user.id;
 
+  const { data: profileData } = await supabase
+    .from("profiles")
+    .select("full_name, location, profession_type, user_type, specialties, bio")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const { data: projectsData } = await supabase
+    .from("projects")
+    .select("id")
+    .eq("profile_id", user.id);
+
+  const profile = (profileData ?? {}) as Partial<Profile>;
+  const projects = (projectsData ?? []) as Project[];
+  const score = profileScore(profile);
+
   return (
-    <main className="min-h-screen bg-white text-black">
-      <div className="mx-auto max-w-4xl px-6 py-10">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-semibold">Account</h1>
-            <p className="mt-2 text-zinc-600">
-              You are signed in as <span className="font-medium">{user.email}</span>
-            </p>
-            <p className="mt-1 text-xs text-zinc-500">
-              User ID: <code>{user.id}</code>
-            </p>
+    <main className="bg-background">
+      <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+            <div>
+              <div className="text-sm font-semibold text-primary">Account Workspace</div>
+              <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
+                {profileName(profile, user.email ?? undefined)}
+              </h1>
+              <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
+                Manage the profile and portfolio that clients see in the ArchiCompass
+                marketplace.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
+                  {profile.user_type || "Account"}
+                </span>
+                {profile.location ? (
+                  <span className="rounded-full border border-line bg-background px-3 py-1 text-sm font-semibold text-muted">
+                    {profile.location}
+                  </span>
+                ) : null}
+                {profile.profession_type ? (
+                  <span className="rounded-full border border-line bg-background px-3 py-1 text-sm font-semibold text-muted">
+                    {profile.profession_type}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3 lg:justify-end">
+              <Link
+                href={`/designers/${myProfileId}`}
+                className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
+              >
+                View public profile
+              </Link>
+              <SignOutButton className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary disabled:opacity-60" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid gap-7">
+          <section className="grid gap-5 md:grid-cols-2">
+            <Link
+              href="/account/profile"
+              className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
+            >
+              <div className="text-sm font-semibold text-primary">Profile Builder</div>
+              <h2 className="mt-2 text-2xl font-bold">Edit public profile</h2>
+              <p className="mt-3 text-sm leading-6 text-muted">
+                Update your identity, specialties, pricing, contact details, and design
+                approach.
+              </p>
+              <div className="mt-6 h-2 overflow-hidden rounded-full bg-primary-soft">
+                <div className="h-full rounded-full bg-primary" style={{ width: `${score}%` }} />
+              </div>
+              <div className="mt-3 text-sm font-semibold text-muted">
+                {score}% profile readiness
+              </div>
+            </Link>
+
+            <Link
+              href="/account/projects"
+              className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
+            >
+              <div className="text-sm font-semibold text-primary">Portfolio Manager</div>
+              <h2 className="mt-2 text-2xl font-bold">Manage projects</h2>
+              <p className="mt-3 text-sm leading-6 text-muted">
+                Add project cards that turn your profile from a listing into a visual
+                portfolio.
+              </p>
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <div className="rounded-xl border border-line bg-background p-3">
+                  <div className="text-sm text-muted">Projects</div>
+                  <div className="mt-1 text-xl font-bold">{projects.length}</div>
+                </div>
+                <div className="rounded-xl border border-line bg-background p-3">
+                  <div className="text-sm text-muted">Specialties</div>
+                  <div className="mt-1 text-xl font-bold">
+                    {profile.specialties?.length ?? 0}
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </section>
+
+          <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="text-sm font-semibold text-primary">Next best actions</div>
+                <h2 className="mt-1 text-3xl font-bold">Make the profile client-ready</h2>
+              </div>
+              <Link
+                href="/designers"
+                className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
+              >
+                Browse marketplace
+              </Link>
+            </div>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              <div className="rounded-2xl border border-line bg-background p-5">
+                <div className="font-bold">1. Complete basics</div>
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  Add location, profession, rate, and contact details so clients can
+                  understand fit quickly.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-line bg-background p-5">
+                <div className="font-bold">2. Add one project</div>
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  A single strong portfolio card already makes the public page much more
+                  credible.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-line bg-background p-5">
+                <div className="font-bold">3. Review public view</div>
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  Open the profile as a client and check whether the story feels clear.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
+          <div className="text-sm font-semibold text-primary">Signed in</div>
+          <h2 className="mt-2 text-2xl font-bold">Account details</h2>
+          <div className="mt-5 grid gap-4 text-sm">
+            <div>
+              <div className="text-muted">Email</div>
+              <div className="mt-1 break-words font-semibold">{user.email}</div>
+            </div>
+            <div>
+              <div className="text-muted">User ID</div>
+              <code className="mt-1 block break-all rounded-xl bg-background p-3 text-xs">
+                {user.id}
+              </code>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="mt-6 border-t border-line pt-6">
+            <div className="font-bold">Public profile link</div>
             <Link
               href={`/designers/${myProfileId}`}
-              className="rounded-xl bg-black px-4 py-2 text-sm text-white hover:opacity-90"
+              className="mt-3 flex rounded-xl bg-primary-soft px-4 py-3 text-center text-sm font-semibold text-primary hover:bg-primary hover:text-white"
             >
-              View my designer profile
+              <span className="w-full">Open profile</span>
             </Link>
-            <SignOutButton />
           </div>
-        </div>
-
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border p-6">
-            <div className="font-semibold">Profile tools</div>
-            <p className="mt-2 text-sm text-zinc-600">
-              Manage the information and portfolio shown on your public designer page.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Link
-                href="/account/profile"
-                className="rounded-xl bg-black px-4 py-2 text-sm text-white hover:opacity-90"
-              >
-                Edit profile
-              </Link>
-              <Link
-                href="/account/projects"
-                className="rounded-xl border px-4 py-2 text-sm hover:bg-zinc-50"
-              >
-                Manage projects
-              </Link>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border p-6">
-            <div className="font-semibold">Quick links</div>
-            <div className="mt-3 flex flex-col gap-2 text-sm">
-              <Link className="underline" href="/designers">
-                Browse designers
-              </Link>
-              <Link className="underline" href={`/designers/${myProfileId}`}>
-                Open my profile
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+        </aside>
+      </section>
     </main>
   );
 }
