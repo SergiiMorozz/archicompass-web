@@ -55,8 +55,10 @@ export default async function DesignerProfilePage({
   }
 
   const supabase = await createSupabaseServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  const isOwner = userData.user?.id === id;
 
-  const { data: profile, error: pErr } = await supabase
+  const { data: profileData, error: pErr } = await supabase
     .from("profiles")
     .select(
       "id, full_name, bio, location, profession_type, user_type, specialties, website, phone, email, hourly_rate, years_experience"
@@ -64,7 +66,7 @@ export default async function DesignerProfilePage({
     .eq("id", id)
     .single();
 
-  if (pErr || !profile) {
+  if (pErr || !profileData) {
     return (
       <main className="min-h-screen bg-white text-black">
         <div className="mx-auto max-w-6xl px-6 py-10">
@@ -77,6 +79,8 @@ export default async function DesignerProfilePage({
       </main>
     );
   }
+
+  const profile = profileData as Profile;
 
   const { data: projects, error: prErr } = await supabase
     .from("projects")
@@ -126,16 +130,46 @@ export default async function DesignerProfilePage({
               <div className="text-right">{profile.email || profile.phone || "n/a"}</div>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <button className="rounded-xl border px-4 py-3 text-sm hover:bg-zinc-50">
-                View Portfolio
-              </button>
-              <button className="rounded-xl bg-black px-4 py-3 text-sm text-white hover:opacity-90">
-                Request Estimate
-              </button>
-            </div>
+            {isOwner ? (
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <Link
+                  href="/account/profile"
+                  className="rounded-xl border px-4 py-3 text-center text-sm hover:bg-zinc-50"
+                >
+                  Edit profile
+                </Link>
+                <Link
+                  href="/account/projects"
+                  className="rounded-xl bg-black px-4 py-3 text-center text-sm text-white hover:opacity-90"
+                >
+                  Manage projects
+                </Link>
+              </div>
+            ) : (
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <a
+                  href="#portfolio"
+                  className="rounded-xl border px-4 py-3 text-center text-sm hover:bg-zinc-50"
+                >
+                  View Portfolio
+                </a>
+                <button className="rounded-xl bg-black px-4 py-3 text-sm text-white hover:opacity-90">
+                  Request Estimate
+                </button>
+              </div>
+            )}
           </div>
         </div>
+
+        {isOwner ? (
+          <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+            <div className="font-semibold">Owner mode</div>
+            <p className="mt-1">
+              You are viewing your own profile. Use the profile and project tools to keep
+              your public page up to date.
+            </p>
+          </div>
+        ) : null}
 
         <div className="mt-8 grid gap-6 md:grid-cols-2">
           <div className="rounded-2xl border p-6">
@@ -154,7 +188,7 @@ export default async function DesignerProfilePage({
           </div>
         </div>
 
-        <div className="mt-10">
+        <div id="portfolio" className="mt-10">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Portfolio</h2>
             <div className="text-sm text-zinc-500">{projects?.length ?? 0} projects</div>

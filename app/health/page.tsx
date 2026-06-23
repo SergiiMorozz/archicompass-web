@@ -1,8 +1,9 @@
-import { supabase } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
 
 export default async function HealthPage() {
+  const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("profiles")
     .select("id")

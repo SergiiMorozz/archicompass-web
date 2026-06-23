@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-white text-black">
@@ -13,12 +15,12 @@ export default function Home() {
         </p>
 
         <div className="mt-8 flex gap-4">
-          <a className="rounded-xl bg-purple-600 px-6 py-3 text-white" href="/ai-style-finder">
+          <Link className="rounded-xl bg-purple-600 px-6 py-3 text-white" href="/ai-style-finder">
             AI Style Finder
-          </a>
-          <a className="rounded-xl border border-zinc-300 px-6 py-3" href="/designers">
+          </Link>
+          <Link className="rounded-xl border border-zinc-300 px-6 py-3" href="/designers">
             Find a Designer
-          </a>
+          </Link>
         </div>
       </div>
     </main>

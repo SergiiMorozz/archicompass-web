@@ -61,6 +61,7 @@ export default async function DesignersPage({
     .select(
       "id, full_name, bio, location, profession_type, user_type, specialties, hourly_rate, created_at"
     )
+    .eq("user_type", "professional")
     .order("created_at", { ascending: false })
     .limit(60);
 
@@ -199,7 +200,7 @@ export default async function DesignersPage({
           </div>
         ) : profiles.length === 0 ? (
           <div className="mt-6 rounded-2xl border p-6">
-            <div className="font-medium">No profiles found</div>
+            <div className="font-medium">No professionals found</div>
             <div className="mt-2 text-sm text-zinc-600">Try changing filters.</div>
           </div>
         ) : view === "list" ? (
