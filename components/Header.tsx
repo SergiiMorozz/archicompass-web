@@ -2,24 +2,37 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+
+const navItems = [
+  { href: "/", label: "Home" },
+  { href: "/ai-style-finder", label: "AI Style Finder" },
+  { href: "/inspiration", label: "Inspiration" },
+  { href: "/designers", label: "Find Designer" },
+  { href: "/services", label: "Services" },
+];
 
 function NavLink({
   href,
   children,
+  onClick,
 }: {
   href: string;
   children: React.ReactNode;
+  onClick?: () => void;
 }) {
   const pathname = usePathname();
-  const isActive =
-    pathname === href || (href !== "/" && pathname?.startsWith(href));
+  const isActive = pathname === href || (href !== "/" && pathname?.startsWith(href));
 
   return (
     <Link
       href={href}
+      onClick={onClick}
       className={[
-        "text-sm transition",
-        isActive ? "font-medium underline" : "hover:underline",
+        "rounded-full px-3 py-2 text-sm font-medium transition",
+        isActive
+          ? "bg-primary text-white shadow-sm"
+          : "text-muted hover:bg-primary-soft hover:text-primary",
       ].join(" ")}
     >
       {children}
@@ -27,34 +40,104 @@ function NavLink({
   );
 }
 
+function Brand() {
+  return (
+    <Link href="/" className="flex items-center gap-2" aria-label="ArchiCompass home">
+      <span className="grid h-9 w-9 place-items-center rounded-2xl bg-primary text-lg font-bold text-white shadow-sm">
+        A
+      </span>
+      <span className="text-xl font-semibold tracking-tight text-primary">ArchiCompass</span>
+    </Link>
+  );
+}
+
 export default function Header() {
   const pathname = usePathname();
   const isGetStartedActive = pathname === "/get-started";
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="w-full border-b border-black/10 bg-white">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link href="/" className="text-xl font-semibold">
-          ArchiCompass
-        </Link>
+    <header className="sticky top-0 z-50 w-full border-b border-line/80 bg-background/90 backdrop-blur-md">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+        <Brand />
 
-        <nav className="flex items-center gap-6">
-          <NavLink href="/ai-style-finder">AI Style Finder</NavLink>
-          <NavLink href="/designers">Designers</NavLink>
-          <NavLink href="/health">Health</NavLink>
-          <NavLink href="/login">Sign in</NavLink>
+        <nav className="hidden items-center gap-1 lg:flex">
+          {navItems.map((item) => (
+            <NavLink key={item.href} href={item.href}>
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="hidden items-center gap-2 lg:flex">
+          <button className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium text-foreground">
+            EN
+          </button>
+          <Link
+            href="/login"
+            className="rounded-xl px-4 py-2 text-sm font-medium text-foreground transition hover:bg-primary-soft hover:text-primary"
+          >
+            Sign In
+          </Link>
 
           <Link
             href="/get-started"
             className={[
-              "rounded-full px-4 py-2 text-sm text-white transition",
-              isGetStartedActive ? "bg-zinc-800" : "bg-black hover:opacity-90",
+              "rounded-xl px-4 py-2 text-sm font-medium text-white transition",
+              isGetStartedActive ? "bg-foreground" : "bg-primary hover:opacity-90",
             ].join(" ")}
           >
             Get Started
           </Link>
-        </nav>
+        </div>
+
+        <div className="flex items-center gap-2 lg:hidden">
+          <button className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium">
+            EN
+          </button>
+          <button
+            type="button"
+            aria-label="Toggle menu"
+            aria-expanded={isOpen}
+            onClick={() => setIsOpen((value) => !value)}
+            className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-card"
+          >
+            <span className="flex w-4 flex-col gap-1">
+              <span className="h-0.5 rounded-full bg-foreground" />
+              <span className="h-0.5 rounded-full bg-foreground" />
+              <span className="h-0.5 rounded-full bg-foreground" />
+            </span>
+          </button>
+        </div>
       </div>
+
+      {isOpen ? (
+        <div className="border-t border-line bg-background px-4 py-4 lg:hidden">
+          <nav className="mx-auto grid max-w-7xl gap-2">
+            {navItems.map((item) => (
+              <NavLink key={item.href} href={item.href} onClick={() => setIsOpen(false)}>
+                {item.label}
+              </NavLink>
+            ))}
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <Link
+                href="/login"
+                onClick={() => setIsOpen(false)}
+                className="rounded-xl border border-line bg-card px-4 py-3 text-center text-sm font-medium"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/get-started"
+                onClick={() => setIsOpen(false)}
+                className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white"
+              >
+                Get Started
+              </Link>
+            </div>
+          </nav>
+        </div>
+      ) : null}
     </header>
   );
 }
