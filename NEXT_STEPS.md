@@ -9,6 +9,8 @@ Last checkpoint: 2026-06-23
 - `/designers` is redesigned as the marketplace catalog.
 - `/designers/[id]` is redesigned as the public designer profile.
 - `/account`, `/account/profile`, and `/account/projects` are redesigned as owner tools.
+- `/account/projects` has the app-side image upload path for Supabase Storage.
+- Storage bucket/policy SQL is in `supabase/storage.sql`.
 - Latest local preview runs on `http://localhost:3001`.
 
 ## Verified
@@ -20,8 +22,8 @@ Last checkpoint: 2026-06-23
 
 ## Best Next Small Step
 
-Add real portfolio image uploads using Supabase Storage, replacing the current manual
-`Image URL` field in `/account/projects`.
+Apply `supabase/storage.sql` in the Supabase SQL Editor, then test adding one real
+portfolio image from `/account/projects`.
 
 ## After That
 

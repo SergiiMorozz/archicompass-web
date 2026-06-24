@@ -29,6 +29,10 @@ type Project = {
   created_at: string;
 };
 
+type SupabaseServerClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
+
+const projectImagesBucket = "project-images";
+
 const fallbackHeroImages = [
   "https://images.unsplash.com/photo-1600210491369-e753d80a41f3?auto=format&fit=crop&w=1800&q=80",
   "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=80",
@@ -83,6 +87,12 @@ function heroImage(profileId: string, projects: Project[]) {
 
 function projectImage(project: Project, index: number) {
   return project.image_url || fallbackProjectImages[index % fallbackProjectImages.length];
+}
+
+function publicImageUrl(supabase: SupabaseServerClient, imagePath: string | null) {
+  if (!imagePath) return null;
+  const { data } = supabase.storage.from(projectImagesBucket).getPublicUrl(imagePath);
+  return data.publicUrl;
 }
 
 function experienceLabel(value: number | null) {
@@ -215,7 +225,10 @@ export default async function DesignerProfilePage({
     .order("created_at", { ascending: false })
     .limit(24);
 
-  const projects = (projectsData ?? []) as Project[];
+  const projects = ((projectsData ?? []) as Project[]).map((project) => ({
+    ...project,
+    image_url: project.image_url || publicImageUrl(supabase, project.image_path),
+  }));
   const title = profileTitle(profile);
   const type = profileType(profile);
   const location = profileLocation(profile);

@@ -11,13 +11,21 @@ type Project = {
   category: string | null;
   description: string | null;
   image_url: string | null;
+  image_path: string | null;
   created_at: string;
 };
+
+type SupabaseServerClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
 const fieldClass =
   "mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal text-foreground outline-none transition focus:border-primary";
 const areaClass =
   "mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal text-foreground outline-none transition focus:border-primary";
+const fileClass =
+  "mt-2 w-full rounded-xl border border-dashed border-line bg-background px-4 py-4 text-sm font-normal text-muted file:mr-4 file:rounded-xl file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white";
+const projectImagesBucket = "project-images";
+const maxImageSize = 10 * 1024 * 1024;
+const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
 
 const fallbackImages = [
   "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=900&q=80",
@@ -30,8 +38,28 @@ function textValue(formData: FormData, key: string) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
+function fileValue(formData: FormData, key: string) {
+  const value = formData.get(key);
+  if (!value || typeof value === "string" || value.size === 0) return null;
+  return value;
+}
+
+function extensionFor(file: File) {
+  const fromName = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (fromName && ["jpg", "jpeg", "png", "webp"].includes(fromName)) return fromName;
+  if (file.type === "image/png") return "png";
+  if (file.type === "image/webp") return "webp";
+  return "jpg";
+}
+
 function imageFor(project: Project, index: number) {
   return project.image_url || fallbackImages[index % fallbackImages.length];
+}
+
+function publicImageUrl(supabase: SupabaseServerClient, imagePath: string | null) {
+  if (!imagePath) return null;
+  const { data } = supabase.storage.from(projectImagesBucket).getPublicUrl(imagePath);
+  return data.publicUrl;
 }
 
 function projectStatus(projects: Project[]) {
@@ -59,6 +87,50 @@ function Field({
   );
 }
 
+async function uploadProjectImage(
+  supabase: SupabaseServerClient,
+  userId: string,
+  file: File
+) {
+  if (!allowedImageTypes.includes(file.type)) {
+    return {
+      error: "Please upload a JPEG, PNG, or WebP image.",
+      path: null,
+      publicUrl: null,
+    };
+  }
+
+  if (file.size > maxImageSize) {
+    return {
+      error: "Please upload an image smaller than 10 MB.",
+      path: null,
+      publicUrl: null,
+    };
+  }
+
+  const imagePath = `${userId}/${crypto.randomUUID()}.${extensionFor(file)}`;
+  const { error } = await supabase.storage
+    .from(projectImagesBucket)
+    .upload(imagePath, file, {
+      contentType: file.type,
+      upsert: false,
+    });
+
+  if (error) {
+    return {
+      error: `Image upload failed: ${error.message}`,
+      path: null,
+      publicUrl: null,
+    };
+  }
+
+  return {
+    error: null,
+    path: imagePath,
+    publicUrl: publicImageUrl(supabase, imagePath),
+  };
+}
+
 async function addProject(formData: FormData) {
   "use server";
 
@@ -71,16 +143,34 @@ async function addProject(formData: FormData) {
   const title = textValue(formData, "title");
   if (!title) redirect("/account/projects?error=Project%20title%20is%20required");
 
+  const imageFile = fileValue(formData, "image_file");
+  let imageUrl = textValue(formData, "image_url");
+  let imagePath: string | null = null;
+
+  if (imageFile) {
+    const upload = await uploadProjectImage(supabase, user.id, imageFile);
+    if (upload.error) {
+      redirect(`/account/projects?error=${encodeURIComponent(upload.error)}`);
+    }
+
+    imageUrl = upload.publicUrl;
+    imagePath = upload.path;
+  }
+
   const { error } = await supabase.from("projects").insert({
     id: crypto.randomUUID(),
     profile_id: user.id,
     title,
     category: textValue(formData, "category"),
     description: textValue(formData, "description"),
-    image_url: textValue(formData, "image_url"),
+    image_url: imageUrl,
+    image_path: imagePath,
   });
 
-  if (error) redirect(`/account/projects?error=${encodeURIComponent(error.message)}`);
+  if (error) {
+    if (imagePath) await supabase.storage.from(projectImagesBucket).remove([imagePath]);
+    redirect(`/account/projects?error=${encodeURIComponent(error.message)}`);
+  }
 
   revalidatePath("/account");
   revalidatePath("/account/projects");
@@ -102,11 +192,14 @@ export default async function ManageProjectsPage({
 
   const { data: projectsData, error } = await supabase
     .from("projects")
-    .select("id, title, category, description, image_url, created_at")
+    .select("id, title, category, description, image_url, image_path, created_at")
     .eq("profile_id", user.id)
     .order("created_at", { ascending: false });
 
-  const projects = (projectsData ?? []) as Project[];
+  const projects = ((projectsData ?? []) as Project[]).map((project) => ({
+    ...project,
+    image_url: project.image_url || publicImageUrl(supabase, project.image_path),
+  }));
   const categories = Array.from(
     new Set(projects.map((project) => project.category).filter(Boolean))
   ) as string[];
@@ -195,8 +288,8 @@ export default async function ManageProjectsPage({
                   <div className="flex min-h-[260px] max-w-xl flex-col justify-end p-6 text-white">
                     <h3 className="text-3xl font-bold">Start with one strong project</h3>
                     <p className="mt-3 text-sm leading-6 text-white/80">
-                      Add a title, category, image URL, and short story. This is enough to
-                      make the public profile feel alive.
+                      Add a title, category, image, and short story. This is enough to make
+                      the public profile feel alive.
                     </p>
                   </div>
                 </div>
@@ -274,7 +367,16 @@ export default async function ManageProjectsPage({
               />
             </Field>
 
-            <Field label="Image URL">
+            <Field label="Project image" hint="JPEG, PNG, or WebP up to 10 MB">
+              <input
+                name="image_file"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className={fileClass}
+              />
+            </Field>
+
+            <Field label="External image URL" hint="optional fallback">
               <input name="image_url" placeholder="https://" className={fieldClass} />
             </Field>
 
@@ -296,7 +398,8 @@ export default async function ManageProjectsPage({
           </form>
 
           <div className="mt-6 rounded-2xl border border-line bg-background p-4 text-sm leading-6 text-muted">
-            Tip: later we can replace image URLs with direct uploads to Supabase Storage.
+            Images are uploaded to Supabase Storage. If upload fails, make sure the
+            `project-images` bucket and policies from `supabase/storage.sql` are applied.
           </div>
         </aside>
       </section>
