@@ -191,9 +191,12 @@ function DesignerCard({
                 >
                   View Portfolio
                 </Link>
-                <button className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
-                  Request Estimate
-                </button>
+                <Link
+                  href={`/account/briefs?designer=${profile.id}`}
+                  className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
+                >
+                  Send Brief
+                </Link>
               </div>
             </div>
           </div>

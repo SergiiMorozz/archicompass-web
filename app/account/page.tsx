@@ -22,6 +22,10 @@ type ProjectBrief = {
   id: string;
 };
 
+type DesignerInquiry = {
+  id: string;
+};
+
 function profileName(profile: Partial<Profile>, email?: string) {
   return profile.full_name || email || "Your ArchiCompass account";
 }
@@ -62,9 +66,21 @@ export default async function AccountPage() {
     .select("id")
     .eq("user_id", user.id);
 
+  const { data: sentInquiriesData } = await supabase
+    .from("designer_inquiries")
+    .select("id")
+    .eq("client_id", user.id);
+
+  const { data: incomingInquiriesData } = await supabase
+    .from("designer_inquiries")
+    .select("id")
+    .eq("designer_id", user.id);
+
   const profile = (profileData ?? {}) as Partial<Profile>;
   const projects = (projectsData ?? []) as Project[];
   const briefs = (briefsData ?? []) as ProjectBrief[];
+  const sentInquiries = (sentInquiriesData ?? []) as DesignerInquiry[];
+  const incomingInquiries = (incomingInquiriesData ?? []) as DesignerInquiry[];
   const score = profileScore(profile);
 
   return (
@@ -113,7 +129,7 @@ export default async function AccountPage() {
 
       <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="grid gap-7">
-          <section className="grid gap-5 md:grid-cols-3">
+          <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             <Link
               href="/account/profile"
               className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
@@ -174,6 +190,28 @@ export default async function AccountPage() {
                 <div className="rounded-xl border border-line bg-background p-3">
                   <div className="text-sm text-muted">Tool</div>
                   <div className="mt-1 text-xl font-bold">Live</div>
+                </div>
+              </div>
+            </Link>
+
+            <Link
+              href="/account/inquiries"
+              className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
+            >
+              <div className="text-sm font-semibold text-primary">Project Requests</div>
+              <h2 className="mt-2 text-2xl font-bold">Brief requests</h2>
+              <p className="mt-3 text-sm leading-6 text-muted">
+                Track saved briefs sent to designers and requests arriving to your own
+                profile.
+              </p>
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <div className="rounded-xl border border-line bg-background p-3">
+                  <div className="text-sm text-muted">Sent</div>
+                  <div className="mt-1 text-xl font-bold">{sentInquiries.length}</div>
+                </div>
+                <div className="rounded-xl border border-line bg-background p-3">
+                  <div className="text-sm text-muted">Incoming</div>
+                  <div className="mt-1 text-xl font-bold">{incomingInquiries.length}</div>
                 </div>
               </div>
             </Link>

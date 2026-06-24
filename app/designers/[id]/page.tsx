@@ -129,22 +129,15 @@ function websiteHref(value: string | null) {
     : `https://${value}`;
 }
 
-function contactHref(profile: Profile) {
-  if (profile.email) {
-    return `mailto:${profile.email}?subject=${encodeURIComponent(
-      "Project request via ArchiCompass"
-    )}`;
-  }
-
-  if (profile.phone) return `tel:${profile.phone}`;
-  return "#contact";
-}
-
 function contactLabel(profile: Profile) {
   if (profile.email) return profile.email;
   if (profile.phone) return profile.phone;
   if (profile.website) return profile.website;
   return "Contact details coming soon";
+}
+
+function briefRequestHref(profileId: string) {
+  return `/account/briefs?designer=${encodeURIComponent(profileId)}`;
 }
 
 function serviceCards(profile: Profile) {
@@ -374,12 +367,12 @@ export default async function DesignerProfilePage({
                   >
                     View Portfolio
                   </a>
-                  <a
-                    href={contactHref(profile)}
+                  <Link
+                    href={briefRequestHref(profile.id)}
                     className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                   >
-                    Contact Designer
-                  </a>
+                    Send Brief
+                  </Link>
                 </div>
               )}
             </div>
@@ -471,12 +464,12 @@ export default async function DesignerProfilePage({
                 </Link>
               </div>
             ) : (
-              <a
-                href={contactHref(profile)}
+              <Link
+                href={briefRequestHref(profile.id)}
                 className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
               >
-                <span className="w-full">Request Estimate</span>
-              </a>
+                <span className="w-full">Send Project Brief</span>
+              </Link>
             )}
 
             {webHref ? (
@@ -764,12 +757,12 @@ export default async function DesignerProfilePage({
               Manage
             </Link>
           ) : (
-            <a
-              href={contactHref(profile)}
+            <Link
+              href={briefRequestHref(profile.id)}
               className="shrink-0 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
             >
-              Contact
-            </a>
+              Send brief
+            </Link>
           )}
         </div>
       </div>

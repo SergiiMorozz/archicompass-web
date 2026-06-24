@@ -23,6 +23,8 @@ Last checkpoint: 2026-06-23
   are included in the copied brief and designer search signal.
 - Project Compass briefs can be saved to Supabase with private reference photo
   storage and reviewed at `/account/briefs`.
+- Saved briefs can be sent to designers as stored requests and tracked at
+  `/account/inquiries`.
 - Latest local preview runs on `http://localhost:3001`.
 
 ## Verified
@@ -34,7 +36,8 @@ Last checkpoint: 2026-06-23
 
 ## Best Next Small Step
 
-Add a send-to-designer inquiry flow from saved Project Compass briefs.
+Add email notifications for new saved-brief requests, or a simple status workflow
+for designers to mark requests as reviewing/accepted/declined.
 
 ## After That
 
