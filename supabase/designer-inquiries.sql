@@ -59,18 +59,13 @@ with check (
 );
 
 drop policy if exists "designer_inquiries_update_participants" on public.designer_inquiries;
-create policy "designer_inquiries_update_participants"
+drop policy if exists "designer_inquiries_update_designer" on public.designer_inquiries;
+create policy "designer_inquiries_update_designer"
 on public.designer_inquiries
 for update
 to authenticated
-using (
-  client_id = auth.uid()
-  or designer_id = auth.uid()
-)
-with check (
-  client_id = auth.uid()
-  or designer_id = auth.uid()
-);
+using (designer_id = auth.uid())
+with check (designer_id = auth.uid());
 
 drop policy if exists "designer_inquiries_delete_client" on public.designer_inquiries;
 create policy "designer_inquiries_delete_client"

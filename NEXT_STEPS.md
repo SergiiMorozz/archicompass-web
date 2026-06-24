@@ -25,6 +25,8 @@ Last checkpoint: 2026-06-23
   storage and reviewed at `/account/briefs`.
 - Saved briefs can be sent to designers as stored requests and tracked at
   `/account/inquiries`.
+- Designers can update incoming request status to reviewing, accepted, or
+  declined from `/account/inquiries`.
 - Latest local preview runs on `http://localhost:3001`.
 
 ## Verified
@@ -36,8 +38,7 @@ Last checkpoint: 2026-06-23
 
 ## Best Next Small Step
 
-Add email notifications for new saved-brief requests, or a simple status workflow
-for designers to mark requests as reviewing/accepted/declined.
+Add email notifications for new saved-brief requests.
 
 ## After That
 

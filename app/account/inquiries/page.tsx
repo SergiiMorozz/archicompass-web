@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -26,6 +27,24 @@ type Profile = {
   email: string | null;
 };
 
+const designerStatuses = ["reviewing", "accepted", "declined"] as const;
+
+function textValue(formData: FormData, key: string) {
+  const value = formData.get(key);
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function statusLabel(status: string) {
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+function statusClass(status: string) {
+  if (status === "accepted") return "bg-emerald-50 text-emerald-800";
+  if (status === "declined") return "bg-red-50 text-red-700";
+  if (status === "reviewing") return "bg-[#fff3df] text-[#9a5a00]";
+  return "bg-primary-soft text-primary";
+}
+
 function createdLabel(value: string) {
   return new Intl.DateTimeFormat("en", {
     day: "2-digit",
@@ -47,6 +66,46 @@ function profileMeta(profile?: Profile) {
 function snapshotText(snapshot: Record<string, unknown> | null, key: string) {
   const value = snapshot?.[key];
   return typeof value === "string" && value.trim() ? value : "Not specified";
+}
+
+function errorRedirect(message: string) {
+  redirect(`/account/inquiries?error=${encodeURIComponent(message)}`);
+}
+
+async function updateInquiryStatus(formData: FormData) {
+  "use server";
+
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+
+  if (!user) redirect("/login");
+
+  const inquiryId = textValue(formData, "inquiry_id");
+  const status = textValue(formData, "status");
+
+  if (!inquiryId) errorRedirect("Request was not found.");
+  if (!status || !designerStatuses.includes(status as (typeof designerStatuses)[number])) {
+    errorRedirect("Choose a valid request status.");
+  }
+
+  const { data: updated, error } = await supabase
+    .from("designer_inquiries")
+    .update({
+      status,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", inquiryId)
+    .eq("designer_id", user.id)
+    .select("id")
+    .maybeSingle();
+
+  if (error) errorRedirect(error.message);
+  if (!updated) errorRedirect("Only the receiving designer can update this request.");
+
+  revalidatePath("/account");
+  revalidatePath("/account/inquiries");
+  redirect("/account/inquiries?updated=1");
 }
 
 function InquiryCard({
@@ -72,8 +131,8 @@ function InquiryCard({
             <div className="mt-1 text-sm text-muted">{profileMeta(profile)}</div>
           ) : null}
         </div>
-        <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
-          {inquiry.status}
+        <span className={`rounded-full px-3 py-1 text-sm font-semibold ${statusClass(inquiry.status)}`}>
+          {statusLabel(inquiry.status)}
         </span>
       </div>
 
@@ -123,11 +182,47 @@ function InquiryCard({
           </a>
         ) : null}
       </div>
+
+      {mode === "incoming" ? (
+        <form
+          action={updateInquiryStatus}
+          className="mt-5 grid gap-3 rounded-2xl border border-line bg-background p-4 sm:grid-cols-[1fr_auto]"
+        >
+          <input type="hidden" name="inquiry_id" value={inquiry.id} />
+          <label className="block text-sm font-semibold">
+            Request status
+            <select
+              name="status"
+              defaultValue={
+                designerStatuses.includes(inquiry.status as (typeof designerStatuses)[number])
+                  ? inquiry.status
+                  : "reviewing"
+              }
+              className="mt-2 w-full rounded-xl border border-line bg-card px-4 py-3 font-normal text-foreground outline-none transition focus:border-primary"
+            >
+              <option value="reviewing">Reviewing</option>
+              <option value="accepted">Accepted</option>
+              <option value="declined">Declined</option>
+            </select>
+          </label>
+          <button
+            type="submit"
+            className="self-end rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
+          >
+            Update status
+          </button>
+        </form>
+      ) : null}
     </article>
   );
 }
 
-export default async function InquiriesPage() {
+export default async function InquiriesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string; updated?: string }>;
+}) {
+  const sp = (await searchParams) ?? {};
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
@@ -217,6 +312,20 @@ export default async function InquiriesPage() {
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-2">
+        {sp.updated ? (
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900 lg:col-span-2">
+            <div className="font-semibold">Request updated</div>
+            <p className="mt-1">The client can now see the latest status.</p>
+          </div>
+        ) : null}
+
+        {sp.error ? (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-700 lg:col-span-2">
+            <div className="font-semibold">Status was not updated</div>
+            <p className="mt-1">{sp.error}</p>
+          </div>
+        ) : null}
+
         <div>
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="text-2xl font-bold">Sent requests</h2>
