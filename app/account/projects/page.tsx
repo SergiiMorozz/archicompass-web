@@ -522,16 +522,24 @@ export default async function ManageProjectsPage({
                           Add a description to explain the brief, style, and result.
                         </p>
                       )}
-                      {project.project_url ? (
-                        <a
-                          href={project.project_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="mt-4 inline-flex rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        <Link
+                          href={`/projects/${project.id}`}
+                          className="inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
                         >
-                          Open project page
-                        </a>
-                      ) : null}
+                          View project page
+                        </Link>
+                        {project.project_url ? (
+                          <a
+                            href={project.project_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
+                          >
+                            Open external page
+                          </a>
+                        ) : null}
+                      </div>
                       <details className="mt-5 rounded-2xl border border-line bg-card p-4">
                         <summary className="cursor-pointer text-sm font-semibold text-primary">
                           Edit project

@@ -15,6 +15,8 @@ Last checkpoint: 2026-06-23
 - Portfolio images open in an embedded lightbox on account and public profile pages.
 - Existing projects can be edited from `/account/projects`.
 - Projects now have an optional external project page link, separate from uploaded images.
+- Public project detail pages live at `/projects/[id]` and can be opened from
+  portfolio cards.
 - Latest local preview runs on `http://localhost:3001`.
 
 ## Verified
@@ -26,12 +28,11 @@ Last checkpoint: 2026-06-23
 
 ## Best Next Small Step
 
-Test editing an existing project from `/account/projects`, including appending images,
-using the replace-gallery checkbox, and saving an external project page link.
+Improve `/ai-style-finder` from static mockup into a first real brief flow.
 
 ## After That
 
-- Improve `/ai-style-finder` from static mockup into a first real brief flow.
+- Add delete controls for projects and individual project images.
 - Add richer seed data for designer profiles and portfolio projects.
 - Add lead/contact request storage instead of `mailto:` links.
 - Polish mobile details on long forms after real content is added.
