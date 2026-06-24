@@ -378,8 +378,17 @@ export default async function InquiriesPage({
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-line bg-card p-6 text-sm leading-6 text-muted">
-              No sent requests yet. Send a saved Project Compass brief when you are ready
-              to contact a designer.
+              <div className="text-lg font-bold text-foreground">No sent requests yet</div>
+              <p className="mt-2">
+                Send a saved Project Compass brief when you are ready to contact a
+                designer.
+              </p>
+              <Link
+                href="/account/briefs"
+                className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
+              >
+                Send a saved brief
+              </Link>
             </div>
           )}
         </div>
@@ -410,8 +419,25 @@ export default async function InquiriesPage({
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-line bg-card p-6 text-sm leading-6 text-muted">
-              No incoming requests yet. When someone sends a saved brief to your profile,
-              it will appear here.
+              <div className="text-lg font-bold text-foreground">No incoming requests yet</div>
+              <p className="mt-2">
+                When someone sends a saved brief to your profile, it will appear here.
+                Keep your public profile ready for that first useful request.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Link
+                  href={`/designers/${user.id}`}
+                  className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
+                >
+                  View public profile
+                </Link>
+                <Link
+                  href="/account/profile"
+                  className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
+                >
+                  Edit profile
+                </Link>
+              </div>
             </div>
           )}
         </div>
