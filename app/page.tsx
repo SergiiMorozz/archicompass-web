@@ -50,10 +50,10 @@ export default function Home() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
-                href="/ai-style-finder"
+                href="/project-compass"
                 className="rounded-xl bg-primary px-6 py-4 text-center text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:opacity-95"
               >
-                Discover Your Style with AI
+                Build Your Project Brief
               </Link>
               <Link
                 href="/designers"
@@ -95,9 +95,9 @@ export default function Home() {
       <section className="border-b border-line bg-card">
         <div className="mx-auto grid max-w-7xl gap-4 px-4 py-10 sm:px-6 lg:grid-cols-3">
           {[
-            ["1", "Browse & Filter", "Explore verified portfolios by style, budget, and location."],
-            ["2", "Message Pros", "Contact one to three designers directly, without middlemen."],
-            ["3", "Get Quotes", "Receive availability and pricing within 24 to 48 hours."],
+            ["1", "Shape the Brief", "Turn your idea into a clear project direction."],
+            ["2", "Browse & Filter", "Explore portfolios by style, budget, and location."],
+            ["3", "Contact Pros", "Send a useful brief instead of a vague first message."],
           ].map(([number, title, copy]) => (
             <div key={title} className="flex gap-4 rounded-2xl border border-line bg-background p-5">
               <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary-soft font-bold text-primary">

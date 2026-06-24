@@ -17,6 +17,8 @@ Last checkpoint: 2026-06-23
 - Projects now have an optional external project page link, separate from uploaded images.
 - Public project detail pages live at `/projects/[id]` and can be opened from
   portfolio cards.
+- `/project-compass` is now a first Project Compass brief-builder flow; the old
+  `/ai-style-finder` route still renders it for compatibility.
 - Latest local preview runs on `http://localhost:3001`.
 
 ## Verified
@@ -28,7 +30,8 @@ Last checkpoint: 2026-06-23
 
 ## Best Next Small Step
 
-Improve `/ai-style-finder` from static mockup into a first real brief flow.
+Add a save/send path for Project Compass briefs, so clients can store a brief or
+send it with a designer inquiry.
 
 ## After That
 

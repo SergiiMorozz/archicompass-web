@@ -699,15 +699,15 @@ export default async function DesignerProfilePage({
                 </div>
                 <h2 className="mt-2 text-3xl font-bold">Compare this designer with your brief</h2>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75">
-                  ArchiCompass should eventually guide clients from taste, budget, and
-                  project type to the right professional shortlist.
+                  ArchiCompass helps clients turn taste, budget, and project type into
+                  a clear brief before contacting professionals.
                 </p>
               </div>
               <Link
-                href="/ai-style-finder"
+                href="/project-compass"
                 className="rounded-xl bg-white px-5 py-3 text-center text-sm font-semibold text-foreground"
               >
-                Try AI Style Finder
+                Build project brief
               </Link>
             </div>
           </section>
