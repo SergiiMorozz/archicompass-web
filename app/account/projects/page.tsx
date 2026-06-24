@@ -144,6 +144,49 @@ async function uploadProjectImage(
   };
 }
 
+async function uploadProjectImages(
+  supabase: SupabaseServerClient,
+  userId: string,
+  imageFiles: File[]
+) {
+  if (imageFiles.length > maxProjectImages) {
+    return {
+      error: `Please upload up to ${maxProjectImages} images per project.`,
+      uploadedPaths: [],
+      uploadedUrls: [],
+    };
+  }
+
+  const uploadedPaths: string[] = [];
+  const uploadedUrls: string[] = [];
+
+  for (const imageFile of imageFiles) {
+    const upload = await uploadProjectImage(supabase, userId, imageFile);
+    if (upload.error) {
+      if (uploadedPaths.length) {
+        await supabase.storage.from(projectImagesBucket).remove(uploadedPaths);
+      }
+
+      return {
+        error: upload.error,
+        uploadedPaths: [],
+        uploadedUrls: [],
+      };
+    }
+
+    if (upload.path && upload.publicUrl) {
+      uploadedPaths.push(upload.path);
+      uploadedUrls.push(upload.publicUrl);
+    }
+  }
+
+  return {
+    error: null,
+    uploadedPaths,
+    uploadedUrls,
+  };
+}
+
 async function addProject(formData: FormData) {
   "use server";
 
@@ -160,39 +203,18 @@ async function addProject(formData: FormData) {
   const imageFiles = fileValues(formData, "image_files");
   if (legacyImageFile && !imageFiles.length) imageFiles.push(legacyImageFile);
 
-  if (imageFiles.length > maxProjectImages) {
-    redirect(
-      `/account/projects?error=${encodeURIComponent(
-        `Please upload up to ${maxProjectImages} images per project.`
-      )}`
-    );
-  }
-
-  const uploadedPaths: string[] = [];
-  const uploadedUrls: string[] = [];
-
-  for (const imageFile of imageFiles) {
-    const upload = await uploadProjectImage(supabase, user.id, imageFile);
-    if (upload.error) {
-      if (uploadedPaths.length) {
-        await supabase.storage.from(projectImagesBucket).remove(uploadedPaths);
-      }
-      redirect(`/account/projects?error=${encodeURIComponent(upload.error)}`);
-    }
-
-    if (upload.path && upload.publicUrl) {
-      uploadedPaths.push(upload.path);
-      uploadedUrls.push(upload.publicUrl);
-    }
+  const upload = await uploadProjectImages(supabase, user.id, imageFiles);
+  if (upload.error) {
+    redirect(`/account/projects?error=${encodeURIComponent(upload.error)}`);
   }
 
   const fallbackImageUrl = textValue(formData, "image_url");
-  const imageUrls = uploadedUrls.length
-    ? uploadedUrls
+  const imageUrls = upload.uploadedUrls.length
+    ? upload.uploadedUrls
     : fallbackImageUrl
       ? [fallbackImageUrl]
       : [];
-  const imagePaths = uploadedPaths;
+  const imagePaths = upload.uploadedPaths;
   const imageUrl = imageUrls[0] ?? null;
   const imagePath = imagePaths[0] ?? null;
 
@@ -209,7 +231,9 @@ async function addProject(formData: FormData) {
   });
 
   if (error) {
-    if (uploadedPaths.length) await supabase.storage.from(projectImagesBucket).remove(uploadedPaths);
+    if (upload.uploadedPaths.length) {
+      await supabase.storage.from(projectImagesBucket).remove(upload.uploadedPaths);
+    }
     redirect(`/account/projects?error=${encodeURIComponent(error.message)}`);
   }
 
@@ -219,10 +243,127 @@ async function addProject(formData: FormData) {
   redirect("/account/projects?created=1");
 }
 
+async function updateProject(formData: FormData) {
+  "use server";
+
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+
+  if (!user) redirect("/login");
+
+  const projectId = textValue(formData, "project_id");
+  const title = textValue(formData, "title");
+
+  if (!projectId) redirect("/account/projects?error=Project%20id%20is%20required");
+  if (!title) redirect("/account/projects?error=Project%20title%20is%20required");
+
+  const { data: currentProject, error: currentError } = await supabase
+    .from("projects")
+    .select("id, image_url, image_path, image_urls, image_paths")
+    .eq("id", projectId)
+    .eq("profile_id", user.id)
+    .single();
+
+  if (currentError || !currentProject) {
+    redirect(
+      `/account/projects?error=${encodeURIComponent(
+        currentError?.message ?? "Project not found."
+      )}`
+    );
+  }
+
+  const current = currentProject as Pick<
+    Project,
+    "id" | "image_url" | "image_path" | "image_urls" | "image_paths"
+  >;
+  const currentUrls = current.image_urls?.length
+    ? current.image_urls.filter(Boolean)
+    : current.image_url
+      ? [current.image_url]
+      : [];
+  const currentPaths = current.image_paths?.length
+    ? current.image_paths.filter(Boolean)
+    : current.image_path
+      ? [current.image_path]
+      : [];
+
+  const imageFiles = fileValues(formData, "image_files");
+  const fallbackImageUrl = textValue(formData, "image_url");
+  const replaceGallery = formData.get("replace_gallery") === "on";
+  const upload = await uploadProjectImages(supabase, user.id, imageFiles);
+
+  if (upload.error) {
+    redirect(`/account/projects?error=${encodeURIComponent(upload.error)}`);
+  }
+
+  const newUrls = upload.uploadedUrls.length
+    ? upload.uploadedUrls
+    : fallbackImageUrl
+      ? [fallbackImageUrl]
+      : [];
+  const newPaths = upload.uploadedPaths;
+  const hasNewImages = Boolean(newUrls.length || newPaths.length);
+  const nextUrls = hasNewImages
+    ? replaceGallery
+      ? newUrls
+      : [...currentUrls, ...newUrls]
+    : currentUrls;
+  const nextPaths = hasNewImages
+    ? replaceGallery
+      ? newPaths
+      : [...currentPaths, ...newPaths]
+    : currentPaths;
+
+  if (nextUrls.length > maxProjectImages) {
+    if (upload.uploadedPaths.length) {
+      await supabase.storage.from(projectImagesBucket).remove(upload.uploadedPaths);
+    }
+    redirect(
+      `/account/projects?error=${encodeURIComponent(
+        `This project would have ${nextUrls.length} images. Please keep up to ${maxProjectImages}.`
+      )}`
+    );
+  }
+
+  const { error } = await supabase
+    .from("projects")
+    .update({
+      title,
+      category: textValue(formData, "category"),
+      description: textValue(formData, "description"),
+      image_url: nextUrls[0] ?? null,
+      image_path: nextPaths[0] ?? null,
+      image_urls: nextUrls,
+      image_paths: nextPaths,
+    })
+    .eq("id", projectId)
+    .eq("profile_id", user.id);
+
+  if (error) {
+    if (upload.uploadedPaths.length) {
+      await supabase.storage.from(projectImagesBucket).remove(upload.uploadedPaths);
+    }
+    redirect(`/account/projects?error=${encodeURIComponent(error.message)}`);
+  }
+
+  if (replaceGallery && hasNewImages && currentPaths.length) {
+    const pathsToRemove = currentPaths.filter((path) => !nextPaths.includes(path));
+    if (pathsToRemove.length) {
+      await supabase.storage.from(projectImagesBucket).remove(pathsToRemove);
+    }
+  }
+
+  revalidatePath("/account");
+  revalidatePath("/account/projects");
+  revalidatePath(`/designers/${user.id}`);
+  redirect("/account/projects?updated=1");
+}
+
 export default async function ManageProjectsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string; created?: string }>;
+  searchParams?: Promise<{ error?: string; created?: string; updated?: string }>;
 }) {
   const sp = (await searchParams) ?? {};
   const supabase = await createSupabaseServerClient();
@@ -316,6 +457,10 @@ export default async function ManageProjectsPage({
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
               Project added. It now appears on your public profile.
             </div>
+          ) : sp.updated ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+              Project updated. Public profile gallery has been refreshed.
+            </div>
           ) : null}
 
           <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
@@ -376,6 +521,78 @@ export default async function ManageProjectsPage({
                           Add a description to explain the brief, style, and result.
                         </p>
                       )}
+                      <details className="mt-5 rounded-2xl border border-line bg-card p-4">
+                        <summary className="cursor-pointer text-sm font-semibold text-primary">
+                          Edit project
+                        </summary>
+                        <form action={updateProject} className="mt-5 grid gap-4">
+                          <input type="hidden" name="project_id" value={project.id} />
+
+                          <Field label="Title">
+                            <input
+                              name="title"
+                              defaultValue={project.title ?? ""}
+                              className={fieldClass}
+                            />
+                          </Field>
+
+                          <Field label="Category">
+                            <input
+                              name="category"
+                              defaultValue={project.category ?? ""}
+                              placeholder="Apartment, house, office..."
+                              className={fieldClass}
+                            />
+                          </Field>
+
+                          <Field label="Description">
+                            <textarea
+                              name="description"
+                              defaultValue={project.description ?? ""}
+                              rows={4}
+                              className={areaClass}
+                            />
+                          </Field>
+
+                          <Field
+                            label="Add images"
+                            hint={`${galleryFor(project, index).length}/${maxProjectImages} used`}
+                          >
+                            <input
+                              name="image_files"
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              multiple
+                              className={fileClass}
+                            />
+                          </Field>
+
+                          <Field label="External image URL" hint="optional add/replace">
+                            <input name="image_url" placeholder="https://" className={fieldClass} />
+                          </Field>
+
+                          <label className="flex items-start gap-3 rounded-xl border border-line bg-background p-3 text-sm">
+                            <input
+                              type="checkbox"
+                              name="replace_gallery"
+                              className="mt-1 h-4 w-4 accent-primary"
+                            />
+                            <span>
+                              <span className="font-semibold">Replace current gallery</span>
+                              <span className="mt-1 block text-muted">
+                                Leave unchecked to append selected images to this project.
+                              </span>
+                            </span>
+                          </label>
+
+                          <button
+                            type="submit"
+                            className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90"
+                          >
+                            Save project changes
+                          </button>
+                        </form>
+                      </details>
                     </div>
                   </article>
                 ))}

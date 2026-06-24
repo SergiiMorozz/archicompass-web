@@ -13,6 +13,7 @@ Last checkpoint: 2026-06-23
 - Storage bucket/policy SQL is in `supabase/storage.sql` and has been applied to Supabase.
 - Project galleries support up to 12 uploaded images per project.
 - Portfolio images open in an embedded lightbox on account and public profile pages.
+- Existing projects can be edited from `/account/projects`.
 - Latest local preview runs on `http://localhost:3001`.
 
 ## Verified
@@ -24,8 +25,8 @@ Last checkpoint: 2026-06-23
 
 ## Best Next Small Step
 
-Test adding several images to one portfolio project from `/account/projects`, then decide
-whether to keep it as seed data or delete it.
+Test editing an existing project from `/account/projects`, including appending images and
+using the replace-gallery checkbox.
 
 ## After That
 
