@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { sendInquiryNotificationEmail } from "@/lib/email/inquiry-notification";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -24,6 +25,7 @@ type ProjectBrief = {
 };
 
 type Designer = {
+  email: string | null;
   id: string;
   full_name: string | null;
   profession_type: string | null;
@@ -102,7 +104,7 @@ async function sendBriefInquiry(formData: FormData) {
 
   const { data: designerData, error: designerError } = await supabase
     .from("profiles")
-    .select("id, full_name, profession_type, user_type, location")
+    .select("id, email, full_name, profession_type, user_type, location")
     .eq("id", designerId)
     .maybeSingle();
 
@@ -110,9 +112,17 @@ async function sendBriefInquiry(formData: FormData) {
     errorRedirect("This designer profile could not be found.");
   }
 
+  const designer = designerData as Designer;
   const subject = `Project request: ${brief.title || brief.project_type || "Project brief"}`;
+  const notification = await sendInquiryNotificationEmail({
+    brief,
+    clientEmail: user.email ?? null,
+    designer,
+    message,
+  });
 
   const { error } = await supabase.from("designer_inquiries").insert({
+    id: crypto.randomUUID(),
     client_id: user.id,
     designer_id: designerId,
     brief_id: brief.id,
@@ -132,6 +142,9 @@ async function sendBriefInquiry(formData: FormData) {
       reference_photo_count: brief.reference_photo_names?.length ?? 0,
     },
     brief_text: brief.brief_text,
+    notification_email_error: notification.error,
+    notification_email_sent_at: notification.sentAt,
+    notification_email_status: notification.status,
   });
 
   if (error) errorRedirect(error.message);
@@ -165,7 +178,7 @@ export default async function SavedBriefsPage({
 
   const { data: designersData } = await supabase
     .from("profiles")
-    .select("id, full_name, profession_type, user_type, location")
+    .select("id, email, full_name, profession_type, user_type, location")
     .neq("id", user.id)
     .order("full_name", { ascending: true })
     .limit(100);

@@ -27,6 +27,9 @@ Last checkpoint: 2026-06-23
   `/account/inquiries`.
 - Designers can update incoming request status to reviewing, accepted, or
   declined from `/account/inquiries`.
+- Saved-brief requests have email notification plumbing via Resend. Set
+  `RESEND_API_KEY` and `INQUIRY_EMAIL_FROM` to send real emails; without them,
+  requests are saved and marked `not_configured`.
 - Latest local preview runs on `http://localhost:3001`.
 
 ## Verified
@@ -38,7 +41,8 @@ Last checkpoint: 2026-06-23
 
 ## Best Next Small Step
 
-Add email notifications for new saved-brief requests.
+Configure Resend env variables and send one real saved-brief request to verify
+email delivery.
 
 ## After That
 

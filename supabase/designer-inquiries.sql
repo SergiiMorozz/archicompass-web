@@ -14,9 +14,35 @@ create table if not exists public.designer_inquiries (
     check (status in ('sent', 'reviewing', 'accepted', 'declined', 'archived')),
   brief_snapshot jsonb not null default '{}'::jsonb,
   brief_text text not null,
+  notification_email_status text not null default 'not_configured'
+    check (notification_email_status in ('not_configured', 'sent', 'failed', 'skipped')),
+  notification_email_sent_at timestamptz,
+  notification_email_error text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.designer_inquiries
+add column if not exists notification_email_status text not null default 'not_configured';
+
+alter table public.designer_inquiries
+add column if not exists notification_email_sent_at timestamptz;
+
+alter table public.designer_inquiries
+add column if not exists notification_email_error text;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'designer_inquiries_notification_email_status_check'
+  ) then
+    alter table public.designer_inquiries
+    add constraint designer_inquiries_notification_email_status_check
+    check (notification_email_status in ('not_configured', 'sent', 'failed', 'skipped'));
+  end if;
+end $$;
 
 create index if not exists designer_inquiries_client_idx
 on public.designer_inquiries (client_id, created_at desc);
