@@ -21,6 +21,8 @@ Last checkpoint: 2026-06-23
   `/ai-style-finder` route still renders it for compatibility.
 - Project Compass accepts up to 10 local reference photos and visual cues, which
   are included in the copied brief and designer search signal.
+- Project Compass briefs can be saved to Supabase with private reference photo
+  storage and reviewed at `/account/briefs`.
 - Latest local preview runs on `http://localhost:3001`.
 
 ## Verified
@@ -32,8 +34,7 @@ Last checkpoint: 2026-06-23
 
 ## Best Next Small Step
 
-Add a save/send path for Project Compass briefs and reference photos, so clients
-can store a brief or send it with a designer inquiry.
+Add a send-to-designer inquiry flow from saved Project Compass briefs.
 
 ## After That
 

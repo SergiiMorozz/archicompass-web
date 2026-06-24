@@ -12,6 +12,7 @@ type Option = {
 };
 
 type ReferencePhoto = {
+  file: File;
   id: string;
   name: string;
   url: string;
@@ -266,6 +267,10 @@ export default function ProjectCompass() {
   const [referencePhotos, setReferencePhotos] = useState<ReferencePhoto[]>([]);
   const [selectedVisualCues, setSelectedVisualCues] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [savedBriefId, setSavedBriefId] = useState<string | null>(null);
+  const [savedReferenceCount, setSavedReferenceCount] = useState<number | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const objectUrls = useRef<string[]>([]);
 
   const selectedStyle = selectedOption(styles, style);
@@ -361,6 +366,7 @@ export default function ProjectCompass() {
         objectUrls.current.push(url);
 
         return {
+          file,
           id: `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
           name: file.name,
           url,
@@ -383,6 +389,58 @@ export default function ProjectCompass() {
         return false;
       })
     );
+  }
+
+  async function saveBrief() {
+    setIsSaving(true);
+    setSaveError(null);
+    setSavedBriefId(null);
+    setSavedReferenceCount(null);
+
+    const formData = new FormData();
+    formData.set("project_type", projectType);
+    formData.set("goal", goal);
+    formData.set("style_direction", style);
+    formData.set("support_scope", scope);
+    formData.set("budget_signal", budget);
+    formData.set("location", location);
+    formData.set("notes", notes);
+    formData.set("visual_cues", JSON.stringify(selectedVisualCues));
+    formData.set("brief_text", briefText);
+    formData.set("designer_search_href", designerHref);
+
+    referencePhotos.forEach((photo) => {
+      formData.append("reference_photos", photo.file, photo.name);
+    });
+
+    try {
+      const response = await fetch("/api/project-briefs", {
+        method: "POST",
+        body: formData,
+      });
+      const payload = (await response.json()) as {
+        code?: string;
+        error?: string;
+        id?: string;
+        referencePhotoCount?: number;
+      };
+
+      if (response.status === 401 || payload.code === "AUTH_REQUIRED") {
+        window.location.href = "/login";
+        return;
+      }
+
+      if (!response.ok || !payload.id) {
+        throw new Error(payload.error ?? "Brief could not be saved.");
+      }
+
+      setSavedBriefId(payload.id);
+      setSavedReferenceCount(payload.referencePhotoCount ?? 0);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Brief could not be saved.");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   function toggleVisualCue(value: string) {
@@ -646,12 +704,41 @@ export default function ProjectCompass() {
             </Link>
             <button
               type="button"
+              onClick={saveBrief}
+              disabled={isSaving}
+              className="rounded-xl border border-primary bg-primary-soft px-5 py-3 text-sm font-semibold text-primary hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSaving ? "Saving brief..." : "Save brief"}
+            </button>
+            <button
+              type="button"
               onClick={copyBrief}
               className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
             >
               {copied ? "Brief copied" : "Copy brief"}
             </button>
           </div>
+
+          {savedBriefId ? (
+            <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
+              <div className="font-semibold">Brief saved</div>
+              <p className="mt-1">
+                Saved with {savedReferenceCount ?? 0} reference photo
+                {(savedReferenceCount ?? 0) === 1 ? "" : "s"}. We can connect this to
+                designer inquiries next.
+              </p>
+              <Link href="/account/briefs" className="mt-3 inline-flex font-semibold underline">
+                Open saved briefs
+              </Link>
+            </div>
+          ) : null}
+
+          {saveError ? (
+            <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
+              <div className="font-semibold">Brief was not saved</div>
+              <p className="mt-1">{saveError}</p>
+            </div>
+          ) : null}
 
           <pre className="mt-5 whitespace-pre-wrap rounded-2xl bg-[#1f172a] p-4 text-xs leading-6 text-white/78">
             {briefText}

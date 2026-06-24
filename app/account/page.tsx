@@ -18,6 +18,10 @@ type Project = {
   id: string;
 };
 
+type ProjectBrief = {
+  id: string;
+};
+
 function profileName(profile: Partial<Profile>, email?: string) {
   return profile.full_name || email || "Your ArchiCompass account";
 }
@@ -53,8 +57,14 @@ export default async function AccountPage() {
     .select("id")
     .eq("profile_id", user.id);
 
+  const { data: briefsData } = await supabase
+    .from("project_briefs")
+    .select("id")
+    .eq("user_id", user.id);
+
   const profile = (profileData ?? {}) as Partial<Profile>;
   const projects = (projectsData ?? []) as Project[];
+  const briefs = (briefsData ?? []) as ProjectBrief[];
   const score = profileScore(profile);
 
   return (
@@ -103,7 +113,7 @@ export default async function AccountPage() {
 
       <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="grid gap-7">
-          <section className="grid gap-5 md:grid-cols-2">
+          <section className="grid gap-5 md:grid-cols-3">
             <Link
               href="/account/profile"
               className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
@@ -142,6 +152,28 @@ export default async function AccountPage() {
                   <div className="mt-1 text-xl font-bold">
                     {profile.specialties?.length ?? 0}
                   </div>
+                </div>
+              </div>
+            </Link>
+
+            <Link
+              href="/account/briefs"
+              className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
+            >
+              <div className="text-sm font-semibold text-primary">Project Compass</div>
+              <h2 className="mt-2 text-2xl font-bold">Saved briefs</h2>
+              <p className="mt-3 text-sm leading-6 text-muted">
+                Review client-style briefs with reference photos, visual cues, budget,
+                and scope before contacting designers.
+              </p>
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <div className="rounded-xl border border-line bg-background p-3">
+                  <div className="text-sm text-muted">Briefs</div>
+                  <div className="mt-1 text-xl font-bold">{briefs.length}</div>
+                </div>
+                <div className="rounded-xl border border-line bg-background p-3">
+                  <div className="text-sm text-muted">Tool</div>
+                  <div className="mt-1 text-xl font-bold">Live</div>
                 </div>
               </div>
             </Link>
