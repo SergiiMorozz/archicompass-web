@@ -30,6 +30,8 @@ Last checkpoint: 2026-06-23
 - Saved-brief requests have email notification plumbing via Resend. Set
   `RESEND_API_KEY` and `INQUIRY_EMAIL_FROM` to send real emails; without them,
   requests are saved and marked `not_configured`.
+- Saved briefs and saved-brief requests can render private reference photos via
+  signed Supabase Storage URLs.
 - Latest local preview runs on `http://localhost:3001`.
 
 ## Verified
@@ -41,8 +43,8 @@ Last checkpoint: 2026-06-23
 
 ## Best Next Small Step
 
-Configure Resend env variables and send one real saved-brief request to verify
-email delivery.
+Upload a real Project Compass reference photo, save the brief, send it to a
+designer, and verify the photo appears in `/account/briefs` and `/account/inquiries`.
 
 ## After That
 

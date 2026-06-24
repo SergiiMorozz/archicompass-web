@@ -14,6 +14,8 @@ create table if not exists public.designer_inquiries (
     check (status in ('sent', 'reviewing', 'accepted', 'declined', 'archived')),
   brief_snapshot jsonb not null default '{}'::jsonb,
   brief_text text not null,
+  reference_photo_names text[] not null default '{}',
+  reference_photo_paths text[] not null default '{}',
   notification_email_status text not null default 'not_configured'
     check (notification_email_status in ('not_configured', 'sent', 'failed', 'skipped')),
   notification_email_sent_at timestamptz,
@@ -21,6 +23,12 @@ create table if not exists public.designer_inquiries (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.designer_inquiries
+add column if not exists reference_photo_names text[] not null default '{}';
+
+alter table public.designer_inquiries
+add column if not exists reference_photo_paths text[] not null default '{}';
 
 alter table public.designer_inquiries
 add column if not exists notification_email_status text not null default 'not_configured';
@@ -99,5 +107,20 @@ on public.designer_inquiries
 for delete
 to authenticated
 using (client_id = auth.uid());
+
+drop policy if exists "brief_reference_photos_select_inquiry_participants" on storage.objects;
+create policy "brief_reference_photos_select_inquiry_participants"
+on storage.objects
+for select
+to authenticated
+using (
+  bucket_id = 'brief-reference-photos'
+  and exists (
+    select 1
+    from public.designer_inquiries di
+    where (di.client_id = auth.uid() or di.designer_id = auth.uid())
+      and storage.objects.name = any(di.reference_photo_paths)
+  )
+);
 
 commit;

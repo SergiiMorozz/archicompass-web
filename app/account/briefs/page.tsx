@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import ReferencePhotoGrid from "@/components/ReferencePhotoGrid";
 import { sendInquiryNotificationEmail } from "@/lib/email/inquiry-notification";
+import {
+  referencePhotoPreviews,
+  type ReferencePhotoPreview,
+} from "@/lib/reference-photos";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -19,6 +24,7 @@ type ProjectBrief = {
   notes: string | null;
   visual_cues: string[] | null;
   reference_photo_names: string[] | null;
+  reference_photo_paths: string[] | null;
   brief_text: string;
   designer_search_href: string | null;
   created_at: string;
@@ -90,7 +96,7 @@ async function sendBriefInquiry(formData: FormData) {
   const { data: briefData, error: briefError } = await supabase
     .from("project_briefs")
     .select(
-      "id, user_id, title, project_type, goal, style_direction, support_scope, budget_signal, location, notes, visual_cues, reference_photo_names, brief_text, designer_search_href, created_at"
+      "id, user_id, title, project_type, goal, style_direction, support_scope, budget_signal, location, notes, visual_cues, reference_photo_names, reference_photo_paths, brief_text, designer_search_href, created_at"
     )
     .eq("id", briefId)
     .eq("user_id", user.id)
@@ -142,6 +148,8 @@ async function sendBriefInquiry(formData: FormData) {
       reference_photo_count: brief.reference_photo_names?.length ?? 0,
     },
     brief_text: brief.brief_text,
+    reference_photo_names: brief.reference_photo_names ?? [],
+    reference_photo_paths: brief.reference_photo_paths ?? [],
     notification_email_error: notification.error,
     notification_email_sent_at: notification.sentAt,
     notification_email_status: notification.status,
@@ -170,7 +178,7 @@ export default async function SavedBriefsPage({
   const { data: briefsData, error } = await supabase
     .from("project_briefs")
     .select(
-      "id, user_id, title, project_type, goal, style_direction, support_scope, budget_signal, location, notes, visual_cues, reference_photo_names, brief_text, designer_search_href, created_at"
+      "id, user_id, title, project_type, goal, style_direction, support_scope, budget_signal, location, notes, visual_cues, reference_photo_names, reference_photo_paths, brief_text, designer_search_href, created_at"
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
@@ -193,6 +201,21 @@ export default async function SavedBriefsPage({
   const briefs = (briefsData ?? []) as ProjectBrief[];
   const designers = (designersData ?? []) as Designer[];
   const inquiries = (inquiriesData ?? []) as DesignerInquiry[];
+  const briefPhotoEntries = await Promise.all(
+    briefs.map(
+      async (brief): Promise<[string, ReferencePhotoPreview[]]> => [
+        brief.id,
+        await referencePhotoPreviews(
+          supabase,
+          brief.reference_photo_names,
+          brief.reference_photo_paths
+        ),
+      ]
+    )
+  );
+  const briefPhotos = new Map<string, ReferencePhotoPreview[]>(
+    briefPhotoEntries
+  );
   const preselectedDesigner = designers.some((designer) => designer.id === sp.designer)
     ? sp.designer
     : "";
@@ -323,6 +346,11 @@ export default async function SavedBriefsPage({
                   <pre className="mt-5 max-h-64 overflow-auto whitespace-pre-wrap rounded-2xl bg-[#1f172a] p-4 text-xs leading-6 text-white/78">
                     {brief.brief_text}
                   </pre>
+
+                  <ReferencePhotoGrid
+                    photos={briefPhotos.get(brief.id) ?? []}
+                    title="Brief reference photos"
+                  />
 
                   <div className="mt-5 rounded-2xl border border-line bg-background p-4">
                     <div className="text-sm font-semibold">Send this brief</div>

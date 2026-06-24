@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import ReferencePhotoGrid from "@/components/ReferencePhotoGrid";
+import {
+  referencePhotoPreviews,
+  type ReferencePhotoPreview,
+} from "@/lib/reference-photos";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -15,6 +20,8 @@ type Inquiry = {
   status: string;
   brief_snapshot: Record<string, unknown> | null;
   brief_text: string;
+  reference_photo_names: string[] | null;
+  reference_photo_paths: string[] | null;
   created_at: string;
 };
 
@@ -111,10 +118,12 @@ async function updateInquiryStatus(formData: FormData) {
 function InquiryCard({
   inquiry,
   mode,
+  photos,
   profile,
 }: {
   inquiry: Inquiry;
   mode: "sent" | "incoming";
+  photos: ReferencePhotoPreview[];
   profile?: Profile;
 }) {
   const snapshot = inquiry.brief_snapshot;
@@ -164,6 +173,8 @@ function InquiryCard({
       <pre className="mt-5 max-h-56 overflow-auto whitespace-pre-wrap rounded-2xl bg-[#1f172a] p-4 text-xs leading-6 text-white/78">
         {inquiry.brief_text}
       </pre>
+
+      <ReferencePhotoGrid photos={photos} title="Request reference photos" />
 
       <div className="mt-5 flex flex-wrap gap-3">
         {mode === "sent" ? (
@@ -232,7 +243,7 @@ export default async function InquiriesPage({
   const { data: sentData, error: sentError } = await supabase
     .from("designer_inquiries")
     .select(
-      "id, client_id, designer_id, brief_id, subject, message, status, brief_snapshot, brief_text, created_at"
+      "id, client_id, designer_id, brief_id, subject, message, status, brief_snapshot, brief_text, reference_photo_names, reference_photo_paths, created_at"
     )
     .eq("client_id", user.id)
     .order("created_at", { ascending: false })
@@ -241,7 +252,7 @@ export default async function InquiriesPage({
   const { data: incomingData, error: incomingError } = await supabase
     .from("designer_inquiries")
     .select(
-      "id, client_id, designer_id, brief_id, subject, message, status, brief_snapshot, brief_text, created_at"
+      "id, client_id, designer_id, brief_id, subject, message, status, brief_snapshot, brief_text, reference_photo_names, reference_photo_paths, created_at"
     )
     .eq("designer_id", user.id)
     .order("created_at", { ascending: false })
@@ -249,6 +260,21 @@ export default async function InquiriesPage({
 
   const sent = (sentData ?? []) as Inquiry[];
   const incoming = (incomingData ?? []) as Inquiry[];
+  const inquiryPhotoEntries = await Promise.all(
+    [...sent, ...incoming].map(
+      async (inquiry): Promise<[string, ReferencePhotoPreview[]]> => [
+        inquiry.id,
+        await referencePhotoPreviews(
+          supabase,
+          inquiry.reference_photo_names,
+          inquiry.reference_photo_paths
+        ),
+      ]
+    )
+  );
+  const inquiryPhotos = new Map<string, ReferencePhotoPreview[]>(
+    inquiryPhotoEntries
+  );
   const profileIds = Array.from(
     new Set([
       ...sent.map((inquiry) => inquiry.designer_id),
@@ -345,6 +371,7 @@ export default async function InquiriesPage({
                   key={inquiry.id}
                   inquiry={inquiry}
                   mode="sent"
+                  photos={inquiryPhotos.get(inquiry.id) ?? []}
                   profile={profilesById.get(inquiry.designer_id)}
                 />
               ))}
@@ -376,6 +403,7 @@ export default async function InquiriesPage({
                   key={inquiry.id}
                   inquiry={inquiry}
                   mode="incoming"
+                  photos={inquiryPhotos.get(inquiry.id) ?? []}
                   profile={profilesById.get(inquiry.client_id)}
                 />
               ))}
