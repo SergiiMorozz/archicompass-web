@@ -19,6 +19,8 @@ Last checkpoint: 2026-06-23
   portfolio cards.
 - `/project-compass` is now a first Project Compass brief-builder flow; the old
   `/ai-style-finder` route still renders it for compatibility.
+- Project Compass accepts up to 10 local reference photos and visual cues, which
+  are included in the copied brief and designer search signal.
 - Latest local preview runs on `http://localhost:3001`.
 
 ## Verified
@@ -30,8 +32,8 @@ Last checkpoint: 2026-06-23
 
 ## Best Next Small Step
 
-Add a save/send path for Project Compass briefs, so clients can store a brief or
-send it with a designer inquiry.
+Add a save/send path for Project Compass briefs and reference photos, so clients
+can store a brief or send it with a designer inquiry.
 
 ## After That
 

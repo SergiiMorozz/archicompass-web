@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import type { ChangeEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Option = {
   label: string;
@@ -9,6 +10,14 @@ type Option = {
   description: string;
   specialty?: string;
 };
+
+type ReferencePhoto = {
+  id: string;
+  name: string;
+  url: string;
+};
+
+const maxReferencePhotos = 10;
 
 const projectTypes: Option[] = [
   {
@@ -140,6 +149,65 @@ const budgets: Option[] = [
   },
 ];
 
+const visualCues: Option[] = [
+  {
+    label: "Natural wood",
+    value: "Natural wood",
+    description: "Oak, veneer, visible texture, warm materials.",
+    specialty: "eco-friendly",
+  },
+  {
+    label: "Bright neutral palette",
+    value: "Bright neutral palette",
+    description: "White, beige, greige, soft daylight.",
+    specialty: "minimalist",
+  },
+  {
+    label: "Hidden storage",
+    value: "Hidden storage",
+    description: "Built-ins, cleaner lines, less visual clutter.",
+  },
+  {
+    label: "Bold color accents",
+    value: "Bold color accents",
+    description: "Strong walls, art, textiles, expressive contrast.",
+  },
+  {
+    label: "Dark contrast",
+    value: "Dark contrast",
+    description: "Black details, moody rooms, stronger geometry.",
+    specialty: "industrial",
+  },
+  {
+    label: "Luxury details",
+    value: "Luxury details",
+    description: "Stone, brass, custom joinery, premium finish.",
+    specialty: "luxury",
+  },
+  {
+    label: "Eco materials",
+    value: "Eco materials",
+    description: "Natural, durable, lower-impact choices.",
+    specialty: "eco-friendly",
+  },
+  {
+    label: "Smart home",
+    value: "Smart home",
+    description: "Lighting scenes, automation, integrated tech.",
+    specialty: "smart home",
+  },
+  {
+    label: "Compact solutions",
+    value: "Compact solutions",
+    description: "Small-space ideas, flexible furniture, storage.",
+  },
+  {
+    label: "Soft curves",
+    value: "Soft curves",
+    description: "Rounded furniture, calm shapes, gentle lines.",
+  },
+];
+
 function selectedOption(options: Option[], value: string) {
   return options.find((option) => option.value === value) ?? options[0];
 }
@@ -195,22 +263,32 @@ export default function ProjectCompass() {
   const [budget, setBudget] = useState(budgets[1].value);
   const [location, setLocation] = useState("Warsaw");
   const [notes, setNotes] = useState("");
+  const [referencePhotos, setReferencePhotos] = useState<ReferencePhoto[]>([]);
+  const [selectedVisualCues, setSelectedVisualCues] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
+  const objectUrls = useRef<string[]>([]);
 
   const selectedStyle = selectedOption(styles, style);
   const selectedScope = selectedOption(scopes, scope);
+  const selectedCueOptions = useMemo(
+    () => visualCues.filter((cue) => selectedVisualCues.includes(cue.value)),
+    [selectedVisualCues]
+  );
+  const visualSearchSpecialty =
+    selectedCueOptions.find((cue) => cue.specialty)?.specialty ?? selectedStyle.specialty;
+  const visualCueLabel = selectedVisualCues.length
+    ? selectedVisualCues.slice(0, 3).join(", ")
+    : selectedStyle.label;
 
-  const designerHref = useMemo(() => {
-    const params = new URLSearchParams({
-      sort: "recommended",
-      view: "list",
-    });
+  const designerParams = new URLSearchParams({
+    sort: "recommended",
+    view: "list",
+  });
 
-    if (location.trim()) params.set("location", location.trim());
-    if (selectedStyle.specialty) params.set("specialty", selectedStyle.specialty);
+  if (location.trim()) designerParams.set("location", location.trim());
+  if (visualSearchSpecialty) designerParams.set("specialty", visualSearchSpecialty);
 
-    return `/designers?${params.toString()}`;
-  }, [location, selectedStyle.specialty]);
+  const designerHref = `/designers?${designerParams.toString()}`;
 
   const briefText = useMemo(
     () =>
@@ -218,6 +296,15 @@ export default function ProjectCompass() {
         `Project type: ${projectType}`,
         `Main goal: ${goal}`,
         `Style direction: ${style}`,
+        referencePhotos.length
+          ? `Reference photos: ${referencePhotos.length} uploaded (${referencePhotos
+              .map((photo) => photo.name)
+              .slice(0, 5)
+              .join(", ")}${referencePhotos.length > 5 ? ", ..." : ""})`
+          : "Reference photos: none yet",
+        selectedVisualCues.length
+          ? `Visual cues: ${selectedVisualCues.join(", ")}`
+          : null,
         `Support needed: ${scope}`,
         `Budget signal: ${budget}`,
         `Location: ${location.trim() || "Not specified"}`,
@@ -225,7 +312,17 @@ export default function ProjectCompass() {
       ]
         .filter(Boolean)
         .join("\n"),
-    [budget, goal, location, notes, projectType, scope, style]
+    [
+      budget,
+      goal,
+      location,
+      notes,
+      projectType,
+      referencePhotos,
+      scope,
+      selectedVisualCues,
+      style,
+    ]
   );
 
   const nextStep = useMemo(() => {
@@ -250,6 +347,59 @@ export default function ProjectCompass() {
     window.setTimeout(() => setCopied(false), 1800);
   }
 
+  function addReferencePhotos(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []).filter((file) =>
+      file.type.startsWith("image/")
+    );
+
+    if (!files.length) return;
+
+    setReferencePhotos((current) => {
+      const remainingSlots = Math.max(0, maxReferencePhotos - current.length);
+      const nextPhotos = files.slice(0, remainingSlots).map((file) => {
+        const url = URL.createObjectURL(file);
+        objectUrls.current.push(url);
+
+        return {
+          id: `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
+          name: file.name,
+          url,
+        };
+      });
+
+      return [...current, ...nextPhotos];
+    });
+
+    event.currentTarget.value = "";
+  }
+
+  function removeReferencePhoto(photoId: string) {
+    setReferencePhotos((current) =>
+      current.filter((photo) => {
+        if (photo.id !== photoId) return true;
+
+        URL.revokeObjectURL(photo.url);
+        objectUrls.current = objectUrls.current.filter((url) => url !== photo.url);
+        return false;
+      })
+    );
+  }
+
+  function toggleVisualCue(value: string) {
+    setSelectedVisualCues((current) =>
+      current.includes(value)
+        ? current.filter((item) => item !== value)
+        : [...current, value]
+    );
+  }
+
+  useEffect(() => {
+    return () => {
+      objectUrls.current.forEach((url) => URL.revokeObjectURL(url));
+      objectUrls.current = [];
+    };
+  }, []);
+
   return (
     <main className="bg-background">
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
@@ -261,7 +411,7 @@ export default function ProjectCompass() {
             </h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
               Style matters, but the real match depends on scope, budget, room type,
-              timeline, and the kind of help you need.
+              reference images, timeline, and the kind of help you need.
             </p>
           </div>
 
@@ -298,15 +448,121 @@ export default function ProjectCompass() {
             value={style}
           />
 
+          <section>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-base font-bold">4. Add reference photos</h2>
+                <p className="mt-1 text-sm leading-6 text-muted">
+                  Add 4-10 rooms, details, or moods you like. Photos stay in this
+                  browser for now, but their names and visual cues are included in the
+                  copied brief.
+                </p>
+              </div>
+              <span className="rounded-full bg-background px-3 py-1 text-sm font-semibold text-muted">
+                {referencePhotos.length}/{maxReferencePhotos}
+              </span>
+            </div>
+
+            <label
+              className={[
+                "mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-background px-4 py-8 text-center transition hover:border-primary",
+                referencePhotos.length >= maxReferencePhotos
+                  ? "pointer-events-none opacity-60"
+                  : "",
+              ].join(" ")}
+            >
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                disabled={referencePhotos.length >= maxReferencePhotos}
+                onChange={addReferencePhotos}
+                className="sr-only"
+              />
+              <span className="text-sm font-bold">
+                {referencePhotos.length >= maxReferencePhotos
+                  ? "Photo limit reached"
+                  : "Add reference photos"}
+              </span>
+              <span className="mt-1 text-sm text-muted">
+                JPEG, PNG, or WebP. Use several photos to spot patterns.
+              </span>
+            </label>
+
+            {referencePhotos.length ? (
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                {referencePhotos.map((photo) => (
+                  <div
+                    key={photo.id}
+                    className="group overflow-hidden rounded-2xl border border-line bg-background"
+                  >
+                    <div className="aspect-square overflow-hidden bg-primary-soft">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={photo.url}
+                        alt={photo.name}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="grid gap-2 p-3">
+                      <div className="truncate text-xs font-semibold">{photo.name}</div>
+                      <button
+                        type="button"
+                        onClick={() => removeReferencePhoto(photo.id)}
+                        className="rounded-lg border border-line bg-card px-3 py-2 text-xs font-semibold text-muted hover:border-primary hover:text-primary"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-4 rounded-2xl border border-line bg-background p-4 text-sm leading-6 text-muted">
+                No photos yet. Start with images that make you say: this is the
+                atmosphere, material, light, or detail I want.
+              </div>
+            )}
+
+            <div className="mt-5">
+              <h3 className="text-sm font-bold">What do these photos have in common?</h3>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {visualCues.map((cue) => {
+                  const isSelected = selectedVisualCues.includes(cue.value);
+
+                  return (
+                    <button
+                      key={cue.value}
+                      type="button"
+                      aria-pressed={isSelected}
+                      onClick={() => toggleVisualCue(cue.value)}
+                      className={[
+                        "rounded-2xl border p-4 text-left transition",
+                        isSelected
+                          ? "border-primary bg-primary-soft"
+                          : "border-line bg-background hover:border-primary",
+                      ].join(" ")}
+                    >
+                      <span className="block text-sm font-bold">{cue.label}</span>
+                      <span className="mt-1 block text-sm leading-6 text-muted">
+                        {cue.description}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
           <OptionGrid
-            label="4. What level of help do you want?"
+            label="5. What level of help do you want?"
             onChange={setScope}
             options={scopes}
             value={scope}
           />
 
           <OptionGrid
-            label="5. What budget range should the designer respect?"
+            label="6. What budget range should the designer respect?"
             onChange={setBudget}
             options={budgets}
             value={budget}
@@ -343,6 +599,18 @@ export default function ProjectCompass() {
             {[
               ["Goal", goal],
               ["Style", style],
+              [
+                "Photos",
+                referencePhotos.length
+                  ? `${referencePhotos.length}/${maxReferencePhotos}`
+                  : "None yet",
+              ],
+              [
+                "Visual cues",
+                selectedVisualCues.length
+                  ? selectedVisualCues.slice(0, 2).join(", ")
+                  : "Not tagged",
+              ],
               ["Support", scope],
               ["Budget", budget],
             ].map(([label, value]) => (
@@ -364,8 +632,8 @@ export default function ProjectCompass() {
           <div className="mt-5 rounded-2xl border border-line bg-background p-4">
             <div className="text-sm font-semibold">Designer fit signal</div>
             <p className="mt-2 text-sm leading-6 text-muted">
-              Look for {selectedStyle.label.toLowerCase()} work and ask whether the
-              designer offers {selectedScope.label.toLowerCase()}.
+              Look for portfolios with {visualCueLabel.toLowerCase()} and ask whether
+              the designer offers {selectedScope.label.toLowerCase()}.
             </p>
           </div>
 
