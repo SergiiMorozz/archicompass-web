@@ -11,6 +11,8 @@ Last checkpoint: 2026-06-23
 - `/account`, `/account/profile`, and `/account/projects` are redesigned as owner tools.
 - `/account/projects` has the app-side image upload path for Supabase Storage.
 - Storage bucket/policy SQL is in `supabase/storage.sql` and has been applied to Supabase.
+- Project galleries support up to 12 uploaded images per project.
+- Portfolio images open in an embedded lightbox on account and public profile pages.
 - Latest local preview runs on `http://localhost:3001`.
 
 ## Verified
@@ -22,8 +24,8 @@ Last checkpoint: 2026-06-23
 
 ## Best Next Small Step
 
-Test adding one real portfolio image from `/account/projects`, then decide whether to
-keep it as seed data or delete it.
+Test adding several images to one portfolio project from `/account/projects`, then decide
+whether to keep it as seed data or delete it.
 
 ## After That
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import ProjectGallery from "@/components/ProjectGallery";
 
 export const revalidate = 0;
 
@@ -12,6 +13,8 @@ type Project = {
   description: string | null;
   image_url: string | null;
   image_path: string | null;
+  image_urls: string[] | null;
+  image_paths: string[] | null;
   created_at: string;
 };
 
@@ -25,6 +28,7 @@ const fileClass =
   "mt-2 w-full rounded-xl border border-dashed border-line bg-background px-4 py-4 text-sm font-normal text-muted file:mr-4 file:rounded-xl file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white";
 const projectImagesBucket = "project-images";
 const maxImageSize = 10 * 1024 * 1024;
+const maxProjectImages = 12;
 const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
 
 const fallbackImages = [
@@ -44,6 +48,12 @@ function fileValue(formData: FormData, key: string) {
   return value;
 }
 
+function fileValues(formData: FormData, key: string) {
+  return formData
+    .getAll(key)
+    .filter((value): value is File => typeof value !== "string" && value.size > 0);
+}
+
 function extensionFor(file: File) {
   const fromName = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "");
   if (fromName && ["jpg", "jpeg", "png", "webp"].includes(fromName)) return fromName;
@@ -52,8 +62,11 @@ function extensionFor(file: File) {
   return "jpg";
 }
 
-function imageFor(project: Project, index: number) {
-  return project.image_url || fallbackImages[index % fallbackImages.length];
+function galleryFor(project: Project, index: number) {
+  const urls = project.image_urls?.filter(Boolean) ?? [];
+  if (urls.length) return urls.slice(0, maxProjectImages);
+  if (project.image_url) return [project.image_url];
+  return [fallbackImages[index % fallbackImages.length]];
 }
 
 function publicImageUrl(supabase: SupabaseServerClient, imagePath: string | null) {
@@ -143,19 +156,45 @@ async function addProject(formData: FormData) {
   const title = textValue(formData, "title");
   if (!title) redirect("/account/projects?error=Project%20title%20is%20required");
 
-  const imageFile = fileValue(formData, "image_file");
-  let imageUrl = textValue(formData, "image_url");
-  let imagePath: string | null = null;
+  const legacyImageFile = fileValue(formData, "image_file");
+  const imageFiles = fileValues(formData, "image_files");
+  if (legacyImageFile && !imageFiles.length) imageFiles.push(legacyImageFile);
 
-  if (imageFile) {
+  if (imageFiles.length > maxProjectImages) {
+    redirect(
+      `/account/projects?error=${encodeURIComponent(
+        `Please upload up to ${maxProjectImages} images per project.`
+      )}`
+    );
+  }
+
+  const uploadedPaths: string[] = [];
+  const uploadedUrls: string[] = [];
+
+  for (const imageFile of imageFiles) {
     const upload = await uploadProjectImage(supabase, user.id, imageFile);
     if (upload.error) {
+      if (uploadedPaths.length) {
+        await supabase.storage.from(projectImagesBucket).remove(uploadedPaths);
+      }
       redirect(`/account/projects?error=${encodeURIComponent(upload.error)}`);
     }
 
-    imageUrl = upload.publicUrl;
-    imagePath = upload.path;
+    if (upload.path && upload.publicUrl) {
+      uploadedPaths.push(upload.path);
+      uploadedUrls.push(upload.publicUrl);
+    }
   }
+
+  const fallbackImageUrl = textValue(formData, "image_url");
+  const imageUrls = uploadedUrls.length
+    ? uploadedUrls
+    : fallbackImageUrl
+      ? [fallbackImageUrl]
+      : [];
+  const imagePaths = uploadedPaths;
+  const imageUrl = imageUrls[0] ?? null;
+  const imagePath = imagePaths[0] ?? null;
 
   const { error } = await supabase.from("projects").insert({
     id: crypto.randomUUID(),
@@ -165,10 +204,12 @@ async function addProject(formData: FormData) {
     description: textValue(formData, "description"),
     image_url: imageUrl,
     image_path: imagePath,
+    image_urls: imageUrls,
+    image_paths: imagePaths,
   });
 
   if (error) {
-    if (imagePath) await supabase.storage.from(projectImagesBucket).remove([imagePath]);
+    if (uploadedPaths.length) await supabase.storage.from(projectImagesBucket).remove(uploadedPaths);
     redirect(`/account/projects?error=${encodeURIComponent(error.message)}`);
   }
 
@@ -192,13 +233,31 @@ export default async function ManageProjectsPage({
 
   const { data: projectsData, error } = await supabase
     .from("projects")
-    .select("id, title, category, description, image_url, image_path, created_at")
+    .select("id, title, category, description, image_url, image_path, image_urls, image_paths, created_at")
     .eq("profile_id", user.id)
     .order("created_at", { ascending: false });
 
   const projects = ((projectsData ?? []) as Project[]).map((project) => ({
     ...project,
-    image_url: project.image_url || publicImageUrl(supabase, project.image_path),
+    image_urls:
+      project.image_urls?.length
+        ? project.image_urls
+        : project.image_paths?.length
+          ? project.image_paths
+              .map((path) => publicImageUrl(supabase, path))
+              .filter((url): url is string => Boolean(url))
+          : project.image_url
+            ? [project.image_url]
+            : project.image_path
+              ? [publicImageUrl(supabase, project.image_path)].filter(
+                  (url): url is string => Boolean(url)
+                )
+              : [],
+    image_url:
+      project.image_url ||
+      publicImageUrl(supabase, project.image_path) ||
+      project.image_urls?.[0] ||
+      null,
   }));
   const categories = Array.from(
     new Set(projects.map((project) => project.category).filter(Boolean))
@@ -301,23 +360,12 @@ export default async function ManageProjectsPage({
                     key={project.id}
                     className="overflow-hidden rounded-2xl border border-line bg-background"
                   >
-                    <div className="relative aspect-[4/3] bg-primary-soft">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={imageFor(project, index)}
-                        alt={project.title ?? "Portfolio project"}
-                        className="h-full w-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#1f172a]/72 via-transparent to-transparent" />
-                      <div className="absolute bottom-4 left-4 right-4 text-white">
-                        <div className="text-xs font-semibold uppercase tracking-wide text-white/70">
-                          {project.category || "Uncategorized"}
-                        </div>
-                        <h3 className="mt-1 text-xl font-bold">
-                          {project.title || "Untitled project"}
-                        </h3>
-                      </div>
-                    </div>
+                    <ProjectGallery
+                      category={project.category || "Uncategorized"}
+                      description={project.description}
+                      images={galleryFor(project, index)}
+                      title={project.title || "Untitled project"}
+                    />
                     <div className="p-5">
                       {project.description ? (
                         <p className="text-sm leading-6 text-muted">
@@ -328,16 +376,6 @@ export default async function ManageProjectsPage({
                           Add a description to explain the brief, style, and result.
                         </p>
                       )}
-                      {project.image_url ? (
-                        <a
-                          href={project.image_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="mt-4 inline-flex text-sm font-semibold text-primary hover:underline"
-                        >
-                          Open image
-                        </a>
-                      ) : null}
                     </div>
                   </article>
                 ))}
@@ -367,11 +405,12 @@ export default async function ManageProjectsPage({
               />
             </Field>
 
-            <Field label="Project image" hint="JPEG, PNG, or WebP up to 10 MB">
+            <Field label="Project images" hint="up to 12 JPEG, PNG, or WebP files">
               <input
-                name="image_file"
+                name="image_files"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
+                multiple
                 className={fileClass}
               />
             </Field>
@@ -398,8 +437,8 @@ export default async function ManageProjectsPage({
           </form>
 
           <div className="mt-6 rounded-2xl border border-line bg-background p-4 text-sm leading-6 text-muted">
-            Images are uploaded to Supabase Storage. If upload fails, make sure the
-            `project-images` bucket and policies from `supabase/storage.sql` are applied.
+            Images stay embedded in the project card as a gallery preview. Storage uses the
+            `project-images` bucket and gallery columns from `supabase/project-gallery.sql`.
           </div>
         </aside>
       </section>

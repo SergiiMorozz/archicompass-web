@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import ProjectGallery from "@/components/ProjectGallery";
 
 export const revalidate = 0;
 
@@ -26,6 +27,8 @@ type Project = {
   description: string | null;
   image_url: string | null;
   image_path: string | null;
+  image_urls: string[] | null;
+  image_paths: string[] | null;
   created_at: string;
 };
 
@@ -85,8 +88,11 @@ function heroImage(profileId: string, projects: Project[]) {
   return projectImage || fallbackHeroImages[hashIndex(profileId, fallbackHeroImages.length)];
 }
 
-function projectImage(project: Project, index: number) {
-  return project.image_url || fallbackProjectImages[index % fallbackProjectImages.length];
+function projectGallery(project: Project, index: number) {
+  const urls = project.image_urls?.filter(Boolean) ?? [];
+  if (urls.length) return urls.slice(0, 12);
+  if (project.image_url) return [project.image_url];
+  return [fallbackProjectImages[index % fallbackProjectImages.length]];
 }
 
 function publicImageUrl(supabase: SupabaseServerClient, imagePath: string | null) {
@@ -220,14 +226,32 @@ export default async function DesignerProfilePage({
 
   const { data: projectsData, error: prErr } = await supabase
     .from("projects")
-    .select("id, profile_id, title, category, description, image_url, image_path, created_at")
+    .select("id, profile_id, title, category, description, image_url, image_path, image_urls, image_paths, created_at")
     .eq("profile_id", id)
     .order("created_at", { ascending: false })
     .limit(24);
 
   const projects = ((projectsData ?? []) as Project[]).map((project) => ({
     ...project,
-    image_url: project.image_url || publicImageUrl(supabase, project.image_path),
+    image_urls:
+      project.image_urls?.length
+        ? project.image_urls
+        : project.image_paths?.length
+          ? project.image_paths
+              .map((path) => publicImageUrl(supabase, path))
+              .filter((url): url is string => Boolean(url))
+          : project.image_url
+            ? [project.image_url]
+            : project.image_path
+              ? [publicImageUrl(supabase, project.image_path)].filter(
+                  (url): url is string => Boolean(url)
+                )
+              : [],
+    image_url:
+      project.image_url ||
+      publicImageUrl(supabase, project.image_path) ||
+      project.image_urls?.[0] ||
+      null,
   }));
   const title = profileTitle(profile);
   const type = profileType(profile);
@@ -558,28 +582,17 @@ export default async function DesignerProfilePage({
                     key={project.id}
                     className="group overflow-hidden rounded-2xl border border-line bg-background"
                   >
-                    <div className="relative aspect-[4/3] overflow-hidden bg-primary-soft">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={projectImage(project, index)}
-                        alt={project.title ?? "Portfolio project"}
-                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#1f172a]/70 via-transparent to-transparent" />
-                      <div className="absolute bottom-4 left-4 right-4 text-white">
-                        <div className="text-xs font-semibold uppercase tracking-wide text-white/70">
-                          {project.category || "Portfolio"}
-                        </div>
-                        <h3 className="mt-1 text-xl font-bold">
-                          {project.title || "Untitled project"}
-                        </h3>
-                      </div>
+                    <ProjectGallery
+                      category={project.category || "Portfolio"}
+                      description={project.description}
+                      images={projectGallery(project, index)}
+                      title={project.title || "Untitled project"}
+                    />
+                    <div className="p-5">
+                      {project.description ? (
+                        <p className="text-sm leading-6 text-muted">{project.description}</p>
+                      ) : null}
                     </div>
-                    {project.description ? (
-                      <p className="p-5 text-sm leading-6 text-muted">
-                        {project.description}
-                      </p>
-                    ) : null}
                   </article>
                 ))}
               </div>
