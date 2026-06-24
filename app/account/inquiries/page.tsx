@@ -338,6 +338,28 @@ export default async function InquiriesPage({
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-2">
+        <div className="rounded-2xl border border-line bg-card p-5 text-sm leading-6 text-muted lg:col-span-2">
+          <div className="font-semibold text-foreground">Request status guide</div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {[
+              ["Sent", "Waiting for the designer to review it."],
+              ["Reviewing", "The designer is checking fit and scope."],
+              ["Accepted", "The designer is interested in the project."],
+              ["Declined", "The project is not a fit right now."],
+            ].map(([label, copy]) => (
+              <span
+                key={label}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass(
+                  label.toLowerCase()
+                )}`}
+                title={copy}
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+        </div>
+
         {sp.updated ? (
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900 lg:col-span-2">
             <div className="font-semibold">Request updated</div>
