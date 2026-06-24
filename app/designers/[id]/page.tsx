@@ -25,6 +25,7 @@ type Project = {
   title: string | null;
   category: string | null;
   description: string | null;
+  project_url: string | null;
   image_url: string | null;
   image_path: string | null;
   image_urls: string[] | null;
@@ -226,7 +227,7 @@ export default async function DesignerProfilePage({
 
   const { data: projectsData, error: prErr } = await supabase
     .from("projects")
-    .select("id, profile_id, title, category, description, image_url, image_path, image_urls, image_paths, created_at")
+    .select("id, profile_id, title, category, description, project_url, image_url, image_path, image_urls, image_paths, created_at")
     .eq("profile_id", id)
     .order("created_at", { ascending: false })
     .limit(24);
@@ -591,6 +592,16 @@ export default async function DesignerProfilePage({
                     <div className="p-5">
                       {project.description ? (
                         <p className="text-sm leading-6 text-muted">{project.description}</p>
+                      ) : null}
+                      {project.project_url ? (
+                        <a
+                          href={project.project_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-4 inline-flex rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
+                        >
+                          Open project page
+                        </a>
                       ) : null}
                     </div>
                   </article>

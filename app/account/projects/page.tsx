@@ -11,6 +11,7 @@ type Project = {
   title: string | null;
   category: string | null;
   description: string | null;
+  project_url: string | null;
   image_url: string | null;
   image_path: string | null;
   image_urls: string[] | null;
@@ -40,6 +41,14 @@ const fallbackImages = [
 function textValue(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function urlValue(formData: FormData, key: string) {
+  const value = textValue(formData, key);
+  if (!value || value === "https://" || value === "http://") return null;
+  return value.startsWith("http://") || value.startsWith("https://")
+    ? value
+    : `https://${value}`;
 }
 
 function fileValue(formData: FormData, key: string) {
@@ -208,12 +217,7 @@ async function addProject(formData: FormData) {
     redirect(`/account/projects?error=${encodeURIComponent(upload.error)}`);
   }
 
-  const fallbackImageUrl = textValue(formData, "image_url");
-  const imageUrls = upload.uploadedUrls.length
-    ? upload.uploadedUrls
-    : fallbackImageUrl
-      ? [fallbackImageUrl]
-      : [];
+  const imageUrls = upload.uploadedUrls;
   const imagePaths = upload.uploadedPaths;
   const imageUrl = imageUrls[0] ?? null;
   const imagePath = imagePaths[0] ?? null;
@@ -224,6 +228,7 @@ async function addProject(formData: FormData) {
     title,
     category: textValue(formData, "category"),
     description: textValue(formData, "description"),
+    project_url: urlValue(formData, "project_url"),
     image_url: imageUrl,
     image_path: imagePath,
     image_urls: imageUrls,
@@ -289,7 +294,6 @@ async function updateProject(formData: FormData) {
       : [];
 
   const imageFiles = fileValues(formData, "image_files");
-  const fallbackImageUrl = textValue(formData, "image_url");
   const replaceGallery = formData.get("replace_gallery") === "on";
   const upload = await uploadProjectImages(supabase, user.id, imageFiles);
 
@@ -297,11 +301,7 @@ async function updateProject(formData: FormData) {
     redirect(`/account/projects?error=${encodeURIComponent(upload.error)}`);
   }
 
-  const newUrls = upload.uploadedUrls.length
-    ? upload.uploadedUrls
-    : fallbackImageUrl
-      ? [fallbackImageUrl]
-      : [];
+  const newUrls = upload.uploadedUrls;
   const newPaths = upload.uploadedPaths;
   const hasNewImages = Boolean(newUrls.length || newPaths.length);
   const nextUrls = hasNewImages
@@ -332,6 +332,7 @@ async function updateProject(formData: FormData) {
       title,
       category: textValue(formData, "category"),
       description: textValue(formData, "description"),
+      project_url: urlValue(formData, "project_url"),
       image_url: nextUrls[0] ?? null,
       image_path: nextPaths[0] ?? null,
       image_urls: nextUrls,
@@ -374,7 +375,7 @@ export default async function ManageProjectsPage({
 
   const { data: projectsData, error } = await supabase
     .from("projects")
-    .select("id, title, category, description, image_url, image_path, image_urls, image_paths, created_at")
+    .select("id, title, category, description, project_url, image_url, image_path, image_urls, image_paths, created_at")
     .eq("profile_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -521,6 +522,16 @@ export default async function ManageProjectsPage({
                           Add a description to explain the brief, style, and result.
                         </p>
                       )}
+                      {project.project_url ? (
+                        <a
+                          href={project.project_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-4 inline-flex rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
+                        >
+                          Open project page
+                        </a>
+                      ) : null}
                       <details className="mt-5 rounded-2xl border border-line bg-card p-4">
                         <summary className="cursor-pointer text-sm font-semibold text-primary">
                           Edit project
@@ -567,8 +578,13 @@ export default async function ManageProjectsPage({
                             />
                           </Field>
 
-                          <Field label="External image URL" hint="optional add/replace">
-                            <input name="image_url" placeholder="https://" className={fieldClass} />
+                          <Field label="Project link" hint="optional external page">
+                            <input
+                              name="project_url"
+                              defaultValue={project.project_url ?? ""}
+                              placeholder="https://your-studio.com/projects/..."
+                              className={fieldClass}
+                            />
                           </Field>
 
                           <label className="flex items-start gap-3 rounded-xl border border-line bg-background p-3 text-sm">
@@ -632,8 +648,12 @@ export default async function ManageProjectsPage({
               />
             </Field>
 
-            <Field label="External image URL" hint="optional fallback">
-              <input name="image_url" placeholder="https://" className={fieldClass} />
+            <Field label="Project link" hint="optional external page">
+              <input
+                name="project_url"
+                placeholder="https://your-studio.com/projects/..."
+                className={fieldClass}
+              />
             </Field>
 
             <Field label="Description">
@@ -654,8 +674,8 @@ export default async function ManageProjectsPage({
           </form>
 
           <div className="mt-6 rounded-2xl border border-line bg-background p-4 text-sm leading-6 text-muted">
-            Images stay embedded in the project card as a gallery preview. Storage uses the
-            `project-images` bucket and gallery columns from `supabase/project-gallery.sql`.
+            Images stay embedded in the project card as a gallery preview. The project link is
+            for a separate page you want to share outside ArchiCompass.
           </div>
         </aside>
       </section>

@@ -14,6 +14,7 @@ Last checkpoint: 2026-06-23
 - Project galleries support up to 12 uploaded images per project.
 - Portfolio images open in an embedded lightbox on account and public profile pages.
 - Existing projects can be edited from `/account/projects`.
+- Projects now have an optional external project page link, separate from uploaded images.
 - Latest local preview runs on `http://localhost:3001`.
 
 ## Verified
@@ -25,8 +26,8 @@ Last checkpoint: 2026-06-23
 
 ## Best Next Small Step
 
-Test editing an existing project from `/account/projects`, including appending images and
-using the replace-gallery checkbox.
+Test editing an existing project from `/account/projects`, including appending images,
+using the replace-gallery checkbox, and saving an external project page link.
 
 ## After That
 
