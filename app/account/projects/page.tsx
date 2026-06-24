@@ -630,7 +630,7 @@ export default async function ManageProjectsPage({
               <input name="title" placeholder="Modern Warsaw apartment" className={fieldClass} />
             </Field>
 
-            <Field label="Category" hint="room or project type">
+            <Field label="Category" hint="room or project type, used as a public filter">
               <input
                 name="category"
                 placeholder="Apartment, house, office..."

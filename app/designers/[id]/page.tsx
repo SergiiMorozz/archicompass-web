@@ -49,6 +49,11 @@ const fallbackProjectImages = [
   "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=900&q=80",
 ];
 
+const activeFilterClass =
+  "rounded-full bg-primary px-3 py-1 text-sm font-semibold text-white";
+const inactiveFilterClass =
+  "rounded-full border border-line bg-background px-3 py-1 text-sm font-semibold text-muted transition hover:border-primary hover:text-primary";
+
 function isUuid(v: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 }
@@ -109,6 +114,12 @@ function experienceLabel(value: number | null) {
 
 function rateLabel(rate: number | null) {
   return rate ? `${rate} PLN/hour` : "Rate on request";
+}
+
+function portfolioHref(profileId: string, category?: string) {
+  return category
+    ? `/designers/${profileId}?category=${encodeURIComponent(category)}#portfolio`
+    : `/designers/${profileId}#portfolio`;
 }
 
 function websiteHref(value: string | null) {
@@ -188,10 +199,13 @@ function EmptyProfileState({
 
 export default async function DesignerProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ category?: string }>;
 }) {
   const { id } = await params;
+  const sp = (await searchParams) ?? {};
 
   if (!id || !isUuid(id)) {
     return (
@@ -263,6 +277,18 @@ export default async function DesignerProfilePage({
   const categoryFilters = Array.from(
     new Set(projects.map((project) => project.category).filter(Boolean))
   ) as string[];
+  const requestedCategory =
+    typeof sp.category === "string" && sp.category.trim() ? sp.category.trim() : null;
+  const selectedCategory =
+    requestedCategory && categoryFilters.includes(requestedCategory)
+      ? requestedCategory
+      : null;
+  const visibleProjects = selectedCategory
+    ? projects.filter((project) => project.category === selectedCategory)
+    : projects;
+  const portfolioCountText = selectedCategory
+    ? `${visibleProjects.length} of ${projects.length} projects`
+    : `${projects.length} project${projects.length === 1 ? "" : "s"}`;
 
   return (
     <main className="bg-background pb-28 lg:pb-0">
@@ -525,23 +551,31 @@ export default async function DesignerProfilePage({
                 <div className="text-sm font-semibold text-primary">Portfolio</div>
                 <h2 className="mt-1 text-3xl font-bold">Selected projects</h2>
               </div>
-              <div className="text-sm font-semibold text-muted">
-                {projects.length} project{projects.length === 1 ? "" : "s"}
-              </div>
+              <div className="text-sm font-semibold text-muted">{portfolioCountText}</div>
             </div>
 
             {categoryFilters.length ? (
               <div className="mt-5 flex flex-wrap gap-2">
-                <span className="rounded-full bg-primary px-3 py-1 text-sm font-semibold text-white">
+                <Link
+                  href={portfolioHref(id)}
+                  aria-current={selectedCategory ? undefined : "true"}
+                  className={selectedCategory ? inactiveFilterClass : activeFilterClass}
+                >
                   All
-                </span>
+                </Link>
                 {categoryFilters.map((category) => (
-                  <span
+                  <Link
                     key={category}
-                    className="rounded-full border border-line bg-background px-3 py-1 text-sm font-semibold text-muted"
+                    href={portfolioHref(id, category)}
+                    aria-current={selectedCategory === category ? "true" : undefined}
+                    className={
+                      selectedCategory === category
+                        ? activeFilterClass
+                        : inactiveFilterClass
+                    }
                   >
                     {category}
-                  </span>
+                  </Link>
                 ))}
               </div>
             ) : null}
@@ -576,9 +610,22 @@ export default async function DesignerProfilePage({
                   </div>
                 </div>
               </div>
+            ) : !visibleProjects.length ? (
+              <div className="mt-5 rounded-2xl border border-dashed border-line bg-background p-6">
+                <h3 className="text-xl font-bold">No projects in this category yet</h3>
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  Try all projects or choose another category.
+                </p>
+                <Link
+                  href={portfolioHref(id)}
+                  className="mt-4 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
+                >
+                  Show all projects
+                </Link>
+              </div>
             ) : (
               <div className="mt-6 grid gap-4 md:grid-cols-2">
-                {projects.map((project, index) => (
+                {visibleProjects.map((project, index) => (
                   <article
                     key={project.id}
                     className="group overflow-hidden rounded-2xl border border-line bg-background"
