@@ -5,7 +5,9 @@ export const runtime = "nodejs";
 const maxAnalysisPhotos = 6;
 const maxImageSize = 8 * 1024 * 1024;
 const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
-const styleModel = process.env.OPENAI_STYLE_MODEL || "gpt-4.1-mini";
+const styleProvider = process.env.STYLE_ANALYSIS_PROVIDER || "openai";
+const openAiStyleModel = process.env.OPENAI_STYLE_MODEL || "gpt-4.1-mini";
+const geminiStyleModel = process.env.GEMINI_STYLE_MODEL || "gemini-3.1-flash-lite";
 
 const allowedVisualCues = [
   "Natural wood",
@@ -42,6 +44,80 @@ type StyleAnalysis = {
   designerPrompt: string;
   watchOuts: string[];
 };
+
+type ImageInput = {
+  base64: string;
+  mimeType: string;
+};
+
+type AnalysisInput = {
+  currentCues: string;
+  currentStyle: string;
+  images: ImageInput[];
+  projectType: string;
+};
+
+const analysisSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    "primaryStyle",
+    "styleDirection",
+    "confidence",
+    "summary",
+    "colorPalette",
+    "materials",
+    "styleClues",
+    "visualCues",
+    "searchSpecialty",
+    "designerPrompt",
+    "watchOuts",
+  ],
+  properties: {
+    primaryStyle: { type: "string" },
+    styleDirection: { type: "string", enum: allowedStyles },
+    confidence: { type: "string", enum: ["low", "medium", "high"] },
+    summary: { type: "string" },
+    colorPalette: {
+      type: "array",
+      items: { type: "string" },
+      maxItems: 6,
+    },
+    materials: {
+      type: "array",
+      items: { type: "string" },
+      maxItems: 6,
+    },
+    styleClues: {
+      type: "array",
+      items: { type: "string" },
+      maxItems: 6,
+    },
+    visualCues: {
+      type: "array",
+      items: { type: "string", enum: allowedVisualCues },
+      maxItems: 5,
+    },
+    searchSpecialty: { type: "string" },
+    designerPrompt: { type: "string" },
+    watchOuts: {
+      type: "array",
+      items: { type: "string" },
+      maxItems: 4,
+    },
+  },
+};
+
+function schemaForGemini(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(schemaForGemini);
+  if (!value || typeof value !== "object") return value;
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .filter(([key]) => key !== "additionalProperties")
+      .map(([key, item]) => [key, schemaForGemini(item)])
+  );
+}
 
 function textValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -137,17 +213,56 @@ function userFacingOpenAiError(message: string) {
   return message || "AI analysis failed.";
 }
 
-async function imagePart(file: File) {
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const base64 = buffer.toString("base64");
+function userFacingGeminiError(message: string) {
+  const normalized = message.toLowerCase();
 
+  if (
+    normalized.includes("api key") ||
+    normalized.includes("permission") ||
+    normalized.includes("unauthenticated") ||
+    normalized.includes("forbidden")
+  ) {
+    return "Gemini is selected, but the Google API key is invalid or not enabled for Gemini API. Create a Gemini API key in Google AI Studio and update GEMINI_API_KEY.";
+  }
+
+  if (
+    normalized.includes("quota") ||
+    normalized.includes("billing") ||
+    normalized.includes("rate")
+  ) {
+    return "Gemini is selected, but the Google API key has no available quota or is rate limited. Check Google AI Studio quota and try again later.";
+  }
+
+  return message || "Gemini analysis failed.";
+}
+
+async function fileToImageInput(file: File): Promise<ImageInput> {
+  const buffer = Buffer.from(await file.arrayBuffer());
   return {
-    type: "input_image",
-    image_url: `data:${file.type};base64,${base64}`,
+    base64: buffer.toString("base64"),
+    mimeType: file.type,
   };
 }
 
-export async function POST(request: Request) {
+function analysisPrompt({
+  currentCues,
+  currentStyle,
+  projectType,
+}: Pick<AnalysisInput, "currentCues" | "currentStyle" | "projectType">) {
+  return [
+    "Analyze these interior reference photos for ArchiCompass.",
+    "Return practical interior-design style guidance for a client who is trying to find the right designer.",
+    `Project type: ${projectType}.`,
+    `Client-selected style before analysis: ${currentStyle}.`,
+    `Client-selected visual cues before analysis: ${currentCues}.`,
+    "Use plain English. Be specific, but avoid pretending certainty if photos conflict.",
+    `styleDirection must be one of: ${allowedStyles.join(", ")}.`,
+    `visualCues must only use these values: ${allowedVisualCues.join(", ")}.`,
+    "searchSpecialty should be one short marketplace keyword such as minimalist, scandinavian, modern, industrial, luxury, eco-friendly, smart home, or an empty string.",
+  ].join("\n");
+}
+
+async function analyzeWithOpenAi(input: AnalysisInput) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
@@ -159,6 +274,175 @@ export async function POST(request: Request) {
     );
   }
 
+  const openAiImageParts = input.images.map((image) => ({
+    type: "input_image",
+    image_url: `data:${image.mimeType};base64,${image.base64}`,
+  }));
+
+  const openAiResponse = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: openAiStyleModel,
+      input: [
+        {
+          role: "user",
+          content: [
+            { type: "input_text", text: analysisPrompt(input) },
+            ...openAiImageParts,
+          ],
+        },
+      ],
+      max_output_tokens: 900,
+      text: {
+        format: {
+          type: "json_schema",
+          name: "interior_style_analysis",
+          strict: true,
+          schema: analysisSchema,
+        },
+      },
+    }),
+  });
+
+  const payload = (await openAiResponse.json()) as Record<string, unknown>;
+  if (!openAiResponse.ok) {
+    const error =
+      typeof payload.error === "object" &&
+      payload.error &&
+      typeof (payload.error as Record<string, unknown>).message === "string"
+        ? ((payload.error as Record<string, unknown>).message as string)
+        : "AI analysis failed.";
+
+    return NextResponse.json(
+      { error: userFacingOpenAiError(error) },
+      { status: openAiResponse.status }
+    );
+  }
+
+  const text = responseText(payload);
+  if (!text) {
+    return NextResponse.json(
+      { error: "AI analysis returned no readable style result." },
+      { status: 502 }
+    );
+  }
+
+  try {
+    return NextResponse.json({ analysis: cleanAnalysis(JSON.parse(text)) });
+  } catch {
+    return NextResponse.json(
+      { error: "AI analysis returned an unreadable style result." },
+      { status: 502 }
+    );
+  }
+}
+
+function geminiText(payload: Record<string, unknown>) {
+  if (typeof payload.output_text === "string") return payload.output_text;
+
+  const candidates = Array.isArray(payload.candidates) ? payload.candidates : [];
+  for (const candidate of candidates) {
+    if (!candidate || typeof candidate !== "object") continue;
+    const content = (candidate as Record<string, unknown>).content;
+    if (!content || typeof content !== "object") continue;
+    const parts = Array.isArray((content as Record<string, unknown>).parts)
+      ? ((content as Record<string, unknown>).parts as unknown[])
+      : [];
+
+    for (const part of parts) {
+      if (part && typeof part === "object" && typeof (part as Record<string, unknown>).text === "string") {
+        return (part as Record<string, unknown>).text as string;
+      }
+    }
+  }
+
+  return null;
+}
+
+async function analyzeWithGemini(input: AnalysisInput) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json(
+      {
+        code: "AI_NOT_CONFIGURED",
+        error: "Gemini photo analysis is not configured yet. Add GEMINI_API_KEY to enable it.",
+      },
+      { status: 501 }
+    );
+  }
+
+  const model = encodeURIComponent(geminiStyleModel);
+  const geminiResponse = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(
+      apiKey
+    )}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: analysisPrompt(input) },
+              ...input.images.map((image) => ({
+                inline_data: {
+                  data: image.base64,
+                  mime_type: image.mimeType,
+                },
+              })),
+            ],
+          },
+        ],
+        generationConfig: {
+          maxOutputTokens: 900,
+          responseMimeType: "application/json",
+          responseSchema: schemaForGemini(analysisSchema),
+        },
+      }),
+    }
+  );
+
+  const payload = (await geminiResponse.json()) as Record<string, unknown>;
+  if (!geminiResponse.ok) {
+    const error =
+      typeof payload.error === "object" &&
+      payload.error &&
+      typeof (payload.error as Record<string, unknown>).message === "string"
+        ? ((payload.error as Record<string, unknown>).message as string)
+        : "Gemini analysis failed.";
+
+    return NextResponse.json(
+      { error: userFacingGeminiError(error) },
+      { status: geminiResponse.status }
+    );
+  }
+
+  const text = geminiText(payload);
+  if (!text) {
+    return NextResponse.json(
+      { error: "Gemini returned no readable style result." },
+      { status: 502 }
+    );
+  }
+
+  try {
+    return NextResponse.json({ analysis: cleanAnalysis(JSON.parse(text)) });
+  } catch {
+    return NextResponse.json(
+      { error: "Gemini returned an unreadable style result." },
+      { status: 502 }
+    );
+  }
+}
+
+export async function POST(request: Request) {
   let formData: FormData;
   try {
     formData = await request.formData();
@@ -203,123 +487,9 @@ export async function POST(request: Request) {
   const projectType = textValue(formData, "project_type") ?? "Interior project";
   const currentStyle = textValue(formData, "style_direction") ?? "Not sure yet";
   const currentCues = textValue(formData, "visual_cues") ?? "None selected yet";
-  const imageParts = await Promise.all(photos.map(imagePart));
-  const prompt = [
-    "Analyze these interior reference photos for ArchiCompass.",
-    "Return practical interior-design style guidance for a client who is trying to find the right designer.",
-    `Project type: ${projectType}.`,
-    `Client-selected style before analysis: ${currentStyle}.`,
-    `Client-selected visual cues before analysis: ${currentCues}.`,
-    "Use plain English. Be specific, but avoid pretending certainty if photos conflict.",
-    `styleDirection must be one of: ${allowedStyles.join(", ")}.`,
-    `visualCues must only use these values: ${allowedVisualCues.join(", ")}.`,
-    "searchSpecialty should be one short marketplace keyword such as minimalist, scandinavian, modern, industrial, luxury, eco-friendly, smart home, or an empty string.",
-  ].join("\n");
+  const images = await Promise.all(photos.map(fileToImageInput));
+  const input = { currentCues, currentStyle, images, projectType };
 
-  const openAiResponse = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: styleModel,
-      input: [
-        {
-          role: "user",
-          content: [{ type: "input_text", text: prompt }, ...imageParts],
-        },
-      ],
-      max_output_tokens: 900,
-      text: {
-        format: {
-          type: "json_schema",
-          name: "interior_style_analysis",
-          strict: true,
-          schema: {
-            type: "object",
-            additionalProperties: false,
-            required: [
-              "primaryStyle",
-              "styleDirection",
-              "confidence",
-              "summary",
-              "colorPalette",
-              "materials",
-              "styleClues",
-              "visualCues",
-              "searchSpecialty",
-              "designerPrompt",
-              "watchOuts",
-            ],
-            properties: {
-              primaryStyle: { type: "string" },
-              styleDirection: { type: "string", enum: allowedStyles },
-              confidence: { type: "string", enum: ["low", "medium", "high"] },
-              summary: { type: "string" },
-              colorPalette: {
-                type: "array",
-                items: { type: "string" },
-                maxItems: 6,
-              },
-              materials: {
-                type: "array",
-                items: { type: "string" },
-                maxItems: 6,
-              },
-              styleClues: {
-                type: "array",
-                items: { type: "string" },
-                maxItems: 6,
-              },
-              visualCues: {
-                type: "array",
-                items: { type: "string", enum: allowedVisualCues },
-                maxItems: 5,
-              },
-              searchSpecialty: { type: "string" },
-              designerPrompt: { type: "string" },
-              watchOuts: {
-                type: "array",
-                items: { type: "string" },
-                maxItems: 4,
-              },
-            },
-          },
-        },
-      },
-    }),
-  });
-
-  const payload = (await openAiResponse.json()) as Record<string, unknown>;
-  if (!openAiResponse.ok) {
-    const error =
-      typeof payload.error === "object" &&
-      payload.error &&
-      typeof (payload.error as Record<string, unknown>).message === "string"
-        ? ((payload.error as Record<string, unknown>).message as string)
-        : "AI analysis failed.";
-
-    return NextResponse.json(
-      { error: userFacingOpenAiError(error) },
-      { status: openAiResponse.status }
-    );
-  }
-
-  const text = responseText(payload);
-  if (!text) {
-    return NextResponse.json(
-      { error: "AI analysis returned no readable style result." },
-      { status: 502 }
-    );
-  }
-
-  try {
-    return NextResponse.json({ analysis: cleanAnalysis(JSON.parse(text)) });
-  } catch {
-    return NextResponse.json(
-      { error: "AI analysis returned an unreadable style result." },
-      { status: 502 }
-    );
-  }
+  if (styleProvider === "gemini") return analyzeWithGemini(input);
+  return analyzeWithOpenAi(input);
 }

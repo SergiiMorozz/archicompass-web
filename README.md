@@ -34,12 +34,19 @@ in `/account/inquiries`; the email notification is marked as `not_configured`.
 Optional AI photo style analysis in Project Compass:
 
 ```bash
+STYLE_ANALYSIS_PROVIDER=openai
 OPENAI_API_KEY=
 OPENAI_STYLE_MODEL=gpt-4.1-mini
+
+# or
+STYLE_ANALYSIS_PROVIDER=gemini
+GEMINI_API_KEY=
+GEMINI_STYLE_MODEL=gemini-3.1-flash-lite
 ```
 
-When `OPENAI_API_KEY` is missing, Project Compass still works as a manual brief
-builder, but photo style analysis shows a configuration message instead of an AI result.
+When the selected provider key is missing, Project Compass still works as a manual
+brief builder, but photo style analysis shows a configuration message instead of an
+AI result.
 
 ## Checks
 

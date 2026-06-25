@@ -24,8 +24,9 @@ Last checkpoint: 2026-06-25
 - Project Compass accepts up to 10 local reference photos and visual cues, which
   are included in the copied brief and designer search signal.
 - Project Compass has optional AI photo style analysis through `/api/style-analysis`.
-  With `OPENAI_API_KEY`, it reads up to 6 reference photos, suggests a style,
-  materials, colors, visual cues, and designer-search guidance.
+  It supports `STYLE_ANALYSIS_PROVIDER=openai` or `gemini`, reads up to 6
+  reference photos, and suggests a style, materials, colors, visual cues, and
+  designer-search guidance.
 - Project Compass briefs can be saved to Supabase with private reference photo
   storage and reviewed at `/account/briefs`.
 - Unsent saved briefs can be deleted from `/account/briefs`; their private
@@ -58,11 +59,13 @@ Last checkpoint: 2026-06-25
   photo analysis section and button render.
 - `/api/style-analysis` returns `AI_NOT_CONFIGURED` when `OPENAI_API_KEY` is
   missing, instead of pretending to analyze photos.
+- Gemini provider was tested locally with `GEMINI_STYLE_MODEL=gemini-3.1-flash-lite`
+  and returned a structured style analysis for a temporary test image.
 
 ## Best Next Small Step
 
-Add `OPENAI_API_KEY` locally, upload one real reference photo in Project Compass,
-run `Analyze photos`, then save/send/cancel/delete the test artifacts.
+Upload real reference photos in Project Compass, run `Analyze photos` with the
+Gemini provider, then save/send/cancel/delete the test artifacts.
 
 ## After That
 
