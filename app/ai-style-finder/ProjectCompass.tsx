@@ -18,7 +18,22 @@ type ReferencePhoto = {
   url: string;
 };
 
+type StyleAnalysis = {
+  primaryStyle: string;
+  styleDirection: string;
+  confidence: "low" | "medium" | "high";
+  summary: string;
+  colorPalette: string[];
+  materials: string[];
+  styleClues: string[];
+  visualCues: string[];
+  searchSpecialty: string;
+  designerPrompt: string;
+  watchOuts: string[];
+};
+
 const maxReferencePhotos = 10;
+const maxAnalysisPhotos = 6;
 
 const projectTypes: Option[] = [
   {
@@ -271,6 +286,9 @@ export default function ProjectCompass() {
   const [savedBriefId, setSavedBriefId] = useState<string | null>(null);
   const [savedReferenceCount, setSavedReferenceCount] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [styleAnalysis, setStyleAnalysis] = useState<StyleAnalysis | null>(null);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const objectUrls = useRef<string[]>([]);
 
   const selectedStyle = selectedOption(styles, style);
@@ -280,7 +298,9 @@ export default function ProjectCompass() {
     [selectedVisualCues]
   );
   const visualSearchSpecialty =
-    selectedCueOptions.find((cue) => cue.specialty)?.specialty ?? selectedStyle.specialty;
+    styleAnalysis?.searchSpecialty ||
+    selectedCueOptions.find((cue) => cue.specialty)?.specialty ||
+    selectedStyle.specialty;
   const visualCueLabel = selectedVisualCues.length
     ? selectedVisualCues.slice(0, 3).join(", ")
     : selectedStyle.label;
@@ -307,6 +327,23 @@ export default function ProjectCompass() {
               .slice(0, 5)
               .join(", ")}${referencePhotos.length > 5 ? ", ..." : ""})`
           : "Reference photos: none yet",
+        styleAnalysis
+          ? [
+              `AI style read: ${styleAnalysis.primaryStyle} (${styleAnalysis.confidence} confidence)`,
+              `AI summary: ${styleAnalysis.summary}`,
+              styleAnalysis.colorPalette.length
+                ? `AI color palette: ${styleAnalysis.colorPalette.join(", ")}`
+                : null,
+              styleAnalysis.materials.length
+                ? `AI materials: ${styleAnalysis.materials.join(", ")}`
+                : null,
+              styleAnalysis.designerPrompt
+                ? `Designer search prompt: ${styleAnalysis.designerPrompt}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join("\n")
+          : null,
         selectedVisualCues.length
           ? `Visual cues: ${selectedVisualCues.join(", ")}`
           : null,
@@ -327,6 +364,7 @@ export default function ProjectCompass() {
       scope,
       selectedVisualCues,
       style,
+      styleAnalysis,
     ]
   );
 
@@ -376,6 +414,8 @@ export default function ProjectCompass() {
       return [...current, ...nextPhotos];
     });
 
+    setStyleAnalysis(null);
+    setAnalysisError(null);
     event.currentTarget.value = "";
   }
 
@@ -389,6 +429,58 @@ export default function ProjectCompass() {
         return false;
       })
     );
+    setStyleAnalysis(null);
+    setAnalysisError(null);
+  }
+
+  async function analyzeReferencePhotos() {
+    if (!referencePhotos.length) {
+      setAnalysisError("Add at least one reference photo before running AI analysis.");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setAnalysisError(null);
+
+    const formData = new FormData();
+    formData.set("project_type", projectType);
+    formData.set("style_direction", style);
+    formData.set("visual_cues", selectedVisualCues.join(", "));
+
+    referencePhotos.slice(0, maxAnalysisPhotos).forEach((photo) => {
+      formData.append("reference_photos", photo.file, photo.name);
+    });
+
+    try {
+      const response = await fetch("/api/style-analysis", {
+        method: "POST",
+        body: formData,
+      });
+      const payload = (await response.json()) as {
+        analysis?: StyleAnalysis;
+        code?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.analysis) {
+        throw new Error(payload.error ?? "AI style analysis could not be completed.");
+      }
+
+      setStyleAnalysis(payload.analysis);
+      if (styles.some((option) => option.value === payload.analysis?.styleDirection)) {
+        setStyle(payload.analysis.styleDirection);
+      }
+
+      setSelectedVisualCues((current) =>
+        Array.from(new Set([...current, ...payload.analysis!.visualCues]))
+      );
+    } catch (error) {
+      setAnalysisError(
+        error instanceof Error ? error.message : "AI style analysis could not be completed."
+      );
+    } finally {
+      setIsAnalyzing(false);
+    }
   }
 
   async function saveBrief() {
@@ -582,6 +674,105 @@ export default function ProjectCompass() {
               </div>
             )}
 
+            <div className="mt-4 rounded-2xl border border-line bg-background p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <h3 className="text-sm font-bold">AI photo style analysis</h3>
+                  <p className="mt-1 text-sm leading-6 text-muted">
+                    Let ArchiCompass read the reference photos and suggest a style name,
+                    materials, colors, and designer-search clues.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={analyzeReferencePhotos}
+                  disabled={!referencePhotos.length || isAnalyzing}
+                  className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isAnalyzing ? "Analyzing..." : "Analyze photos"}
+                </button>
+              </div>
+
+              {referencePhotos.length > maxAnalysisPhotos ? (
+                <p className="mt-3 text-xs leading-5 text-muted">
+                  AI analysis uses the first {maxAnalysisPhotos} photos to keep the result
+                  fast and focused. All photos can still be saved in the brief.
+                </p>
+              ) : null}
+
+              {styleAnalysis ? (
+                <div className="mt-4 grid gap-4 rounded-2xl border border-primary/20 bg-primary-soft p-4">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <div className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">
+                        Suggested style
+                      </div>
+                      <div className="mt-1 text-2xl font-bold">
+                        {styleAnalysis.primaryStyle}
+                      </div>
+                    </div>
+                    <span className="w-fit rounded-full bg-card px-3 py-1 text-xs font-semibold text-primary">
+                      {styleAnalysis.confidence} confidence
+                    </span>
+                  </div>
+
+                  <p className="text-sm leading-6 text-muted">{styleAnalysis.summary}</p>
+
+                  <div className="grid gap-3 text-sm sm:grid-cols-2">
+                    {[
+                      ["Closest option", styleAnalysis.styleDirection],
+                      [
+                        "Colors",
+                        styleAnalysis.colorPalette.length
+                          ? styleAnalysis.colorPalette.join(", ")
+                          : "Not enough signal",
+                      ],
+                      [
+                        "Materials",
+                        styleAnalysis.materials.length
+                          ? styleAnalysis.materials.join(", ")
+                          : "Not enough signal",
+                      ],
+                      [
+                        "Style clues",
+                        styleAnalysis.styleClues.length
+                          ? styleAnalysis.styleClues.join(", ")
+                          : "Not enough signal",
+                      ],
+                    ].map(([label, value]) => (
+                      <div key={label} className="rounded-xl border border-line bg-card p-3">
+                        <div className="text-muted">{label}</div>
+                        <div className="mt-1 font-semibold">{value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="rounded-xl border border-line bg-card p-3 text-sm leading-6">
+                    <div className="font-semibold">How to brief a designer</div>
+                    <p className="mt-1 text-muted">{styleAnalysis.designerPrompt}</p>
+                  </div>
+
+                  {styleAnalysis.watchOuts.length ? (
+                    <div>
+                      <div className="text-sm font-semibold">Watch-outs</div>
+                      <ul className="mt-2 grid gap-2 text-sm leading-6 text-muted">
+                        {styleAnalysis.watchOuts.map((item) => (
+                          <li key={item}>- {item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {analysisError ? (
+                <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
+                  <div className="font-semibold">AI analysis unavailable</div>
+                  <p className="mt-1">{analysisError}</p>
+                </div>
+              ) : null}
+            </div>
+
             <div className="mt-5">
               <h3 className="text-sm font-bold">What do these photos have in common?</h3>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -690,8 +881,10 @@ export default function ProjectCompass() {
           <div className="mt-5 rounded-2xl border border-line bg-background p-4">
             <div className="text-sm font-semibold">Designer fit signal</div>
             <p className="mt-2 text-sm leading-6 text-muted">
-              Look for portfolios with {visualCueLabel.toLowerCase()} and ask whether
-              the designer offers {selectedScope.label.toLowerCase()}.
+              {styleAnalysis
+                ? styleAnalysis.designerPrompt
+                : `Look for portfolios with ${visualCueLabel.toLowerCase()} and ask whether
+              the designer offers ${selectedScope.label.toLowerCase()}.`}
             </p>
           </div>
 

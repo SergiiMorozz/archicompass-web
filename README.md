@@ -31,6 +31,16 @@ NEXT_PUBLIC_SITE_URL=
 When `RESEND_API_KEY` and `INQUIRY_EMAIL_FROM` are missing, requests are still saved
 in `/account/inquiries`; the email notification is marked as `not_configured`.
 
+Optional AI photo style analysis in Project Compass:
+
+```bash
+OPENAI_API_KEY=
+OPENAI_STYLE_MODEL=gpt-4.1-mini
+```
+
+When `OPENAI_API_KEY` is missing, Project Compass still works as a manual brief
+builder, but photo style analysis shows a configuration message instead of an AI result.
+
 ## Checks
 
 ```bash

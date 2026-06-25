@@ -23,6 +23,9 @@ Last checkpoint: 2026-06-25
   `/ai-style-finder` route still renders it for compatibility.
 - Project Compass accepts up to 10 local reference photos and visual cues, which
   are included in the copied brief and designer search signal.
+- Project Compass has optional AI photo style analysis through `/api/style-analysis`.
+  With `OPENAI_API_KEY`, it reads up to 6 reference photos, suggests a style,
+  materials, colors, visual cues, and designer-search guidance.
 - Project Compass briefs can be saved to Supabase with private reference photo
   storage and reviewed at `/account/briefs`.
 - Unsent saved briefs can be deleted from `/account/briefs`; their private
@@ -51,12 +54,15 @@ Last checkpoint: 2026-06-25
   delete controls render for the user's 2 projects and 13 current images.
 - Browser check on `http://localhost:3002/account/briefs` and
   `/account/inquiries` confirmed brief deletion and request cancellation controls render.
+- Browser check on `http://localhost:3002/project-compass` confirmed the AI
+  photo analysis section and button render.
+- `/api/style-analysis` returns `AI_NOT_CONFIGURED` when `OPENAI_API_KEY` is
+  missing, instead of pretending to analyze photos.
 
 ## Best Next Small Step
 
-Test the full Project Compass loop with one real reference photo: save a brief,
-send it to a designer, verify it appears in requests, then cancel/delete the
-test artifacts through the new cleanup controls.
+Add `OPENAI_API_KEY` locally, upload one real reference photo in Project Compass,
+run `Analyze photos`, then save/send/cancel/delete the test artifacts.
 
 ## After That
 
