@@ -25,8 +25,12 @@ Last checkpoint: 2026-06-25
   are included in the copied brief and designer search signal.
 - Project Compass briefs can be saved to Supabase with private reference photo
   storage and reviewed at `/account/briefs`.
+- Unsent saved briefs can be deleted from `/account/briefs`; their private
+  reference photos are removed from storage.
 - Saved briefs can be sent to designers as stored requests and tracked at
   `/account/inquiries`.
+- Sent brief requests can be cancelled from `/account/inquiries`; the saved
+  brief remains available.
 - Designers can update incoming request status to reviewing, accepted, or
   declined from `/account/inquiries`.
 - Saved-brief requests have email notification plumbing via Resend. Set
@@ -45,12 +49,14 @@ Last checkpoint: 2026-06-25
 - Browser checks for catalog, profile, and account tools.
 - Browser check on `http://localhost:3002/account/projects` confirmed the fresh
   delete controls render for the user's 2 projects and 13 current images.
+- Browser check on `http://localhost:3002/account/briefs` and
+  `/account/inquiries` confirmed brief deletion and request cancellation controls render.
 
 ## Best Next Small Step
 
-Manually test deletion on one disposable project image or test project from
-`/account/projects`, then test one real Project Compass reference photo through
-save-and-send.
+Test the full Project Compass loop with one real reference photo: save a brief,
+send it to a designer, verify it appears in requests, then cancel/delete the
+test artifacts through the new cleanup controls.
 
 ## After That
 

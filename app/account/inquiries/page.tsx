@@ -115,6 +115,35 @@ async function updateInquiryStatus(formData: FormData) {
   redirect("/account/inquiries?updated=1");
 }
 
+async function cancelSentInquiry(formData: FormData) {
+  "use server";
+
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+
+  if (!user) redirect("/login");
+
+  const inquiryId = textValue(formData, "inquiry_id");
+  if (!inquiryId) errorRedirect("Request was not found.");
+
+  const { data: deleted, error } = await supabase
+    .from("designer_inquiries")
+    .delete()
+    .eq("id", inquiryId)
+    .eq("client_id", user.id)
+    .select("id")
+    .maybeSingle();
+
+  if (error) errorRedirect(error.message);
+  if (!deleted) errorRedirect("Only the sender can cancel this request.");
+
+  revalidatePath("/account");
+  revalidatePath("/account/briefs");
+  revalidatePath("/account/inquiries");
+  redirect("/account/inquiries?cancelled=1");
+}
+
 function InquiryCard({
   inquiry,
   mode,
@@ -224,6 +253,29 @@ function InquiryCard({
           </button>
         </form>
       ) : null}
+
+      {mode === "sent" ? (
+        <details className="mt-5 overflow-hidden rounded-xl border border-red-200 bg-red-50">
+          <summary className="block cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-red-700">
+            Cancel request
+          </summary>
+          <div className="border-t border-red-200 p-4">
+            <p className="text-sm leading-6 text-red-700">
+              This removes the request from ArchiCompass. Your saved brief stays available
+              in Project Compass.
+            </p>
+            <form action={cancelSentInquiry} className="mt-4">
+              <input type="hidden" name="inquiry_id" value={inquiry.id} />
+              <button
+                type="submit"
+                className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white hover:bg-red-700"
+              >
+                Cancel this request
+              </button>
+            </form>
+          </div>
+        </details>
+      ) : null}
     </article>
   );
 }
@@ -231,7 +283,7 @@ function InquiryCard({
 export default async function InquiriesPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string; updated?: string }>;
+  searchParams?: Promise<{ cancelled?: string; error?: string; updated?: string }>;
 }) {
   const sp = (await searchParams) ?? {};
   const supabase = await createSupabaseServerClient();
@@ -367,9 +419,16 @@ export default async function InquiriesPage({
           </div>
         ) : null}
 
+        {sp.cancelled ? (
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900 lg:col-span-2">
+            <div className="font-semibold">Request cancelled</div>
+            <p className="mt-1">The saved brief is still available if you want to send it again.</p>
+          </div>
+        ) : null}
+
         {sp.error ? (
           <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-700 lg:col-span-2">
-            <div className="font-semibold">Status was not updated</div>
+            <div className="font-semibold">Request action failed</div>
             <p className="mt-1">{sp.error}</p>
           </div>
         ) : null}

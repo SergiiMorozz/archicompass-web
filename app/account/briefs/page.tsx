@@ -163,10 +163,70 @@ async function sendBriefInquiry(formData: FormData) {
   redirect("/account/briefs?sent=1");
 }
 
+async function deleteSavedBrief(formData: FormData) {
+  "use server";
+
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+
+  if (!user) redirect("/login");
+
+  const briefId = textValue(formData, "brief_id");
+  if (!briefId) errorRedirect("Saved brief was not found.");
+
+  const { data: existingInquiry, error: inquiryError } = await supabase
+    .from("designer_inquiries")
+    .select("id")
+    .eq("client_id", user.id)
+    .eq("brief_id", briefId)
+    .limit(1)
+    .maybeSingle();
+
+  if (inquiryError) errorRedirect(inquiryError.message);
+  if (existingInquiry) {
+    errorRedirect("This brief was already sent. Cancel its request before deleting it.");
+  }
+
+  const { data: briefData, error: briefError } = await supabase
+    .from("project_briefs")
+    .select("id, reference_photo_paths")
+    .eq("id", briefId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (briefError || !briefData) {
+    errorRedirect("Saved brief was not found.");
+  }
+
+  const brief = briefData as Pick<ProjectBrief, "id" | "reference_photo_paths">;
+  const { error } = await supabase
+    .from("project_briefs")
+    .delete()
+    .eq("id", briefId)
+    .eq("user_id", user.id);
+
+  if (error) errorRedirect(error.message);
+
+  const pathsToRemove = brief.reference_photo_paths?.filter(Boolean) ?? [];
+  if (pathsToRemove.length) {
+    await supabase.storage.from("brief-reference-photos").remove(pathsToRemove);
+  }
+
+  revalidatePath("/account");
+  revalidatePath("/account/briefs");
+  redirect("/account/briefs?deleted=1");
+}
+
 export default async function SavedBriefsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ designer?: string; error?: string; sent?: string }>;
+  searchParams?: Promise<{
+    deleted?: string;
+    designer?: string;
+    error?: string;
+    sent?: string;
+  }>;
 }) {
   const sp = (await searchParams) ?? {};
   const supabase = await createSupabaseServerClient();
@@ -274,9 +334,16 @@ export default async function SavedBriefsPage({
           </div>
         ) : null}
 
+        {sp.deleted ? (
+          <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900">
+            <div className="font-semibold">Brief deleted</div>
+            <p className="mt-1">The saved brief and its private reference photos were removed.</p>
+          </div>
+        ) : null}
+
         {sp.error ? (
           <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-700">
-            <div className="font-semibold">Brief was not sent</div>
+            <div className="font-semibold">Brief action failed</div>
             <p className="mt-1">{sp.error}</p>
           </div>
         ) : null}
@@ -434,6 +501,27 @@ export default async function SavedBriefsPage({
                       Create another brief
                     </Link>
                   </div>
+
+                  <details className="mt-5 overflow-hidden rounded-xl border border-red-200 bg-red-50">
+                    <summary className="block cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-red-700">
+                      Delete saved brief
+                    </summary>
+                    <div className="border-t border-red-200 p-4">
+                      <p className="text-sm leading-6 text-red-700">
+                        This removes the saved brief and its private reference photos.
+                        Briefs already sent to designers must be cancelled first.
+                      </p>
+                      <form action={deleteSavedBrief} className="mt-4">
+                        <input type="hidden" name="brief_id" value={brief.id} />
+                        <button
+                          type="submit"
+                          className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white hover:bg-red-700"
+                        >
+                          Delete this brief
+                        </button>
+                      </form>
+                    </div>
+                  </details>
                 </article>
               );
             })}
