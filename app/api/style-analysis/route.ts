@@ -119,6 +119,24 @@ function responseText(payload: Record<string, unknown>) {
   return null;
 }
 
+function userFacingOpenAiError(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("quota") ||
+    normalized.includes("billing") ||
+    normalized.includes("plan")
+  ) {
+    return "AI is connected, but the OpenAI API account has no available quota. Add billing or credits in OpenAI Platform, then try Analyze photos again.";
+  }
+
+  if (normalized.includes("api key") || normalized.includes("unauthorized")) {
+    return "AI is connected, but the OpenAI API key is invalid or inactive. Create a new key in OpenAI Platform and update OPENAI_API_KEY.";
+  }
+
+  return message || "AI analysis failed.";
+}
+
 async function imagePart(file: File) {
   const buffer = Buffer.from(await file.arrayBuffer());
   const base64 = buffer.toString("base64");
@@ -282,7 +300,10 @@ export async function POST(request: Request) {
         ? ((payload.error as Record<string, unknown>).message as string)
         : "AI analysis failed.";
 
-    return NextResponse.json({ error }, { status: openAiResponse.status });
+    return NextResponse.json(
+      { error: userFacingOpenAiError(error) },
+      { status: openAiResponse.status }
+    );
   }
 
   const text = responseText(payload);
