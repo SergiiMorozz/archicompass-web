@@ -713,11 +713,11 @@ export default async function ManageProjectsPage({
                         ) : null}
                       </div>
                       {actualImageItems(project).length ? (
-                        <details className="mt-5 rounded-2xl border border-line bg-card p-4">
-                          <summary className="cursor-pointer text-sm font-semibold text-primary">
+                        <details className="mt-3 overflow-hidden rounded-xl border border-line bg-card">
+                          <summary className="block cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-primary">
                             Manage images
                           </summary>
-                          <div className="mt-4 grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-2 gap-3 border-t border-line p-3">
                             {actualImageItems(project).map((image) => (
                               <div
                                 key={`${image.url}-${image.index}`}
@@ -750,11 +750,11 @@ export default async function ManageProjectsPage({
                           </div>
                         </details>
                       ) : null}
-                      <details className="mt-5 rounded-2xl border border-line bg-card p-4">
-                        <summary className="cursor-pointer text-sm font-semibold text-primary">
+                      <details className="mt-3 overflow-hidden rounded-xl border border-line bg-card">
+                        <summary className="block cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-primary">
                           Edit project
                         </summary>
-                        <form action={updateProject} className="mt-5 grid gap-4">
+                        <form action={updateProject} className="grid gap-4 border-t border-line p-4">
                           <input type="hidden" name="project_id" value={project.id} />
 
                           <Field label="Title">
@@ -827,23 +827,25 @@ export default async function ManageProjectsPage({
                           </button>
                         </form>
                       </details>
-                      <details className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4">
-                        <summary className="cursor-pointer text-sm font-semibold text-red-700">
+                      <details className="mt-3 overflow-hidden rounded-xl border border-red-200 bg-red-50">
+                        <summary className="block cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-red-700">
                           Delete project
                         </summary>
-                        <p className="mt-3 text-sm leading-6 text-red-700">
-                          This removes the project from your public portfolio and deletes its
-                          uploaded images from storage.
-                        </p>
-                        <form action={deleteProject} className="mt-4">
-                          <input type="hidden" name="project_id" value={project.id} />
-                          <button
-                            type="submit"
-                            className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white hover:bg-red-700"
-                          >
-                            Delete this project
-                          </button>
-                        </form>
+                        <div className="border-t border-red-200 p-4">
+                          <p className="text-sm leading-6 text-red-700">
+                            This removes the project from your public portfolio and deletes its
+                            uploaded images from storage.
+                          </p>
+                          <form action={deleteProject} className="mt-4">
+                            <input type="hidden" name="project_id" value={project.id} />
+                            <button
+                              type="submit"
+                              className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white hover:bg-red-700"
+                            >
+                              Delete this project
+                            </button>
+                          </form>
+                        </div>
                       </details>
                     </div>
                   </article>
