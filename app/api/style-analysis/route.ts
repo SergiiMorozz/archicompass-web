@@ -141,7 +141,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const formData = await request.formData();
+  let formData: FormData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return NextResponse.json(
+      { error: "Send reference photos as a multipart form before running AI analysis." },
+      { status: 400 }
+    );
+  }
   const photos = fileValues(formData, "reference_photos");
 
   if (!photos.length) {
