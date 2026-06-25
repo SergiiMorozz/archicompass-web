@@ -78,6 +78,27 @@ function galleryFor(project: Project, index: number) {
   return [fallbackImages[index % fallbackImages.length]];
 }
 
+function actualImageItems(project: Project) {
+  const urls =
+    project.image_urls?.length && project.image_urls.some(Boolean)
+      ? project.image_urls.filter(Boolean)
+      : project.image_url
+        ? [project.image_url]
+        : [];
+  const paths =
+    project.image_paths?.length && project.image_paths.some(Boolean)
+      ? project.image_paths.filter(Boolean)
+      : project.image_path
+        ? [project.image_path]
+        : [];
+
+  return urls.slice(0, maxProjectImages).map((url, index) => ({
+    index,
+    path: paths[index] ?? null,
+    url,
+  }));
+}
+
 function publicImageUrl(supabase: SupabaseServerClient, imagePath: string | null) {
   if (!imagePath) return null;
   const { data } = supabase.storage.from(projectImagesBucket).getPublicUrl(imagePath);
@@ -361,10 +382,153 @@ async function updateProject(formData: FormData) {
   redirect("/account/projects?updated=1");
 }
 
+async function deleteProjectImage(formData: FormData) {
+  "use server";
+
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+
+  if (!user) redirect("/login");
+
+  const projectId = textValue(formData, "project_id");
+  const imageIndexValue = textValue(formData, "image_index");
+  const imageIndex = imageIndexValue ? Number.parseInt(imageIndexValue, 10) : Number.NaN;
+
+  if (!projectId) redirect("/account/projects?error=Project%20id%20is%20required");
+  if (!Number.isInteger(imageIndex) || imageIndex < 0) {
+    redirect("/account/projects?error=Image%20selection%20is%20invalid");
+  }
+
+  const { data: currentProject, error: currentError } = await supabase
+    .from("projects")
+    .select("id, image_url, image_path, image_urls, image_paths")
+    .eq("id", projectId)
+    .eq("profile_id", user.id)
+    .single();
+
+  if (currentError || !currentProject) {
+    redirect(
+      `/account/projects?error=${encodeURIComponent(
+        currentError?.message ?? "Project not found."
+      )}`
+    );
+  }
+
+  const current = currentProject as Pick<
+    Project,
+    "id" | "image_url" | "image_path" | "image_urls" | "image_paths"
+  >;
+  const currentUrls = current.image_urls?.length
+    ? current.image_urls.filter(Boolean)
+    : current.image_url
+      ? [current.image_url]
+      : [];
+  const currentPaths = current.image_paths?.length
+    ? current.image_paths.filter(Boolean)
+    : current.image_path
+      ? [current.image_path]
+      : [];
+
+  if (imageIndex >= currentUrls.length) {
+    redirect("/account/projects?error=Image%20selection%20is%20invalid");
+  }
+
+  const pathToRemove = currentPaths[imageIndex] ?? null;
+  const nextUrls = currentUrls.filter((_, index) => index !== imageIndex);
+  const nextPaths = currentPaths.filter((_, index) => index !== imageIndex);
+
+  const { error } = await supabase
+    .from("projects")
+    .update({
+      image_url: nextUrls[0] ?? null,
+      image_path: nextPaths[0] ?? null,
+      image_urls: nextUrls,
+      image_paths: nextPaths,
+    })
+    .eq("id", projectId)
+    .eq("profile_id", user.id);
+
+  if (error) {
+    redirect(`/account/projects?error=${encodeURIComponent(error.message)}`);
+  }
+
+  if (pathToRemove) {
+    await supabase.storage.from(projectImagesBucket).remove([pathToRemove]);
+  }
+
+  revalidatePath("/account");
+  revalidatePath("/account/projects");
+  revalidatePath(`/designers/${user.id}`);
+  revalidatePath(`/projects/${projectId}`);
+  redirect("/account/projects?imageDeleted=1");
+}
+
+async function deleteProject(formData: FormData) {
+  "use server";
+
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+
+  if (!user) redirect("/login");
+
+  const projectId = textValue(formData, "project_id");
+  if (!projectId) redirect("/account/projects?error=Project%20id%20is%20required");
+
+  const { data: currentProject, error: currentError } = await supabase
+    .from("projects")
+    .select("id, image_path, image_paths")
+    .eq("id", projectId)
+    .eq("profile_id", user.id)
+    .single();
+
+  if (currentError || !currentProject) {
+    redirect(
+      `/account/projects?error=${encodeURIComponent(
+        currentError?.message ?? "Project not found."
+      )}`
+    );
+  }
+
+  const current = currentProject as Pick<Project, "id" | "image_path" | "image_paths">;
+  const pathsToRemove = current.image_paths?.length
+    ? current.image_paths.filter(Boolean)
+    : current.image_path
+      ? [current.image_path]
+      : [];
+
+  const { error } = await supabase
+    .from("projects")
+    .delete()
+    .eq("id", projectId)
+    .eq("profile_id", user.id);
+
+  if (error) {
+    redirect(`/account/projects?error=${encodeURIComponent(error.message)}`);
+  }
+
+  if (pathsToRemove.length) {
+    await supabase.storage.from(projectImagesBucket).remove(pathsToRemove);
+  }
+
+  revalidatePath("/account");
+  revalidatePath("/account/projects");
+  revalidatePath(`/designers/${user.id}`);
+  revalidatePath(`/projects/${projectId}`);
+  redirect("/account/projects?deleted=1");
+}
+
 export default async function ManageProjectsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string; created?: string; updated?: string }>;
+  searchParams?: Promise<{
+    error?: string;
+    created?: string;
+    deleted?: string;
+    imageDeleted?: string;
+    updated?: string;
+  }>;
 }) {
   const sp = (await searchParams) ?? {};
   const supabase = await createSupabaseServerClient();
@@ -462,6 +626,14 @@ export default async function ManageProjectsPage({
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
               Project updated. Public profile gallery has been refreshed.
             </div>
+          ) : sp.imageDeleted ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+              Image removed from the project gallery.
+            </div>
+          ) : sp.deleted ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+              Project deleted from your public portfolio.
+            </div>
           ) : null}
 
           <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
@@ -540,6 +712,44 @@ export default async function ManageProjectsPage({
                           </a>
                         ) : null}
                       </div>
+                      {actualImageItems(project).length ? (
+                        <details className="mt-5 rounded-2xl border border-line bg-card p-4">
+                          <summary className="cursor-pointer text-sm font-semibold text-primary">
+                            Manage images
+                          </summary>
+                          <div className="mt-4 grid grid-cols-2 gap-3">
+                            {actualImageItems(project).map((image) => (
+                              <div
+                                key={`${image.url}-${image.index}`}
+                                className="overflow-hidden rounded-xl border border-line bg-background"
+                              >
+                                <div
+                                  aria-label={`${project.title || "Project"} image ${
+                                    image.index + 1
+                                  }`}
+                                  className="h-28 w-full bg-cover bg-center"
+                                  role="img"
+                                  style={{ backgroundImage: `url(${image.url})` }}
+                                />
+                                <form action={deleteProjectImage} className="p-2">
+                                  <input type="hidden" name="project_id" value={project.id} />
+                                  <input
+                                    type="hidden"
+                                    name="image_index"
+                                    value={image.index}
+                                  />
+                                  <button
+                                    type="submit"
+                                    className="w-full rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100"
+                                  >
+                                    Remove image
+                                  </button>
+                                </form>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      ) : null}
                       <details className="mt-5 rounded-2xl border border-line bg-card p-4">
                         <summary className="cursor-pointer text-sm font-semibold text-primary">
                           Edit project
@@ -614,6 +824,24 @@ export default async function ManageProjectsPage({
                             className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90"
                           >
                             Save project changes
+                          </button>
+                        </form>
+                      </details>
+                      <details className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4">
+                        <summary className="cursor-pointer text-sm font-semibold text-red-700">
+                          Delete project
+                        </summary>
+                        <p className="mt-3 text-sm leading-6 text-red-700">
+                          This removes the project from your public portfolio and deletes its
+                          uploaded images from storage.
+                        </p>
+                        <form action={deleteProject} className="mt-4">
+                          <input type="hidden" name="project_id" value={project.id} />
+                          <button
+                            type="submit"
+                            className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white hover:bg-red-700"
+                          >
+                            Delete this project
                           </button>
                         </form>
                       </details>

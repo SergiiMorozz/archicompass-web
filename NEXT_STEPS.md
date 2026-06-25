@@ -1,6 +1,6 @@
 # ArchiCompass Next Steps
 
-Last checkpoint: 2026-06-24
+Last checkpoint: 2026-06-25
 
 ## Current State
 
@@ -14,6 +14,8 @@ Last checkpoint: 2026-06-24
 - Project galleries support up to 12 uploaded images per project.
 - Portfolio images open in an embedded lightbox on account and public profile pages.
 - Existing projects can be edited from `/account/projects`.
+- Existing projects and individual project images can be deleted from
+  `/account/projects`.
 - Projects now have an optional external project page link, separate from uploaded images.
 - Public project detail pages live at `/projects/[id]` and can be opened from
   portfolio cards.
@@ -32,7 +34,8 @@ Last checkpoint: 2026-06-24
   requests are saved and marked `not_configured`.
 - Saved briefs and saved-brief requests can render private reference photos via
   signed Supabase Storage URLs.
-- Latest local preview runs on `http://localhost:3001`.
+- Latest local preview for the fresh build is running on `http://localhost:3002`
+  because an older local server is still occupying `http://localhost:3001`.
 
 ## Verified
 
@@ -40,15 +43,17 @@ Last checkpoint: 2026-06-24
 - `./node_modules/.bin/tsc --noEmit`
 - `NEXT_TELEMETRY_DISABLED=1 npm run build`
 - Browser checks for catalog, profile, and account tools.
+- Browser check on `http://localhost:3002/account/projects` confirmed the fresh
+  delete controls render for the user's 2 projects and 13 current images.
 
 ## Best Next Small Step
 
-Upload a real Project Compass reference photo, save the brief, send it to a
-designer, and verify the photo appears in `/account/briefs` and `/account/inquiries`.
+Manually test deletion on one disposable project image or test project from
+`/account/projects`, then test one real Project Compass reference photo through
+save-and-send.
 
 ## After That
 
-- Add delete controls for projects and individual project images.
 - Add richer seed data for designer profiles and portfolio projects.
 - Add lead/contact request storage instead of `mailto:` links.
 - Polish mobile details on long forms after real content is added.
