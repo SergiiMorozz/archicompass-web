@@ -1,10 +1,15 @@
 # ArchiCompass Next Steps
 
-Last checkpoint: 2026-06-25
+Last checkpoint: 2026-06-29
 
 ## Current State
 
 - Supabase restore is working with the new project.
+- Production is deployed through Vercel at
+  `https://archicompass-web-cqyf.vercel.app` from GitHub `main`.
+- Vercel production has the Supabase and Gemini environment variables.
+- Supabase Auth uses the Vercel URL as its Site URL and allows callbacks from
+  the production site plus local ports 3001 and 3002.
 - Public shell has the Lovable-inspired visual direction.
 - `/designers` is redesigned as the marketplace catalog.
 - `/designers/[id]` is redesigned as the public designer profile.
@@ -61,11 +66,16 @@ Last checkpoint: 2026-06-25
   missing, instead of pretending to analyze photos.
 - Gemini provider was tested locally with `GEMINI_STYLE_MODEL=gemini-3.1-flash-lite`
   and returned a structured style analysis for a temporary test image.
+- Production homepage, `/designers`, `/project-compass`, and `/login` return
+  HTTP 200; the public designers page also loads live Supabase profile data.
+- Production `/api/style-analysis` is live and correctly rejects an empty
+  request with HTTP 400.
 
 ## Best Next Small Step
 
-Upload real reference photos in Project Compass, run `Analyze photos` with the
-Gemini provider, then save/send/cancel/delete the test artifacts.
+Open the production site, sign in with a magic link, then upload real reference
+photos in Project Compass and run `Analyze photos`. Save/send/cancel/delete the
+test artifacts after checking the Gemini answer.
 
 ## After That
 
