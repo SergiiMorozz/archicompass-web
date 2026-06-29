@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ProjectGallery from "@/components/ProjectGallery";
+import ProfileViewTracker from "@/components/ProfileViewTracker";
 import {
   applyDemoProfilePresentation,
   getDemoProfilePresentation,
@@ -297,6 +298,7 @@ export default async function DesignerProfilePage({
 
   return (
     <main className="bg-background pb-28 lg:pb-0">
+      <ProfileViewTracker disabled={isOwner} profileId={profile.id} />
       <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
         <Link
           href="/designers"

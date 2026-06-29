@@ -35,6 +35,14 @@ const sections = [
     body: [
       "Designer profile details and portfolio projects are intended to be public. Saved project briefs and their reference photos are private account content unless you choose to send a brief to a designer.",
       "A designer who receives a brief can see the brief information, your message, and available signed reference-photo links. Do not send a brief to someone who should not receive that information.",
+      "Messages inside a request are visible only to the client and designer participating in that request. They are stored with the inquiry so both participants can keep the project context together.",
+    ],
+  },
+  {
+    title: "Designer profile analytics",
+    body: [
+      "ArchiCompass records a privacy-light profile view when a visitor opens a designer page. The analytics record contains the designer profile ID, page path, date, and a random browser-tab identifier used to avoid counting repeated refreshes on the same day. The analytics table does not store the visitor's name or email.",
+      "Only the owner of the designer profile can read their view records through Designer Studio. A profile owner viewing their own page is not counted.",
     ],
   },
   {

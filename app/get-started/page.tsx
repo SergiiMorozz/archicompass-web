@@ -20,7 +20,8 @@ export default function Page() {
           <Link href="/login" className="rounded-2xl border border-primary bg-primary-soft p-6">
             <div className="text-lg font-semibold text-primary">Professional</div>
             <p className="mt-2 text-sm leading-6 text-muted">
-              Claim your profile and prepare a portfolio page for future leads.
+              Manage your profile, portfolio, client briefs, conversations, and
+              performance from Designer Studio.
             </p>
           </Link>
         </div>

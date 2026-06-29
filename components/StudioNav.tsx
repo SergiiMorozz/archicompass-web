@@ -1,0 +1,70 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+const studioLinks = [
+  { href: "/studio", label: "Overview" },
+  { href: "/studio/inbox", label: "Inbox" },
+  { href: "/studio/analytics", label: "Analytics" },
+  { href: "/account/profile", label: "Edit profile" },
+  { href: "/account/projects", label: "Projects" },
+];
+
+export default function StudioNav({
+  profileId,
+  profileName,
+  unreadCount,
+}: {
+  profileId: string;
+  profileName: string;
+  unreadCount: number;
+}) {
+  const pathname = usePathname();
+
+  return (
+    <section className="border-b border-line bg-card">
+      <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="text-xs font-semibold uppercase text-primary">Designer Studio</div>
+            <div className="mt-1 text-xl font-bold">{profileName}</div>
+          </div>
+          <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Designer Studio">
+            {studioLinks.map((item) => {
+              const active =
+                pathname === item.href ||
+                (item.href !== "/studio" && pathname.startsWith(item.href));
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={[
+                    "shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold transition",
+                    active
+                      ? "bg-primary text-white"
+                      : "border border-line bg-background text-muted hover:border-primary hover:text-primary",
+                  ].join(" ")}
+                >
+                  {item.label}
+                  {item.href === "/studio/inbox" && unreadCount ? (
+                    <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-xs">
+                      {unreadCount}
+                    </span>
+                  ) : null}
+                </Link>
+              );
+            })}
+            <Link
+              href={`/designers/${profileId}`}
+              className="shrink-0 rounded-xl border border-line bg-background px-4 py-2.5 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
+            >
+              Public page
+            </Link>
+          </nav>
+        </div>
+      </div>
+    </section>
+  );
+}

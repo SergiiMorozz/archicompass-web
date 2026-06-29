@@ -23,6 +23,23 @@ Last checkpoint: 2026-06-29
 - Privacy and Terms now contain closed-beta working notices covering reference
   photos, private brief storage, AI processing, sharing, deletion, and user rights.
 - `/health` returns only `{ "ok": true }` or an HTTP 503 without sample data.
+- Professional accounts now receive a session-aware `Designer Studio` tab in
+  the global header; it remains visible across navigation until sign-out or
+  session expiry.
+- `/studio` provides profile/request/message KPIs, recent incoming briefs,
+  profile readiness, and shortcuts to public profile and portfolio tools.
+- `/studio/inbox` provides status filters and incoming brief cards, while
+  `/studio/inbox/[id]` combines brief context, private photos, lead status, and
+  participant-only messaging.
+- Clients can continue the same message thread from
+  `/account/inquiries/[id]`.
+- `/studio/analytics` reports privacy-light profile views, incoming requests,
+  accepted-fit rate, measured first-response time, portfolio count, and a
+  14-day view chart.
+- Public profile views are deduplicated per random browser-tab session per day;
+  self-views are skipped and the analytics table stores no visitor email/name.
+- `supabase/designer-studio.sql` has been applied to the restored Supabase
+  project with least-privilege grants and participant/owner RLS policies.
 - Public shell has the Lovable-inspired visual direction.
 - `/designers` is redesigned as the marketplace catalog.
 - `/designers/[id]` is redesigned as the public designer profile.
@@ -87,15 +104,22 @@ Last checkpoint: 2026-06-29
   complete production build; local browser checks covered the homepage,
   filtered designer results, demo profile, Project Compass disclosure, Privacy,
   and the minimal health response.
+- Designer Studio passes lint, TypeScript, `git diff --check`, and a production
+  build. Browser checks confirmed the persistent header tab, authenticated
+  Studio dashboard, Inbox, Analytics, and the existing client's conversation.
+- Analytics insertion was verified end to end and its test record deleted.
+- Chat RLS was verified in a rolled-back transaction: the request participant
+  saw the test message and an unrelated authenticated user saw zero rows.
 
 ## Best Next Small Step
 
-Open the production site, sign in with a magic link, then upload real reference
-photos in Project Compass and run `Analyze photos`. Save/send/cancel/delete the
-test artifacts after checking the Gemini answer.
+Use two test accounts to send one Project Compass brief to the designer profile,
+reply from Designer Studio, answer from the client request history, and confirm
+unread counters plus first-response analytics.
 
 ## After That
 
 - Add richer seed data for designer profiles and portfolio projects.
-- Add lead/contact request storage instead of `mailto:` links.
+- Add realtime message subscriptions and email notifications for new chat
+  messages after the two-account conversation flow is approved.
 - Polish mobile details on long forms after real content is added.

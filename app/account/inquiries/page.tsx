@@ -206,6 +206,16 @@ function InquiryCard({
       <ReferencePhotoGrid photos={photos} title="Request reference photos" />
 
       <div className="mt-5 flex flex-wrap gap-3">
+        <Link
+          href={
+            mode === "incoming"
+              ? `/studio/inbox/${inquiry.id}`
+              : `/account/inquiries/${inquiry.id}`
+          }
+          className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
+        >
+          Open conversation
+        </Link>
         {mode === "sent" ? (
           <Link
             href={`/designers/${inquiry.designer_id}`}
@@ -216,7 +226,7 @@ function InquiryCard({
         ) : profile?.email ? (
           <a
             href={`mailto:${profile.email}?subject=${encodeURIComponent(`Re: ${inquiry.subject}`)}`}
-            className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
+            className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
           >
             Reply by email
           </a>

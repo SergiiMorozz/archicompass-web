@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import SignOutButton from "@/components/SignOutButton";
+import { isProfessionalProfile } from "@/lib/professional";
 
 export const revalidate = 0;
 
@@ -82,6 +83,7 @@ export default async function AccountPage() {
   const sentInquiries = (sentInquiriesData ?? []) as DesignerInquiry[];
   const incomingInquiries = (incomingInquiriesData ?? []) as DesignerInquiry[];
   const score = profileScore(profile);
+  const isProfessional = isProfessionalProfile(profile);
 
   return (
     <main className="bg-background">
@@ -115,6 +117,14 @@ export default async function AccountPage() {
             </div>
 
             <div className="flex flex-wrap gap-3 lg:justify-end">
+              {isProfessional ? (
+                <Link
+                  href="/studio"
+                  className="rounded-xl bg-foreground px-4 py-3 text-sm font-semibold text-white"
+                >
+                  Designer Studio
+                </Link>
+              ) : null}
               <Link
                 href={`/designers/${myProfileId}`}
                 className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"

@@ -48,6 +48,19 @@ When the selected provider key is missing, Project Compass still works as a manu
 brief builder, but photo style analysis shows a configuration message instead of an
 AI result.
 
+## Supabase Schema
+
+Run the SQL files in order for a fresh project. Designer Studio conversations and
+profile analytics are defined in:
+
+```text
+supabase/designer-studio.sql
+```
+
+The Studio schema requires `designer_inquiries`, enables RLS, keeps inquiry messages
+visible only to request participants, and exposes profile-view analytics only to the
+profile owner.
+
 ## Checks
 
 ```bash

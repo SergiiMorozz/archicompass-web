@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { isProfessionalProfile } from "@/lib/professional";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -53,6 +55,45 @@ export default function Header() {
   const pathname = usePathname();
   const isGetStartedActive = pathname === "/get-started";
   const [isOpen, setIsOpen] = useState(false);
+  const [account, setAccount] = useState<
+    { id: string; isProfessional: boolean } | null
+  >(null);
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    let active = true;
+
+    async function syncAccount(userId: string | null) {
+      if (!userId) {
+        if (active) setAccount(null);
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("user_type, profession_type")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (active) {
+        setAccount({ id: userId, isProfessional: isProfessionalProfile(profile) });
+      }
+    }
+
+    void supabase.auth.getUser().then(({ data }) => syncAccount(data.user?.id ?? null));
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      void syncAccount(session?.user.id ?? null);
+    });
+
+    return () => {
+      active = false;
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const visibleNavItems = account?.isProfessional
+    ? [...navItems, { href: "/studio", label: "Designer Studio" }]
+    : navItems;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-line/80 bg-background/90 backdrop-blur-md">
@@ -60,7 +101,7 @@ export default function Header() {
         <Brand />
 
         <nav className="hidden items-center gap-1 lg:flex">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <NavLink key={item.href} href={item.href}>
               {item.label}
             </NavLink>
@@ -71,22 +112,33 @@ export default function Header() {
           <button className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium text-foreground">
             EN
           </button>
-          <Link
-            href="/login"
-            className="rounded-xl px-4 py-2 text-sm font-medium text-foreground transition hover:bg-primary-soft hover:text-primary"
-          >
-            Sign In
-          </Link>
+          {account ? (
+            <Link
+              href="/account"
+              className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
+            >
+              Account
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="rounded-xl px-4 py-2 text-sm font-medium text-foreground transition hover:bg-primary-soft hover:text-primary"
+              >
+                Sign In
+              </Link>
 
-          <Link
-            href="/get-started"
-            className={[
-              "rounded-xl px-4 py-2 text-sm font-medium text-white transition",
-              isGetStartedActive ? "bg-foreground" : "bg-primary hover:opacity-90",
-            ].join(" ")}
-          >
-            Get Started
-          </Link>
+              <Link
+                href="/get-started"
+                className={[
+                  "rounded-xl px-4 py-2 text-sm font-medium text-white transition",
+                  isGetStartedActive ? "bg-foreground" : "bg-primary hover:opacity-90",
+                ].join(" ")}
+              >
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
@@ -112,26 +164,38 @@ export default function Header() {
       {isOpen ? (
         <div className="border-t border-line bg-background px-4 py-4 lg:hidden">
           <nav className="mx-auto grid max-w-7xl gap-2">
-            {navItems.map((item) => (
+            {visibleNavItems.map((item) => (
               <NavLink key={item.href} href={item.href} onClick={() => setIsOpen(false)}>
                 {item.label}
               </NavLink>
             ))}
             <div className="mt-2 grid grid-cols-2 gap-2">
-              <Link
-                href="/login"
-                onClick={() => setIsOpen(false)}
-                className="rounded-xl border border-line bg-card px-4 py-3 text-center text-sm font-medium"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/get-started"
-                onClick={() => setIsOpen(false)}
-                className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white"
-              >
-                Get Started
-              </Link>
+              {account ? (
+                <Link
+                  href="/account"
+                  onClick={() => setIsOpen(false)}
+                  className="col-span-2 rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white"
+                >
+                  Account
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setIsOpen(false)}
+                    className="rounded-xl border border-line bg-card px-4 py-3 text-center text-sm font-medium"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/get-started"
+                    onClick={() => setIsOpen(false)}
+                    className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>

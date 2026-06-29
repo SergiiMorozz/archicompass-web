@@ -11,8 +11,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "ArchiCompass | Find Your Interior Designer & Architect",
-  description: "Find your perfect interior designer & architect",
+  title: "ArchiCompass | AI Project Brief & Designer Matching",
+  description: "Turn interior references into a clear brief and find designers who fit the project.",
 };
 
 export default function RootLayout({
