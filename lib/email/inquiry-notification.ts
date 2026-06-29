@@ -5,6 +5,7 @@ type BriefForEmail = {
   style_direction: string | null;
   support_scope: string | null;
   budget_signal: string | null;
+  timeline: string | null;
   location: string | null;
   visual_cues: string[] | null;
   reference_photo_names: string[] | null;
@@ -71,6 +72,7 @@ function emailText({
     briefLine("Style", brief.style_direction),
     briefLine("Support", brief.support_scope),
     briefLine("Budget", brief.budget_signal),
+    briefLine("Timeline", brief.timeline),
     briefLine("Location", brief.location),
     brief.visual_cues?.length ? `Visual cues: ${brief.visual_cues.join(", ")}` : null,
     `Reference photos: ${brief.reference_photo_names?.length ?? 0}`,
@@ -78,7 +80,7 @@ function emailText({
     "Brief:",
     brief.brief_text,
     "",
-    `Open requests: ${appUrl()}/account/inquiries`,
+    `Open requests: ${appUrl()}/studio/inbox`,
   ]
     .filter((line): line is string => line !== null)
     .join("\n");
@@ -101,6 +103,7 @@ function emailHtml({
     ["Style", brief.style_direction],
     ["Support", brief.support_scope],
     ["Budget", brief.budget_signal],
+    ["Timeline", brief.timeline],
     ["Location", brief.location],
     ["Visual cues", brief.visual_cues?.join(", ")],
     ["Reference photos", String(brief.reference_photo_names?.length ?? 0)],
@@ -153,7 +156,7 @@ function emailHtml({
           : ""
       }
 
-      <a href="${appUrl()}/account/inquiries" style="display:inline-block;padding:12px 18px;border-radius:12px;background:#8b5e34;color:#fff;text-decoration:none;font-weight:700;">
+      <a href="${appUrl()}/studio/inbox" style="display:inline-block;padding:12px 18px;border-radius:12px;background:#8b5e34;color:#fff;text-decoration:none;font-weight:700;">
         Open request
       </a>
     </div>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { countLabel } from "@/lib/count-label";
 
 export const revalidate = 0;
 
@@ -224,7 +225,7 @@ export default async function StudioOverviewPage() {
                 Edit profile
               </Link>
               <Link href="/account/projects" className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">
-                Manage {projects.length} project{projects.length === 1 ? "" : "s"}
+                Manage {countLabel(projects.length, "project")}
               </Link>
               <Link href="/studio/analytics" className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">
                 Open analytics

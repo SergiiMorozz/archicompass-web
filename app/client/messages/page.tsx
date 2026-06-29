@@ -1,0 +1,152 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+export const revalidate = 0;
+
+type Inquiry = {
+  id: string;
+  designer_id: string;
+  subject: string;
+  message: string | null;
+  status: string;
+  created_at: string;
+};
+
+type Message = {
+  inquiry_id: string;
+  sender_id: string;
+  body: string;
+  read_at: string | null;
+  created_at: string;
+};
+
+type Profile = {
+  id: string;
+  full_name: string | null;
+  profession_type: string | null;
+  location: string | null;
+};
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("en", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
+function statusClass(status: string) {
+  if (status === "accepted") return "bg-emerald-50 text-emerald-800";
+  if (status === "declined") return "bg-red-50 text-red-700";
+  if (status === "reviewing") return "bg-[#fff3df] text-[#8a5a00]";
+  return "bg-primary-soft text-primary";
+}
+
+export default async function ClientMessagesPage() {
+  const supabase = await createSupabaseServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData.user;
+  if (!user) redirect("/login");
+
+  const { data: inquiryData, error } = await supabase
+    .from("designer_inquiries")
+    .select("id, designer_id, subject, message, status, created_at")
+    .eq("client_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  const inquiries = (inquiryData ?? []) as Inquiry[];
+  const inquiryIds = inquiries.map((inquiry) => inquiry.id);
+  const designerIds = Array.from(new Set(inquiries.map((inquiry) => inquiry.designer_id)));
+
+  const [{ data: messageData }, { data: profileData }] = await Promise.all([
+    inquiryIds.length
+      ? supabase
+          .from("inquiry_messages")
+          .select("inquiry_id, sender_id, body, read_at, created_at")
+          .in("inquiry_id", inquiryIds)
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
+    designerIds.length
+      ? supabase
+          .from("profiles")
+          .select("id, full_name, profession_type, location")
+          .in("id", designerIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+
+  const messages = (messageData ?? []) as Message[];
+  const profiles = (profileData ?? []) as Profile[];
+  const profilesById = new Map(profiles.map((profile) => [profile.id, profile]));
+  const latestByInquiry = new Map<string, Message>();
+  const unreadByInquiry = new Map<string, number>();
+  messages.forEach((message) => {
+    if (!latestByInquiry.has(message.inquiry_id)) latestByInquiry.set(message.inquiry_id, message);
+    if (message.sender_id !== user.id && !message.read_at) {
+      unreadByInquiry.set(message.inquiry_id, (unreadByInquiry.get(message.inquiry_id) ?? 0) + 1);
+    }
+  });
+
+  return (
+    <main>
+      <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="text-sm font-semibold text-primary">Client communication</div>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Messages</h1>
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
+            Continue every designer conversation beside the exact brief and references you sent.
+          </p>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        {error ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">Messages could not be loaded: {error.message}</div>
+        ) : inquiries.length ? (
+          <div className="grid gap-4">
+            {inquiries.map((inquiry) => {
+              const profile = profilesById.get(inquiry.designer_id);
+              const latest = latestByInquiry.get(inquiry.id);
+              const unread = unreadByInquiry.get(inquiry.id) ?? 0;
+              return (
+                <article key={inquiry.id} className="rounded-lg border border-line bg-card p-5 shadow-sm">
+                  <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusClass(inquiry.status)}`}>
+                          {inquiry.status === "sent" ? "New" : inquiry.status}
+                        </span>
+                        {unread ? <span className="rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-white">{unread} unread</span> : null}
+                      </div>
+                      <h2 className="mt-3 text-2xl font-bold">{inquiry.subject}</h2>
+                      <div className="mt-2 text-sm text-muted">
+                        {profile?.full_name || "Design professional"}
+                        {profile?.profession_type ? ` · ${profile.profession_type}` : ""}
+                        {profile?.location ? ` · ${profile.location}` : ""}
+                      </div>
+                      <div className="mt-4 rounded-lg bg-background p-4 text-sm leading-6 text-muted">
+                        <div className="font-semibold text-foreground">{latest ? "Latest message" : "Your introduction"}</div>
+                        <p className="mt-1 line-clamp-2">{latest?.body || inquiry.message || "Open the conversation to review the full brief."}</p>
+                        <div className="mt-2 text-xs">{formatDate(latest?.created_at || inquiry.created_at)}</div>
+                      </div>
+                    </div>
+                    <Link href={`/account/inquiries/${inquiry.id}`} className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white">
+                      Open conversation
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="rounded-lg border border-dashed border-line bg-card p-8">
+            <h2 className="text-2xl font-bold">No messages yet</h2>
+            <p className="mt-2 max-w-xl leading-7 text-muted">Send a saved brief to a designer and the conversation will appear here.</p>
+            <Link href="/designers" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">Browse designers</Link>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}

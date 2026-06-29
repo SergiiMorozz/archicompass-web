@@ -27,7 +27,11 @@ export default function LoginPage() {
     setStatus({ type: "loading" });
 
     const origin = window.location.origin;
-    const redirectTo = `${origin}/auth/callback`;
+    const requestedNext = new URLSearchParams(window.location.search).get("next") || "/account";
+    const safeNext = requestedNext.startsWith("/") && !requestedNext.startsWith("//")
+      ? requestedNext
+      : "/account";
+    const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
 
     const { error } = await supabase.auth.signInWithOtp({
       email: clean,
@@ -62,8 +66,8 @@ export default function LoginPage() {
             </h1>
 
             <p className="mt-4 max-w-xl text-zinc-600">
-              One-click login. No password. We’ll email you a secure link to access
-              your account and manage your profile.
+              One-click login. No password. We’ll email you a secure link to save
+              briefs, contact professionals, or manage your designer profile.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3 text-sm">

@@ -76,6 +76,8 @@ async function sendParticipantMessage(formData: FormData) {
   }
 
   revalidatePath("/account/inquiries");
+  revalidatePath("/client");
+  revalidatePath("/client/messages");
   revalidatePath(`/account/inquiries/${inquiryId}`);
   revalidatePath("/studio");
   revalidatePath("/studio/inbox");
@@ -150,8 +152,8 @@ export default async function AccountConversationPage({
     <main>
       <section className="border-b border-line bg-card px-4 py-8 sm:px-6">
         <div className="mx-auto max-w-6xl">
-          <Link href="/account/inquiries" className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary">
-            Back to requests
+          <Link href="/client/messages" className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary">
+            Back to messages
           </Link>
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>

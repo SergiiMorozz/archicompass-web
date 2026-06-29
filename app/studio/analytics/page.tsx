@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { countLabel } from "@/lib/count-label";
 
 export const revalidate = 0;
 
@@ -181,7 +182,7 @@ export default async function StudioAnalyticsPage() {
               <div className="text-sm font-semibold text-primary">Portfolio supply</div>
               <div className="mt-2 text-4xl font-bold">{projects.length}</div>
               <p className="mt-2 text-sm leading-6 text-muted">
-                Public project{projects.length === 1 ? "" : "s"} available for clients to review before sending a brief.
+                {countLabel(projects.length, "Public project", "Public projects")} available for clients to review before sending a brief.
               </p>
               <div className="mt-5 grid gap-3">
                 <Link href="/account/projects" className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white">

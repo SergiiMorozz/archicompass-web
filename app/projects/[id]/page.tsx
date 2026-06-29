@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import FavoriteButton from "@/components/FavoriteButton";
 import ProjectGallery from "@/components/ProjectGallery";
 import {
   applyDemoProfilePresentation,
@@ -96,17 +97,6 @@ function profileType(profile: Profile | null) {
   return profile?.profession_type || profile?.user_type || "Professional";
 }
 
-function contactHref(profile: Profile | null) {
-  if (profile?.email) {
-    return `mailto:${profile.email}?subject=${encodeURIComponent(
-      "Project request via ArchiCompass"
-    )}`;
-  }
-
-  if (profile?.phone) return `tel:${profile.phone}`;
-  return "#designer";
-}
-
 function websiteHref(value: string | null | undefined) {
   if (!value) return null;
   return value.startsWith("http://") || value.startsWith("https://")
@@ -191,6 +181,15 @@ export default async function ProjectDetailPage({
     project = { ...project, ...demoProject, project_url: null };
   }
   const isOwner = userData.user?.id === project.profile_id;
+  const { data: favoriteData } = userData.user
+    ? await supabase
+        .from("favorites")
+        .select("id")
+        .eq("user_id", userData.user.id)
+        .eq("entity_type", "project")
+        .eq("entity_key", project.id)
+        .maybeSingle()
+    : { data: null };
   const title = project.title || "Untitled project";
   const designerName = profileTitle(profile);
   const designerWebsite = websiteHref(profile?.website);
@@ -337,12 +336,19 @@ export default async function ProjectDetailPage({
                 Edit in account
               </Link>
             ) : (
-              <a
-                href={contactHref(profile)}
-                className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
-              >
-                Contact designer
-              </a>
+              <>
+                <FavoriteButton
+                  entityType="project"
+                  entityKey={project.id}
+                  initialSaved={Boolean(favoriteData)}
+                />
+                <Link
+                  href={`/account/briefs?designer=${project.profile_id}`}
+                  className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
+                >
+                  Send brief to designer
+                </Link>
+              </>
             )}
             {designerWebsite ? (
               <a

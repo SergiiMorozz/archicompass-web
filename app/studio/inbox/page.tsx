@@ -182,6 +182,7 @@ export default async function StudioInboxPage({
                         <span>{snapshotValue(inquiry.brief_snapshot, "project_type")}</span>
                         <span>{snapshotValue(inquiry.brief_snapshot, "style_direction")}</span>
                         <span>{snapshotValue(inquiry.brief_snapshot, "budget_signal")}</span>
+                        <span>{snapshotValue(inquiry.brief_snapshot, "timeline")}</span>
                         <span>{snapshotValue(inquiry.brief_snapshot, "location")}</span>
                       </div>
 

@@ -26,6 +26,17 @@ Last checkpoint: 2026-06-29
 - Professional accounts now receive a session-aware `Designer Studio` tab in
   the global header; it remains visible across navigation until sign-out or
   session expiry.
+- Every signed-in account now receives a session-aware `Client Workspace` tab;
+  professional accounts keep both Client Workspace and Designer Studio.
+- `/client` provides a dashboard with saved brief, favorite, request, and
+  unread-message totals plus recent designer conversations.
+- `/client/messages` is the client inbox, `/client/briefs` keeps saved Project
+  Compass prompts inside the workspace, and `/client/favorites` stores saved
+  designers and portfolio projects.
+- The generic favorite model already supports future Inspiration HUB articles
+  and curated inspiration without another account-data migration.
+- Public designer cards, profiles, portfolio cards, and project pages now have
+  working Save/Saved controls with login return paths.
 - `/studio` provides profile/request/message KPIs, recent incoming briefs,
   profile readiness, and shortcuts to public profile and portfolio tools.
 - `/studio/inbox` provides status filters and incoming brief cards, while
@@ -40,6 +51,8 @@ Last checkpoint: 2026-06-29
   self-views are skipped and the analytics table stores no visitor email/name.
 - `supabase/designer-studio.sql` has been applied to the restored Supabase
   project with least-privilege grants and participant/owner RLS policies.
+- `supabase/client-workspace.sql` has been applied with owner-only favorite
+  policies and the saved-brief timeline column.
 - Public shell has the Lovable-inspired visual direction.
 - `/designers` is redesigned as the marketplace catalog.
 - `/designers/[id]` is redesigned as the public designer profile.
@@ -58,6 +71,8 @@ Last checkpoint: 2026-06-29
   `/ai-style-finder` route still renders it for compatibility.
 - Project Compass accepts up to 10 local reference photos and visual cues, which
   are included in the copied brief and designer search signal.
+- Project Compass now captures a preferred timeline, stores it in the saved
+  brief, and includes it in the inquiry snapshot and designer notification.
 - Project Compass has optional AI photo style analysis through `/api/style-analysis`.
   It supports `STYLE_ANALYSIS_PROVIDER=openai` or `gemini`, reads up to 6
   reference photos, and suggests a style, materials, colors, visual cues, and
@@ -77,8 +92,6 @@ Last checkpoint: 2026-06-29
   requests are saved and marked `not_configured`.
 - Saved briefs and saved-brief requests can render private reference photos via
   signed Supabase Storage URLs.
-- Latest local preview for the fresh build is running on `http://localhost:3002`
-  because an older local server is still occupying `http://localhost:3001`.
 
 ## Verified
 
@@ -110,16 +123,22 @@ Last checkpoint: 2026-06-29
 - Analytics insertion was verified end to end and its test record deleted.
 - Chat RLS was verified in a rolled-back transaction: the request participant
   saw the test message and an unrelated authenticated user saw zero rows.
+- Client Workspace passed lint, TypeScript, production build, and desktop/mobile
+  browser checks. Save/remove was exercised for both a designer and a project,
+  then the temporary favorites were removed.
+- Browser checks confirmed the persistent header tab, dashboard, messages,
+  saved briefs, future Inspiration HUB placeholder, Project Compass timeline,
+  and no browser console errors.
 
 ## Best Next Small Step
 
-Use two test accounts to send one Project Compass brief to the designer profile,
-reply from Designer Studio, answer from the client request history, and confirm
-unread counters plus first-response analytics.
+Add four to six stronger demo professional profiles and give Compact Living
+Studio a complete portfolio project with production-quality imagery.
 
 ## After That
 
 - Add richer seed data for designer profiles and portfolio projects.
+- Build the first Inspiration HUB route on top of the existing generic favorites.
 - Add realtime message subscriptions and email notifications for new chat
   messages after the two-account conversation flow is approved.
 - Polish mobile details on long forms after real content is added.

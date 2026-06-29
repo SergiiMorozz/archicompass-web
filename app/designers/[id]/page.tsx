@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import FavoriteButton from "@/components/FavoriteButton";
 import ProjectGallery from "@/components/ProjectGallery";
 import ProfileViewTracker from "@/components/ProfileViewTracker";
+import { countLabel } from "@/lib/count-label";
 import {
   applyDemoProfilePresentation,
   getDemoProfilePresentation,
@@ -274,6 +276,17 @@ export default async function DesignerProfilePage({
       ? { ...publicProject, ...demoCopy, project_url: null }
       : publicProject;
   });
+  const favoriteKeys = [profile.id, ...projects.map((project) => project.id)];
+  const { data: favoriteData } = userData.user && favoriteKeys.length
+    ? await supabase
+        .from("favorites")
+        .select("entity_type, entity_key")
+        .eq("user_id", userData.user.id)
+        .in("entity_key", favoriteKeys)
+    : { data: [] };
+  const savedFavorites = new Set(
+    (favoriteData ?? []).map((item) => `${item.entity_type}:${item.entity_key}`)
+  );
   const title = profileTitle(profile);
   const type = profileType(profile);
   const location = profileLocation(profile);
@@ -294,7 +307,7 @@ export default async function DesignerProfilePage({
     : projects;
   const portfolioCountText = selectedCategory
     ? `${visibleProjects.length} of ${projects.length} projects`
-    : `${projects.length} project${projects.length === 1 ? "" : "s"}`;
+    : countLabel(projects.length, "project");
 
   return (
     <main className="bg-background pb-28 lg:pb-0">
@@ -372,6 +385,11 @@ export default async function DesignerProfilePage({
                 </div>
               ) : (
                 <div className="flex flex-wrap gap-3">
+                  <FavoriteButton
+                    entityType="designer"
+                    entityKey={profile.id}
+                    initialSaved={savedFavorites.has(`designer:${profile.id}`)}
+                  />
                   <a
                     href="#portfolio"
                     className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
@@ -408,7 +426,7 @@ export default async function DesignerProfilePage({
                   Portfolio
                 </div>
                 <div className="mt-1 font-semibold">
-                  {projects.length} project{projects.length === 1 ? "" : "s"}
+                  {countLabel(projects.length, "project")}
                 </div>
               </div>
               <div className="rounded-2xl border border-line bg-background p-4">
@@ -651,6 +669,11 @@ export default async function DesignerProfilePage({
                         >
                           View project
                         </Link>
+                        <FavoriteButton
+                          entityType="project"
+                          entityKey={project.id}
+                          initialSaved={savedFavorites.has(`project:${project.id}`)}
+                        />
                         {project.project_url ? (
                           <a
                             href={project.project_url}
@@ -739,7 +762,7 @@ export default async function DesignerProfilePage({
             <div>
               <div className="text-sm text-muted">Portfolio</div>
               <div className="mt-1 font-semibold">
-                {projects.length} public project{projects.length === 1 ? "" : "s"}
+                {countLabel(projects.length, "public project", "public projects")}
               </div>
             </div>
           </div>

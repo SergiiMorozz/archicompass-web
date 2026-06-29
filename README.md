@@ -50,16 +50,20 @@ AI result.
 
 ## Supabase Schema
 
-Run the SQL files in order for a fresh project. Designer Studio conversations and
-profile analytics are defined in:
+Run the SQL files in order for a fresh project. Designer Studio conversations,
+profile analytics, and Client Workspace favorites are defined in:
 
 ```text
 supabase/designer-studio.sql
+supabase/client-workspace.sql
 ```
 
 The Studio schema requires `designer_inquiries`, enables RLS, keeps inquiry messages
 visible only to request participants, and exposes profile-view analytics only to the
 profile owner.
+
+The Client Workspace schema adds owner-only favorites for designers, projects,
+and future Inspiration HUB content, plus a preferred timeline on saved briefs.
 
 ## Checks
 

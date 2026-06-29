@@ -122,6 +122,7 @@ export async function POST(request: Request) {
     style_direction: textValue(formData, "style_direction"),
     support_scope: textValue(formData, "support_scope"),
     budget_signal: textValue(formData, "budget_signal"),
+    timeline: textValue(formData, "timeline"),
     location: textValue(formData, "location"),
     notes: textValue(formData, "notes"),
     visual_cues: stringArrayValue(formData, "visual_cues"),

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { countLabel } from "@/lib/count-label";
 
 type Option = {
   label: string;
@@ -165,6 +166,29 @@ const budgets: Option[] = [
   },
 ];
 
+const timelines: Option[] = [
+  {
+    label: "As soon as possible",
+    value: "As soon as possible",
+    description: "I am ready to speak with available professionals now.",
+  },
+  {
+    label: "In 1-3 months",
+    value: "In 1-3 months",
+    description: "I am preparing decisions and want to shortlist soon.",
+  },
+  {
+    label: "In 3-6 months",
+    value: "In 3-6 months",
+    description: "I am planning ahead before the project starts.",
+  },
+  {
+    label: "Just exploring",
+    value: "Just exploring",
+    description: "I want clarity before choosing a start date.",
+  },
+];
+
 const visualCues: Option[] = [
   {
     label: "Natural wood",
@@ -251,6 +275,7 @@ function OptionGrid({
               key={option.value}
               type="button"
               aria-pressed={isSelected}
+              aria-label={`${option.label}: ${option.description}`}
               onClick={() => onChange(option.value)}
               className={[
                 "rounded-2xl border p-4 text-left transition",
@@ -277,6 +302,7 @@ export default function ProjectCompass() {
   const [style, setStyle] = useState(styles[0].value);
   const [scope, setScope] = useState(scopes[1].value);
   const [budget, setBudget] = useState(budgets[1].value);
+  const [timeline, setTimeline] = useState(timelines[1].value);
   const [location, setLocation] = useState("Warsaw");
   const [notes, setNotes] = useState("");
   const [referencePhotos, setReferencePhotos] = useState<ReferencePhoto[]>([]);
@@ -349,6 +375,7 @@ export default function ProjectCompass() {
           : null,
         `Support needed: ${scope}`,
         `Budget signal: ${budget}`,
+        `Preferred timeline: ${timeline}`,
         `Location: ${location.trim() || "Not specified"}`,
         notes.trim() ? `Notes: ${notes.trim()}` : null,
       ]
@@ -365,6 +392,7 @@ export default function ProjectCompass() {
       selectedVisualCues,
       style,
       styleAnalysis,
+      timeline,
     ]
   );
 
@@ -495,6 +523,7 @@ export default function ProjectCompass() {
     formData.set("style_direction", style);
     formData.set("support_scope", scope);
     formData.set("budget_signal", budget);
+    formData.set("timeline", timeline);
     formData.set("location", location);
     formData.set("notes", notes);
     formData.set("visual_cues", JSON.stringify(selectedVisualCues));
@@ -823,6 +852,13 @@ export default function ProjectCompass() {
             value={budget}
           />
 
+          <OptionGrid
+            label="7. When do you want to start?"
+            onChange={setTimeline}
+            options={timelines}
+            value={timeline}
+          />
+
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block text-sm font-semibold">
               Location
@@ -868,6 +904,7 @@ export default function ProjectCompass() {
               ],
               ["Support", scope],
               ["Budget", budget],
+              ["Timeline", timeline],
             ].map(([label, value]) => (
               <div
                 key={label}
@@ -922,11 +959,9 @@ export default function ProjectCompass() {
             <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
               <div className="font-semibold">Brief saved</div>
               <p className="mt-1">
-                Saved with {savedReferenceCount ?? 0} reference photo
-                {(savedReferenceCount ?? 0) === 1 ? "" : "s"}. We can connect this to
-                designer inquiries next.
+                Saved with {countLabel(savedReferenceCount ?? 0, "reference photo")}. It is ready to send to a designer.
               </p>
-              <Link href="/account/briefs" className="mt-3 inline-flex font-semibold underline">
+              <Link href="/client/briefs" className="mt-3 inline-flex font-semibold underline">
                 Open saved briefs
               </Link>
             </div>

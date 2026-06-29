@@ -189,6 +189,7 @@ function InquiryCard({
           ["Style", snapshotText(snapshot, "style_direction")],
           ["Support", snapshotText(snapshot, "support_scope")],
           ["Budget", snapshotText(snapshot, "budget_signal")],
+          ["Timeline", snapshotText(snapshot, "timeline")],
           ["Location", snapshotText(snapshot, "location")],
           ["Goal", snapshotText(snapshot, "goal")],
         ].map(([label, value]) => (

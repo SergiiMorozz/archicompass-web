@@ -35,11 +35,11 @@ export default function Home() {
               AI-powered project brief and designer matching
             </div>
             <h1 className="mt-6 text-5xl font-bold leading-[1.02] tracking-tight sm:text-7xl">
-              Turn your inspiration into a designer-ready brief.
+              Turn saved inspiration into a clear interior design brief.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/82">
-              Upload references, define your project, and find professionals who match
-              your style, budget, and scope.
+              Upload references, define your space, budget, goals, and timeline, then
+              find designers who fit the project, not just the style.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -82,8 +82,8 @@ export default function Home() {
             From saved references to a useful first conversation.
           </h2>
           <p className="mt-4 text-lg leading-8 text-muted">
-            ArchiCompass helps you understand the project before asking a designer for
-            a quote.
+            Most interior projects start with scattered screenshots and vague messages.
+            ArchiCompass turns them into a structured brief designers can actually respond to.
           </p>
         </div>
 

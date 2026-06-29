@@ -1,4 +1,6 @@
 import Link from "next/link";
+import FavoriteButton from "@/components/FavoriteButton";
+import { countLabel } from "@/lib/count-label";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   applyDemoProfilePresentation,
@@ -115,12 +117,14 @@ function DesignerCard({
   index,
   requestedLocation,
   requestedSpecialty,
+  initialSaved,
   view,
 }: {
   profile: Profile;
   index: number;
   requestedLocation: string;
   requestedSpecialty: string;
+  initialSaved: boolean;
   view: "grid" | "list";
 }) {
   const title = profileTitle(profile);
@@ -168,9 +172,7 @@ function DesignerCard({
                   </span>
                 </div>
               </div>
-              <button className="h-10 rounded-xl border border-line bg-background px-4 text-sm font-semibold">
-                Save
-              </button>
+              <FavoriteButton compact entityType="designer" entityKey={profile.id} initialSaved={initialSaved} />
             </div>
 
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted">
@@ -258,9 +260,7 @@ function DesignerCard({
             </Link>
             <p className="mt-1 text-sm text-muted">{type}</p>
           </div>
-          <button className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-line bg-background text-sm">
-            Save
-          </button>
+          <FavoriteButton compact entityType="designer" entityKey={profile.id} initialSaved={initialSaved} />
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
@@ -345,6 +345,15 @@ export default async function DesignersPage({
     .limit(60);
 
   const { data, error } = await query;
+  const { data: userData } = await supabase.auth.getUser();
+  const { data: favoriteData } = userData.user
+    ? await supabase
+        .from("favorites")
+        .select("entity_key")
+        .eq("user_id", userData.user.id)
+        .eq("entity_type", "designer")
+    : { data: [] };
+  const savedDesignerIds = new Set((favoriteData ?? []).map((item) => item.entity_key));
   const normalizedQuery = q.toLowerCase();
   const normalizedLocation = location.toLowerCase();
   const normalizedSpecialty = specialty
@@ -455,7 +464,7 @@ export default async function DesignersPage({
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-bold">Filters</h2>
-              <p className="mt-1 text-sm text-muted">{profiles.length} result{profiles.length === 1 ? "" : "s"}</p>
+              <p className="mt-1 text-sm text-muted">{countLabel(profiles.length, "result")}</p>
             </div>
             {hasFilters ? (
               <Link href="/designers" className="text-sm font-semibold text-primary hover:underline">
@@ -529,7 +538,7 @@ export default async function DesignersPage({
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-primary">
-                {profiles.length} designer{profiles.length === 1 ? "" : "s"} found
+                {countLabel(profiles.length, "designer")} found
               </p>
               <h2 className="mt-1 text-2xl font-bold">Recommended professionals</h2>
             </div>
@@ -599,6 +608,7 @@ export default async function DesignersPage({
                   index={index}
                   requestedLocation={location}
                   requestedSpecialty={specialty}
+                  initialSaved={savedDesignerIds.has(profile.id)}
                   view={view}
                 />
               ))}
@@ -612,6 +622,7 @@ export default async function DesignersPage({
                   index={index}
                   requestedLocation={location}
                   requestedSpecialty={specialty}
+                  initialSaved={savedDesignerIds.has(profile.id)}
                   view={view}
                 />
               ))}

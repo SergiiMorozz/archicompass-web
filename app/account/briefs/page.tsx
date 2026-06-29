@@ -2,6 +2,7 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import ReferencePhotoGrid from "@/components/ReferencePhotoGrid";
+import { countLabel } from "@/lib/count-label";
 import { sendInquiryNotificationEmail } from "@/lib/email/inquiry-notification";
 import {
   referencePhotoPreviews,
@@ -20,6 +21,7 @@ type ProjectBrief = {
   style_direction: string | null;
   support_scope: string | null;
   budget_signal: string | null;
+  timeline: string | null;
   location: string | null;
   notes: string | null;
   visual_cues: string[] | null;
@@ -96,7 +98,7 @@ async function sendBriefInquiry(formData: FormData) {
   const { data: briefData, error: briefError } = await supabase
     .from("project_briefs")
     .select(
-      "id, user_id, title, project_type, goal, style_direction, support_scope, budget_signal, location, notes, visual_cues, reference_photo_names, reference_photo_paths, brief_text, designer_search_href, created_at"
+      "id, user_id, title, project_type, goal, style_direction, support_scope, budget_signal, timeline, location, notes, visual_cues, reference_photo_names, reference_photo_paths, brief_text, designer_search_href, created_at"
     )
     .eq("id", briefId)
     .eq("user_id", user.id)
@@ -142,6 +144,7 @@ async function sendBriefInquiry(formData: FormData) {
       style_direction: brief.style_direction,
       support_scope: brief.support_scope,
       budget_signal: brief.budget_signal,
+      timeline: brief.timeline,
       location: brief.location,
       notes: brief.notes,
       visual_cues: brief.visual_cues ?? [],
@@ -238,7 +241,7 @@ export default async function SavedBriefsPage({
   const { data: briefsData, error } = await supabase
     .from("project_briefs")
     .select(
-      "id, user_id, title, project_type, goal, style_direction, support_scope, budget_signal, location, notes, visual_cues, reference_photo_names, reference_photo_paths, brief_text, designer_search_href, created_at"
+      "id, user_id, title, project_type, goal, style_direction, support_scope, budget_signal, timeline, location, notes, visual_cues, reference_photo_names, reference_photo_paths, brief_text, designer_search_href, created_at"
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
@@ -373,6 +376,7 @@ export default async function SavedBriefsPage({
 
               return (
                 <article
+                  id={brief.id}
                   key={brief.id}
                   className="rounded-2xl border border-line bg-card p-6 shadow-sm"
                 >
@@ -389,8 +393,7 @@ export default async function SavedBriefsPage({
                       </div>
                     </div>
                     <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
-                      {brief.reference_photo_names?.length ?? 0} photo
-                      {(brief.reference_photo_names?.length ?? 0) === 1 ? "" : "s"}
+                      {countLabel(brief.reference_photo_names?.length ?? 0, "photo")}
                     </span>
                   </div>
 
@@ -400,6 +403,7 @@ export default async function SavedBriefsPage({
                       ["Style", brief.style_direction],
                       ["Support", brief.support_scope],
                       ["Budget", brief.budget_signal],
+                      ["Timeline", brief.timeline],
                       ["Location", brief.location],
                       ["Visual cues", brief.visual_cues?.join(", ") || "Not tagged"],
                     ].map(([label, value]) => (

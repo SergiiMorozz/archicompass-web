@@ -11,7 +11,7 @@ const sections = [
   {
     title: "Data we process",
     body: [
-      "We may process your email address and authentication data, profile and portfolio details, project briefs, messages and inquiry status, uploaded project images, reference photos, and technical security logs such as timestamps, browser information, and IP address.",
+      "We may process your email address and authentication data, profile and portfolio details, project briefs, favorites, messages and inquiry status, uploaded project images, reference photos, and technical security logs such as timestamps, browser information, and IP address.",
       "Please do not upload identity documents, financial information, private addresses, photos of people, or other sensitive or confidential material.",
     ],
   },

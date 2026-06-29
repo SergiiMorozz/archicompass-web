@@ -91,8 +91,14 @@ export default function Header() {
     };
   }, []);
 
-  const visibleNavItems = account?.isProfessional
-    ? [...navItems, { href: "/studio", label: "Designer Studio" }]
+  const visibleNavItems = account
+    ? [
+        ...navItems,
+        { href: "/client", label: "Client Workspace" },
+        ...(account.isProfessional
+          ? [{ href: "/studio", label: "Designer Studio" }]
+          : []),
+      ]
     : navItems;
 
   return (

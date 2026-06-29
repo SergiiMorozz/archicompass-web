@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { countLabel } from "@/lib/count-label";
 
 type ProjectGalleryProps = {
   category?: string | null;
@@ -64,7 +65,7 @@ export default function ProjectGallery({
             </div>
             <h3 className="mt-1 text-xl font-bold">{title}</h3>
             <div className="mt-3 inline-flex rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">
-              View {safeImages.length} photo{safeImages.length === 1 ? "" : "s"}
+              View {countLabel(safeImages.length, "photo")}
             </div>
           </div>
         </button>
