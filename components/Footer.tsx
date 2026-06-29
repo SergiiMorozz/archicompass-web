@@ -3,9 +3,8 @@ import Link from "next/link";
 const navigation = [
   { href: "/", label: "Home" },
   { href: "/project-compass", label: "Project Compass" },
-  { href: "/inspiration", label: "Inspiration" },
   { href: "/designers", label: "Find Designer" },
-  { href: "/services", label: "Services" },
+  { href: "/get-started", label: "Join the Beta" },
 ];
 
 export default function Footer() {
@@ -20,8 +19,8 @@ export default function Footer() {
             <span className="text-xl font-semibold">ArchiCompass</span>
           </Link>
           <p className="mt-5 max-w-md text-sm leading-6 text-white/70">
-            Connecting visionary clients with exceptional designers and architects to
-            create spaces that inspire.
+            Turn references into a clear project brief, then find designers and
+            architects who fit the work.
           </p>
         </div>
 

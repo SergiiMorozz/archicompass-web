@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  applyDemoProfilePresentation,
+  getDemoProfilePresentation,
+} from "@/lib/public-demo-profiles";
 
 export const revalidate = 0;
 
@@ -12,6 +16,8 @@ type Profile = {
   user_type: string | null;
   specialties: string[] | null;
   hourly_rate: number | null;
+  years_experience: number | null;
+  created_at: string;
 };
 
 type SP = {
@@ -33,7 +39,7 @@ const trendChips = [
 ];
 
 const styleFilters = [
-  "Minimalistic",
+  "Minimalist",
   "Scandinavian",
   "Modern",
   "Industrial",
@@ -84,7 +90,7 @@ function initials(name: string) {
 }
 
 function rateLabel(rate: number | null) {
-  return rate ? `${rate} PLN/project` : "Rate on request";
+  return rate ? `${rate} PLN/hour` : "Budget discussed after brief";
 }
 
 function profileTitle(profile: Profile) {
@@ -96,16 +102,25 @@ function profileType(profile: Profile) {
 }
 
 function profileLocation(profile: Profile) {
-  return profile.location || "Location flexible";
+  return profile.location || "Remote / location on request";
+}
+
+function experienceLabel(value: number | null) {
+  if (!value) return "Experience not provided";
+  return value === 1 ? "1 year experience" : `${value}+ years experience`;
 }
 
 function DesignerCard({
   profile,
   index,
+  requestedLocation,
+  requestedSpecialty,
   view,
 }: {
   profile: Profile;
   index: number;
+  requestedLocation: string;
+  requestedSpecialty: string;
   view: "grid" | "list";
 }) {
   const title = profileTitle(profile);
@@ -113,6 +128,12 @@ function DesignerCard({
   const location = profileLocation(profile);
   const cover = coverImages[index % coverImages.length];
   const specialties = profile.specialties?.filter(Boolean).slice(0, 5) ?? [];
+  const demo = getDemoProfilePresentation(profile.id);
+  const matchItems = [
+    ["Style / specialty", requestedSpecialty || demo?.bestFor || specialties[0] || type],
+    ["Project fit", demo?.projectFit || "Review the portfolio for similar room and project types"],
+    ["Location", requestedLocation || location],
+  ];
 
   if (view === "list") {
     return (
@@ -128,7 +149,7 @@ function DesignerCard({
               {initials(title)}
             </div>
             <div className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-sm font-semibold text-foreground shadow-sm">
-              4.5
+              {demo ? "Demo profile" : "Beta profile"}
             </div>
           </Link>
 
@@ -140,10 +161,7 @@ function DesignerCard({
                 </Link>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <span className="rounded-full bg-[#fff3df] px-3 py-1 text-xs font-semibold text-[#b56b08]">
-                    Early Professional
-                  </span>
-                  <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-                    Verified
+                    {demo ? "Example profile" : "Early professional"}
                   </span>
                   <span className="rounded-full bg-[#eaf2ff] px-3 py-1 text-xs font-semibold text-[#2563eb]">
                     Portfolio
@@ -157,12 +175,11 @@ function DesignerCard({
 
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted">
               <span>{location}</span>
-              <span>5+ years</span>
-              <span>Replies in 1-2 days</span>
+              <span>{experienceLabel(profile.years_experience)}</span>
             </div>
 
             <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">
-              {profile.bio || "Portfolio-ready professional profile. Add more profile details to make this card shine."}
+              {profile.bio || "This beta profile has not added a public introduction yet."}
             </p>
 
             <div className="mt-4 flex flex-wrap gap-2">
@@ -179,10 +196,22 @@ function DesignerCard({
               )}
             </div>
 
+            <div className="mt-5 rounded-lg bg-primary-soft p-4">
+              <div className="text-xs font-semibold uppercase text-primary">Why it may fit</div>
+              <div className="mt-3 grid gap-2 text-sm">
+                {matchItems.map(([label, value]) => (
+                  <div key={label} className="grid gap-1 sm:grid-cols-[130px_1fr]">
+                    <span className="text-muted">{label}</span>
+                    <span className="font-semibold">{value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <div className="mt-5 flex flex-col gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="text-xl font-bold text-primary">{rateLabel(profile.hourly_rate)}</div>
-                <div className="text-sm text-muted">Portfolio profile</div>
+                <div className="text-sm text-muted">{demo?.budgetFit || "Beta portfolio profile"}</div>
               </div>
               <div className="flex gap-3">
                 <Link
@@ -214,7 +243,7 @@ function DesignerCard({
       >
         <div className="absolute inset-0 bg-gradient-to-t from-[#1f172a]/78 via-[#1f172a]/20 to-transparent" />
         <div className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-sm font-semibold text-foreground shadow-sm">
-          4.5
+          {demo ? "Demo" : "Beta"}
         </div>
         <div className="absolute bottom-4 left-4 grid h-14 w-14 place-items-center rounded-2xl border-2 border-white bg-primary text-xl font-bold text-white shadow">
           {initials(title)}
@@ -236,21 +265,17 @@ function DesignerCard({
 
         <div className="mt-3 flex flex-wrap gap-2">
           <span className="rounded-full bg-[#fff3df] px-3 py-1 text-xs font-semibold text-[#b56b08]">
-            Early Professional
-          </span>
-          <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-            Verified
+            {demo ? "Example profile" : "Early professional"}
           </span>
         </div>
 
         <div className="mt-4 grid gap-2 text-sm text-muted">
           <span>{location}</span>
-          <span>5+ years experience</span>
-          <span>Replies in 1-2 days</span>
+          <span>{experienceLabel(profile.years_experience)}</span>
         </div>
 
         <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">
-          {profile.bio || "Portfolio-ready professional profile. Add more profile details to make this card shine."}
+          {profile.bio || "This beta profile has not added a public introduction yet."}
         </p>
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -267,10 +292,16 @@ function DesignerCard({
           )}
         </div>
 
+        <div className="mt-5 rounded-lg bg-primary-soft p-4 text-sm">
+          <div className="text-xs font-semibold uppercase text-primary">Best fit signal</div>
+          <div className="mt-2 font-semibold">{matchItems[0][1]}</div>
+          <div className="mt-1 text-muted">{matchItems[2][1]}</div>
+        </div>
+
         <div className="mt-5 flex items-center justify-between gap-3 border-t border-line pt-5">
           <div>
             <div className="font-bold text-primary">{rateLabel(profile.hourly_rate)}</div>
-            <div className="text-xs text-muted">Portfolio profile</div>
+            <div className="text-xs text-muted">{demo?.budgetFit || "Beta portfolio profile"}</div>
           </div>
           <Link
             href={`/designers/${profile.id}`}
@@ -304,28 +335,62 @@ export default async function DesignersPage({
 
   const supabase = await createSupabaseServerClient();
 
-  let query = supabase
+  const query = supabase
     .from("profiles")
     .select(
-      "id, full_name, bio, location, profession_type, user_type, specialties, hourly_rate, created_at"
+      "id, full_name, bio, location, profession_type, user_type, specialties, hourly_rate, years_experience, created_at"
     )
     .eq("user_type", "professional")
+    .order("created_at", { ascending: false })
     .limit(60);
 
-  if (q) query = query.ilike("full_name", `%${q}%`);
-  if (location) query = query.ilike("location", `%${location}%`);
-  if (specialty) query = query.contains("specialties", [specialty]);
-  if (!Number.isNaN(minRate)) query = query.gte("hourly_rate", minRate);
-  if (!Number.isNaN(maxRate)) query = query.lte("hourly_rate", maxRate);
+  const { data, error } = await query;
+  const normalizedQuery = q.toLowerCase();
+  const normalizedLocation = location.toLowerCase();
+  const normalizedSpecialty = specialty
+    .toLowerCase()
+    .replace(/(istic|ist|ism)$/, "");
+
+  let profiles = ((data ?? []) as Profile[])
+    .map(applyDemoProfilePresentation)
+    .filter((profile) => {
+      const searchable = [
+        profile.full_name,
+        profile.bio,
+        profile.profession_type,
+        ...(profile.specialties ?? []),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      const specialtyText = (profile.specialties ?? []).join(" ").toLowerCase();
+      const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
+      const matchesLocation =
+        !normalizedLocation ||
+        (profile.location ?? "").toLowerCase().includes(normalizedLocation);
+      const matchesSpecialty =
+        !normalizedSpecialty || specialtyText.includes(normalizedSpecialty);
+      const matchesMinimum =
+        Number.isNaN(minRate) ||
+        (profile.hourly_rate !== null && profile.hourly_rate >= minRate);
+      const matchesMaximum =
+        Number.isNaN(maxRate) ||
+        (profile.hourly_rate !== null && profile.hourly_rate <= maxRate);
+
+      return (
+        matchesQuery &&
+        matchesLocation &&
+        matchesSpecialty &&
+        matchesMinimum &&
+        matchesMaximum
+      );
+    });
 
   if (sort === "rate") {
-    query = query.order("hourly_rate", { ascending: true, nullsFirst: false });
-  } else {
-    query = query.order("created_at", { ascending: false });
+    profiles = profiles.sort(
+      (a, b) => (a.hourly_rate ?? Number.MAX_SAFE_INTEGER) - (b.hourly_rate ?? Number.MAX_SAFE_INTEGER)
+    );
   }
-
-  const { data, error } = await query;
-  const profiles = (data ?? []) as Profile[];
 
   const base = {
     q,
@@ -347,8 +412,8 @@ export default async function DesignersPage({
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-5xl font-bold tracking-tight">Find Designer</h1>
             <p className="mt-4 text-lg leading-8 text-muted">
-              Search verified interior designers and architects by style, location,
-              and budget.
+              Browse beta designer and architect profiles by style, location, and
+              project fit.
             </p>
           </div>
 
@@ -438,7 +503,7 @@ export default async function DesignersPage({
               <div className="text-sm font-semibold">Design Style</div>
               <div className="mt-3 grid gap-3">
                 {styleFilters.map((style) => (
-                  <label key={style} className="flex items-center justify-between gap-3 text-sm text-muted">
+                  <label key={style} className="flex items-center gap-3 text-sm text-muted">
                     <span className="flex items-center gap-3">
                       <input
                         type="radio"
@@ -449,7 +514,6 @@ export default async function DesignersPage({
                       />
                       {style}
                     </span>
-                    <span className="rounded-full bg-background px-2 py-1 text-xs">0</span>
                   </label>
                 ))}
               </div>
@@ -529,13 +593,27 @@ export default async function DesignersPage({
           ) : view === "grid" ? (
             <div className="mt-7 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {profiles.map((profile, index) => (
-                <DesignerCard key={profile.id} profile={profile} index={index} view={view} />
+                <DesignerCard
+                  key={profile.id}
+                  profile={profile}
+                  index={index}
+                  requestedLocation={location}
+                  requestedSpecialty={specialty}
+                  view={view}
+                />
               ))}
             </div>
           ) : (
             <div className="mt-7 grid gap-5">
               {profiles.map((profile, index) => (
-                <DesignerCard key={profile.id} profile={profile} index={index} view={view} />
+                <DesignerCard
+                  key={profile.id}
+                  profile={profile}
+                  index={index}
+                  requestedLocation={location}
+                  requestedSpecialty={specialty}
+                  view={view}
+                />
               ))}
             </div>
           )}

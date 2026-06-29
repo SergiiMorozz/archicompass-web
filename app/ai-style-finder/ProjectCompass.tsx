@@ -603,9 +603,9 @@ export default function ProjectCompass() {
               <div>
                 <h2 className="text-base font-bold">4. Add reference photos</h2>
                 <p className="mt-1 text-sm leading-6 text-muted">
-                  Add 4-10 rooms, details, or moods you like. Photos stay in this
-                  browser for now, but their names and visual cues are included in the
-                  copied brief.
+                  Add 4-10 rooms, details, or moods you like. Previews stay in this
+                  browser until you choose analysis or save the brief. Saving uploads
+                  them to private brief storage.
                 </p>
               </div>
               <span className="rounded-full bg-background px-3 py-1 text-sm font-semibold text-muted">
@@ -692,6 +692,12 @@ export default function ProjectCompass() {
                   {isAnalyzing ? "Analyzing..." : "Analyze photos"}
                 </button>
               </div>
+
+              <p className="mt-3 text-xs leading-5 text-muted">
+                Choosing Analyze sends up to {maxAnalysisPhotos} photos to the configured
+                AI provider. Do not submit photos containing people, addresses, or
+                confidential information. See the <Link href="/privacy" className="underline">Privacy Policy</Link>.
+              </p>
 
               {referencePhotos.length > maxAnalysisPhotos ? (
                 <p className="mt-3 text-xs leading-5 text-muted">

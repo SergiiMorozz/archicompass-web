@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ProjectGallery from "@/components/ProjectGallery";
+import {
+  applyDemoProfilePresentation,
+  getDemoProfilePresentation,
+  getDemoProjectPresentation,
+} from "@/lib/public-demo-profiles";
 
 export const revalidate = 0;
 
@@ -67,7 +72,7 @@ function profileType(profile: Profile) {
 }
 
 function profileLocation(profile: Profile) {
-  return profile.location || "Location flexible";
+  return profile.location || "Remote / location on request";
 }
 
 function initials(name: string) {
@@ -108,7 +113,7 @@ function publicImageUrl(supabase: SupabaseServerClient, imagePath: string | null
 }
 
 function experienceLabel(value: number | null) {
-  if (!value) return "Experience details soon";
+  if (!value) return "Not provided";
   return value === 1 ? "1 year experience" : `${value}+ years experience`;
 }
 
@@ -133,7 +138,7 @@ function contactLabel(profile: Profile) {
   if (profile.email) return profile.email;
   if (profile.phone) return profile.phone;
   if (profile.website) return profile.website;
-  return "Contact details coming soon";
+  return "Shared after a brief is sent";
 }
 
 function briefRequestHref(profileId: string) {
@@ -230,7 +235,8 @@ export default async function DesignerProfilePage({
     );
   }
 
-  const profile = profileData as Profile;
+  const profile = applyDemoProfilePresentation(profileData as Profile);
+  const demo = getDemoProfilePresentation(profile.id);
 
   const { data: projectsData, error: prErr } = await supabase
     .from("projects")
@@ -239,28 +245,34 @@ export default async function DesignerProfilePage({
     .order("created_at", { ascending: false })
     .limit(24);
 
-  const projects = ((projectsData ?? []) as Project[]).map((project) => ({
-    ...project,
-    image_urls:
-      project.image_urls?.length
-        ? project.image_urls
-        : project.image_paths?.length
-          ? project.image_paths
-              .map((path) => publicImageUrl(supabase, path))
-              .filter((url): url is string => Boolean(url))
-          : project.image_url
-            ? [project.image_url]
-            : project.image_path
-              ? [publicImageUrl(supabase, project.image_path)].filter(
-                  (url): url is string => Boolean(url)
-                )
-              : [],
-    image_url:
-      project.image_url ||
-      publicImageUrl(supabase, project.image_path) ||
-      project.image_urls?.[0] ||
-      null,
-  }));
+  const projects = ((projectsData ?? []) as Project[]).map((project) => {
+    const publicProject = {
+      ...project,
+      image_urls:
+        project.image_urls?.length
+          ? project.image_urls
+          : project.image_paths?.length
+            ? project.image_paths
+                .map((path) => publicImageUrl(supabase, path))
+                .filter((url): url is string => Boolean(url))
+            : project.image_url
+              ? [project.image_url]
+              : project.image_path
+                ? [publicImageUrl(supabase, project.image_path)].filter(
+                    (url): url is string => Boolean(url)
+                  )
+                : [],
+      image_url:
+        project.image_url ||
+        publicImageUrl(supabase, project.image_path) ||
+        project.image_urls?.[0] ||
+        null,
+    };
+    const demoCopy = getDemoProjectPresentation(profile.id, project.id);
+    return demoCopy
+      ? { ...publicProject, ...demoCopy, project_url: null }
+      : publicProject;
+  });
   const title = profileTitle(profile);
   const type = profileType(profile);
   const location = profileLocation(profile);
@@ -302,7 +314,7 @@ export default async function DesignerProfilePage({
           <div className="flex min-h-[360px] items-end px-5 py-7 sm:px-8 lg:px-10">
             <div className="max-w-3xl text-white">
               <div className="inline-flex rounded-full bg-white/16 px-4 py-2 text-sm font-semibold backdrop-blur">
-                Verified ArchiCompass profile
+                {demo ? "Example ArchiCompass profile" : "ArchiCompass beta profile"}
               </div>
               <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-6xl">
                 {title}
@@ -329,11 +341,8 @@ export default async function DesignerProfilePage({
                   <h2 className="text-3xl font-bold">{title}</h2>
                   <p className="mt-1 text-muted">{type}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-                      Verified
-                    </span>
                     <span className="rounded-full bg-[#fff3df] px-3 py-1 text-xs font-semibold text-[#b56b08]">
-                      Early Professional
+                      {demo ? "Demo profile" : "Early professional"}
                     </span>
                     {projects.length ? (
                       <span className="rounded-full bg-[#eaf2ff] px-3 py-1 text-xs font-semibold text-[#2563eb]">
@@ -436,7 +445,7 @@ export default async function DesignerProfilePage({
             <div className="mt-5 grid gap-3 text-sm">
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
                 <span className="text-muted">Response</span>
-                <span className="font-semibold">Usually 1-2 days</span>
+                <span className="font-semibold">Not yet measured</span>
               </div>
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
                 <span className="text-muted">Contact</span>
@@ -671,8 +680,8 @@ export default async function DesignerProfilePage({
 
             <div className="mt-6 grid gap-4 md:grid-cols-[220px_1fr]">
               <div className="rounded-2xl border border-line bg-background p-5 text-center">
-                <div className="text-5xl font-bold text-primary">New</div>
-                <div className="mt-2 text-sm text-muted">Review profile</div>
+                <div className="text-5xl font-bold text-primary">Beta</div>
+                <div className="mt-2 text-sm text-muted">No ratings collected</div>
               </div>
               <div className="rounded-2xl border border-dashed border-line bg-background p-5">
                 <h3 className="text-lg font-bold">Reviews will appear here</h3>
@@ -747,7 +756,7 @@ export default async function DesignerProfilePage({
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="truncate text-sm font-bold">{title}</div>
-            <div className="truncate text-xs text-muted">Usually replies in 1-2 days</div>
+            <div className="truncate text-xs text-muted">Response time not yet measured</div>
           </div>
           {isOwner ? (
             <Link

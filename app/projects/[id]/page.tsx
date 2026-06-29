@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ProjectGallery from "@/components/ProjectGallery";
+import {
+  applyDemoProfilePresentation,
+  getDemoProfilePresentation,
+  getDemoProjectPresentation,
+} from "@/lib/public-demo-profiles";
 
 export const revalidate = 0;
 
@@ -170,14 +175,21 @@ export default async function ProjectDetailPage({
     );
   }
 
-  const project = hydrateProjectImages(supabase, projectData as Project);
+  let project = hydrateProjectImages(supabase, projectData as Project);
   const { data: profileData } = await supabase
     .from("profiles")
     .select("id, full_name, profession_type, user_type, location, email, phone, website")
     .eq("id", project.profile_id)
     .single();
 
-  const profile = (profileData as Profile | null) ?? null;
+  const profile = profileData
+    ? applyDemoProfilePresentation(profileData as Profile)
+    : null;
+  const demo = getDemoProfilePresentation(project.profile_id);
+  const demoProject = getDemoProjectPresentation(project.profile_id, project.id);
+  if (demoProject) {
+    project = { ...project, ...demoProject, project_url: null };
+  }
   const isOwner = userData.user?.id === project.profile_id;
   const title = project.title || "Untitled project";
   const designerName = profileTitle(profile);
@@ -210,6 +222,11 @@ export default async function ProjectDetailPage({
               <div className="text-sm font-semibold text-primary">
                 {project.category || "Portfolio project"}
               </div>
+              {demo ? (
+                <div className="mt-3 inline-flex rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
+                  Example portfolio project
+                </div>
+              ) : null}
               <h1 className="mt-2 max-w-4xl text-4xl font-bold tracking-tight sm:text-6xl">
                 {title}
               </h1>
@@ -290,7 +307,7 @@ export default async function ProjectDetailPage({
             <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
               <span className="text-muted">Location</span>
               <span className="truncate text-right font-semibold">
-                {profile?.location || "Location flexible"}
+                {profile?.location || "Remote / location on request"}
               </span>
             </div>
             <div className="flex items-center justify-between gap-4 border-b border-line pb-3">

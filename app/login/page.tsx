@@ -144,18 +144,15 @@ export default function LoginPage() {
                 ) : (
                   <div className="text-xs text-zinc-500">
                     By continuing you agree to our{" "}
-                    <span className="underline">Terms</span> and{" "}
-                    <span className="underline">Privacy Policy</span>.
+                    <Link href="/terms" className="underline">Terms</Link> and{" "}
+                    <Link href="/privacy" className="underline">Privacy Policy</Link>.
                   </div>
                 )}
               </form>
 
-              <div className="mt-6 flex items-center justify-between text-xs text-zinc-600">
+              <div className="mt-6 text-xs text-zinc-600">
                 <Link href="/" className="underline">
                   ← Back home
-                </Link>
-                <Link href="/health" className="underline">
-                  Health
                 </Link>
               </div>
             </div>

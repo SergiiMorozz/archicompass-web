@@ -7,9 +7,7 @@ import { useState } from "react";
 const navItems = [
   { href: "/", label: "Home" },
   { href: "/project-compass", label: "Project Compass" },
-  { href: "/inspiration", label: "Inspiration" },
   { href: "/designers", label: "Find Designer" },
-  { href: "/services", label: "Services" },
 ];
 
 function NavLink({

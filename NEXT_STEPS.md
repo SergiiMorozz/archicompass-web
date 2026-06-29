@@ -10,6 +10,19 @@ Last checkpoint: 2026-06-29
 - Vercel production has the Supabase and Gemini environment variables.
 - Supabase Auth uses the Vercel URL as its Site URL and allows callbacks from
   the production site plus local ports 3001 and 3002.
+- Homepage positioning now leads with the Project Compass flow: references,
+  AI-assisted brief, designer fit, and sending the brief.
+- Fake marketplace metrics and the stock "real projects" claim were removed.
+- Empty Inspiration and Services routes remain available for development but
+  are hidden from the main navigation.
+- Current test professional records are presented publicly as two clearly
+  labelled example profiles with curated demo copy; raw test names and fake
+  ratings, verification, response times, and filter counts are hidden.
+- Designer cards show contextual fit signals from Project Compass style and
+  location filters.
+- Privacy and Terms now contain closed-beta working notices covering reference
+  photos, private brief storage, AI processing, sharing, deletion, and user rights.
+- `/health` returns only `{ "ok": true }` or an HTTP 503 without sample data.
 - Public shell has the Lovable-inspired visual direction.
 - `/designers` is redesigned as the marketplace catalog.
 - `/designers/[id]` is redesigned as the public designer profile.
@@ -70,6 +83,10 @@ Last checkpoint: 2026-06-29
   HTTP 200; the public designers page also loads live Supabase profile data.
 - Production `/api/style-analysis` is live and correctly rejects an empty
   request with HTTP 400.
+- Launch-alignment update passes lint, TypeScript, `git diff --check`, and a
+  complete production build; local browser checks covered the homepage,
+  filtered designer results, demo profile, Project Compass disclosure, Privacy,
+  and the minimal health response.
 
 ## Best Next Small Step
 
