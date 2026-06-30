@@ -197,8 +197,14 @@ Last checkpoint: 2026-06-30
 
 ## Best Next Small Step
 
-Use two test designer accounts to create the first real studio, accept an
-invitation, and exercise one shared client conversation from both team logins.
+Expand Project Compass and saved briefs with project area, room count and room
+types, property status, 3D visualization needs, and supervision needs. Persist
+the fields in Supabase, include them in inquiry snapshots and designer views,
+preserve them through login, and use them in matching only after corresponding
+professional service capabilities are available.
+
+The source review and research-backed ordering for this work are documented in
+`PRODUCT_RESEARCH.md`.
 
 ## Admin Workspace Roadmap
 
@@ -214,6 +220,11 @@ invitation, and exercise one shared client conversation from both team logins.
 
 ## After That
 
+- Use two test designer accounts to create the first real studio, accept an
+  invitation, and exercise one shared client conversation from both team logins.
+- Add clearer price ranges and cooperation terms to professional profiles.
+- Add a compact comparison view for shortlisted designers and studios.
+- Introduce reviews only when they can be tied to a completed real inquiry.
 - Add richer seed data for designer profiles and portfolio projects.
 - Build the first Inspiration HUB route on top of the existing generic favorites.
 - Add realtime message subscriptions and email notifications for new chat
