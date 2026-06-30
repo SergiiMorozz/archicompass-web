@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+function LoginContent() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const searchParams = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<
@@ -14,6 +16,31 @@ export default function LoginPage() {
     | { type: "success"; message: string }
     | { type: "error"; message: string }
   >({ type: "idle" });
+
+  const requestedValue = searchParams.get("next") || "/account";
+  const requestedNext = requestedValue.startsWith("/") && !requestedValue.startsWith("//")
+    ? requestedValue
+    : "/account";
+
+  const context = requestedNext.startsWith("/account/briefs")
+    ? {
+        title: "Sign in to send your project brief",
+        copy: "Your selected professional and saved briefs will be waiting after the magic link opens.",
+      }
+    : requestedNext.startsWith("/studio") || requestedNext.startsWith("/account/profile")
+      ? {
+          title: "Sign in to your designer workspace",
+          copy: "Manage your professional profile, studio team, portfolio, and incoming project requests.",
+        }
+      : requestedNext.startsWith("/client")
+        ? {
+            title: "Sign in to your client workspace",
+            copy: "Return to saved briefs, favorite professionals, and active conversations.",
+          }
+        : {
+            title: "Sign in to ArchiCompass",
+            copy: "Use one secure magic link to open the workspace connected to your account role.",
+          };
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,10 +54,7 @@ export default function LoginPage() {
     setStatus({ type: "loading" });
 
     const origin = window.location.origin;
-    const requestedNext = new URLSearchParams(window.location.search).get("next") || "/account";
-    const safeNext = requestedNext.startsWith("/") && !requestedNext.startsWith("//")
-      ? requestedNext
-      : "/account";
+    const safeNext = requestedNext;
     const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
 
     const { error } = await supabase.auth.signInWithOtp({
@@ -62,28 +86,16 @@ export default function LoginPage() {
             </div>
 
             <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
-              Sign in to <span className="underline">ArchiCompass</span>
+              {context.title}
             </h1>
 
             <p className="mt-4 max-w-xl text-zinc-600">
-              One-click login. No password. We’ll email you a secure link to save
-              briefs, contact professionals, or manage your designer profile.
+              {context.copy}
             </p>
 
-            <div className="mt-6 flex flex-wrap gap-3 text-sm">
-              <Link
-                href="/designers"
-                className="rounded-full border px-4 py-2 hover:bg-zinc-50"
-              >
-                Browse Designers
-              </Link>
-              <Link
-                href="/get-started"
-                className="rounded-full bg-black px-4 py-2 text-white hover:opacity-90"
-              >
-                Get Started
-              </Link>
-            </div>
+            <Link href="/" className="mt-6 inline-flex text-sm font-medium underline">
+              Explore before signing in
+            </Link>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl border p-5">
@@ -168,5 +180,13 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-white" />}>
+      <LoginContent />
+    </Suspense>
   );
 }

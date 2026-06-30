@@ -36,6 +36,7 @@ type StyleAnalysis = {
 
 const maxReferencePhotos = 10;
 const maxAnalysisPhotos = 6;
+const projectCompassDraftKey = "archicompass-project-compass-draft";
 
 const projectTypes: Option[] = [
   {
@@ -333,12 +334,21 @@ export default function ProjectCompass() {
     : selectedStyle.label;
 
   const designerParams = new URLSearchParams({
+    match: "brief",
     sort: "recommended",
     view: "list",
+    projectType,
+    goal,
+    style: styleAnalysis?.primaryStyle || style,
+    support: scope,
+    budget,
+    timeline,
   });
 
   if (location.trim()) designerParams.set("location", location.trim());
   if (visualSearchSpecialty) designerParams.set("specialty", visualSearchSpecialty);
+  if (selectedVisualCues.length) designerParams.set("cues", selectedVisualCues.slice(0, 5).join(","));
+  if (savedBriefId) designerParams.set("brief", savedBriefId);
 
   const designerHref = `/designers?${designerParams.toString()}`;
 
@@ -548,7 +558,21 @@ export default function ProjectCompass() {
       };
 
       if (response.status === 401 || payload.code === "AUTH_REQUIRED") {
-        window.location.href = "/login";
+        window.sessionStorage.setItem(
+          projectCompassDraftKey,
+          JSON.stringify({
+            projectType,
+            goal,
+            style,
+            scope,
+            budget,
+            timeline,
+            location,
+            notes,
+            selectedVisualCues,
+          })
+        );
+        window.location.href = "/login?next=%2Fproject-compass";
         return;
       }
 
@@ -574,6 +598,37 @@ export default function ProjectCompass() {
   }
 
   useEffect(() => {
+    const rawDraft = window.sessionStorage.getItem(projectCompassDraftKey);
+    if (rawDraft) {
+      try {
+        const draft = JSON.parse(rawDraft) as Partial<{
+          projectType: string;
+          goal: string;
+          style: string;
+          scope: string;
+          budget: string;
+          timeline: string;
+          location: string;
+          notes: string;
+          selectedVisualCues: string[];
+        }>;
+        if (draft.projectType) setProjectType(draft.projectType);
+        if (draft.goal) setGoal(draft.goal);
+        if (draft.style) setStyle(draft.style);
+        if (draft.scope) setScope(draft.scope);
+        if (draft.budget) setBudget(draft.budget);
+        if (draft.timeline) setTimeline(draft.timeline);
+        if (typeof draft.location === "string") setLocation(draft.location);
+        if (typeof draft.notes === "string") setNotes(draft.notes);
+        if (Array.isArray(draft.selectedVisualCues)) {
+          setSelectedVisualCues(draft.selectedVisualCues);
+        }
+      } catch {
+        // Ignore an invalid browser draft and continue with the default brief.
+      }
+      window.sessionStorage.removeItem(projectCompassDraftKey);
+    }
+
     return () => {
       objectUrls.current.forEach((url) => URL.revokeObjectURL(url));
       objectUrls.current = [];

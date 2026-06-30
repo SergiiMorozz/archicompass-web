@@ -35,6 +35,15 @@ type Studio = {
 };
 
 type SP = {
+  match?: string;
+  brief?: string;
+  projectType?: string;
+  goal?: string;
+  style?: string;
+  support?: string;
+  budget?: string;
+  timeline?: string;
+  cues?: string;
   q?: string;
   location?: string;
   specialty?: string;
@@ -42,6 +51,17 @@ type SP = {
   maxRate?: string;
   sort?: "recommended" | "newest" | "rate";
   view?: "grid" | "list";
+};
+
+type BriefMatchContext = {
+  projectType: string;
+  goal: string;
+  style: string;
+  support: string;
+  budget: string;
+  timeline: string;
+  location: string;
+  cues: string[];
 };
 
 const trendChips = [
@@ -70,6 +90,13 @@ const coverImages = [
 function first(v: string | string[] | undefined) {
   if (!v) return "";
   return Array.isArray(v) ? v[0] : v;
+}
+
+function normalizeSearchText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 }
 
 function qs(obj: Record<string, string>) {
@@ -125,11 +152,13 @@ function experienceLabel(value: number | null) {
 }
 
 function StudioCard({
+  briefId,
   canSendBrief,
   initialSaved,
   memberCount,
   studio,
 }: {
+  briefId: string;
   canSendBrief: boolean;
   initialSaved: boolean;
   memberCount: number;
@@ -173,7 +202,7 @@ function StudioCard({
             View studio
           </Link>
           {canSendBrief ? (
-            <Link href={`/account/briefs?studio=${studio.id}`} className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
+            <Link href={`/account/briefs?studio=${studio.id}${briefId ? `&brief=${briefId}` : ""}`} className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
               Send brief
             </Link>
           ) : null}
@@ -184,20 +213,26 @@ function StudioCard({
 }
 
 function DesignerCard({
+  briefContext,
+  briefId,
   canSendBrief,
   profile,
   index,
   requestedLocation,
   requestedSpecialty,
   initialSaved,
+  portfolioCount,
   view,
 }: {
+  briefContext: BriefMatchContext | null;
+  briefId: string;
   canSendBrief: boolean;
   profile: Profile;
   index: number;
   requestedLocation: string;
   requestedSpecialty: string;
   initialSaved: boolean;
+  portfolioCount: number;
   view: "grid" | "list";
 }) {
   const title = profileTitle(profile);
@@ -206,11 +241,36 @@ function DesignerCard({
   const cover = coverImages[index % coverImages.length];
   const specialties = profile.specialties?.filter(Boolean).slice(0, 5) ?? [];
   const demo = getDemoProfilePresentation(profile.id);
+  const specialtyText = normalizeSearchText(specialties.join(" "));
+  const requestedSpecialtyText = normalizeSearchText(requestedSpecialty).replace(
+    /(istic|ist|ism)$/,
+    ""
+  );
+  const requestedStyle = briefContext?.style || requestedSpecialty;
+  const styleMatch = requestedStyle && requestedSpecialtyText && specialtyText.includes(requestedSpecialtyText)
+    ? `High · ${requestedStyle}`
+    : requestedStyle
+      ? `Compare · ${requestedStyle}`
+      : demo?.bestFor || specialties[0] || type;
+  const locationMatches = requestedLocation
+    ? normalizeSearchText(location).includes(normalizeSearchText(requestedLocation))
+    : false;
   const matchItems = [
-    ["Style / specialty", requestedSpecialty || demo?.bestFor || specialties[0] || type],
-    ["Project fit", demo?.projectFit || "Review the portfolio for similar room and project types"],
-    ["Location", requestedLocation || location],
+    [briefContext ? "Style match" : "Style / specialty", styleMatch],
+    ["Project fit", briefContext?.projectType || demo?.projectFit || "Review the portfolio for similar room and project types"],
+    [
+      "Location fit",
+      requestedLocation
+        ? locationMatches
+          ? `Local match · ${location}`
+          : `Check remote availability · ${location}`
+        : location,
+    ],
+    ["Support", briefContext?.support ? `Confirm ${briefContext.support.toLowerCase()}` : "Review available services"],
+    ["Budget", briefContext?.budget ? `${briefContext.budget} · pricing confirmed after review` : "Pricing after brief review"],
+    ["Portfolio", countLabel(portfolioCount, "public project")],
   ];
+  const sendBriefHref = `/account/briefs?designer=${profile.id}${briefId ? `&brief=${briefId}` : ""}`;
 
   if (view === "list") {
     return (
@@ -297,7 +357,7 @@ function DesignerCard({
                 </Link>
                 {canSendBrief ? (
                   <Link
-                    href={`/account/briefs?designer=${profile.id}`}
+                    href={sendBriefHref}
                     className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                   >
                     Send Brief
@@ -400,6 +460,22 @@ export default async function DesignersPage({
   const q = first(sp.q).trim();
   const location = first(sp.location).trim();
   const specialty = first(sp.specialty).trim();
+  const matchingMode = first(sp.match) === "brief";
+  const briefId = first(sp.brief).trim();
+  const projectType = first(sp.projectType).trim();
+  const goal = first(sp.goal).trim();
+  const style = first(sp.style).trim();
+  const support = first(sp.support).trim();
+  const budget = first(sp.budget).trim();
+  const timeline = first(sp.timeline).trim();
+  const cues = first(sp.cues)
+    .split(",")
+    .map((cue) => cue.trim())
+    .filter(Boolean)
+    .slice(0, 5);
+  const briefContext: BriefMatchContext | null = matchingMode
+    ? { projectType, goal, style, support, budget, timeline, location, cues }
+    : null;
   const view = selectedView(first(sp.view));
   const sort = selectedSort(first(sp.sort));
 
@@ -448,31 +524,32 @@ export default async function DesignersPage({
       .filter((item) => item.entity_type === "studio")
       .map((item) => item.entity_key)
   );
-  const normalizedQuery = q.toLowerCase();
-  const normalizedLocation = location.toLowerCase();
-  const normalizedSpecialty = specialty
-    .toLowerCase()
+  const normalizedQuery = normalizeSearchText(q);
+  const normalizedLocation = normalizeSearchText(location);
+  const normalizedSpecialty = normalizeSearchText(specialty)
     .replace(/(istic|ist|ism)$/, "");
 
   let profiles = ((data ?? []) as Profile[])
     .map(applyDemoProfilePresentation)
     .filter((profile) => {
-      const searchable = [
-        profile.full_name,
-        profile.bio,
-        profile.profession_type,
-        ...(profile.specialties ?? []),
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      const specialtyText = (profile.specialties ?? []).join(" ").toLowerCase();
+      const searchable = normalizeSearchText(
+        [
+          profile.full_name,
+          profile.bio,
+          profile.profession_type,
+          ...(profile.specialties ?? []),
+        ]
+          .filter(Boolean)
+          .join(" ")
+      );
+      const specialtyText = normalizeSearchText((profile.specialties ?? []).join(" "));
       const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
       const matchesLocation =
+        matchingMode ||
         !normalizedLocation ||
-        (profile.location ?? "").toLowerCase().includes(normalizedLocation);
+        normalizeSearchText(profile.location ?? "").includes(normalizedLocation);
       const matchesSpecialty =
-        !normalizedSpecialty || specialtyText.includes(normalizedSpecialty);
+        matchingMode || !normalizedSpecialty || specialtyText.includes(normalizedSpecialty);
       const matchesMinimum =
         Number.isNaN(minRate) ||
         (profile.hourly_rate !== null && profile.hourly_rate >= minRate);
@@ -490,17 +567,19 @@ export default async function DesignersPage({
     });
 
   const studios = ((studioData ?? []) as Studio[]).filter((studio) => {
-    const searchable = [studio.name, studio.bio, ...(studio.specialties ?? [])]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-    const specialtyText = (studio.specialties ?? []).join(" ").toLowerCase();
+    const searchable = normalizeSearchText(
+      [studio.name, studio.bio, ...(studio.specialties ?? [])]
+        .filter(Boolean)
+        .join(" ")
+    );
+    const specialtyText = normalizeSearchText((studio.specialties ?? []).join(" "));
     const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
     const matchesLocation =
+      matchingMode ||
       !normalizedLocation ||
-      (studio.location ?? "").toLowerCase().includes(normalizedLocation);
+      normalizeSearchText(studio.location ?? "").includes(normalizedLocation);
     const matchesSpecialty =
-      !normalizedSpecialty || specialtyText.includes(normalizedSpecialty);
+      matchingMode || !normalizedSpecialty || specialtyText.includes(normalizedSpecialty);
     const matchesMinimum =
       Number.isNaN(minRate) ||
       (studio.hourly_rate !== null && studio.hourly_rate >= minRate);
@@ -525,13 +604,51 @@ export default async function DesignersPage({
     );
   });
 
-  if (sort === "rate") {
+  if (matchingMode && sort === "recommended") {
+    const matchScore = (profile: Profile) => {
+      const profileSpecialties = normalizeSearchText((profile.specialties ?? []).join(" "));
+      const profileLocation = normalizeSearchText(profile.location ?? "");
+      const profileText = normalizeSearchText(
+        [profile.bio, profile.profession_type, ...(profile.specialties ?? [])]
+          .filter(Boolean)
+          .join(" ")
+      );
+      return (
+        (normalizedSpecialty && profileSpecialties.includes(normalizedSpecialty) ? 4 : 0) +
+        (normalizedLocation && profileLocation.includes(normalizedLocation) ? 3 : 0) +
+        (projectType && profileText.includes(normalizeSearchText(projectType)) ? 2 : 0) +
+        cues.filter((cue) => profileText.includes(normalizeSearchText(cue))).length
+      );
+    };
+    profiles = profiles.sort((left, right) => matchScore(right) - matchScore(left));
+  } else if (sort === "rate") {
     profiles = profiles.sort(
       (a, b) => (a.hourly_rate ?? Number.MAX_SAFE_INTEGER) - (b.hourly_rate ?? Number.MAX_SAFE_INTEGER)
     );
   }
 
+  const profileIds = profiles.map((profile) => profile.id);
+  const { data: portfolioProjectData } = profileIds.length
+    ? await supabase.from("projects").select("profile_id").in("profile_id", profileIds)
+    : { data: [] };
+  const portfolioCounts = new Map<string, number>();
+  (portfolioProjectData ?? []).forEach((project) => {
+    portfolioCounts.set(
+      project.profile_id,
+      (portfolioCounts.get(project.profile_id) ?? 0) + 1
+    );
+  });
+
   const base = {
+    match: matchingMode ? "brief" : "",
+    brief: briefId,
+    projectType,
+    goal,
+    style,
+    support,
+    budget,
+    timeline,
+    cues: cues.join(","),
     q,
     location,
     specialty,
@@ -543,6 +660,19 @@ export default async function DesignersPage({
   const gridHref = "/designers" + qs({ ...base, view: "grid" });
   const listHref = "/designers" + qs({ ...base, view: "list" });
   const hasFilters = Boolean(q || location || specialty || minRateRaw || maxRateRaw);
+  const matchingQueryEntries = briefContext
+    ? [
+        ["match", "brief"],
+        ["brief", briefId],
+        ["projectType", projectType],
+        ["goal", goal],
+        ["style", style],
+        ["support", support],
+        ["budget", budget],
+        ["timeline", timeline],
+        ["cues", cues.join(",")],
+      ].filter((entry) => entry[1])
+    : [];
 
   return (
     <main>
@@ -559,6 +689,9 @@ export default async function DesignersPage({
           <form action="/designers" className="mx-auto mt-9 max-w-4xl">
             <input type="hidden" name="view" value={view} />
             <input type="hidden" name="sort" value={sort} />
+            {matchingQueryEntries.map(([name, value]) => (
+              <input key={name} type="hidden" name={name} value={value} />
+            ))}
             <div className="flex flex-col gap-3 rounded-2xl border border-line bg-background p-3 shadow-sm sm:flex-row">
               <input
                 name="q"
@@ -589,6 +722,43 @@ export default async function DesignersPage({
         </div>
       </section>
 
+      {briefContext ? (
+        <section className="border-b border-line bg-primary-soft px-4 py-6 sm:px-6">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <div className="text-sm font-semibold text-primary">Matching from Project Compass</div>
+                <h2 className="mt-1 text-2xl font-bold">Designers for your brief</h2>
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
+                  Results use the style and location available in current beta profiles.
+                  The cards explain what matches and what still needs confirmation.
+                </p>
+              </div>
+              <Link href="/project-compass" className="rounded-xl border border-primary bg-card px-4 py-3 text-center text-sm font-semibold text-primary">
+                Edit brief
+              </Link>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {[
+                briefContext.style,
+                briefContext.projectType,
+                briefContext.location,
+                briefContext.budget,
+                briefContext.support,
+                briefContext.timeline,
+                ...briefContext.cues.slice(0, 3),
+              ]
+                .filter(Boolean)
+                .map((item) => (
+                  <span key={item} className="rounded-full border border-primary/20 bg-card px-3 py-1.5 text-sm font-semibold text-primary">
+                    {item}
+                  </span>
+                ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-[290px_1fr]">
         <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
           <div className="flex items-center justify-between gap-3">
@@ -607,6 +777,9 @@ export default async function DesignersPage({
             <input type="hidden" name="view" value={view} />
             <input type="hidden" name="sort" value={sort} />
             <input type="hidden" name="q" value={q} />
+            {matchingQueryEntries.map(([name, value]) => (
+              <input key={name} type="hidden" name={name} value={value} />
+            ))}
 
             <label className="block text-sm font-semibold">
               Location
@@ -680,6 +853,7 @@ export default async function DesignersPage({
                 {studios.map((studio) => (
                   <StudioCard
                     key={studio.id}
+                    briefId={briefId}
                     studio={studio}
                     memberCount={studioMemberCounts.get(studio.id) ?? 0}
                     initialSaved={savedStudioIds.has(studio.id)}
@@ -695,7 +869,9 @@ export default async function DesignersPage({
               <p className="text-sm font-semibold text-primary">
                 {countLabel(profiles.length, "designer")} found
               </p>
-              <h2 className="mt-1 text-2xl font-bold">Recommended professionals</h2>
+              <h2 className="mt-1 text-2xl font-bold">
+                {briefContext ? "Recommended for your brief" : "Recommended beta professionals"}
+              </h2>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -746,7 +922,11 @@ export default async function DesignersPage({
           ) : profiles.length === 0 ? (
             <div className="mt-6 rounded-2xl border border-line bg-card p-8 text-center">
               <div className="text-xl font-bold">No designers match these filters</div>
-              <p className="mt-2 text-muted">Try removing a filter or searching a different city.</p>
+              <p className="mt-2 text-muted">
+                {briefContext
+                  ? "No exact matches yet. Try widening location or style, or save the brief and revisit as the beta network grows."
+                  : "Try removing a filter or searching a different city."}
+              </p>
               <Link
                 href="/designers"
                 className="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"
@@ -759,12 +939,15 @@ export default async function DesignersPage({
               {profiles.map((profile, index) => (
                 <DesignerCard
                   key={profile.id}
+                  briefContext={briefContext}
+                  briefId={briefId}
                   canSendBrief={canSendBrief}
                   profile={profile}
                   index={index}
                   requestedLocation={location}
                   requestedSpecialty={specialty}
                   initialSaved={savedDesignerIds.has(profile.id)}
+                  portfolioCount={portfolioCounts.get(profile.id) ?? 0}
                   view={view}
                 />
               ))}
@@ -774,12 +957,15 @@ export default async function DesignersPage({
               {profiles.map((profile, index) => (
                 <DesignerCard
                   key={profile.id}
+                  briefContext={briefContext}
+                  briefId={briefId}
                   canSendBrief={canSendBrief}
                   profile={profile}
                   index={index}
                   requestedLocation={location}
                   requestedSpecialty={specialty}
                   initialSaved={savedDesignerIds.has(profile.id)}
+                  portfolioCount={portfolioCounts.get(profile.id) ?? 0}
                   view={view}
                 />
               ))}

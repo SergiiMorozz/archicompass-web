@@ -5,10 +5,12 @@ import BrandLogo from "@/components/BrandLogo";
 
 type ShareableStyleAnalysis = {
   primaryStyle: string;
+  confidence: "low" | "medium" | "high";
   summary: string;
   colorPalette: string[];
   materials: string[];
   designerPrompt: string;
+  watchOuts: string[];
 };
 
 type ShareablePhoto = {
@@ -142,14 +144,37 @@ function wrappedLines(
   return visible;
 }
 
+function conciseSentence(text: string, maxCharacters = 180) {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (!clean) return "A coherent interior direction translated from your reference photos.";
+
+  const firstSentence = clean.split(/(?<=[.!?])\s+/)[0];
+  if (firstSentence.length <= maxCharacters) {
+    return /[.!?]$/.test(firstSentence) ? firstSentence : `${firstSentence}.`;
+  }
+
+  const words = firstSentence.split(" ");
+  let result = "";
+  for (const word of words) {
+    const candidate = result ? `${result} ${word}` : word;
+    if (candidate.length > maxCharacters - 1) break;
+    result = candidate;
+  }
+  return `${result.replace(/[,:;\-]+$/, "")}.`;
+}
+
+function confidenceLabel(confidence: ShareableStyleAnalysis["confidence"]) {
+  return `${confidence.charAt(0).toUpperCase()}${confidence.slice(1)} confidence`;
+}
+
 function drawPhotoGrid(
   context: CanvasRenderingContext2D,
   images: HTMLImageElement[]
 ) {
   const x = 60;
-  const y = 160;
+  const y = 142;
   const width = 960;
-  const height = 430;
+  const height = 400;
   const gap = 14;
 
   if (!images.length) {
@@ -211,14 +236,14 @@ async function createResultPng({
     logoCrop.width,
     logoCrop.height,
     60,
-    60,
-    380,
-    90
+    57,
+    270,
+    64
   );
   context.fillStyle = "#706284";
   context.font = "600 22px Outfit, Arial, sans-serif";
   context.textAlign = "right";
-  context.fillText("AI INTERIOR STYLE CHECK", 1020, 99);
+  context.fillText("AI INTERIOR STYLE CHECK", 1020, 91);
   context.textAlign = "left";
 
   const images = await Promise.all(photos.slice(0, 4).map((photo) => loadImage(photo.url)));
@@ -226,20 +251,28 @@ async function createResultPng({
 
   context.fillStyle = "#592d86";
   context.font = "700 22px Outfit, Arial, sans-serif";
-  context.fillText("YOUR INTERIOR STYLE", 60, 650);
+  context.fillText("YOUR INTERIOR STYLE", 60, 596);
 
   context.fillStyle = "#251d30";
   context.font = "700 66px Outfit, Arial, sans-serif";
-  const titleLines = wrappedLines(context, analysis.primaryStyle, 960, 1);
-  titleLines.forEach((line, index) => context.fillText(line, 60, 725 + index * 72));
-  const titleBottom = 725 + (titleLines.length - 1) * 72;
+  const titleLines = wrappedLines(context, analysis.primaryStyle, 700, 1);
+  titleLines.forEach((line, index) => context.fillText(line, 60, 670 + index * 72));
+  const titleBottom = 670 + (titleLines.length - 1) * 72;
+  const titleWidth = context.measureText(titleLines[0]).width;
+  context.font = "700 18px Outfit, Arial, sans-serif";
+  const confidence = confidenceLabel(analysis.confidence);
+  const confidenceWidth = context.measureText(confidence).width + 34;
+  const confidenceX = Math.min(1020 - confidenceWidth, 60 + titleWidth + 28);
+  drawRoundedFill(context, confidenceX, titleBottom - 31, confidenceWidth, 38, 19, "#f1eaf7");
+  context.fillStyle = "#592d86";
+  context.fillText(confidence, confidenceX + 17, titleBottom - 6);
 
   context.fillStyle = "#706284";
-  context.font = "400 27px Outfit, Arial, sans-serif";
-  const summaryLines = wrappedLines(context, analysis.summary, 960, 3);
-  summaryLines.forEach((line, index) => context.fillText(line, 60, titleBottom + 58 + index * 38));
+  context.font = "400 25px Outfit, Arial, sans-serif";
+  const summaryLines = wrappedLines(context, conciseSentence(analysis.summary), 960, 3);
+  summaryLines.forEach((line, index) => context.fillText(line, 60, titleBottom + 48 + index * 35));
 
-  const paletteY = Math.max(920, titleBottom + 58 + summaryLines.length * 38 + 34);
+  const paletteY = Math.max(830, titleBottom + 48 + summaryLines.length * 35 + 28);
   context.fillStyle = "#251d30";
   context.font = "700 23px Outfit, Arial, sans-serif";
   context.fillText("PALETTE", 60, paletteY);
@@ -247,18 +280,17 @@ async function createResultPng({
   const paletteWidth = (960 - 18 * 3) / 4;
   paletteItems.forEach((item, index) => {
     const itemX = 60 + index * (paletteWidth + 18);
-    drawRoundedFill(context, itemX, paletteY + 24, paletteWidth, 82, 18, "#faf9fb");
     context.fillStyle = paletteColor(item, index);
     context.beginPath();
-    context.arc(itemX + 32, paletteY + 65, 18, 0, Math.PI * 2);
+    context.arc(itemX + 22, paletteY + 58, 20, 0, Math.PI * 2);
     context.fill();
     context.fillStyle = "#251d30";
     context.font = "600 19px Outfit, Arial, sans-serif";
-    const label = item.length > 16 ? `${item.slice(0, 15)}...` : item;
-    context.fillText(label, itemX + 60, paletteY + 71);
+    const label = item.length > 19 ? item.slice(0, 19) : item;
+    context.fillText(label, itemX + 52, paletteY + 65);
   });
 
-  const materialsY = paletteY + 150;
+  const materialsY = paletteY + 116;
   context.fillStyle = "#251d30";
   context.font = "700 23px Outfit, Arial, sans-serif";
   context.fillText("MATERIALS", 60, materialsY);
@@ -277,21 +309,28 @@ async function createResultPng({
     pillX += pillWidth + 12;
   });
 
-  context.drawImage(
-    brandLogo,
-    logoCrop.x,
-    logoCrop.y,
-    logoCrop.width,
-    logoCrop.height,
-    60,
-    1242,
-    250,
-    59
+  const designerFitY = Math.max(materialsY + 98, pillY + 72);
+  context.fillStyle = "#251d30";
+  context.font = "700 23px Outfit, Arial, sans-serif";
+  context.fillText("DESIGNER FIT", 60, designerFitY);
+  context.fillStyle = "#706284";
+  context.font = "500 21px Outfit, Arial, sans-serif";
+  const fitLines = wrappedLines(
+    context,
+    conciseSentence(analysis.designerPrompt, 150),
+    960,
+    2
   );
+  fitLines.forEach((line, index) => context.fillText(line, 60, designerFitY + 35 + index * 30));
+
+  context.fillStyle = "#592d86";
+  context.textAlign = "left";
+  context.font = "700 21px Outfit, Arial, sans-serif";
+  context.fillText("Upload 4 photos. Get your designer-ready brief.", 60, 1280);
   context.fillStyle = "#592d86";
   context.textAlign = "right";
-  context.font = "700 22px Outfit, Arial, sans-serif";
-  context.fillText("From inspiration to the right designer", 1020, 1282);
+  context.font = "600 19px Outfit, Arial, sans-serif";
+  context.fillText("ArchiCompass beta", 1020, 1280);
 
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -326,10 +365,16 @@ export default function ShareableStyleResult({
   analysis: ShareableStyleAnalysis;
   photos: ShareablePhoto[];
 }) {
-  const [busyAction, setBusyAction] = useState<"download" | "share" | null>(null);
+  const [busyAction, setBusyAction] = useState<"caption" | "download" | "share" | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const visiblePhotos = photos.slice(0, 4);
+  const shareCaption = [
+    `My interior style is ${analysis.primaryStyle} (${confidenceLabel(analysis.confidence).toLowerCase()}).`,
+    conciseSentence(analysis.summary),
+    `Designer fit: ${conciseSentence(analysis.designerPrompt, 140)}`,
+    "Upload your inspiration and get a designer-ready brief with ArchiCompass.",
+  ].join("\n\n");
 
   async function downloadResult() {
     setBusyAction("download");
@@ -354,7 +399,7 @@ export default function ShareableStyleResult({
       const blob = await createResultPng({ analysis, photos });
       const fileName = safeFileName(analysis.primaryStyle);
       const file = new File([blob], fileName, { type: "image/png" });
-      const shareText = `My interior style is ${analysis.primaryStyle}. Created with ArchiCompass.`;
+      const shareText = shareCaption;
 
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
@@ -378,6 +423,20 @@ export default function ShareableStyleResult({
     } catch (caught) {
       if (caught instanceof DOMException && caught.name === "AbortError") return;
       setError(caught instanceof Error ? caught.message : "The result could not be shared.");
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
+  async function copyCaption() {
+    setBusyAction("caption");
+    setNotice(null);
+    setError(null);
+    try {
+      await navigator.clipboard.writeText(shareCaption);
+      setNotice("Caption copied. It is ready to paste into a post or message.");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "The caption could not be copied.");
     } finally {
       setBusyAction(null);
     }
@@ -410,6 +469,14 @@ export default function ShareableStyleResult({
           >
             {busyAction === "download" ? "Creating PNG..." : "Download PNG"}
           </button>
+          <button
+            type="button"
+            onClick={copyCaption}
+            disabled={Boolean(busyAction)}
+            className="rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold text-foreground disabled:opacity-60"
+          >
+            {busyAction === "caption" ? "Copying..." : "Copy caption"}
+          </button>
         </div>
       </div>
 
@@ -435,16 +502,21 @@ export default function ShareableStyleResult({
 
         <div className="p-5 sm:p-6">
           <div className="text-xs font-semibold uppercase text-primary">Your interior style</div>
-          <h4 className="mt-1 text-3xl font-bold">{analysis.primaryStyle}</h4>
-          <p className="mt-3 text-sm leading-6 text-muted">{analysis.summary}</p>
+          <div className="mt-1 flex flex-wrap items-center gap-3">
+            <h4 className="text-3xl font-bold">{analysis.primaryStyle}</h4>
+            <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
+              {confidenceLabel(analysis.confidence)}
+            </span>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-muted">{conciseSentence(analysis.summary)}</p>
 
           <div className="mt-5">
             <div className="text-xs font-semibold uppercase text-muted">Palette</div>
-            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {analysis.colorPalette.slice(0, 4).map((color, index) => (
-                <div key={color} className="flex items-center gap-3 rounded-lg bg-background px-3 py-2 text-sm font-semibold">
-                  <span className="h-6 w-6 shrink-0 rounded-full border border-black/5" style={{ backgroundColor: paletteColor(color, index) }} />
-                  <span>{color}</span>
+                <div key={color} className="text-center text-xs font-semibold">
+                  <span className="mx-auto block h-10 w-10 rounded-full border border-black/5" style={{ backgroundColor: paletteColor(color, index) }} />
+                  <span className="mt-2 block">{color}</span>
                 </div>
               ))}
             </div>
@@ -459,8 +531,18 @@ export default function ShareableStyleResult({
             </div>
           </div>
 
-          <div className="mt-5 border-t border-line pt-4 text-xs font-semibold text-muted">
-            Made with ArchiCompass | From inspiration to the right designer
+          <div className="mt-5 rounded-lg bg-background p-4">
+            <div className="text-xs font-semibold uppercase text-primary">Designer fit</div>
+            <p className="mt-2 text-sm leading-6 text-muted">
+              {conciseSentence(analysis.designerPrompt, 170)}
+            </p>
+          </div>
+
+          <div className="mt-5 border-t border-line pt-4">
+            <div className="text-sm font-semibold text-primary">
+              Upload 4 photos. Get your designer-ready brief.
+            </div>
+            <div className="mt-1 text-xs font-semibold text-muted">Made with ArchiCompass beta</div>
           </div>
         </div>
       </div>

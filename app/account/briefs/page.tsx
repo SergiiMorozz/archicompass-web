@@ -274,6 +274,7 @@ export default async function SavedBriefsPage({
     deleted?: string;
     designer?: string;
     studio?: string;
+    brief?: string;
     error?: string;
     sent?: string;
   }>;
@@ -283,7 +284,14 @@ export default async function SavedBriefsPage({
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
 
-  if (!user) redirect("/login");
+  if (!user) {
+    const nextParams = new URLSearchParams();
+    if (sp.designer) nextParams.set("designer", sp.designer);
+    if (sp.studio) nextParams.set("studio", sp.studio);
+    if (sp.brief) nextParams.set("brief", sp.brief);
+    const nextPath = `/account/briefs${nextParams.size ? `?${nextParams.toString()}` : ""}`;
+    redirect(`/login?next=${encodeURIComponent(nextPath)}`);
+  }
   const accountRole = await getAccountRole(supabase, user.id);
   const canSendBriefs = accountRole === "client";
 
@@ -317,7 +325,12 @@ export default async function SavedBriefsPage({
     .order("created_at", { ascending: false })
     .limit(100);
 
-  const briefs = (briefsData ?? []) as ProjectBrief[];
+  const briefs = [...((briefsData ?? []) as ProjectBrief[])].sort((left, right) => {
+    if (!sp.brief) return 0;
+    if (left.id === sp.brief) return -1;
+    if (right.id === sp.brief) return 1;
+    return 0;
+  });
   const designers = (designersData ?? []) as Designer[];
   const studios = (studiosData ?? []) as StudioRecipient[];
   const inquiries = (inquiriesData ?? []) as DesignerInquiry[];
@@ -466,9 +479,16 @@ export default async function SavedBriefsPage({
                         Saved {createdLabel(brief.created_at)}
                       </div>
                     </div>
-                    <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
-                      {countLabel(brief.reference_photo_names?.length ?? 0, "photo")}
-                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {sp.brief === brief.id ? (
+                        <span className="rounded-full bg-primary px-3 py-1 text-sm font-semibold text-white">
+                          Selected brief
+                        </span>
+                      ) : null}
+                      <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
+                        {countLabel(brief.reference_photo_names?.length ?? 0, "photo")}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">

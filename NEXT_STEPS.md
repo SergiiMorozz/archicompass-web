@@ -80,6 +80,17 @@ Last checkpoint: 2026-06-30
   designer-search guidance.
 - AI style results now include a portrait sharing card built from the first
   four reference photos, with system sharing and a downloadable PNG.
+- The personal sharing card now keeps the user's result as the visual focus:
+  smaller branding, one logo, complete short copy, confidence, compact palette,
+  designer-fit guidance, a stronger CTA, and a ready-to-copy social caption.
+- Project Compass passes project type, style, scope, budget, timeline, location,
+  visual cues, and saved brief ID into Find Designer. Matching results show the
+  brief context and explain style, location, support, budget, and portfolio fit.
+- Brief matching ranks the available beta network instead of treating every
+  signal as a hard filter. Ordinary catalog filters remain strict, and Polish
+  diacritics such as `Kraków`/`Krakow` are normalized consistently.
+- Brief sending now preserves designer, studio, and saved-brief context through
+  magic-link login. Login copy explains the action the user is returning to.
 - The supplied ArchiCompass logo is used in the global header, footer, browser
   icon, and generated sharing card.
 - `/admin` is now a protected owner workspace with live platform totals, recent
@@ -180,6 +191,9 @@ Last checkpoint: 2026-06-30
 - Rolled-back live database checks verified automatic studio-owner membership,
   pending invitations for an existing designer account, and database-level
   rejection when a designer account attempts to save a client brief.
+- Browser checks verified brief-aware matching, honest remote/location labels,
+  preserved matching query parameters, context-aware login, Polish city-name
+  normalization, mobile width, and no browser console errors.
 
 ## Best Next Small Step
 
