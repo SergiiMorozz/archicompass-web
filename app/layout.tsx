@@ -13,6 +13,10 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "ArchiCompass | AI Project Brief & Designer Matching",
   description: "Turn interior references into a clear brief and find designers who fit the project.",
+  icons: {
+    icon: "/brand/archicompass-mark.png",
+    apple: "/brand/archicompass-mark.png",
+  },
 };
 
 export default function RootLayout({

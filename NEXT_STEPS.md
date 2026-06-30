@@ -1,6 +1,6 @@
 # ArchiCompass Next Steps
 
-Last checkpoint: 2026-06-29
+Last checkpoint: 2026-06-30
 
 ## Current State
 
@@ -77,6 +77,10 @@ Last checkpoint: 2026-06-29
   It supports `STYLE_ANALYSIS_PROVIDER=openai` or `gemini`, reads up to 6
   reference photos, and suggests a style, materials, colors, visual cues, and
   designer-search guidance.
+- AI style results now include a portrait sharing card built from the first
+  four reference photos, with system sharing and a downloadable PNG.
+- The supplied ArchiCompass logo is used in the global header, footer, browser
+  icon, and generated sharing card.
 - Project Compass briefs can be saved to Supabase with private reference photo
   storage and reviewed at `/account/briefs`.
 - Unsent saved briefs can be deleted from `/account/briefs`; their private
@@ -129,11 +133,31 @@ Last checkpoint: 2026-06-29
 - Browser checks confirmed the persistent header tab, dashboard, messages,
   saved briefs, future Inspiration HUB placeholder, Project Compass timeline,
   and no browser console errors.
+- The supplied brand logo and shareable style result passed desktop/mobile
+  browser checks with no horizontal overflow or console errors. PNG generation
+  reached its successful completion state in the browser.
 
 ## Best Next Small Step
 
 Add four to six stronger demo professional profiles and give Compact Living
 Studio a complete portfolio project with production-quality imagery.
+
+## Future Admin Workspace
+
+- Add a private `/admin` workspace for the owner and authorized employees.
+- Keep admin access separate from editable user profiles, using protected roles
+  and server-side authorization for every admin page and action.
+- Start with an overview of clients, professionals, briefs, inquiries,
+  favorites, profile traffic, and conversion through the Project Compass flow.
+- Add user, profile, portfolio, and project moderation with clear status,
+  search, filters, and internal notes.
+- Add a content workspace for articles and Inspiration HUB entries, including
+  drafts, publishing, authors, categories, and featured content.
+- Add subscription, invoice, and payment oversight when monetization is enabled.
+- Support scoped staff permissions such as owner, support, content editor, and
+  finance, plus an audit log for sensitive actions.
+- Keep private photos and conversations hidden from general staff by default.
+  Any support access should be explicit, limited, and recorded in the audit log.
 
 ## After That
 

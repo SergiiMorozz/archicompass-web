@@ -1,4 +1,5 @@
 import Link from "next/link";
+import BrandLogo from "@/components/BrandLogo";
 
 const navigation = [
   { href: "/", label: "Home" },
@@ -12,11 +13,8 @@ export default function Footer() {
     <footer className="bg-[#1f172a] text-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.5fr_1fr_1fr]">
         <div>
-          <Link href="/" className="inline-flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-2xl bg-white text-lg font-bold text-primary">
-              A
-            </span>
-            <span className="text-xl font-semibold">ArchiCompass</span>
+          <Link href="/" className="inline-flex items-center" aria-label="ArchiCompass home">
+            <BrandLogo variant="white" className="h-11 w-[190px]" />
           </Link>
           <p className="mt-5 max-w-md text-sm leading-6 text-white/70">
             Turn references into a clear project brief, then find designers and

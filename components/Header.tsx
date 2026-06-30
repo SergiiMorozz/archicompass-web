@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import BrandLogo from "@/components/BrandLogo";
 import { isProfessionalProfile } from "@/lib/professional";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -42,11 +43,8 @@ function NavLink({
 
 function Brand() {
   return (
-    <Link href="/" className="flex items-center gap-2" aria-label="ArchiCompass home">
-      <span className="grid h-9 w-9 place-items-center rounded-2xl bg-primary text-lg font-bold text-white shadow-sm">
-        A
-      </span>
-      <span className="text-xl font-semibold tracking-tight text-primary">ArchiCompass</span>
+    <Link href="/" className="flex items-center" aria-label="ArchiCompass home">
+      <BrandLogo className="h-9 w-[158px] sm:w-[174px]" />
     </Link>
   );
 }

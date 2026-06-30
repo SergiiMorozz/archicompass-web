@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import ShareableStyleResult from "@/components/ShareableStyleResult";
 import { countLabel } from "@/lib/count-label";
 
 type Option = {
@@ -797,6 +798,8 @@ export default function ProjectCompass() {
                       </ul>
                     </div>
                   ) : null}
+
+                  <ShareableStyleResult analysis={styleAnalysis} photos={referencePhotos} />
                 </div>
               ) : null}
 
