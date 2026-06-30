@@ -41,6 +41,25 @@ function NavLink({
   );
 }
 
+function WorkspaceLink({ href, children }: { href: string; children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isActive = pathname === href || pathname?.startsWith(`${href}/`);
+
+  return (
+    <Link
+      href={href}
+      className={[
+        "rounded-lg px-3 py-2 text-sm font-semibold transition",
+        isActive
+          ? "bg-primary-soft text-primary"
+          : "text-muted hover:bg-primary-soft hover:text-primary",
+      ].join(" ")}
+    >
+      {children}
+    </Link>
+  );
+}
+
 function Brand() {
   return (
     <Link href="/" className="flex items-center" aria-label="ArchiCompass home">
@@ -89,40 +108,47 @@ export default function Header() {
     };
   }, []);
 
-  const visibleNavItems = account
+  const workspaceItems = account
     ? [
-        ...navItems,
         { href: "/client", label: "Client Workspace" },
         ...(account.isProfessional
           ? [{ href: "/studio", label: "Designer Studio" }]
           : []),
       ]
-    : navItems;
+    : [];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-line/80 bg-background/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <Brand />
 
-        <nav className="hidden items-center gap-1 lg:flex">
-          {visibleNavItems.map((item) => (
+        <nav className="hidden items-center gap-1 xl:flex">
+          {navItems.map((item) => (
             <NavLink key={item.href} href={item.href}>
               {item.label}
             </NavLink>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 lg:flex">
+        <div className="hidden items-center gap-2 xl:flex">
           <button className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium text-foreground">
             EN
           </button>
           {account ? (
-            <Link
-              href="/account"
-              className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
-            >
-              Account
-            </Link>
+            <div className="flex items-center gap-1 rounded-xl border border-line bg-card p-1 shadow-sm">
+              {workspaceItems.map((item) => (
+                <WorkspaceLink key={item.href} href={item.href}>
+                  {item.label}
+                </WorkspaceLink>
+              ))}
+              <span aria-hidden="true" className="mx-1 h-6 w-px bg-line" />
+              <Link
+                href="/account"
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+              >
+                Account
+              </Link>
+            </div>
           ) : (
             <>
               <Link
@@ -145,7 +171,7 @@ export default function Header() {
           )}
         </div>
 
-        <div className="flex items-center gap-2 lg:hidden">
+        <div className="flex items-center gap-2 xl:hidden">
           <button className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium">
             EN
           </button>
@@ -166,41 +192,47 @@ export default function Header() {
       </div>
 
       {isOpen ? (
-        <div className="border-t border-line bg-background px-4 py-4 lg:hidden">
+        <div className="border-t border-line bg-background px-4 py-4 xl:hidden">
           <nav className="mx-auto grid max-w-7xl gap-2">
-            {visibleNavItems.map((item) => (
+            {navItems.map((item) => (
               <NavLink key={item.href} href={item.href} onClick={() => setIsOpen(false)}>
                 {item.label}
               </NavLink>
             ))}
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              {account ? (
+            {account ? (
+              <div className="mt-2 grid gap-2 border-t border-line pt-3">
+                <div className="px-3 text-xs font-semibold uppercase text-muted">Workspace</div>
+                {workspaceItems.map((item) => (
+                  <NavLink key={item.href} href={item.href} onClick={() => setIsOpen(false)}>
+                    {item.label}
+                  </NavLink>
+                ))}
                 <Link
                   href="/account"
                   onClick={() => setIsOpen(false)}
-                  className="col-span-2 rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white"
+                  className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white"
                 >
                   Account
                 </Link>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    onClick={() => setIsOpen(false)}
-                    className="rounded-xl border border-line bg-card px-4 py-3 text-center text-sm font-medium"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/get-started"
-                    onClick={() => setIsOpen(false)}
-                    className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white"
-                  >
-                    Get Started
-                  </Link>
-                </>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <Link
+                  href="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="rounded-xl border border-line bg-card px-4 py-3 text-center text-sm font-medium"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/get-started"
+                  onClick={() => setIsOpen(false)}
+                  className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white"
+                >
+                  Get Started
+                </Link>
+              </div>
+            )}
           </nav>
         </div>
       ) : null}

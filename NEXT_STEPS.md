@@ -23,11 +23,12 @@ Last checkpoint: 2026-06-30
 - Privacy and Terms now contain closed-beta working notices covering reference
   photos, private brief storage, AI processing, sharing, deletion, and user rights.
 - `/health` returns only `{ "ok": true }` or an HTTP 503 without sample data.
-- Professional accounts now receive a session-aware `Designer Studio` tab in
-  the global header; it remains visible across navigation until sign-out or
-  session expiry.
-- Every signed-in account now receives a session-aware `Client Workspace` tab;
-  professional accounts keep both Client Workspace and Designer Studio.
+- Professional accounts now receive a session-aware `Designer Studio` link in
+  the personal account group; it remains visible across navigation until
+  sign-out or session expiry.
+- Every signed-in account receives a session-aware `Client Workspace` link in
+  the same personal group; professional accounts keep both workspaces, visually
+  separated from the public navigation.
 - `/client` provides a dashboard with saved brief, favorite, request, and
   unread-message totals plus recent designer conversations.
 - `/client/messages` is the client inbox, `/client/briefs` keeps saved Project
