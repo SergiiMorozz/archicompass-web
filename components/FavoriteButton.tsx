@@ -10,7 +10,7 @@ export default function FavoriteButton({
 }: {
   compact?: boolean;
   entityKey: string;
-  entityType: "designer" | "project";
+  entityType: "designer" | "studio" | "project";
   initialSaved?: boolean;
 }) {
   const [saved, setSaved] = useState(initialSaved);

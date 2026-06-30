@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import ReferencePhotoGrid from "@/components/ReferencePhotoGrid";
 import { referencePhotoPreviews } from "@/lib/reference-photos";
+import { getStudioMemberships } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -11,6 +12,7 @@ type Inquiry = {
   id: string;
   client_id: string;
   designer_id: string;
+  studio_id: string | null;
   subject: string;
   message: string | null;
   status: string;
@@ -34,6 +36,8 @@ type ClientProfile = {
   email: string | null;
   location: string | null;
 };
+
+type TeamProfile = { id: string; full_name: string | null; email: string | null };
 
 const statuses = ["reviewing", "accepted", "declined"] as const;
 
@@ -64,11 +68,15 @@ async function sendMessage(formData: FormData) {
   const user = userData.user;
   if (!user) redirect("/login");
 
+  const { data: canManage } = await supabase.rpc("can_manage_inquiry", {
+    target_inquiry_id: inquiryId,
+  });
+  if (!canManage) actionError(inquiryId, "This conversation is not available.");
+
   const { data: inquiry } = await supabase
     .from("designer_inquiries")
     .select("id, designer_id, status")
     .eq("id", inquiryId)
-    .eq("designer_id", user.id)
     .maybeSingle();
   if (!inquiry) actionError(inquiryId, "This conversation is not available.");
 
@@ -83,8 +91,7 @@ async function sendMessage(formData: FormData) {
     await supabase
       .from("designer_inquiries")
       .update({ status: "reviewing", updated_at: new Date().toISOString() })
-      .eq("id", inquiryId)
-      .eq("designer_id", user.id);
+      .eq("id", inquiryId);
   }
 
   revalidatePath("/studio");
@@ -109,15 +116,19 @@ async function updateStatus(formData: FormData) {
   const user = userData.user;
   if (!user) redirect("/login");
 
+  const { data: canManage } = await supabase.rpc("can_manage_inquiry", {
+    target_inquiry_id: inquiryId,
+  });
+  if (!canManage) actionError(inquiryId, "Only the receiving designer or studio team can update this request.");
+
   const { data: updated, error } = await supabase
     .from("designer_inquiries")
     .update({ status, updated_at: new Date().toISOString() })
     .eq("id", inquiryId)
-    .eq("designer_id", user.id)
     .select("id")
     .maybeSingle();
   if (error) actionError(inquiryId, error.message);
-  if (!updated) actionError(inquiryId, "Only the receiving designer can update this request.");
+  if (!updated) actionError(inquiryId, "Only the receiving designer or studio team can update this request.");
 
   revalidatePath("/studio");
   revalidatePath("/studio/inbox");
@@ -166,13 +177,17 @@ export default async function StudioConversationPage({
   const { data: inquiryData } = await supabase
     .from("designer_inquiries")
     .select(
-      "id, client_id, designer_id, subject, message, status, brief_snapshot, brief_text, reference_photo_names, reference_photo_paths, created_at"
+      "id, client_id, designer_id, studio_id, subject, message, status, brief_snapshot, brief_text, reference_photo_names, reference_photo_paths, created_at"
     )
     .eq("id", id)
-    .eq("designer_id", user.id)
     .maybeSingle();
   if (!inquiryData) notFound();
   const inquiry = inquiryData as Inquiry;
+
+  const { data: canManage } = await supabase.rpc("can_manage_inquiry", {
+    target_inquiry_id: inquiry.id,
+  });
+  if (!canManage) notFound();
 
   await supabase
     .from("inquiry_messages")
@@ -201,6 +216,32 @@ export default async function StudioConversationPage({
   const messages = (messageData ?? []) as Message[];
   const client = clientData as ClientProfile | null;
   const clientName = client?.full_name || client?.email || "Client";
+  const { data: teamMemberships } = inquiry.studio_id
+    ? await getStudioMemberships(supabase, user.id, "active")
+    : { data: [] };
+  const hasStudioAccess = inquiry.studio_id
+    ? teamMemberships.some((membership) => membership.studio_id === inquiry.studio_id)
+    : false;
+  const { data: studioTeamData } = inquiry.studio_id && hasStudioAccess
+    ? await supabase
+        .from("studio_members")
+        .select("user_id")
+        .eq("studio_id", inquiry.studio_id)
+        .eq("status", "active")
+    : { data: [] };
+  const teamUserIds = new Set<string>([
+    inquiry.designer_id,
+    ...(studioTeamData ?? []).map((member) => member.user_id),
+  ]);
+  const { data: teamProfileData } = teamUserIds.size
+    ? await supabase
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", Array.from(teamUserIds))
+    : { data: [] };
+  const teamProfiles = new Map(
+    ((teamProfileData ?? []) as TeamProfile[]).map((profile) => [profile.id, profile])
+  );
 
   return (
     <main>
@@ -278,18 +319,25 @@ export default async function StudioConversationPage({
 
               {messages.map((message) => {
                 const mine = message.sender_id === user.id;
+                const fromTeam = teamUserIds.has(message.sender_id);
+                const senderProfile = teamProfiles.get(message.sender_id);
+                const senderLabel = mine
+                  ? "You"
+                  : fromTeam
+                    ? senderProfile?.full_name || senderProfile?.email || "Studio team"
+                    : clientName;
                 return (
                   <div
                     key={message.id}
                     className={[
                       "max-w-[85%] rounded-lg p-4",
-                      mine
+                      fromTeam
                         ? "ml-auto rounded-br-sm bg-primary text-white"
                         : "mr-auto rounded-bl-sm bg-background",
                     ].join(" ")}
                   >
-                    <div className={`text-xs font-semibold ${mine ? "text-white/70" : "text-primary"}`}>
-                      {mine ? "You" : clientName} · {formatDate(message.created_at)}
+                    <div className={`text-xs font-semibold ${fromTeam ? "text-white/70" : "text-primary"}`}>
+                      {senderLabel} · {formatDate(message.created_at)}
                     </div>
                     <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{message.body}</p>
                   </div>
@@ -319,7 +367,8 @@ export default async function StudioConversationPage({
               </label>
               <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs leading-5 text-muted">
-                  Messages are visible only to this client and the receiving designer.
+                  Messages are visible only to this client and the receiving designer or
+                  active studio team.
                 </p>
                 <button type="submit" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
                   Send message

@@ -97,6 +97,18 @@ Last checkpoint: 2026-06-30
   owners retain account access and existing conversations continue.
 - Visibility changes use protected database functions, appear in dashboard
   totals and user filters, and are recorded in the admin audit log.
+- Accounts now have an explicit `client` or `designer` operating role. Clients
+  create and send briefs; designers receive them and can work independently or
+  as part of a studio. The same account cannot perform both roles concurrently.
+- Designers can permanently delete their personal public profile and portfolio
+  without deleting their login, saved conversation history, or studio access.
+- `/studio/team` creates and edits separate design-studio profiles, manages
+  consent-based team invitations and roles, and links each active designer's
+  existing public profile and portfolio to the studio automatically.
+- `/studios/[id]` presents the studio identity, connected designers, combined
+  portfolio, shared contact action, and studio favorite state.
+- Studio inquiries keep one client conversation while granting every active
+  team member access to the brief, private references, status, and messages.
 - Project Compass briefs can be saved to Supabase with private reference photo
   storage and reviewed at `/account/briefs`.
 - Unsent saved briefs can be deleted from `/account/briefs`; their private
@@ -159,11 +171,20 @@ Last checkpoint: 2026-06-30
 - Public moderation was verified end to end: a hidden designer profile and a
   hidden portfolio project returned their not-found states to a logged-out
   visitor, then both were restored to visible status.
+- Account-role and studio migrations were applied successfully to live Supabase.
+  The owner account is now a designer account, is redirected away from Client
+  Workspace, and no longer sees or can execute new brief-sending actions.
+- Local production browser checks covered account role copy, retained brief
+  history, profile deletion controls, Studio & Team creation UI, public catalog,
+  personal profile actions, mobile overflow, and browser errors.
+- Rolled-back live database checks verified automatic studio-owner membership,
+  pending invitations for an existing designer account, and database-level
+  rejection when a designer account attempts to save a client brief.
 
 ## Best Next Small Step
 
-Add four to six stronger demo professional profiles and give Compact Living
-Studio a complete portfolio project with production-quality imagery.
+Use two test designer accounts to create the first real studio, accept an
+invitation, and exercise one shared client conversation from both team logins.
 
 ## Admin Workspace Roadmap
 

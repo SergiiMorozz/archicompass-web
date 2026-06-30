@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import ClientNav from "@/components/ClientNav";
+import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -9,6 +10,7 @@ export default async function ClientLayout({ children }: { children: React.React
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
   if (!user) redirect("/login");
+  if ((await getAccountRole(supabase, user.id)) !== "client") redirect("/studio");
 
   const [{ data: profile }, { data: inquiries }] = await Promise.all([
     supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),

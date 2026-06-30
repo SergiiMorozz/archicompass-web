@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getAccountRole } from "@/lib/studios";
 import ProjectGallery from "@/components/ProjectGallery";
 
 export const revalidate = 0;
@@ -225,6 +226,9 @@ async function addProject(formData: FormData) {
   const user = data.user;
 
   if (!user) redirect("/login");
+  if ((await getAccountRole(supabase, user.id)) !== "designer") {
+    redirect("/account/profile?error=Switch%20to%20a%20designer%20account%20before%20creating%20a%20portfolio.");
+  }
 
   const title = textValue(formData, "title");
   if (!title) redirect("/account/projects?error=Project%20title%20is%20required");
@@ -536,6 +540,9 @@ export default async function ManageProjectsPage({
   const user = userData.user;
 
   if (!user) redirect("/login");
+  if ((await getAccountRole(supabase, user.id)) !== "designer") {
+    redirect("/account/profile?error=Switch%20to%20a%20designer%20account%20before%20managing%20a%20portfolio.");
+  }
 
   const { data: projectsData, error } = await supabase
     .from("projects")

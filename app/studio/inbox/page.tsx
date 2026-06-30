@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getStudioMemberships, inquiryRecipientFilter } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -7,6 +8,7 @@ export const revalidate = 0;
 type Inquiry = {
   id: string;
   client_id: string;
+  studio_id: string | null;
   subject: string;
   message: string | null;
   status: string;
@@ -28,6 +30,8 @@ type ClientProfile = {
   email: string | null;
   location: string | null;
 };
+
+type Studio = { id: string; name: string };
 
 const statusFilters = ["all", "sent", "reviewing", "accepted", "declined"] as const;
 
@@ -66,10 +70,13 @@ export default async function StudioInboxPage({
   const user = userData.user;
   if (!user) redirect("/login");
 
+  const { data: memberships } = await getStudioMemberships(supabase, user.id, "active");
+  const studioIds = memberships.map((membership) => membership.studio_id);
+
   const { data: inquiryData, error } = await supabase
     .from("designer_inquiries")
-    .select("id, client_id, subject, message, status, brief_snapshot, created_at")
-    .eq("designer_id", user.id)
+    .select("id, client_id, studio_id, subject, message, status, brief_snapshot, created_at")
+    .or(inquiryRecipientFilter(user.id, studioIds))
     .order("created_at", { ascending: false })
     .limit(100);
   const inquiries = (inquiryData ?? []) as Inquiry[];
@@ -106,6 +113,12 @@ export default async function StudioInboxPage({
     : { data: [] };
   const clients = (clientData ?? []) as ClientProfile[];
   const clientsById = new Map(clients.map((client) => [client.id, client]));
+  const { data: studioData } = studioIds.length
+    ? await supabase.from("studios").select("id, name").in("id", studioIds)
+    : { data: [] };
+  const studiosById = new Map(
+    ((studioData ?? []) as Studio[]).map((studio) => [studio.id, studio])
+  );
   const visibleInquiries =
     selectedStatus === "all"
       ? inquiries
@@ -171,6 +184,11 @@ export default async function StudioInboxPage({
                             {unread} unread
                           </span>
                         ) : null}
+                        <span className="rounded-full border border-line bg-background px-3 py-1 text-xs font-semibold text-muted">
+                          {inquiry.studio_id
+                            ? studiosById.get(inquiry.studio_id)?.name || "Studio inbox"
+                            : "Personal profile"}
+                        </span>
                       </div>
                       <h2 className="mt-3 text-2xl font-bold">{inquiry.subject}</h2>
                       <div className="mt-2 text-sm text-muted">

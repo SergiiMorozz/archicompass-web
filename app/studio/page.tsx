@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { countLabel } from "@/lib/count-label";
+import { getStudioMemberships, inquiryRecipientFilter } from "@/lib/studios";
 
 export const revalidate = 0;
 
@@ -59,6 +60,9 @@ export default async function StudioOverviewPage() {
   const user = userData.user;
   if (!user) redirect("/login");
 
+  const { data: memberships } = await getStudioMemberships(supabase, user.id, "active");
+  const studioIds = memberships.map((membership) => membership.studio_id);
+
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -72,7 +76,7 @@ export default async function StudioOverviewPage() {
     supabase
       .from("designer_inquiries")
       .select("id, client_id, subject, status, brief_snapshot, created_at")
-      .eq("designer_id", user.id)
+      .or(inquiryRecipientFilter(user.id, studioIds))
       .order("created_at", { ascending: false })
       .limit(50),
     supabase
@@ -132,9 +136,12 @@ export default async function StudioOverviewPage() {
             <Link href="/studio/inbox" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
               Open inbox
             </Link>
-            <Link href="/account/projects" className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
-              Add project
-            </Link>
+              <Link href="/account/projects" className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
+                Add project
+              </Link>
+              <Link href="/studio/team" className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
+                Studio and team
+              </Link>
           </div>
         </div>
       </section>

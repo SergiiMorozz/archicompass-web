@@ -11,7 +11,7 @@ export const revalidate = 0;
 
 type Favorite = {
   entity_key: string;
-  entity_type: "designer" | "project" | "article" | "inspiration";
+  entity_type: "designer" | "studio" | "project" | "article" | "inspiration";
 };
 
 type Profile = {
@@ -34,6 +34,14 @@ type Project = {
   image_path: string | null;
 };
 
+type Studio = {
+  id: string;
+  name: string;
+  bio: string | null;
+  location: string | null;
+  specialties: string[] | null;
+};
+
 const fallbackProjectImage =
   "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=80";
 
@@ -50,14 +58,21 @@ export default async function ClientFavoritesPage() {
     .order("created_at", { ascending: false });
   const favorites = (favoriteData ?? []) as Favorite[];
   const designerIds = favorites.filter((item) => item.entity_type === "designer").map((item) => item.entity_key);
+  const studioIds = favorites.filter((item) => item.entity_type === "studio").map((item) => item.entity_key);
   const projectIds = favorites.filter((item) => item.entity_type === "project").map((item) => item.entity_key);
 
-  const [{ data: profileData }, { data: projectData }] = await Promise.all([
+  const [{ data: profileData }, { data: studioData }, { data: projectData }] = await Promise.all([
     designerIds.length
       ? supabase
           .from("profiles")
           .select("id, full_name, profession_type, user_type, location, specialties, bio")
           .in("id", designerIds)
+      : Promise.resolve({ data: [] }),
+    studioIds.length
+      ? supabase
+          .from("studios")
+          .select("id, name, bio, location, specialties")
+          .in("id", studioIds)
       : Promise.resolve({ data: [] }),
     projectIds.length
       ? supabase
@@ -67,6 +82,7 @@ export default async function ClientFavoritesPage() {
       : Promise.resolve({ data: [] }),
   ]);
   const designers = ((profileData ?? []) as Profile[]).map(applyDemoProfilePresentation);
+  const studios = (studioData ?? []) as Studio[];
   const projects = ((projectData ?? []) as Project[]).map((project) => {
     const presentation = getDemoProjectPresentation(project.profile_id, project.id);
     return presentation ? { ...project, ...presentation } : project;
@@ -125,6 +141,33 @@ export default async function ClientFavoritesPage() {
               ))}
             </div>
           ) : <div className="mt-5 rounded-lg border border-dashed border-line bg-card p-6 text-muted">Save designers from the catalog to build a shortlist here.</div>}
+        </section>
+
+        <section>
+          <div>
+            <div className="text-sm font-semibold text-primary">Teams to consider</div>
+            <h2 className="mt-1 text-3xl font-bold">Saved studios</h2>
+          </div>
+          {studios.length ? (
+            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {studios.map((studio) => (
+                <article key={studio.id} className="rounded-lg border border-line bg-card p-5 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <Link href={`/studios/${studio.id}`} className="text-xl font-bold hover:text-primary">{studio.name}</Link>
+                      <div className="mt-1 text-sm text-muted">Design studio{studio.location ? ` · ${studio.location}` : ""}</div>
+                    </div>
+                    <FavoriteButton compact entityType="studio" entityKey={studio.id} initialSaved />
+                  </div>
+                  <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">{studio.bio || "Open the studio to review its connected designers and combined portfolio."}</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {(studio.specialties ?? []).slice(0, 3).map((specialty) => <span key={specialty} className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">{specialty}</span>)}
+                  </div>
+                  <Link href={`/studios/${studio.id}`} className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">Open studio</Link>
+                </article>
+              ))}
+            </div>
+          ) : <div className="mt-5 rounded-lg border border-dashed border-line bg-card p-6 text-muted">Save studio profiles while comparing teams.</div>}
         </section>
 
         <section>

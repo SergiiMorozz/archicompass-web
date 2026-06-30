@@ -7,6 +7,7 @@ const studioLinks = [
   { href: "/studio", label: "Overview" },
   { href: "/studio/inbox", label: "Inbox" },
   { href: "/studio/analytics", label: "Analytics" },
+  { href: "/studio/team", label: "Studio & team" },
   { href: "/account/profile", label: "Edit profile" },
   { href: "/account/projects", label: "Projects" },
 ];
@@ -16,7 +17,7 @@ export default function StudioNav({
   profileName,
   unreadCount,
 }: {
-  profileId: string;
+  profileId: string | null;
   profileName: string;
   unreadCount: number;
 }) {
@@ -56,12 +57,14 @@ export default function StudioNav({
                 </Link>
               );
             })}
-            <Link
-              href={`/designers/${profileId}`}
-              className="shrink-0 rounded-xl border border-line bg-background px-4 py-2.5 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
-            >
-              Public page
-            </Link>
+            {profileId ? (
+              <Link
+                href={`/designers/${profileId}`}
+                className="shrink-0 rounded-xl border border-line bg-background px-4 py-2.5 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
+              >
+                Public page
+              </Link>
+            ) : null}
           </nav>
         </div>
       </div>

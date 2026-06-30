@@ -4,6 +4,7 @@ import FavoriteButton from "@/components/FavoriteButton";
 import ProjectGallery from "@/components/ProjectGallery";
 import ProfileViewTracker from "@/components/ProfileViewTracker";
 import { countLabel } from "@/lib/count-label";
+import { getAccountRole } from "@/lib/studios";
 import {
   applyDemoProfilePresentation,
   getDemoProfilePresentation,
@@ -39,6 +40,14 @@ type Project = {
   image_urls: string[] | null;
   image_paths: string[] | null;
   created_at: string;
+};
+
+type StudioMembership = { studio_id: string };
+type StudioLink = {
+  id: string;
+  name: string;
+  location: string | null;
+  specialties: string[] | null;
 };
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
@@ -220,6 +229,22 @@ export default async function DesignerProfilePage({
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const isOwner = userData.user?.id === id;
+  const viewerRole = userData.user
+    ? await getAccountRole(supabase, userData.user.id)
+    : "client";
+  const canSendBrief = !userData.user || viewerRole === "client";
+
+  const { data: isDesignerAccount } = await supabase.rpc("is_designer_account", {
+    target_user_id: id,
+  });
+  if (!isDesignerAccount) {
+    return (
+      <EmptyProfileState
+        title="Profile not found"
+        message="This account does not have an active public designer profile."
+      />
+    );
+  }
 
   const { data: profileData, error: pErr } = await supabase
     .from("profiles")
@@ -276,6 +301,22 @@ export default async function DesignerProfilePage({
       ? { ...publicProject, ...demoCopy, project_url: null }
       : publicProject;
   });
+  const { data: studioMembershipData } = await supabase
+    .from("studio_members")
+    .select("studio_id")
+    .eq("user_id", profile.id)
+    .eq("status", "active");
+  const studioIds = ((studioMembershipData ?? []) as StudioMembership[]).map(
+    (membership) => membership.studio_id
+  );
+  const { data: studioData } = studioIds.length
+    ? await supabase
+        .from("studios")
+        .select("id, name, location, specialties")
+        .in("id", studioIds)
+        .eq("published", true)
+    : { data: [] };
+  const studios = (studioData ?? []) as StudioLink[];
   const favoriteKeys = [profile.id, ...projects.map((project) => project.id)];
   const { data: favoriteData } = userData.user && favoriteKeys.length
     ? await supabase
@@ -396,12 +437,18 @@ export default async function DesignerProfilePage({
                   >
                     View Portfolio
                   </a>
-                  <Link
-                    href={briefRequestHref(profile.id)}
-                    className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
-                  >
-                    Send Brief
-                  </Link>
+                  {canSendBrief ? (
+                    <Link
+                      href={briefRequestHref(profile.id)}
+                      className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
+                    >
+                      Send Brief
+                    </Link>
+                  ) : (
+                    <span className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold text-muted">
+                      Designer account
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -492,13 +539,17 @@ export default async function DesignerProfilePage({
                   Add portfolio project
                 </Link>
               </div>
-            ) : (
+            ) : canSendBrief ? (
               <Link
                 href={briefRequestHref(profile.id)}
                 className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
               >
                 <span className="w-full">Send Project Brief</span>
               </Link>
+            ) : (
+              <div className="mt-6 rounded-lg border border-line bg-background p-4 text-sm leading-6 text-muted">
+                Designer accounts receive project requests and cannot send client briefs.
+              </div>
             )}
 
             {webHref ? (
@@ -523,6 +574,36 @@ export default async function DesignerProfilePage({
               You are viewing your own public profile. Use the profile and project tools
               to keep this marketplace page up to date.
             </p>
+          </div>
+        </section>
+      ) : null}
+
+      {studios.length ? (
+        <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
+          <div className="rounded-lg border border-line bg-card p-6 shadow-sm">
+            <div className="text-sm font-semibold text-primary">Studio connections</div>
+            <h2 className="mt-1 text-2xl font-bold">
+              {title} is part of {countLabel(studios.length, "studio")}
+            </h2>
+            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {studios.map((studio) => (
+                <Link
+                  key={studio.id}
+                  href={`/studios/${studio.id}`}
+                  className="rounded-lg border border-line bg-background p-4 transition hover:border-primary"
+                >
+                  <div className="font-bold">{studio.name}</div>
+                  <div className="mt-1 text-sm text-muted">
+                    {studio.location || "Remote studio"}
+                  </div>
+                  {studio.specialties?.length ? (
+                    <div className="mt-3 text-sm font-semibold text-primary">
+                      {studio.specialties.slice(0, 3).join(" · ")}
+                    </div>
+                  ) : null}
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
       ) : null}

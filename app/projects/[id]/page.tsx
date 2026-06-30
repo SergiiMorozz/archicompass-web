@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import FavoriteButton from "@/components/FavoriteButton";
 import ProjectGallery from "@/components/ProjectGallery";
+import { getAccountRole } from "@/lib/studios";
 import {
   applyDemoProfilePresentation,
   getDemoProfilePresentation,
@@ -147,6 +148,10 @@ export default async function ProjectDetailPage({
 
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
+  const viewerRole = userData.user
+    ? await getAccountRole(supabase, userData.user.id)
+    : "client";
+  const canSendBrief = !userData.user || viewerRole === "client";
 
   const { data: projectData, error: projectError } = await supabase
     .from("projects")
@@ -342,12 +347,18 @@ export default async function ProjectDetailPage({
                   entityKey={project.id}
                   initialSaved={Boolean(favoriteData)}
                 />
-                <Link
-                  href={`/account/briefs?designer=${project.profile_id}`}
-                  className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
-                >
-                  Send brief to designer
-                </Link>
+                {canSendBrief ? (
+                  <Link
+                    href={`/account/briefs?designer=${project.profile_id}`}
+                    className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
+                  >
+                    Send brief to designer
+                  </Link>
+                ) : (
+                  <div className="rounded-lg border border-line bg-background p-4 text-sm leading-6 text-muted">
+                    Designer accounts receive briefs and cannot send client requests.
+                  </div>
+                )}
               </>
             )}
             {designerWebsite ? (

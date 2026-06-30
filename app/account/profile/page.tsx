@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -18,6 +19,13 @@ type Profile = {
   hourly_rate: number | null;
   years_experience: number | null;
 };
+
+type ProjectImagePaths = {
+  image_path: string | null;
+  image_paths: string[] | null;
+};
+
+const projectImagesBucket = "project-images";
 
 const fieldClass =
   "mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal text-foreground outline-none transition focus:border-primary";
@@ -86,19 +94,29 @@ async function updateProfile(formData: FormData) {
 
   if (!user) redirect("/login");
 
+  const selectedType = textValue(formData, "user_type") === "client" ? "client" : "professional";
+  const accountRole = selectedType === "professional" ? "designer" : "client";
+  const { error: roleError } = await supabase.rpc("set_my_account_role", {
+    new_role: accountRole,
+  });
+
+  if (roleError) redirect(`/account/profile?error=${encodeURIComponent(roleError.message)}`);
+
   const payload = {
     id: user.id,
     full_name: textValue(formData, "full_name"),
     bio: textValue(formData, "bio"),
     location: textValue(formData, "location"),
-    profession_type: textValue(formData, "profession_type"),
-    user_type: textValue(formData, "user_type") ?? "professional",
-    specialties: specialtiesValue(formData),
+    profession_type:
+      selectedType === "professional" ? textValue(formData, "profession_type") : null,
+    user_type: selectedType,
+    specialties: selectedType === "professional" ? specialtiesValue(formData) : [],
     website: textValue(formData, "website"),
     phone: textValue(formData, "phone"),
     email: textValue(formData, "email") ?? user.email ?? null,
-    hourly_rate: numberValue(formData, "hourly_rate"),
-    years_experience: numberValue(formData, "years_experience"),
+    hourly_rate: selectedType === "professional" ? numberValue(formData, "hourly_rate") : null,
+    years_experience:
+      selectedType === "professional" ? numberValue(formData, "years_experience") : null,
   };
 
   const { error } = await supabase.from("profiles").upsert(payload, { onConflict: "id" });
@@ -108,7 +126,54 @@ async function updateProfile(formData: FormData) {
   revalidatePath("/account");
   revalidatePath("/designers");
   revalidatePath(`/designers/${user.id}`);
-  redirect(`/designers/${user.id}`);
+  redirect(
+    selectedType === "professional"
+      ? `/designers/${user.id}`
+      : "/account?profileUpdated=1"
+  );
+}
+
+async function deleteProfessionalProfile(formData: FormData) {
+  "use server";
+
+  const supabase = await createSupabaseServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData.user;
+  if (!user) redirect("/login");
+
+  if (textValue(formData, "confirm_delete") !== "DELETE") {
+    redirect("/account/profile?error=Type%20DELETE%20to%20confirm%20profile%20deletion.");
+  }
+
+  const { data: projectData } = await supabase
+    .from("projects")
+    .select("image_path, image_paths")
+    .eq("profile_id", user.id);
+  const paths = Array.from(
+    new Set(
+      ((projectData ?? []) as ProjectImagePaths[]).flatMap((project) =>
+        project.image_paths?.length
+          ? project.image_paths.filter(Boolean)
+          : project.image_path
+            ? [project.image_path]
+            : []
+      )
+    )
+  );
+
+  const { error } = await supabase.rpc("delete_my_professional_profile");
+  if (error) redirect(`/account/profile?error=${encodeURIComponent(error.message)}`);
+
+  if (paths.length) {
+    await supabase.storage.from(projectImagesBucket).remove(paths);
+  }
+
+  revalidatePath("/account");
+  revalidatePath("/account/profile");
+  revalidatePath("/account/projects");
+  revalidatePath("/designers");
+  revalidatePath(`/designers/${user.id}`);
+  redirect("/account?profileDeleted=1");
 }
 
 export default async function EditProfilePage({
@@ -132,6 +197,8 @@ export default async function EditProfilePage({
     .maybeSingle();
 
   const p = (profile ?? {}) as Partial<Profile>;
+  const accountRole = await getAccountRole(supabase, user.id);
+  const hasProfile = Boolean(profile);
   const score = completionScore(p);
   const specialtyCount = p.specialties?.length ?? 0;
 
@@ -164,12 +231,14 @@ export default async function EditProfilePage({
                   <div className="text-sm font-semibold text-muted">Profile readiness</div>
                   <div className="mt-1 text-3xl font-bold text-primary">{score}%</div>
                 </div>
-                <Link
-                  href={`/designers/${user.id}`}
-                  className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
-                >
-                  View profile
-                </Link>
+                {accountRole === "designer" && hasProfile ? (
+                  <Link
+                    href={`/designers/${user.id}`}
+                    className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
+                  >
+                    View profile
+                  </Link>
+                ) : null}
               </div>
               <div className="mt-4 h-2 overflow-hidden rounded-full bg-primary-soft">
                 <div className="h-full rounded-full bg-primary" style={{ width: `${score}%` }} />
@@ -192,7 +261,8 @@ export default async function EditProfilePage({
               <div className="text-sm font-semibold text-primary">Identity</div>
               <h2 className="mt-1 text-2xl font-bold">Who clients are meeting</h2>
               <p className="mt-2 text-sm leading-6 text-muted">
-                Use a studio name if clients should see the studio first.
+                Personal designer profiles and studio profiles are separate. Create a
+                studio from Designer Studio when several people should work together.
               </p>
             </div>
 
@@ -222,12 +292,16 @@ export default async function EditProfilePage({
               <Field label="Account type">
                 <select
                   name="user_type"
-                  defaultValue={p.user_type ?? "professional"}
+                  defaultValue={accountRole === "designer" ? "professional" : "client"}
                   className={fieldClass}
                 >
-                  <option value="professional">Professional</option>
                   <option value="client">Client</option>
+                  <option value="professional">Designer</option>
                 </select>
+                <span className="mt-2 block text-xs font-normal leading-5 text-muted">
+                  Clients send briefs. Designers receive briefs and can work independently
+                  or as part of a studio. One account cannot do both at the same time.
+                </span>
               </Field>
             </div>
           </section>
@@ -321,7 +395,7 @@ export default async function EditProfilePage({
               Save profile
             </button>
             <Link
-              href={`/designers/${user.id}`}
+              href={hasProfile && accountRole === "designer" ? `/designers/${user.id}` : "/account"}
               className="rounded-xl border border-line bg-card px-6 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
             >
               Cancel
@@ -362,6 +436,40 @@ export default async function EditProfilePage({
           >
             <span className="w-full">Manage portfolio projects</span>
           </Link>
+
+          {accountRole === "designer" && hasProfile ? (
+            <details className="mt-6 overflow-hidden rounded-xl border border-red-200 bg-red-50">
+              <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-red-700">
+                Delete professional profile
+              </summary>
+              <div className="border-t border-red-200 p-4">
+                <p className="text-sm leading-6 text-red-700">
+                  This permanently removes your public designer profile, all portfolio
+                  projects, project images, favorites pointing to them, and profile
+                  analytics. Your login, saved conversations, and studio memberships stay
+                  active.
+                </p>
+                <form action={deleteProfessionalProfile} className="mt-4 grid gap-3">
+                  <label className="text-sm font-semibold text-red-800">
+                    Type DELETE to confirm
+                    <input
+                      name="confirm_delete"
+                      required
+                      pattern="DELETE"
+                      autoComplete="off"
+                      className="mt-2 w-full rounded-xl border border-red-300 bg-white px-4 py-3 font-normal text-foreground outline-none focus:border-red-600"
+                    />
+                  </label>
+                  <button
+                    type="submit"
+                    className="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700"
+                  >
+                    Permanently delete profile
+                  </button>
+                </form>
+              </div>
+            </details>
+          ) : null}
         </aside>
       </section>
     </main>

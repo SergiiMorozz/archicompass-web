@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const briefPhotosBucket = "brief-reference-photos";
@@ -48,6 +49,16 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "Please sign in to save this brief.", code: "AUTH_REQUIRED" },
       { status: 401 }
+    );
+  }
+
+  if ((await getAccountRole(supabase, user.id)) !== "client") {
+    return NextResponse.json(
+      {
+        error: "Designer accounts receive briefs and cannot save client project requests.",
+        code: "CLIENT_ROLE_REQUIRED",
+      },
+      { status: 403 }
     );
   }
 

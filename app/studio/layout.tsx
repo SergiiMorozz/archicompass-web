@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import StudioNav from "@/components/StudioNav";
-import { isProfessionalProfile } from "@/lib/professional";
+import {
+  getAccountRole,
+  getStudioMemberships,
+  inquiryRecipientFilter,
+} from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -19,19 +23,21 @@ export default async function StudioLayout({ children }: { children: React.React
     .eq("id", user.id)
     .maybeSingle();
 
-  if (!isProfessionalProfile(profile)) {
+  const accountRole = await getAccountRole(supabase, user.id);
+
+  if (accountRole !== "designer") {
     return (
       <main className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
         <div className="rounded-lg border border-line bg-card p-8 shadow-sm">
           <div className="text-sm font-semibold text-primary">Professional access</div>
-          <h1 className="mt-2 text-4xl font-bold">Designer Studio needs a professional profile</h1>
+          <h1 className="mt-2 text-4xl font-bold">This is a client account</h1>
           <p className="mt-4 max-w-2xl leading-7 text-muted">
-            Set your account type and profession details first. The Studio tab will then
-            stay available while your account session is active.
+            Client accounts create and send briefs. To receive requests independently or
+            join a design studio, deliberately switch the account role to Designer first.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/account/profile" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-              Complete professional profile
+              Review account role
             </Link>
             <Link href="/account" className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold">
               Back to account
@@ -42,10 +48,13 @@ export default async function StudioLayout({ children }: { children: React.React
     );
   }
 
+  const { data: memberships } = await getStudioMemberships(supabase, user.id, "active");
+  const studioIds = memberships.map((membership) => membership.studio_id);
+
   const { data: incoming } = await supabase
     .from("designer_inquiries")
     .select("id")
-    .eq("designer_id", user.id);
+    .or(inquiryRecipientFilter(user.id, studioIds));
   const inquiryIds = (incoming ?? []).map((item) => item.id);
   const { count: unreadCount } = inquiryIds.length
     ? await supabase
@@ -59,7 +68,7 @@ export default async function StudioLayout({ children }: { children: React.React
   return (
     <div className="min-h-screen bg-background">
       <StudioNav
-        profileId={user.id}
+        profileId={profile ? user.id : null}
         profileName={profile?.full_name || user.email || "Professional profile"}
         unreadCount={unreadCount ?? 0}
       />

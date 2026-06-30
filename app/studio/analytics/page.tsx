@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { countLabel } from "@/lib/count-label";
+import { getStudioMemberships, inquiryRecipientFilter } from "@/lib/studios";
 
 export const revalidate = 0;
 
@@ -31,6 +32,19 @@ export default async function StudioAnalyticsPage() {
   const user = userData.user;
   if (!user) redirect("/login");
 
+  const { data: memberships } = await getStudioMemberships(supabase, user.id, "active");
+  const studioIds = memberships.map((membership) => membership.studio_id);
+  const { data: studioMemberData } = studioIds.length
+    ? await supabase
+        .from("studio_members")
+        .select("user_id")
+        .in("studio_id", studioIds)
+        .eq("status", "active")
+    : { data: [] };
+  const teamUserIds = Array.from(
+    new Set([user.id, ...(studioMemberData ?? []).map((member) => member.user_id)])
+  );
+
   const now = new Date();
   const ninetyDaysAgo = new Date(now);
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
@@ -47,7 +61,7 @@ export default async function StudioAnalyticsPage() {
     supabase
       .from("designer_inquiries")
       .select("id, status, created_at")
-      .eq("designer_id", user.id)
+      .or(inquiryRecipientFilter(user.id, studioIds))
       .gte("created_at", ninetyDaysAgo.toISOString())
       .order("created_at", { ascending: true }),
     supabase.from("projects").select("id").eq("profile_id", user.id),
@@ -62,7 +76,7 @@ export default async function StudioAnalyticsPage() {
         .from("inquiry_messages")
         .select("inquiry_id, created_at")
         .in("inquiry_id", inquiryIds)
-        .eq("sender_id", user.id)
+        .in("sender_id", teamUserIds)
         .order("created_at", { ascending: true })
     : { data: [] };
   const replies = (replyData ?? []) as Message[];

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import FavoriteButton from "@/components/FavoriteButton";
 import { countLabel } from "@/lib/count-label";
+import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   applyDemoProfilePresentation,
@@ -16,6 +17,17 @@ type Profile = {
   location: string | null;
   profession_type: string | null;
   user_type: string | null;
+  specialties: string[] | null;
+  hourly_rate: number | null;
+  years_experience: number | null;
+  created_at: string;
+};
+
+type Studio = {
+  id: string;
+  name: string;
+  bio: string | null;
+  location: string | null;
   specialties: string[] | null;
   hourly_rate: number | null;
   years_experience: number | null;
@@ -112,7 +124,67 @@ function experienceLabel(value: number | null) {
   return value === 1 ? "1 year experience" : `${value}+ years experience`;
 }
 
+function StudioCard({
+  canSendBrief,
+  initialSaved,
+  memberCount,
+  studio,
+}: {
+  canSendBrief: boolean;
+  initialSaved: boolean;
+  memberCount: number;
+  studio: Studio;
+}) {
+  return (
+    <article className="overflow-hidden rounded-lg border border-line bg-card shadow-sm">
+      <Link
+        href={`/studios/${studio.id}`}
+        className="relative block h-52 bg-cover bg-center"
+        style={{ backgroundImage: `url(${coverImages[1]})` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1f172a]/75 to-transparent" />
+        <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-sm font-semibold text-primary shadow-sm">
+          Design studio
+        </span>
+        <div className="absolute bottom-4 left-4 text-white">
+          <div className="text-2xl font-bold">{studio.name}</div>
+          <div className="mt-1 text-sm text-white/75">{studio.location || "Remote studio"}</div>
+        </div>
+      </Link>
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="text-sm font-semibold text-primary">
+            {countLabel(memberCount, "connected designer")}
+          </div>
+          <FavoriteButton compact entityType="studio" entityKey={studio.id} initialSaved={initialSaved} />
+        </div>
+        <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted">
+          {studio.bio || "A collaborative studio profile with a shared team inbox and projects from connected designers."}
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {(studio.specialties ?? []).slice(0, 3).map((specialty) => (
+            <span key={specialty} className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
+              {specialty}
+            </span>
+          ))}
+        </div>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <Link href={`/studios/${studio.id}`} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
+            View studio
+          </Link>
+          {canSendBrief ? (
+            <Link href={`/account/briefs?studio=${studio.id}`} className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
+              Send brief
+            </Link>
+          ) : null}
+        </div>
+      </div>
+    </article>
+  );
+}
+
 function DesignerCard({
+  canSendBrief,
   profile,
   index,
   requestedLocation,
@@ -120,6 +192,7 @@ function DesignerCard({
   initialSaved,
   view,
 }: {
+  canSendBrief: boolean;
   profile: Profile;
   index: number;
   requestedLocation: string;
@@ -222,12 +295,14 @@ function DesignerCard({
                 >
                   View Portfolio
                 </Link>
-                <Link
-                  href={`/account/briefs?designer=${profile.id}`}
-                  className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
-                >
-                  Send Brief
-                </Link>
+                {canSendBrief ? (
+                  <Link
+                    href={`/account/briefs?designer=${profile.id}`}
+                    className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
+                  >
+                    Send Brief
+                  </Link>
+                ) : null}
               </div>
             </div>
           </div>
@@ -345,15 +420,34 @@ export default async function DesignersPage({
     .limit(60);
 
   const { data, error } = await query;
+  const { data: studioData } = await supabase
+    .from("studios")
+    .select("id, name, bio, location, specialties, hourly_rate, years_experience, created_at")
+    .eq("published", true)
+    .order("created_at", { ascending: false })
+    .limit(30);
   const { data: userData } = await supabase.auth.getUser();
+  const viewerRole = userData.user
+    ? await getAccountRole(supabase, userData.user.id)
+    : "client";
+  const canSendBrief = !userData.user || viewerRole === "client";
   const { data: favoriteData } = userData.user
     ? await supabase
         .from("favorites")
-        .select("entity_key")
+        .select("entity_type, entity_key")
         .eq("user_id", userData.user.id)
-        .eq("entity_type", "designer")
+        .in("entity_type", ["designer", "studio"])
     : { data: [] };
-  const savedDesignerIds = new Set((favoriteData ?? []).map((item) => item.entity_key));
+  const savedDesignerIds = new Set(
+    (favoriteData ?? [])
+      .filter((item) => item.entity_type === "designer")
+      .map((item) => item.entity_key)
+  );
+  const savedStudioIds = new Set(
+    (favoriteData ?? [])
+      .filter((item) => item.entity_type === "studio")
+      .map((item) => item.entity_key)
+  );
   const normalizedQuery = q.toLowerCase();
   const normalizedLocation = location.toLowerCase();
   const normalizedSpecialty = specialty
@@ -394,6 +488,42 @@ export default async function DesignersPage({
         matchesMaximum
       );
     });
+
+  const studios = ((studioData ?? []) as Studio[]).filter((studio) => {
+    const searchable = [studio.name, studio.bio, ...(studio.specialties ?? [])]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    const specialtyText = (studio.specialties ?? []).join(" ").toLowerCase();
+    const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
+    const matchesLocation =
+      !normalizedLocation ||
+      (studio.location ?? "").toLowerCase().includes(normalizedLocation);
+    const matchesSpecialty =
+      !normalizedSpecialty || specialtyText.includes(normalizedSpecialty);
+    const matchesMinimum =
+      Number.isNaN(minRate) ||
+      (studio.hourly_rate !== null && studio.hourly_rate >= minRate);
+    const matchesMaximum =
+      Number.isNaN(maxRate) ||
+      (studio.hourly_rate !== null && studio.hourly_rate <= maxRate);
+    return matchesQuery && matchesLocation && matchesSpecialty && matchesMinimum && matchesMaximum;
+  });
+  const studioIds = studios.map((studio) => studio.id);
+  const { data: studioMemberData } = studioIds.length
+    ? await supabase
+        .from("studio_members")
+        .select("studio_id")
+        .in("studio_id", studioIds)
+        .eq("status", "active")
+    : { data: [] };
+  const studioMemberCounts = new Map<string, number>();
+  (studioMemberData ?? []).forEach((member) => {
+    studioMemberCounts.set(
+      member.studio_id,
+      (studioMemberCounts.get(member.studio_id) ?? 0) + 1
+    );
+  });
 
   if (sort === "rate") {
     profiles = profiles.sort(
@@ -464,7 +594,7 @@ export default async function DesignersPage({
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-bold">Filters</h2>
-              <p className="mt-1 text-sm text-muted">{countLabel(profiles.length, "result")}</p>
+              <p className="mt-1 text-sm text-muted">{countLabel(profiles.length + studios.length, "result")}</p>
             </div>
             {hasFilters ? (
               <Link href="/designers" className="text-sm font-semibold text-primary hover:underline">
@@ -535,6 +665,31 @@ export default async function DesignersPage({
         </aside>
 
         <div>
+          {studios.length ? (
+            <section className="mb-9">
+              <div>
+                <p className="text-sm font-semibold text-primary">
+                  {countLabel(studios.length, "studio")} found
+                </p>
+                <h2 className="mt-1 text-2xl font-bold">Design studios</h2>
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  Contact one shared team and review projects from its connected designers.
+                </p>
+              </div>
+              <div className="mt-5 grid gap-5 md:grid-cols-2">
+                {studios.map((studio) => (
+                  <StudioCard
+                    key={studio.id}
+                    studio={studio}
+                    memberCount={studioMemberCounts.get(studio.id) ?? 0}
+                    initialSaved={savedStudioIds.has(studio.id)}
+                    canSendBrief={canSendBrief}
+                  />
+                ))}
+              </div>
+            </section>
+          ) : null}
+
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-primary">
@@ -604,6 +759,7 @@ export default async function DesignersPage({
               {profiles.map((profile, index) => (
                 <DesignerCard
                   key={profile.id}
+                  canSendBrief={canSendBrief}
                   profile={profile}
                   index={index}
                   requestedLocation={location}
@@ -618,6 +774,7 @@ export default async function DesignersPage({
               {profiles.map((profile, index) => (
                 <DesignerCard
                   key={profile.id}
+                  canSendBrief={canSendBrief}
                   profile={profile}
                   index={index}
                   requestedLocation={location}

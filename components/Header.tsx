@@ -86,11 +86,16 @@ export default function Header() {
         return;
       }
 
-      const [{ data: profile }, { data: adminRole }] = await Promise.all([
+      const [{ data: profile }, { data: accountRole }, { data: adminRole }] = await Promise.all([
         supabase
           .from("profiles")
           .select("user_type, profession_type")
           .eq("id", userId)
+          .maybeSingle(),
+        supabase
+          .from("account_roles")
+          .select("role")
+          .eq("user_id", userId)
           .maybeSingle(),
         supabase
           .from("admin_roles")
@@ -105,7 +110,9 @@ export default function Header() {
         setAccount({
           id: userId,
           isAdmin: Boolean(adminRole),
-          isProfessional: isProfessionalProfile(profile),
+          isProfessional:
+            accountRole?.role === "designer" ||
+            (!accountRole && isProfessionalProfile(profile)),
         });
       }
     }
@@ -119,11 +126,13 @@ export default function Header() {
       active = false;
       authListener.subscription.unsubscribe();
     };
-  }, []);
+  }, [pathname]);
 
   const workspaceItems = account
     ? [
-        { href: "/client", label: "Client Workspace" },
+        ...(account.isProfessional
+          ? []
+          : [{ href: "/client", label: "Client Workspace" }]),
         ...(account.isProfessional
           ? [{ href: "/studio", label: "Designer Studio" }]
           : []),
