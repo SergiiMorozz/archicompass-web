@@ -15,6 +15,8 @@ type AdminStats = {
   signups_30?: number;
   active_30?: number;
   profile_views_30?: number;
+  hidden_profiles?: number;
+  hidden_projects?: number;
 };
 
 type AdminUser = {
@@ -60,6 +62,7 @@ export default async function AdminOverviewPage() {
       page_offset: 0,
       review_filter: "all",
       search_text: null,
+      visibility_filter: "all",
     }),
   ]);
 
@@ -74,7 +77,7 @@ export default async function AdminOverviewPage() {
     ["Portfolio projects", numberValue(stats.projects), "Public work"],
     ["Saved briefs", briefCount, "Project Compass output"],
     ["Designer requests", inquiryCount, "Across the closed beta"],
-    ["Favorites", numberValue(stats.favorites), "Saved platform items"],
+    ["Hidden content", numberValue(stats.hidden_profiles) + numberValue(stats.hidden_projects), `${numberValue(stats.hidden_profiles)} profiles, ${numberValue(stats.hidden_projects)} projects`],
     ["Profile views", numberValue(stats.profile_views_30), "Last 30 days"],
   ];
 

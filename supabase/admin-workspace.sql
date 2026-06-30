@@ -32,20 +32,34 @@ create table if not exists public.admin_audit_log (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.content_moderation (
+  entity_type text not null check (entity_type in ('profile', 'project')),
+  entity_id uuid not null,
+  visibility text not null default 'visible'
+    check (visibility in ('visible', 'hidden')),
+  reason text check (reason is null or char_length(reason) <= 1000),
+  updated_at timestamptz not null default now(),
+  updated_by uuid not null references auth.users(id) on delete restrict,
+  primary key (entity_type, entity_id)
+);
+
 create index if not exists admin_audit_log_created_idx
   on public.admin_audit_log (created_at desc);
 
 alter table public.admin_roles enable row level security;
 alter table public.admin_user_reviews enable row level security;
 alter table public.admin_audit_log enable row level security;
+alter table public.content_moderation enable row level security;
 
 revoke all on public.admin_roles from anon, authenticated;
 revoke all on public.admin_user_reviews from anon, authenticated;
 revoke all on public.admin_audit_log from anon, authenticated;
+revoke all on public.content_moderation from anon, authenticated;
 
 grant select on public.admin_roles to authenticated;
 grant select on public.admin_user_reviews to authenticated;
 grant select on public.admin_audit_log to authenticated;
+grant select on public.content_moderation to authenticated;
 
 drop policy if exists "admin_roles_select_own" on public.admin_roles;
 create policy "admin_roles_select_own"
@@ -71,7 +85,29 @@ as $$
 $$;
 
 revoke all on function public.is_admin() from public;
-grant execute on function public.is_admin() to authenticated;
+grant execute on function public.is_admin() to anon, authenticated;
+
+create or replace function public.is_content_visible(
+  requested_entity_type text,
+  requested_entity_id uuid
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select not exists (
+    select 1
+    from public.content_moderation moderation_record
+    where moderation_record.entity_type = requested_entity_type
+      and moderation_record.entity_id = requested_entity_id
+      and moderation_record.visibility = 'hidden'
+  );
+$$;
+
+revoke all on function public.is_content_visible(text, uuid) from public;
+grant execute on function public.is_content_visible(text, uuid) to anon, authenticated;
 
 drop policy if exists "admin_user_reviews_select_admin" on public.admin_user_reviews;
 create policy "admin_user_reviews_select_admin"
@@ -86,6 +122,54 @@ on public.admin_audit_log
 for select
 to authenticated
 using (public.is_admin());
+
+drop policy if exists "content_moderation_select_admin" on public.content_moderation;
+create policy "content_moderation_select_admin"
+on public.content_moderation
+for select
+to authenticated
+using (public.is_admin());
+
+-- Public content visibility. Owners and administrators keep access to their
+-- hidden records, and existing inquiry participants may still resolve the
+-- other participant's profile for an active conversation.
+drop policy if exists "profiles_select_public" on public.profiles;
+drop policy if exists "profiles_select_visible_or_authorized" on public.profiles;
+create policy "profiles_select_visible_or_authorized"
+on public.profiles
+for select
+to public
+using (
+  id = auth.uid()
+  or public.is_admin()
+  or public.is_content_visible('profile', id)
+  or exists (
+    select 1
+    from public.designer_inquiries inquiry_record
+    where (
+      inquiry_record.client_id = auth.uid()
+      and inquiry_record.designer_id = profiles.id
+    ) or (
+      inquiry_record.designer_id = auth.uid()
+      and inquiry_record.client_id = profiles.id
+    )
+  )
+);
+
+drop policy if exists "projects_select_public" on public.projects;
+drop policy if exists "projects_select_visible_or_authorized" on public.projects;
+create policy "projects_select_visible_or_authorized"
+on public.projects
+for select
+to public
+using (
+  profile_id = auth.uid()
+  or public.is_admin()
+  or (
+    public.is_content_visible('profile', profile_id)
+    and public.is_content_visible('project', id)
+  )
+);
 
 create or replace function public.admin_dashboard_stats()
 returns jsonb
@@ -127,15 +211,26 @@ begin
     ),
     'profile_views_30', (
       select count(*) from public.profile_views where created_at >= now() - interval '30 days'
+    ),
+    'hidden_profiles', (
+      select count(*) from public.content_moderation
+      where entity_type = 'profile' and visibility = 'hidden'
+    ),
+    'hidden_projects', (
+      select count(*) from public.content_moderation
+      where entity_type = 'project' and visibility = 'hidden'
     )
   );
 end;
 $$;
 
+drop function if exists public.admin_user_directory(text, text, text, integer, integer);
+
 create or replace function public.admin_user_directory(
   search_text text default null,
   account_type text default 'all',
   review_filter text default 'all',
+  visibility_filter text default 'all',
   page_limit integer default 50,
   page_offset integer default 0
 )
@@ -153,6 +248,7 @@ returns table (
   sent_inquiry_count bigint,
   received_inquiry_count bigint,
   review_status text,
+  profile_visibility text,
   total_count bigint
 )
 language plpgsql
@@ -180,10 +276,14 @@ begin
     (select count(*) from public.designer_inquiries inquiry_record where inquiry_record.client_id = user_record.id),
     (select count(*) from public.designer_inquiries inquiry_record where inquiry_record.designer_id = user_record.id),
     coalesce(review_record.status, 'clear'),
+    coalesce(moderation_record.visibility, 'visible'),
     count(*) over()
   from auth.users user_record
   left join public.profiles profile_record on profile_record.id = user_record.id
   left join public.admin_user_reviews review_record on review_record.user_id = user_record.id
+  left join public.content_moderation moderation_record
+    on moderation_record.entity_type = 'profile'
+    and moderation_record.entity_id = user_record.id
   where (
     nullif(trim(coalesce(search_text, '')), '') is null
     or user_record.email ilike '%' || trim(search_text) || '%'
@@ -205,6 +305,10 @@ begin
   and (
     review_filter = 'all'
     or coalesce(review_record.status, 'clear') = review_filter
+  )
+  and (
+    visibility_filter = 'all'
+    or coalesce(moderation_record.visibility, 'visible') = visibility_filter
   )
   order by user_record.created_at desc
   limit greatest(1, least(coalesce(page_limit, 50), 100))
@@ -258,12 +362,18 @@ begin
           'id', project_record.id,
           'title', project_record.title,
           'category', project_record.category,
-          'created_at', project_record.created_at
+          'created_at', project_record.created_at,
+          'visibility', coalesce(project_moderation.visibility, 'visible')
         ) order by project_record.created_at desc
       )
       from public.projects project_record
+      left join public.content_moderation project_moderation
+        on project_moderation.entity_type = 'project'
+        and project_moderation.entity_id = project_record.id
       where project_record.profile_id = user_record.id
     ), '[]'::jsonb),
+    'profile_visibility', coalesce(profile_moderation.visibility, 'visible'),
+    'profile_visibility_reason', profile_moderation.reason,
     'review', jsonb_build_object(
       'status', coalesce(review_record.status, 'clear'),
       'internal_note', review_record.internal_note,
@@ -276,6 +386,9 @@ begin
   from auth.users user_record
   left join public.profiles profile_record on profile_record.id = user_record.id
   left join public.admin_user_reviews review_record on review_record.user_id = user_record.id
+  left join public.content_moderation profile_moderation
+    on profile_moderation.entity_type = 'profile'
+    and profile_moderation.entity_id = user_record.id
   left join public.admin_roles role_record
     on role_record.user_id = user_record.id and role_record.active
   where user_record.id = target_user_id;
@@ -345,6 +458,92 @@ begin
 end;
 $$;
 
+create or replace function public.admin_set_content_visibility(
+  target_entity_type text,
+  target_entity_id uuid,
+  target_visibility text,
+  moderation_reason text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Admin access required' using errcode = '42501';
+  end if;
+
+  if target_entity_type not in ('profile', 'project') then
+    raise exception 'Invalid content type' using errcode = '22023';
+  end if;
+
+  if target_visibility not in ('visible', 'hidden') then
+    raise exception 'Invalid visibility' using errcode = '22023';
+  end if;
+
+  if target_entity_type = 'profile'
+    and not exists (select 1 from public.profiles where id = target_entity_id) then
+    raise exception 'Profile not found' using errcode = 'P0002';
+  end if;
+
+  if target_entity_type = 'project'
+    and not exists (select 1 from public.projects where id = target_entity_id) then
+    raise exception 'Project not found' using errcode = 'P0002';
+  end if;
+
+  if target_entity_type = 'profile'
+    and target_visibility = 'hidden'
+    and exists (
+      select 1 from public.admin_roles
+      where user_id = target_entity_id and active and role in ('owner', 'admin')
+    ) then
+    raise exception 'Active administrator profiles cannot be hidden' using errcode = '42501';
+  end if;
+
+  insert into public.content_moderation (
+    entity_type,
+    entity_id,
+    visibility,
+    reason,
+    updated_at,
+    updated_by
+  )
+  values (
+    target_entity_type,
+    target_entity_id,
+    target_visibility,
+    nullif(trim(coalesce(moderation_reason, '')), ''),
+    now(),
+    auth.uid()
+  )
+  on conflict (entity_type, entity_id) do update
+  set
+    visibility = excluded.visibility,
+    reason = excluded.reason,
+    updated_at = excluded.updated_at,
+    updated_by = excluded.updated_by;
+
+  insert into public.admin_audit_log (
+    actor_id,
+    action,
+    target_type,
+    target_id,
+    metadata
+  )
+  values (
+    auth.uid(),
+    'content_visibility_updated',
+    target_entity_type,
+    target_entity_id::text,
+    jsonb_build_object(
+      'visibility', target_visibility,
+      'reason', nullif(trim(coalesce(moderation_reason, '')), '')
+    )
+  );
+end;
+$$;
+
 create or replace function public.admin_activity_feed(page_limit integer default 50)
 returns table (
   id bigint,
@@ -384,16 +583,18 @@ end;
 $$;
 
 revoke all on function public.admin_dashboard_stats() from public;
-revoke all on function public.admin_user_directory(text, text, text, integer, integer) from public;
+revoke all on function public.admin_user_directory(text, text, text, text, integer, integer) from public;
 revoke all on function public.admin_user_detail(uuid) from public;
 revoke all on function public.admin_set_user_review(uuid, text, text) from public;
 revoke all on function public.admin_activity_feed(integer) from public;
+revoke all on function public.admin_set_content_visibility(text, uuid, text, text) from public;
 
 grant execute on function public.admin_dashboard_stats() to authenticated;
-grant execute on function public.admin_user_directory(text, text, text, integer, integer) to authenticated;
+grant execute on function public.admin_user_directory(text, text, text, text, integer, integer) to authenticated;
 grant execute on function public.admin_user_detail(uuid) to authenticated;
 grant execute on function public.admin_set_user_review(uuid, text, text) to authenticated;
 grant execute on function public.admin_activity_feed(integer) to authenticated;
+grant execute on function public.admin_set_content_visibility(text, uuid, text, text) to authenticated;
 
 -- Initial owner account for the closed beta.
 insert into public.admin_roles (user_id, role, active, created_by)

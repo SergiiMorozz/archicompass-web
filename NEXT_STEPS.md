@@ -92,6 +92,11 @@ Last checkpoint: 2026-06-30
 - Admin functions expose operational counts, account fields, public profiles,
   and public projects; private message bodies and brief reference photos are not
   returned to the workspace.
+- Administrators can hide and restore public designer profiles and portfolio
+  projects. Hidden content is removed from search and direct public pages while
+  owners retain account access and existing conversations continue.
+- Visibility changes use protected database functions, appear in dashboard
+  totals and user filters, and are recorded in the admin audit log.
 - Project Compass briefs can be saved to Supabase with private reference photo
   storage and reviewed at `/account/briefs`.
 - Unsent saved briefs can be deleted from `/account/briefs`; their private
@@ -151,21 +156,19 @@ Last checkpoint: 2026-06-30
   migration, and desktop/mobile browser checks. Overview, Users, user detail,
   internal review persistence, audit activity, and the owner-only header link
   were verified against the restored project.
+- Public moderation was verified end to end: a hidden designer profile and a
+  hidden portfolio project returned their not-found states to a logged-out
+  visitor, then both were restored to visible status.
 
 ## Best Next Small Step
 
 Add four to six stronger demo professional profiles and give Compact Living
 Studio a complete portfolio project with production-quality imagery.
 
-## Future Admin Workspace
+## Admin Workspace Roadmap
 
-- Add a private `/admin` workspace for the owner and authorized employees.
-- Keep admin access separate from editable user profiles, using protected roles
-  and server-side authorization for every admin page and action.
-- Start with an overview of clients, professionals, briefs, inquiries,
-  favorites, profile traffic, and conversion through the Project Compass flow.
-- Add user, profile, portfolio, and project moderation with clear status,
-  search, filters, and internal notes.
+- Add deeper funnel reporting for Project Compass, designer contact, and saved
+  content conversion.
 - Add a content workspace for articles and Inspiration HUB entries, including
   drafts, publishing, authors, categories, and featured content.
 - Add subscription, invoice, and payment oversight when monetization is enabled.

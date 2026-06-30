@@ -33,6 +33,7 @@ type UserProject = {
   title: string | null;
   category: string | null;
   created_at: string;
+  visibility: string;
 };
 
 type UserReview = {
@@ -52,6 +53,8 @@ type AdminUserDetail = {
   projects: UserProject[];
   review: UserReview;
   admin_role: string | null;
+  profile_visibility: string;
+  profile_visibility_reason: string | null;
 };
 
 const fieldClass =
@@ -112,12 +115,48 @@ async function updateUserReview(formData: FormData) {
   redirect(`/admin/users/${userId}?updated=1`);
 }
 
+async function updateContentVisibility(formData: FormData) {
+  "use server";
+
+  const userId = formText(formData, "user_id");
+  const entityId = formText(formData, "entity_id");
+  const entityType = formText(formData, "entity_type");
+  const visibility = formText(formData, "visibility");
+  const reason = formText(formData, "moderation_reason");
+
+  if (!isUuid(userId) || !isUuid(entityId)) redirect("/admin/users");
+  if (!["profile", "project"].includes(entityType)) {
+    redirect(`/admin/users/${userId}?error=Invalid%20content%20type`);
+  }
+  if (!["visible", "hidden"].includes(visibility)) {
+    redirect(`/admin/users/${userId}?error=Invalid%20visibility`);
+  }
+
+  const { supabase } = await requireAdmin();
+  const { error } = await supabase.rpc("admin_set_content_visibility", {
+    moderation_reason: reason || null,
+    target_entity_id: entityId,
+    target_entity_type: entityType,
+    target_visibility: visibility,
+  });
+
+  if (error) redirect(`/admin/users/${userId}?error=${encodeURIComponent(error.message)}`);
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/users");
+  revalidatePath(`/admin/users/${userId}`);
+  revalidatePath("/designers");
+  revalidatePath(`/designers/${userId}`);
+  if (entityType === "project") revalidatePath(`/projects/${entityId}`);
+  redirect(`/admin/users/${userId}?visibilityUpdated=1`);
+}
+
 export default async function AdminUserDetailPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ error?: string; updated?: string }>;
+  searchParams?: Promise<{ error?: string; updated?: string; visibilityUpdated?: string }>;
 }) {
   const { id } = await params;
   const sp = (await searchParams) ?? {};
@@ -176,6 +215,10 @@ export default async function AdminUserDetailPage({
         {sp.updated ? (
           <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
             Internal review state updated and recorded in the audit log.
+          </div>
+        ) : sp.visibilityUpdated ? (
+          <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+            Public visibility updated and recorded in the audit log.
           </div>
         ) : sp.error ? (
           <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-5 text-sm text-red-700">
@@ -241,16 +284,53 @@ export default async function AdminUserDetailPage({
               {projects.length ? (
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
                   {projects.map((project) => (
-                    <Link
-                      key={project.id}
-                      href={`/projects/${project.id}`}
-                      className="rounded-lg border border-line bg-background p-4 hover:border-primary"
-                    >
-                      <div className="font-semibold">{project.title || "Untitled project"}</div>
-                      <div className="mt-1 text-sm text-muted">
-                        {project.category || "Uncategorized"} | {formatDate(project.created_at)}
-                      </div>
-                    </Link>
+                    <div key={project.id} className="overflow-hidden rounded-lg border border-line bg-background">
+                      <Link
+                        href={`/projects/${project.id}`}
+                        className="block p-4 hover:bg-primary-soft/40"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="font-semibold">{project.title || "Untitled project"}</div>
+                            <div className="mt-1 text-sm text-muted">
+                              {project.category || "Uncategorized"} | {formatDate(project.created_at)}
+                            </div>
+                          </div>
+                          <span className={[
+                            "rounded-full px-2.5 py-1 text-xs font-semibold capitalize",
+                            project.visibility === "hidden"
+                              ? "bg-red-50 text-red-700"
+                              : "bg-emerald-50 text-emerald-800",
+                          ].join(" ")}>
+                            {project.visibility}
+                          </span>
+                        </div>
+                      </Link>
+                      <form action={updateContentVisibility} className="flex flex-wrap items-center gap-2 border-t border-line p-3">
+                        <input type="hidden" name="user_id" value={detail.user_id} />
+                        <input type="hidden" name="entity_id" value={project.id} />
+                        <input type="hidden" name="entity_type" value="project" />
+                        <input
+                          type="hidden"
+                          name="visibility"
+                          value={project.visibility === "hidden" ? "visible" : "hidden"}
+                        />
+                        <input
+                          type="hidden"
+                          name="moderation_reason"
+                          value={project.visibility === "hidden" ? "" : "Hidden during admin moderation"}
+                        />
+                        <button className={[
+                          "rounded-xl px-4 py-2.5 text-sm font-semibold",
+                          project.visibility === "hidden"
+                            ? "bg-primary text-white"
+                            : "border border-red-200 bg-red-50 text-red-700",
+                        ].join(" ")}>
+                          {project.visibility === "hidden" ? "Restore project" : "Hide project"}
+                        </button>
+                        <span className="text-xs text-muted">Affects the public project page.</span>
+                      </form>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -259,44 +339,96 @@ export default async function AdminUserDetailPage({
             </section>
           </div>
 
-          <aside className="h-fit rounded-lg border border-line bg-card p-6 shadow-sm lg:sticky lg:top-40">
-            <div className="text-sm font-semibold text-primary">Internal review</div>
-            <h2 className="mt-1 text-2xl font-bold">Operations note</h2>
-            <p className="mt-3 text-sm leading-6 text-muted">
-              This state is for staff follow-up only. It does not block the account or
-              expose the note to the user.
-            </p>
-            <form action={updateUserReview} className="mt-5 grid gap-4">
-              <input type="hidden" name="user_id" value={detail.user_id} />
-              <label className="text-sm font-semibold">
-                Review state
-                <select name="review_status" defaultValue={detail.review?.status || "clear"} className={fieldClass}>
-                  <option value="clear">Clear</option>
-                  <option value="needs_review">Needs review</option>
-                  <option value="priority">Priority follow-up</option>
-                </select>
-              </label>
-              <label className="text-sm font-semibold">
-                Internal note
-                <textarea
-                  name="internal_note"
-                  defaultValue={detail.review?.internal_note || ""}
-                  rows={6}
-                  maxLength={4000}
-                  placeholder="Context for the owner or support team"
-                  className={fieldClass}
-                />
-              </label>
-              <button className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-                Save review
-              </button>
-            </form>
-            {reviewUpdated ? (
-              <div className="mt-4 text-xs text-muted">Last updated {formatDate(reviewUpdated)}</div>
-            ) : null}
-            <div className="mt-5 border-t border-line pt-4 text-xs leading-5 text-muted">
-              Private messages and reference photos are intentionally unavailable here.
-            </div>
+          <aside className="grid h-fit gap-5 lg:sticky lg:top-40">
+            <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-sm font-semibold text-primary">Public visibility</div>
+                <span className={[
+                  "rounded-full px-3 py-1 text-xs font-semibold capitalize",
+                  detail.profile_visibility === "hidden"
+                    ? "bg-red-50 text-red-700"
+                    : "bg-emerald-50 text-emerald-800",
+                ].join(" ")}>
+                  {detail.profile_visibility}
+                </span>
+              </div>
+              <h2 className="mt-2 text-2xl font-bold">Profile moderation</h2>
+              <p className="mt-3 text-sm leading-6 text-muted">
+                Hidden profiles disappear from designer search and direct public pages.
+                The owner keeps account access and existing conversations continue.
+              </p>
+              <form action={updateContentVisibility} className="mt-5 grid gap-4">
+                <input type="hidden" name="user_id" value={detail.user_id} />
+                <input type="hidden" name="entity_id" value={detail.user_id} />
+                <input type="hidden" name="entity_type" value="profile" />
+                <label className="text-sm font-semibold">
+                  Visibility
+                  <select name="visibility" defaultValue={detail.profile_visibility || "visible"} className={fieldClass}>
+                    <option value="visible">Visible</option>
+                    <option value="hidden" disabled={Boolean(detail.admin_role)}>Hidden</option>
+                  </select>
+                </label>
+                <label className="text-sm font-semibold">
+                  Moderation reason
+                  <textarea
+                    name="moderation_reason"
+                    defaultValue={detail.profile_visibility_reason || ""}
+                    rows={3}
+                    maxLength={1000}
+                    placeholder="Why this profile is hidden"
+                    className={fieldClass}
+                  />
+                </label>
+                <button className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
+                  Update visibility
+                </button>
+              </form>
+              {detail.admin_role ? (
+                <div className="mt-3 text-xs leading-5 text-muted">
+                  Active administrator profiles are protected from being hidden.
+                </div>
+              ) : null}
+            </section>
+
+            <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
+              <div className="text-sm font-semibold text-primary">Internal review</div>
+              <h2 className="mt-1 text-2xl font-bold">Operations note</h2>
+              <p className="mt-3 text-sm leading-6 text-muted">
+                This state is for staff follow-up only. It does not block the account or
+                expose the note to the user.
+              </p>
+              <form action={updateUserReview} className="mt-5 grid gap-4">
+                <input type="hidden" name="user_id" value={detail.user_id} />
+                <label className="text-sm font-semibold">
+                  Review state
+                  <select name="review_status" defaultValue={detail.review?.status || "clear"} className={fieldClass}>
+                    <option value="clear">Clear</option>
+                    <option value="needs_review">Needs review</option>
+                    <option value="priority">Priority follow-up</option>
+                  </select>
+                </label>
+                <label className="text-sm font-semibold">
+                  Internal note
+                  <textarea
+                    name="internal_note"
+                    defaultValue={detail.review?.internal_note || ""}
+                    rows={6}
+                    maxLength={4000}
+                    placeholder="Context for the owner or support team"
+                    className={fieldClass}
+                  />
+                </label>
+                <button className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
+                  Save review
+                </button>
+              </form>
+              {reviewUpdated ? (
+                <div className="mt-4 text-xs text-muted">Last updated {formatDate(reviewUpdated)}</div>
+              ) : null}
+              <div className="mt-5 border-t border-line pt-4 text-xs leading-5 text-muted">
+                Private messages and reference photos are intentionally unavailable here.
+              </div>
+            </section>
           </aside>
         </div>
       </section>

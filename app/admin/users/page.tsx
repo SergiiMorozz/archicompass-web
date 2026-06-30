@@ -17,11 +17,13 @@ type AdminUser = {
   sent_inquiry_count: number;
   received_inquiry_count: number;
   review_status: string;
+  profile_visibility: string;
   total_count: number;
 };
 
 const accountTypes = ["all", "professional", "client", "no_profile"] as const;
 const reviewStatuses = ["all", "clear", "needs_review", "priority"] as const;
+const visibilityStatuses = ["all", "visible", "hidden"] as const;
 const pageSize = 30;
 
 const fieldClass =
@@ -62,16 +64,19 @@ function pageHref({
   q,
   type,
   review,
+  visibility,
 }: {
   page: number;
   q: string;
   type: string;
   review: string;
+  visibility: string;
 }) {
   const params = new URLSearchParams();
   if (q) params.set("q", q);
   if (type !== "all") params.set("type", type);
   if (review !== "all") params.set("review", review);
+  if (visibility !== "all") params.set("visibility", visibility);
   if (page > 1) params.set("page", String(page));
   const query = params.toString();
   return query ? `/admin/users?${query}` : "/admin/users";
@@ -80,12 +85,13 @@ function pageHref({
 export default async function AdminUsersPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ page?: string; q?: string; review?: string; type?: string }>;
+  searchParams?: Promise<{ page?: string; q?: string; review?: string; type?: string; visibility?: string }>;
 }) {
   const sp = (await searchParams) ?? {};
   const q = sp.q?.trim().slice(0, 120) ?? "";
   const type = selectedValue(sp.type, accountTypes);
   const review = selectedValue(sp.review, reviewStatuses);
+  const visibility = selectedValue(sp.visibility, visibilityStatuses);
   const page = safePage(sp.page);
   const { supabase } = await requireAdmin();
   const { data, error } = await supabase.rpc("admin_user_directory", {
@@ -94,6 +100,7 @@ export default async function AdminUsersPage({
     page_offset: (page - 1) * pageSize,
     review_filter: review,
     search_text: q || null,
+    visibility_filter: visibility,
   });
   const users = (data ?? []) as AdminUser[];
   const total = Number(users[0]?.total_count ?? 0);
@@ -113,7 +120,7 @@ export default async function AdminUsersPage({
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-        <form className="grid gap-3 rounded-lg border border-line bg-card p-4 shadow-sm lg:grid-cols-[minmax(240px,1fr)_200px_190px_auto]">
+        <form className="grid gap-3 rounded-lg border border-line bg-card p-4 shadow-sm xl:grid-cols-[minmax(220px,1fr)_180px_170px_160px_auto]">
           <input
             name="q"
             defaultValue={q}
@@ -132,6 +139,11 @@ export default async function AdminUsersPage({
             <option value="needs_review">Needs review</option>
             <option value="priority">Priority</option>
           </select>
+          <select name="visibility" defaultValue={visibility} className={fieldClass}>
+            <option value="all">All visibility</option>
+            <option value="visible">Visible</option>
+            <option value="hidden">Hidden</option>
+          </select>
           <button className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
             Apply filters
           </button>
@@ -141,7 +153,7 @@ export default async function AdminUsersPage({
           <div className="text-sm text-muted">
             <span className="font-semibold text-foreground">{total}</span> matching accounts
           </div>
-          {(q || type !== "all" || review !== "all") ? (
+          {(q || type !== "all" || review !== "all" || visibility !== "all") ? (
             <Link href="/admin/users" className="text-sm font-semibold text-primary hover:underline">
               Clear filters
             </Link>
@@ -154,7 +166,7 @@ export default async function AdminUsersPage({
           </div>
         ) : users.length ? (
           <div className="mt-5 overflow-x-auto rounded-lg border border-line bg-card shadow-sm">
-            <table className="w-full min-w-[1040px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
               <thead className="bg-background text-xs uppercase text-muted">
                 <tr>
                   <th className="px-5 py-4 font-semibold">Account</th>
@@ -164,6 +176,7 @@ export default async function AdminUsersPage({
                   <th className="px-4 py-4 font-semibold">Requests</th>
                   <th className="px-4 py-4 font-semibold">Last sign-in</th>
                   <th className="px-4 py-4 font-semibold">Review</th>
+                  <th className="px-4 py-4 font-semibold">Visibility</th>
                   <th className="px-5 py-4 text-right font-semibold">Action</th>
                 </tr>
               </thead>
@@ -190,6 +203,16 @@ export default async function AdminUsersPage({
                         {user.review_status.replace("_", " ")}
                       </span>
                     </td>
+                    <td className="px-4 py-4">
+                      <span className={[
+                        "rounded-full px-3 py-1 text-xs font-semibold capitalize",
+                        user.profile_visibility === "hidden"
+                          ? "bg-red-50 text-red-700"
+                          : "bg-emerald-50 text-emerald-800",
+                      ].join(" ")}>
+                        {user.profile_visibility}
+                      </span>
+                    </td>
                     <td className="px-5 py-4 text-right">
                       <Link
                         href={`/admin/users/${user.user_id}`}
@@ -213,13 +236,13 @@ export default async function AdminUsersPage({
         {totalPages > 1 ? (
           <div className="mt-6 flex items-center justify-between gap-4">
             {page > 1 ? (
-              <Link href={pageHref({ page: page - 1, q, type, review })} className="rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold">
+              <Link href={pageHref({ page: page - 1, q, type, review, visibility })} className="rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold">
                 Previous
               </Link>
             ) : <span />}
             <span className="text-sm text-muted">Page {page} of {totalPages}</span>
             {page < totalPages ? (
-              <Link href={pageHref({ page: page + 1, q, type, review })} className="rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold">
+              <Link href={pageHref({ page: page + 1, q, type, review, visibility })} className="rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold">
                 Next
               </Link>
             ) : <span />}

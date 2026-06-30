@@ -72,6 +72,11 @@ export default async function AdminActivityPage() {
                       Status: {item.metadata.status.replace("_", " ")}
                     </div>
                   ) : null}
+                  {typeof item.metadata?.visibility === "string" ? (
+                    <div className="mt-2 text-xs font-semibold capitalize text-primary">
+                      Visibility: {item.metadata.visibility}
+                    </div>
+                  ) : null}
                 </div>
                 <div className="text-sm text-muted">{formatDate(item.created_at)}</div>
               </article>
