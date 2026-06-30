@@ -15,7 +15,7 @@ export default function BrandLogo({
 }: BrandLogoProps) {
   return (
     <svg
-      viewBox="100 735 3100 735"
+      viewBox="0 793 3371 798"
       className={className}
       role="img"
       aria-label="ArchiCompass"

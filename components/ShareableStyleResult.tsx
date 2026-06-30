@@ -18,6 +18,7 @@ type ShareablePhoto = {
 
 const canvasWidth = 1080;
 const canvasHeight = 1350;
+const logoCrop = { x: 0, y: 793, width: 3371, height: 798 };
 
 function paletteColor(label: string, index: number) {
   const value = label.toLowerCase();
@@ -203,7 +204,17 @@ async function createResultPng({
 
   drawRoundedFill(context, 38, 38, canvasWidth - 76, canvasHeight - 76, 34, "#ffffff");
   const brandLogo = await loadImage("/brand/archicompass-logo-purple.png");
-  context.drawImage(brandLogo, 100, 735, 3100, 735, 60, 60, 380, 90);
+  context.drawImage(
+    brandLogo,
+    logoCrop.x,
+    logoCrop.y,
+    logoCrop.width,
+    logoCrop.height,
+    60,
+    60,
+    380,
+    90
+  );
   context.fillStyle = "#706284";
   context.font = "600 22px Outfit, Arial, sans-serif";
   context.textAlign = "right";
@@ -266,7 +277,17 @@ async function createResultPng({
     pillX += pillWidth + 12;
   });
 
-  context.drawImage(brandLogo, 100, 735, 3100, 735, 60, 1242, 250, 59);
+  context.drawImage(
+    brandLogo,
+    logoCrop.x,
+    logoCrop.y,
+    logoCrop.width,
+    logoCrop.height,
+    60,
+    1242,
+    250,
+    59
+  );
   context.fillStyle = "#592d86";
   context.textAlign = "right";
   context.font = "700 22px Outfit, Arial, sans-serif";
