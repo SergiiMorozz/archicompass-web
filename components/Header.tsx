@@ -73,7 +73,7 @@ export default function Header() {
   const isGetStartedActive = pathname === "/get-started";
   const [isOpen, setIsOpen] = useState(false);
   const [account, setAccount] = useState<
-    { id: string; isProfessional: boolean } | null
+    { id: string; isAdmin: boolean; isProfessional: boolean } | null
   >(null);
 
   useEffect(() => {
@@ -86,14 +86,27 @@ export default function Header() {
         return;
       }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("user_type, profession_type")
-        .eq("id", userId)
-        .maybeSingle();
+      const [{ data: profile }, { data: adminRole }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("user_type, profession_type")
+          .eq("id", userId)
+          .maybeSingle(),
+        supabase
+          .from("admin_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .eq("active", true)
+          .in("role", ["owner", "admin"])
+          .maybeSingle(),
+      ]);
 
       if (active) {
-        setAccount({ id: userId, isProfessional: isProfessionalProfile(profile) });
+        setAccount({
+          id: userId,
+          isAdmin: Boolean(adminRole),
+          isProfessional: isProfessionalProfile(profile),
+        });
       }
     }
 
@@ -114,6 +127,7 @@ export default function Header() {
         ...(account.isProfessional
           ? [{ href: "/studio", label: "Designer Studio" }]
           : []),
+        ...(account.isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
       ]
     : [];
 

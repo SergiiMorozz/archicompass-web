@@ -82,6 +82,16 @@ Last checkpoint: 2026-06-30
   four reference photos, with system sharing and a downloadable PNG.
 - The supplied ArchiCompass logo is used in the global header, footer, browser
   icon, and generated sharing card.
+- `/admin` is now a protected owner workspace with live platform totals, recent
+  accounts, a searchable user directory, and safe account detail pages.
+- Admin access is stored separately from editable profiles. The first owner role
+  is assigned to the current ArchiCompass owner account and appears as a
+  session-aware `Admin` link in the personal header group.
+- User review states and internal notes are written through a protected database
+  function and recorded in `/admin/activity` with actor, target, and time.
+- Admin functions expose operational counts, account fields, public profiles,
+  and public projects; private message bodies and brief reference photos are not
+  returned to the workspace.
 - Project Compass briefs can be saved to Supabase with private reference photo
   storage and reviewed at `/account/briefs`.
 - Unsent saved briefs can be deleted from `/account/briefs`; their private
@@ -137,6 +147,10 @@ Last checkpoint: 2026-06-30
 - The supplied brand logo and shareable style result passed desktop/mobile
   browser checks with no horizontal overflow or console errors. PNG generation
   reached its successful completion state in the browser.
+- Admin Workspace passed lint, TypeScript, a production build, live Supabase
+  migration, and desktop/mobile browser checks. Overview, Users, user detail,
+  internal review persistence, audit activity, and the owner-only header link
+  were verified against the restored project.
 
 ## Best Next Small Step
 
