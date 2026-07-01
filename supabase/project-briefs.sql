@@ -12,6 +12,12 @@ create table if not exists public.project_briefs (
   style_direction text,
   support_scope text,
   budget_signal text,
+  area_m2 numeric,
+  room_count integer,
+  room_types text[] not null default '{}',
+  property_status text,
+  visualization_need text,
+  supervision_need text,
   location text,
   notes text,
   visual_cues text[] not null default '{}',
@@ -22,6 +28,14 @@ create table if not exists public.project_briefs (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.project_briefs
+  add column if not exists area_m2 numeric,
+  add column if not exists room_count integer,
+  add column if not exists room_types text[] not null default '{}',
+  add column if not exists property_status text,
+  add column if not exists visualization_need text,
+  add column if not exists supervision_need text;
 
 alter table public.project_briefs enable row level security;
 

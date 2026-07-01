@@ -1,6 +1,6 @@
 # ArchiCompass Next Steps
 
-Last checkpoint: 2026-06-30
+Last checkpoint: 2026-07-01
 
 ## Current State
 
@@ -74,6 +74,14 @@ Last checkpoint: 2026-06-30
   are included in the copied brief and designer search signal.
 - Project Compass now captures a preferred timeline, stores it in the saved
   brief, and includes it in the inquiry snapshot and designer notification.
+- Project Compass now captures project area, room count and room types,
+  property status, 3D visualization needs, and supervision needs. These values
+  are preserved through login, stored in saved briefs, copied into inquiry
+  snapshots, included in designer notifications, and shown in both workspaces.
+- Individual designers and studios can confirm structured service capabilities
+  such as 3D visualization, site consultations, author's supervision, and full
+  project coordination. Brief matching rewards confirmed requested services and
+  labels unconfirmed services honestly.
 - Project Compass has optional AI photo style analysis through `/api/style-analysis`.
   It supports `STYLE_ANALYSIS_PROVIDER=openai` or `gemini`, reads up to 6
   reference photos, and suggests a style, materials, colors, visual cues, and
@@ -194,17 +202,16 @@ Last checkpoint: 2026-06-30
 - Browser checks verified brief-aware matching, honest remote/location labels,
   preserved matching query parameters, context-aware login, Polish city-name
   normalization, mobile width, and no browser console errors.
+- Structured project-detail migration was applied to live Supabase and returned
+  all eight expected columns. The expanded Project Compass passed lint,
+  TypeScript, a production build, desktop interaction checks, mobile overflow
+  checks, service-capability profile checks, and saved-brief compatibility.
 
 ## Best Next Small Step
 
-Expand Project Compass and saved briefs with project area, room count and room
-types, property status, 3D visualization needs, and supervision needs. Persist
-the fields in Supabase, include them in inquiry snapshots and designer views,
-preserve them through login, and use them in matching only after corresponding
-professional service capabilities are available.
-
-The source review and research-backed ordering for this work are documented in
-`PRODUCT_RESEARCH.md`.
+Add clearer price ranges and cooperation terms to individual designer and studio
+profiles so clients can compare realistic engagement models before sending a
+brief.
 
 ## Admin Workspace Roadmap
 
@@ -222,7 +229,6 @@ The source review and research-backed ordering for this work are documented in
 
 - Use two test designer accounts to create the first real studio, accept an
   invitation, and exercise one shared client conversation from both team logins.
-- Add clearer price ranges and cooperation terms to professional profiles.
 - Add a compact comparison view for shortlisted designers and studios.
 - Introduce reviews only when they can be tied to a completed real inquiry.
 - Add richer seed data for designer profiles and portfolio projects.

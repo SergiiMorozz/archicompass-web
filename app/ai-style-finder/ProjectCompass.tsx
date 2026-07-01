@@ -191,6 +191,86 @@ const timelines: Option[] = [
   },
 ];
 
+const propertyStatuses: Option[] = [
+  {
+    label: "New build",
+    value: "New build / developer condition",
+    description: "A new property before fit-out or handover.",
+  },
+  {
+    label: "Existing property",
+    value: "Existing property",
+    description: "A lived-in, furnished, or previously finished space.",
+  },
+  {
+    label: "Renovation in progress",
+    value: "Renovation in progress",
+    description: "Work has started and design decisions are still needed.",
+  },
+  {
+    label: "Not purchased yet",
+    value: "Not purchased yet",
+    description: "I am planning before choosing or receiving the property.",
+  },
+];
+
+const visualizationNeeds: Option[] = [
+  {
+    label: "Not needed",
+    value: "Not needed",
+    description: "Plans, samples, or a moodboard are enough for me.",
+  },
+  {
+    label: "Selected rooms",
+    value: "Selected rooms",
+    description: "I want realistic views for the most important spaces.",
+  },
+  {
+    label: "Full project",
+    value: "Full project",
+    description: "I want 3D visualization across the complete project.",
+  },
+  {
+    label: "Not sure yet",
+    value: "Not sure yet",
+    description: "I want the designer to recommend the useful level.",
+  },
+];
+
+const supervisionNeeds: Option[] = [
+  {
+    label: "Not needed",
+    value: "Not needed",
+    description: "I only need the design package and documentation.",
+  },
+  {
+    label: "Consultations / site visits",
+    value: "Consultations / site visits",
+    description: "Occasional checks and help with on-site decisions.",
+  },
+  {
+    label: "Author's supervision",
+    value: "Author's supervision",
+    description: "The designer should protect the design intent during works.",
+  },
+  {
+    label: "Full project coordination",
+    value: "Full project coordination",
+    description: "I need active coordination of contractors, orders, and delivery.",
+  },
+];
+
+const roomTypes = [
+  "Living room",
+  "Kitchen",
+  "Bedroom",
+  "Bathroom",
+  "Home office",
+  "Children's room",
+  "Hall / storage",
+  "Other",
+];
+
 const visualCues: Option[] = [
   {
     label: "Natural wood",
@@ -305,6 +385,12 @@ export default function ProjectCompass() {
   const [scope, setScope] = useState(scopes[1].value);
   const [budget, setBudget] = useState(budgets[1].value);
   const [timeline, setTimeline] = useState(timelines[1].value);
+  const [areaM2, setAreaM2] = useState("");
+  const [roomCount, setRoomCount] = useState("");
+  const [selectedRoomTypes, setSelectedRoomTypes] = useState<string[]>([]);
+  const [propertyStatus, setPropertyStatus] = useState(propertyStatuses[0].value);
+  const [visualizationNeed, setVisualizationNeed] = useState(visualizationNeeds[3].value);
+  const [supervisionNeed, setSupervisionNeed] = useState(supervisionNeeds[0].value);
   const [location, setLocation] = useState("Warsaw");
   const [notes, setNotes] = useState("");
   const [referencePhotos, setReferencePhotos] = useState<ReferencePhoto[]>([]);
@@ -343,8 +429,14 @@ export default function ProjectCompass() {
     support: scope,
     budget,
     timeline,
+    propertyStatus,
+    visualization: visualizationNeed,
+    supervision: supervisionNeed,
   });
 
+  if (areaM2) designerParams.set("area", areaM2);
+  if (roomCount) designerParams.set("roomCount", roomCount);
+  if (selectedRoomTypes.length) designerParams.set("rooms", selectedRoomTypes.join(","));
   if (location.trim()) designerParams.set("location", location.trim());
   if (visualSearchSpecialty) designerParams.set("specialty", visualSearchSpecialty);
   if (selectedVisualCues.length) designerParams.set("cues", selectedVisualCues.slice(0, 5).join(","));
@@ -357,6 +449,10 @@ export default function ProjectCompass() {
       [
         `Project type: ${projectType}`,
         `Main goal: ${goal}`,
+        `Area: ${areaM2 ? `${areaM2} m2` : "Not specified"}`,
+        `Room count: ${roomCount || "Not specified"}`,
+        selectedRoomTypes.length ? `Rooms: ${selectedRoomTypes.join(", ")}` : null,
+        `Property status: ${propertyStatus}`,
         `Style direction: ${style}`,
         referencePhotos.length
           ? `Reference photos: ${referencePhotos.length} uploaded (${referencePhotos
@@ -387,6 +483,8 @@ export default function ProjectCompass() {
         `Support needed: ${scope}`,
         `Budget signal: ${budget}`,
         `Preferred timeline: ${timeline}`,
+        `3D visualization: ${visualizationNeed}`,
+        `Supervision: ${supervisionNeed}`,
         `Location: ${location.trim() || "Not specified"}`,
         notes.trim() ? `Notes: ${notes.trim()}` : null,
       ]
@@ -394,16 +492,22 @@ export default function ProjectCompass() {
         .join("\n"),
     [
       budget,
+      areaM2,
       goal,
       location,
       notes,
       projectType,
+      propertyStatus,
       referencePhotos,
+      roomCount,
       scope,
+      selectedRoomTypes,
       selectedVisualCues,
       style,
       styleAnalysis,
+      supervisionNeed,
       timeline,
+      visualizationNeed,
     ]
   );
 
@@ -535,6 +639,12 @@ export default function ProjectCompass() {
     formData.set("support_scope", scope);
     formData.set("budget_signal", budget);
     formData.set("timeline", timeline);
+    formData.set("area_m2", areaM2);
+    formData.set("room_count", roomCount);
+    formData.set("room_types", JSON.stringify(selectedRoomTypes));
+    formData.set("property_status", propertyStatus);
+    formData.set("visualization_need", visualizationNeed);
+    formData.set("supervision_need", supervisionNeed);
     formData.set("location", location);
     formData.set("notes", notes);
     formData.set("visual_cues", JSON.stringify(selectedVisualCues));
@@ -567,6 +677,12 @@ export default function ProjectCompass() {
             scope,
             budget,
             timeline,
+            areaM2,
+            roomCount,
+            selectedRoomTypes,
+            propertyStatus,
+            visualizationNeed,
+            supervisionNeed,
             location,
             notes,
             selectedVisualCues,
@@ -597,6 +713,14 @@ export default function ProjectCompass() {
     );
   }
 
+  function toggleRoomType(value: string) {
+    setSelectedRoomTypes((current) =>
+      current.includes(value)
+        ? current.filter((item) => item !== value)
+        : [...current, value]
+    );
+  }
+
   useEffect(() => {
     const rawDraft = window.sessionStorage.getItem(projectCompassDraftKey);
     if (rawDraft) {
@@ -608,6 +732,12 @@ export default function ProjectCompass() {
           scope: string;
           budget: string;
           timeline: string;
+          areaM2: string;
+          roomCount: string;
+          selectedRoomTypes: string[];
+          propertyStatus: string;
+          visualizationNeed: string;
+          supervisionNeed: string;
           location: string;
           notes: string;
           selectedVisualCues: string[];
@@ -618,6 +748,12 @@ export default function ProjectCompass() {
         if (draft.scope) setScope(draft.scope);
         if (draft.budget) setBudget(draft.budget);
         if (draft.timeline) setTimeline(draft.timeline);
+        if (typeof draft.areaM2 === "string") setAreaM2(draft.areaM2);
+        if (typeof draft.roomCount === "string") setRoomCount(draft.roomCount);
+        if (Array.isArray(draft.selectedRoomTypes)) setSelectedRoomTypes(draft.selectedRoomTypes);
+        if (draft.propertyStatus) setPropertyStatus(draft.propertyStatus);
+        if (draft.visualizationNeed) setVisualizationNeed(draft.visualizationNeed);
+        if (draft.supervisionNeed) setSupervisionNeed(draft.supervisionNeed);
         if (typeof draft.location === "string") setLocation(draft.location);
         if (typeof draft.notes === "string") setNotes(draft.notes);
         if (Array.isArray(draft.selectedVisualCues)) {
@@ -669,15 +805,82 @@ export default function ProjectCompass() {
             value={projectType}
           />
 
+          <section>
+            <h2 className="text-base font-bold">2. Tell us about the space</h2>
+            <p className="mt-1 text-sm leading-6 text-muted">
+              Approximate details are enough. They help professionals estimate workload
+              before the first conversation.
+            </p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm font-semibold">
+                Area, m2
+                <input
+                  type="number"
+                  min="1"
+                  max="5000"
+                  inputMode="decimal"
+                  value={areaM2}
+                  onChange={(event) => setAreaM2(event.target.value)}
+                  placeholder="e.g. 72"
+                  className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary"
+                />
+              </label>
+              <label className="block text-sm font-semibold">
+                Number of rooms
+                <input
+                  type="number"
+                  min="1"
+                  max="50"
+                  inputMode="numeric"
+                  value={roomCount}
+                  onChange={(event) => setRoomCount(event.target.value)}
+                  placeholder="e.g. 3"
+                  className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary"
+                />
+              </label>
+            </div>
+            <div className="mt-4">
+              <div className="text-sm font-semibold">Rooms included</div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {roomTypes.map((room) => {
+                  const isSelected = selectedRoomTypes.includes(room);
+                  return (
+                    <button
+                      key={room}
+                      type="button"
+                      aria-pressed={isSelected}
+                      onClick={() => toggleRoomType(room)}
+                      className={[
+                        "rounded-full border px-4 py-2 text-sm font-semibold transition",
+                        isSelected
+                          ? "border-primary bg-primary text-white"
+                          : "border-line bg-background text-muted hover:border-primary hover:text-primary",
+                      ].join(" ")}
+                    >
+                      {room}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
           <OptionGrid
-            label="2. What do you need most?"
+            label="3. What is the property status?"
+            onChange={setPropertyStatus}
+            options={propertyStatuses}
+            value={propertyStatus}
+          />
+
+          <OptionGrid
+            label="4. What do you need most?"
             onChange={setGoal}
             options={goals}
             value={goal}
           />
 
           <OptionGrid
-            label="3. Which direction feels closest?"
+            label="5. Which direction feels closest?"
             onChange={setStyle}
             options={styles}
             value={style}
@@ -686,7 +889,7 @@ export default function ProjectCompass() {
           <section>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-base font-bold">4. Add reference photos</h2>
+                <h2 className="text-base font-bold">6. Add reference photos</h2>
                 <p className="mt-1 text-sm leading-6 text-muted">
                   Add 4-10 rooms, details, or moods you like. Previews stay in this
                   browser until you choose analysis or save the brief. Saving uploads
@@ -897,24 +1100,38 @@ export default function ProjectCompass() {
           </section>
 
           <OptionGrid
-            label="5. What level of help do you want?"
+            label="7. What level of help do you want?"
             onChange={setScope}
             options={scopes}
             value={scope}
           />
 
           <OptionGrid
-            label="6. What budget range should the designer respect?"
+            label="8. What budget range should the designer respect?"
             onChange={setBudget}
             options={budgets}
             value={budget}
           />
 
           <OptionGrid
-            label="7. When do you want to start?"
+            label="9. When do you want to start?"
             onChange={setTimeline}
             options={timelines}
             value={timeline}
+          />
+
+          <OptionGrid
+            label="10. Do you need 3D visualization?"
+            onChange={setVisualizationNeed}
+            options={visualizationNeeds}
+            value={visualizationNeed}
+          />
+
+          <OptionGrid
+            label="11. What supervision do you need?"
+            onChange={setSupervisionNeed}
+            options={supervisionNeeds}
+            value={supervisionNeed}
           />
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -947,6 +1164,9 @@ export default function ProjectCompass() {
           <div className="mt-5 grid gap-3 text-sm">
             {[
               ["Goal", goal],
+              ["Area", areaM2 ? `${areaM2} m2` : "Not specified"],
+              ["Rooms", roomCount || selectedRoomTypes.slice(0, 2).join(", ") || "Not specified"],
+              ["Property", propertyStatus],
               ["Style", style],
               [
                 "Photos",
@@ -963,6 +1183,8 @@ export default function ProjectCompass() {
               ["Support", scope],
               ["Budget", budget],
               ["Timeline", timeline],
+              ["3D", visualizationNeed],
+              ["Supervision", supervisionNeed],
             ].map(([label, value]) => (
               <div
                 key={label}

@@ -71,6 +71,8 @@ must not be reused as product evidence or production content.
 
 ## Immediate Brief Expansion
 
+Status: implemented on 2026-07-01.
+
 The next implementation block should add:
 
 - `area_m2`: a numeric area with an optional "not sure" state.
@@ -102,4 +104,3 @@ the professional profile exposes corresponding service capabilities.
 - Current competitor set and their active user numbers.
 - Any profitability threshold or forecast from the old Q&A.
 - Any claim of verification, ratings, traction, or uniqueness.
-

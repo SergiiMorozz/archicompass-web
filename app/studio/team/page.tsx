@@ -3,6 +3,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getAccountRole, getStudioMemberships } from "@/lib/studios";
+import {
+  serviceCapabilities,
+  serviceCapabilityValues,
+} from "@/lib/service-capabilities";
 
 export const revalidate = 0;
 
@@ -13,6 +17,7 @@ type Studio = {
   bio: string | null;
   location: string | null;
   specialties: string[] | null;
+  service_capabilities: string[] | null;
   website: string | null;
   phone: string | null;
   email: string | null;
@@ -72,6 +77,7 @@ function studioPayload(formData: FormData) {
     bio: textValue(formData, "bio"),
     location: textValue(formData, "location"),
     specialties: listValue(formData, "specialties"),
+    service_capabilities: serviceCapabilityValues(formData),
     website: textValue(formData, "website"),
     phone: textValue(formData, "phone"),
     email: textValue(formData, "email"),
@@ -229,7 +235,7 @@ export default async function StudioTeamPage({
   const { data: studioData } = studioIds.length
     ? await supabase
         .from("studios")
-        .select("id, owner_id, name, bio, location, specialties, website, phone, email, hourly_rate, years_experience, published, created_at")
+        .select("id, owner_id, name, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, years_experience, published, created_at")
         .in("id", studioIds)
         .order("created_at", { ascending: true })
     : { data: [] };
@@ -412,6 +418,17 @@ export default async function StudioTeamPage({
                       <label className="text-sm font-semibold">Studio name<input name="name" required defaultValue={studio.name} className={fieldClass} /></label>
                       <label className="text-sm font-semibold">Location<input name="location" defaultValue={studio.location ?? ""} className={fieldClass} /></label>
                       <label className="text-sm font-semibold">Specialties<input name="specialties" defaultValue={studio.specialties?.join(", ") ?? ""} className={fieldClass} /></label>
+                      <fieldset>
+                        <legend className="text-sm font-semibold">Services available</legend>
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          {serviceCapabilities.map((capability) => (
+                            <label key={capability} className="flex items-center gap-3 rounded-xl border border-line bg-card px-3 py-2 text-sm font-semibold">
+                              <input type="checkbox" name="service_capabilities" value={capability} defaultChecked={studio.service_capabilities?.includes(capability)} className="h-4 w-4 accent-primary" />
+                              {capability}
+                            </label>
+                          ))}
+                        </div>
+                      </fieldset>
                       <label className="text-sm font-semibold">Bio<textarea name="bio" rows={5} defaultValue={studio.bio ?? ""} className={fieldClass} /></label>
                       <label className="text-sm font-semibold">Website<input name="website" defaultValue={studio.website ?? ""} className={fieldClass} /></label>
                       <label className="text-sm font-semibold">Public email<input name="email" type="email" defaultValue={studio.email ?? ""} className={fieldClass} /></label>
@@ -448,6 +465,17 @@ export default async function StudioTeamPage({
             <label className="text-sm font-semibold">Studio name<input name="name" required className={fieldClass} /></label>
             <label className="text-sm font-semibold">Location<input name="location" className={fieldClass} /></label>
             <label className="text-sm font-semibold md:col-span-2">Specialties<input name="specialties" placeholder="residential, hospitality, renovations" className={fieldClass} /></label>
+            <fieldset className="md:col-span-2">
+              <legend className="text-sm font-semibold">Services available</legend>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {serviceCapabilities.map((capability) => (
+                  <label key={capability} className="flex items-center gap-3 rounded-xl border border-line bg-background px-3 py-2 text-sm font-semibold">
+                    <input type="checkbox" name="service_capabilities" value={capability} className="h-4 w-4 accent-primary" />
+                    {capability}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
             <label className="text-sm font-semibold md:col-span-2">Bio<textarea name="bio" rows={5} className={fieldClass} /></label>
             <label className="text-sm font-semibold">Website<input name="website" placeholder="https://" className={fieldClass} /></label>
             <label className="text-sm font-semibold">Public email<input name="email" type="email" defaultValue={user.email ?? ""} className={fieldClass} /></label>

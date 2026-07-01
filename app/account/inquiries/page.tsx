@@ -72,6 +72,8 @@ function profileMeta(profile?: Profile) {
 
 function snapshotText(snapshot: Record<string, unknown> | null, key: string) {
   const value = snapshot?.[key];
+  if (typeof value === "number") return String(value);
+  if (Array.isArray(value)) return value.filter((item) => typeof item === "string").join(", ") || "Not specified";
   return typeof value === "string" && value.trim() ? value : "Not specified";
 }
 
@@ -190,6 +192,11 @@ function InquiryCard({
           ["Support", snapshotText(snapshot, "support_scope")],
           ["Budget", snapshotText(snapshot, "budget_signal")],
           ["Timeline", snapshotText(snapshot, "timeline")],
+          ["Area", snapshotText(snapshot, "area_m2") === "Not specified" ? "Not specified" : `${snapshotText(snapshot, "area_m2")} m2`],
+          ["Rooms", snapshotText(snapshot, "room_types")],
+          ["Property", snapshotText(snapshot, "property_status")],
+          ["3D", snapshotText(snapshot, "visualization_need")],
+          ["Supervision", snapshotText(snapshot, "supervision_need")],
           ["Location", snapshotText(snapshot, "location")],
           ["Goal", snapshotText(snapshot, "goal")],
         ].map(([label, value]) => (

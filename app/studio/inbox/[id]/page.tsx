@@ -148,6 +148,8 @@ function formatDate(value: string) {
 
 function snapshotValue(snapshot: Record<string, unknown> | null, key: string) {
   const value = snapshot?.[key];
+  if (typeof value === "number") return String(value);
+  if (Array.isArray(value)) return value.filter((item) => typeof item === "string").join(", ") || "Not specified";
   return typeof value === "string" && value.trim() ? value : "Not specified";
 }
 
@@ -388,6 +390,11 @@ export default async function StudioConversationPage({
                 ["Style", snapshotValue(inquiry.brief_snapshot, "style_direction")],
                 ["Support", snapshotValue(inquiry.brief_snapshot, "support_scope")],
                 ["Budget", snapshotValue(inquiry.brief_snapshot, "budget_signal")],
+                ["Area", snapshotValue(inquiry.brief_snapshot, "area_m2")],
+                ["Rooms", snapshotValue(inquiry.brief_snapshot, "room_types")],
+                ["Property", snapshotValue(inquiry.brief_snapshot, "property_status")],
+                ["3D", snapshotValue(inquiry.brief_snapshot, "visualization_need")],
+                ["Supervision", snapshotValue(inquiry.brief_snapshot, "supervision_need")],
                 ["Location", snapshotValue(inquiry.brief_snapshot, "location")],
               ].map(([label, value]) => (
                 <div key={label} className="flex justify-between gap-4 border-b border-line pb-3 last:border-0 last:pb-0">

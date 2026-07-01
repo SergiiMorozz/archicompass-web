@@ -3,6 +3,7 @@ import FavoriteButton from "@/components/FavoriteButton";
 import { countLabel } from "@/lib/count-label";
 import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requiredServiceCapabilities } from "@/lib/service-capabilities";
 import {
   applyDemoProfilePresentation,
   getDemoProfilePresentation,
@@ -18,6 +19,7 @@ type Profile = {
   profession_type: string | null;
   user_type: string | null;
   specialties: string[] | null;
+  service_capabilities: string[] | null;
   hourly_rate: number | null;
   years_experience: number | null;
   created_at: string;
@@ -29,6 +31,7 @@ type Studio = {
   bio: string | null;
   location: string | null;
   specialties: string[] | null;
+  service_capabilities: string[] | null;
   hourly_rate: number | null;
   years_experience: number | null;
   created_at: string;
@@ -43,6 +46,12 @@ type SP = {
   support?: string;
   budget?: string;
   timeline?: string;
+  area?: string;
+  roomCount?: string;
+  rooms?: string;
+  propertyStatus?: string;
+  visualization?: string;
+  supervision?: string;
   cues?: string;
   q?: string;
   location?: string;
@@ -60,6 +69,12 @@ type BriefMatchContext = {
   support: string;
   budget: string;
   timeline: string;
+  area: string;
+  roomCount: string;
+  rooms: string[];
+  propertyStatus: string;
+  visualization: string;
+  supervision: string;
   location: string;
   cues: string[];
 };
@@ -152,18 +167,27 @@ function experienceLabel(value: number | null) {
 }
 
 function StudioCard({
+  briefContext,
   briefId,
   canSendBrief,
   initialSaved,
   memberCount,
   studio,
 }: {
+  briefContext: BriefMatchContext | null;
   briefId: string;
   canSendBrief: boolean;
   initialSaved: boolean;
   memberCount: number;
   studio: Studio;
 }) {
+  const requestedCapabilities = briefContext
+    ? requiredServiceCapabilities(briefContext.visualization, briefContext.supervision)
+    : [];
+  const availableCapabilities = studio.service_capabilities ?? [];
+  const confirmedCapabilities = requestedCapabilities.filter((capability) =>
+    availableCapabilities.includes(capability)
+  );
   return (
     <article className="overflow-hidden rounded-lg border border-line bg-card shadow-sm">
       <Link
@@ -197,6 +221,16 @@ function StudioCard({
             </span>
           ))}
         </div>
+        {briefContext && requestedCapabilities.length ? (
+          <div className="mt-4 rounded-lg bg-primary-soft p-4 text-sm">
+            <div className="text-xs font-semibold uppercase text-primary">Service fit</div>
+            <div className="mt-2 font-semibold">
+              {confirmedCapabilities.length === requestedCapabilities.length
+                ? "Requested services confirmed"
+                : `${confirmedCapabilities.length}/${requestedCapabilities.length} requested services confirmed`}
+            </div>
+          </div>
+        ) : null}
         <div className="mt-5 flex flex-wrap gap-3">
           <Link href={`/studios/${studio.id}`} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
             View studio
@@ -240,6 +274,7 @@ function DesignerCard({
   const location = profileLocation(profile);
   const cover = coverImages[index % coverImages.length];
   const specialties = profile.specialties?.filter(Boolean).slice(0, 5) ?? [];
+  const availableCapabilities = profile.service_capabilities ?? [];
   const demo = getDemoProfilePresentation(profile.id);
   const specialtyText = normalizeSearchText(specialties.join(" "));
   const requestedSpecialtyText = normalizeSearchText(requestedSpecialty).replace(
@@ -255,6 +290,12 @@ function DesignerCard({
   const locationMatches = requestedLocation
     ? normalizeSearchText(location).includes(normalizeSearchText(requestedLocation))
     : false;
+  const requestedCapabilities = briefContext
+    ? requiredServiceCapabilities(briefContext.visualization, briefContext.supervision)
+    : [];
+  const confirmedCapabilities = requestedCapabilities.filter((capability) =>
+    availableCapabilities.includes(capability)
+  );
   const matchItems = [
     [briefContext ? "Style match" : "Style / specialty", styleMatch],
     ["Project fit", briefContext?.projectType || demo?.projectFit || "Review the portfolio for similar room and project types"],
@@ -267,6 +308,12 @@ function DesignerCard({
         : location,
     ],
     ["Support", briefContext?.support ? `Confirm ${briefContext.support.toLowerCase()}` : "Review available services"],
+    ...(briefContext?.visualization && briefContext.visualization !== "Not needed"
+      ? [["3D visualization", availableCapabilities.includes("3D visualization") ? "Available" : `Confirm · ${briefContext.visualization}`]]
+      : []),
+    ...(briefContext?.supervision && briefContext.supervision !== "Not needed"
+      ? [["Supervision", confirmedCapabilities.some((capability) => capability !== "3D visualization") ? "Available" : `Confirm · ${briefContext.supervision}`]]
+      : []),
     ["Budget", briefContext?.budget ? `${briefContext.budget} · pricing confirmed after review` : "Pricing after brief review"],
     ["Portfolio", countLabel(portfolioCount, "public project")],
   ];
@@ -468,13 +515,37 @@ export default async function DesignersPage({
   const support = first(sp.support).trim();
   const budget = first(sp.budget).trim();
   const timeline = first(sp.timeline).trim();
+  const area = first(sp.area).trim();
+  const roomCount = first(sp.roomCount).trim();
+  const rooms = first(sp.rooms)
+    .split(",")
+    .map((room) => room.trim())
+    .filter(Boolean);
+  const propertyStatus = first(sp.propertyStatus).trim();
+  const visualization = first(sp.visualization).trim();
+  const supervision = first(sp.supervision).trim();
   const cues = first(sp.cues)
     .split(",")
     .map((cue) => cue.trim())
     .filter(Boolean)
     .slice(0, 5);
   const briefContext: BriefMatchContext | null = matchingMode
-    ? { projectType, goal, style, support, budget, timeline, location, cues }
+    ? {
+        projectType,
+        goal,
+        style,
+        support,
+        budget,
+        timeline,
+        area,
+        roomCount,
+        rooms,
+        propertyStatus,
+        visualization,
+        supervision,
+        location,
+        cues,
+      }
     : null;
   const view = selectedView(first(sp.view));
   const sort = selectedSort(first(sp.sort));
@@ -489,7 +560,7 @@ export default async function DesignersPage({
   const query = supabase
     .from("profiles")
     .select(
-      "id, full_name, bio, location, profession_type, user_type, specialties, hourly_rate, years_experience, created_at"
+      "id, full_name, bio, location, profession_type, user_type, specialties, service_capabilities, hourly_rate, years_experience, created_at"
     )
     .eq("user_type", "professional")
     .order("created_at", { ascending: false })
@@ -498,7 +569,7 @@ export default async function DesignersPage({
   const { data, error } = await query;
   const { data: studioData } = await supabase
     .from("studios")
-    .select("id, name, bio, location, specialties, hourly_rate, years_experience, created_at")
+    .select("id, name, bio, location, specialties, service_capabilities, hourly_rate, years_experience, created_at")
     .eq("published", true)
     .order("created_at", { ascending: false })
     .limit(30);
@@ -538,6 +609,7 @@ export default async function DesignersPage({
           profile.bio,
           profile.profession_type,
           ...(profile.specialties ?? []),
+          ...(profile.service_capabilities ?? []),
         ]
           .filter(Boolean)
           .join(" ")
@@ -568,7 +640,7 @@ export default async function DesignersPage({
 
   const studios = ((studioData ?? []) as Studio[]).filter((studio) => {
     const searchable = normalizeSearchText(
-      [studio.name, studio.bio, ...(studio.specialties ?? [])]
+      [studio.name, studio.bio, ...(studio.specialties ?? []), ...(studio.service_capabilities ?? [])]
         .filter(Boolean)
         .join(" ")
     );
@@ -609,14 +681,23 @@ export default async function DesignersPage({
       const profileSpecialties = normalizeSearchText((profile.specialties ?? []).join(" "));
       const profileLocation = normalizeSearchText(profile.location ?? "");
       const profileText = normalizeSearchText(
-        [profile.bio, profile.profession_type, ...(profile.specialties ?? [])]
+        [
+          profile.bio,
+          profile.profession_type,
+          ...(profile.specialties ?? []),
+          ...(profile.service_capabilities ?? []),
+        ]
           .filter(Boolean)
           .join(" ")
       );
+      const requestedCapabilities = requiredServiceCapabilities(visualization, supervision);
       return (
         (normalizedSpecialty && profileSpecialties.includes(normalizedSpecialty) ? 4 : 0) +
         (normalizedLocation && profileLocation.includes(normalizedLocation) ? 3 : 0) +
         (projectType && profileText.includes(normalizeSearchText(projectType)) ? 2 : 0) +
+        requestedCapabilities.filter((capability) =>
+          profile.service_capabilities?.includes(capability)
+        ).length * 3 +
         cues.filter((cue) => profileText.includes(normalizeSearchText(cue))).length
       );
     };
@@ -648,6 +729,12 @@ export default async function DesignersPage({
     support,
     budget,
     timeline,
+    area,
+    roomCount,
+    rooms: rooms.join(","),
+    propertyStatus,
+    visualization,
+    supervision,
     cues: cues.join(","),
     q,
     location,
@@ -670,6 +757,12 @@ export default async function DesignersPage({
         ["support", support],
         ["budget", budget],
         ["timeline", timeline],
+        ["area", area],
+        ["roomCount", roomCount],
+        ["rooms", rooms.join(",")],
+        ["propertyStatus", propertyStatus],
+        ["visualization", visualization],
+        ["supervision", supervision],
         ["cues", cues.join(",")],
       ].filter((entry) => entry[1])
     : [];
@@ -746,6 +839,11 @@ export default async function DesignersPage({
                 briefContext.budget,
                 briefContext.support,
                 briefContext.timeline,
+                briefContext.area ? `${briefContext.area} m2` : "",
+                briefContext.roomCount ? `${briefContext.roomCount} rooms` : "",
+                briefContext.propertyStatus,
+                briefContext.visualization,
+                briefContext.supervision,
                 ...briefContext.cues.slice(0, 3),
               ]
                 .filter(Boolean)
@@ -853,6 +951,7 @@ export default async function DesignersPage({
                 {studios.map((studio) => (
                   <StudioCard
                     key={studio.id}
+                    briefContext={briefContext}
                     briefId={briefId}
                     studio={studio}
                     memberCount={studioMemberCounts.get(studio.id) ?? 0}

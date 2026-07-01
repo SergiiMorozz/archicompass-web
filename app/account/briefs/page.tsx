@@ -23,6 +23,12 @@ type ProjectBrief = {
   support_scope: string | null;
   budget_signal: string | null;
   timeline: string | null;
+  area_m2: number | null;
+  room_count: number | null;
+  room_types: string[] | null;
+  property_status: string | null;
+  visualization_need: string | null;
+  supervision_need: string | null;
   location: string | null;
   notes: string | null;
   visual_cues: string[] | null;
@@ -121,7 +127,7 @@ async function sendBriefInquiry(formData: FormData) {
   const { data: briefData, error: briefError } = await supabase
     .from("project_briefs")
     .select(
-      "id, user_id, title, project_type, goal, style_direction, support_scope, budget_signal, timeline, location, notes, visual_cues, reference_photo_names, reference_photo_paths, brief_text, designer_search_href, created_at"
+      "id, user_id, title, project_type, goal, style_direction, support_scope, budget_signal, timeline, area_m2, room_count, room_types, property_status, visualization_need, supervision_need, location, notes, visual_cues, reference_photo_names, reference_photo_paths, brief_text, designer_search_href, created_at"
     )
     .eq("id", briefId)
     .eq("user_id", user.id)
@@ -191,6 +197,12 @@ async function sendBriefInquiry(formData: FormData) {
       support_scope: brief.support_scope,
       budget_signal: brief.budget_signal,
       timeline: brief.timeline,
+      area_m2: brief.area_m2,
+      room_count: brief.room_count,
+      room_types: brief.room_types ?? [],
+      property_status: brief.property_status,
+      visualization_need: brief.visualization_need,
+      supervision_need: brief.supervision_need,
       location: brief.location,
       notes: brief.notes,
       visual_cues: brief.visual_cues ?? [],
@@ -298,7 +310,7 @@ export default async function SavedBriefsPage({
   const { data: briefsData, error } = await supabase
     .from("project_briefs")
     .select(
-      "id, user_id, title, project_type, goal, style_direction, support_scope, budget_signal, timeline, location, notes, visual_cues, reference_photo_names, reference_photo_paths, brief_text, designer_search_href, created_at"
+      "id, user_id, title, project_type, goal, style_direction, support_scope, budget_signal, timeline, area_m2, room_count, room_types, property_status, visualization_need, supervision_need, location, notes, visual_cues, reference_photo_names, reference_photo_paths, brief_text, designer_search_href, created_at"
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
@@ -498,6 +510,12 @@ export default async function SavedBriefsPage({
                       ["Support", brief.support_scope],
                       ["Budget", brief.budget_signal],
                       ["Timeline", brief.timeline],
+                      ["Area", brief.area_m2 ? `${brief.area_m2} m2` : null],
+                      ["Room count", brief.room_count ? String(brief.room_count) : null],
+                      ["Rooms", brief.room_types?.join(", ") || null],
+                      ["Property status", brief.property_status],
+                      ["3D visualization", brief.visualization_need],
+                      ["Supervision", brief.supervision_need],
                       ["Location", brief.location],
                       ["Visual cues", brief.visual_cues?.join(", ") || "Not tagged"],
                     ].map(([label, value]) => (

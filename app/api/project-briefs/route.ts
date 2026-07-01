@@ -26,6 +26,14 @@ function stringArrayValue(formData: FormData, key: string) {
   }
 }
 
+function numberValue(formData: FormData, key: string, integer = false) {
+  const value = textValue(formData, key);
+  if (!value) return null;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return null;
+  return integer ? Math.round(parsed) : parsed;
+}
+
 function fileValues(formData: FormData, key: string) {
   return formData
     .getAll(key)
@@ -134,6 +142,12 @@ export async function POST(request: Request) {
     support_scope: textValue(formData, "support_scope"),
     budget_signal: textValue(formData, "budget_signal"),
     timeline: textValue(formData, "timeline"),
+    area_m2: numberValue(formData, "area_m2"),
+    room_count: numberValue(formData, "room_count", true),
+    room_types: stringArrayValue(formData, "room_types"),
+    property_status: textValue(formData, "property_status"),
+    visualization_need: textValue(formData, "visualization_need"),
+    supervision_need: textValue(formData, "supervision_need"),
     location: textValue(formData, "location"),
     notes: textValue(formData, "notes"),
     visual_cues: stringArrayValue(formData, "visual_cues"),

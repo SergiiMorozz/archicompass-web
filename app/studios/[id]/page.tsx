@@ -15,6 +15,7 @@ type Studio = {
   bio: string | null;
   location: string | null;
   specialties: string[] | null;
+  service_capabilities: string[] | null;
   website: string | null;
   phone: string | null;
   email: string | null;
@@ -75,7 +76,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ i
 
   const { data: studioData } = await supabase
     .from("studios")
-    .select("id, owner_id, name, bio, location, specialties, website, phone, email, hourly_rate, years_experience, published")
+    .select("id, owner_id, name, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, years_experience, published")
     .eq("id", id)
     .maybeSingle();
   if (!studioData) notFound();
@@ -191,6 +192,11 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ i
             {studio.specialties?.length ? (
               <div className="mt-5 flex flex-wrap gap-2">
                 {studio.specialties.map((specialty) => <span key={specialty} className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">{specialty}</span>)}
+              </div>
+            ) : null}
+            {studio.service_capabilities?.length ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {studio.service_capabilities.map((capability) => <span key={capability} className="rounded-full border border-line bg-background px-3 py-1 text-sm font-semibold text-muted">{capability}</span>)}
               </div>
             ) : null}
           </div>

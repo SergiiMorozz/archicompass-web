@@ -14,6 +14,12 @@ type Brief = {
   support_scope: string | null;
   budget_signal: string | null;
   timeline: string | null;
+  area_m2: number | null;
+  room_count: number | null;
+  room_types: string[] | null;
+  property_status: string | null;
+  visualization_need: string | null;
+  supervision_need: string | null;
   location: string | null;
   reference_photo_names: string[] | null;
   created_at: string;
@@ -35,7 +41,7 @@ export default async function ClientBriefsPage() {
 
   const { data, error } = await supabase
     .from("project_briefs")
-    .select("id, title, project_type, goal, style_direction, support_scope, budget_signal, timeline, location, reference_photo_names, created_at")
+    .select("id, title, project_type, goal, style_direction, support_scope, budget_signal, timeline, area_m2, room_count, room_types, property_status, visualization_need, supervision_need, location, reference_photo_names, created_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -81,6 +87,11 @@ export default async function ClientBriefsPage() {
                     ["Support", brief.support_scope],
                     ["Budget", brief.budget_signal],
                     ["Timeline", brief.timeline],
+                    ["Area", brief.area_m2 ? `${brief.area_m2} m2` : null],
+                    ["Rooms", brief.room_types?.join(", ") || (brief.room_count ? String(brief.room_count) : null)],
+                    ["Property", brief.property_status],
+                    ["3D", brief.visualization_need],
+                    ["Supervision", brief.supervision_need],
                     ["Location", brief.location],
                   ].map(([label, value]) => (
                     <div key={label} className="rounded-xl border border-line bg-background p-3">

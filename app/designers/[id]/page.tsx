@@ -21,6 +21,7 @@ type Profile = {
   profession_type: string | null;
   user_type: string | null;
   specialties: string[] | null;
+  service_capabilities: string[] | null;
   website: string | null;
   phone: string | null;
   email: string | null;
@@ -249,7 +250,7 @@ export default async function DesignerProfilePage({
   const { data: profileData, error: pErr } = await supabase
     .from("profiles")
     .select(
-      "id, full_name, bio, location, profession_type, user_type, specialties, website, phone, email, hourly_rate, years_experience"
+      "id, full_name, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, years_experience"
     )
     .eq("id", id)
     .single();
@@ -332,6 +333,7 @@ export default async function DesignerProfilePage({
   const type = profileType(profile);
   const location = profileLocation(profile);
   const specialties = profile.specialties?.filter(Boolean).slice(0, 10) ?? [];
+  const serviceCapabilities = profile.service_capabilities?.filter(Boolean) ?? [];
   const webHref = websiteHref(profile.website);
   const profileHero = heroImage(profile.id, projects);
   const categoryFilters = Array.from(
@@ -631,6 +633,21 @@ export default async function DesignerProfilePage({
               <div className="text-sm font-semibold text-primary">Services Offered</div>
               <h2 className="mt-1 text-3xl font-bold">Ways to work together</h2>
             </div>
+
+            {serviceCapabilities.length ? (
+              <div className="mt-5 flex flex-wrap gap-2">
+                {serviceCapabilities.map((capability) => (
+                  <span key={capability} className="rounded-full bg-primary-soft px-3 py-1.5 text-sm font-semibold text-primary">
+                    {capability}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-4 text-sm leading-6 text-muted">
+                Service capabilities have not been confirmed yet. Send the brief to ask
+                about 3D work, documentation, or supervision.
+              </p>
+            )}
 
             <div className="mt-6 grid gap-4 md:grid-cols-3">
               {serviceCards(profile).map((service) => (

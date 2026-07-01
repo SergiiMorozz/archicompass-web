@@ -2,6 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getAccountRole } from "@/lib/studios";
+import {
+  serviceCapabilities,
+  serviceCapabilityValues,
+} from "@/lib/service-capabilities";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -13,6 +17,7 @@ type Profile = {
   profession_type: string | null;
   user_type: string | null;
   specialties: string[] | null;
+  service_capabilities: string[] | null;
   website: string | null;
   phone: string | null;
   email: string | null;
@@ -61,6 +66,7 @@ function completionScore(profile: Partial<Profile>) {
     profile.email,
     profile.bio,
     profile.specialties?.length ? "specialties" : null,
+    profile.service_capabilities?.length ? "services" : null,
     profile.hourly_rate,
     profile.years_experience,
   ];
@@ -111,6 +117,8 @@ async function updateProfile(formData: FormData) {
       selectedType === "professional" ? textValue(formData, "profession_type") : null,
     user_type: selectedType,
     specialties: selectedType === "professional" ? specialtiesValue(formData) : [],
+    service_capabilities:
+      selectedType === "professional" ? serviceCapabilityValues(formData) : [],
     website: textValue(formData, "website"),
     phone: textValue(formData, "phone"),
     email: textValue(formData, "email") ?? user.email ?? null,
@@ -191,7 +199,7 @@ export default async function EditProfilePage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "full_name, bio, location, profession_type, user_type, specialties, website, phone, email, hourly_rate, years_experience"
+      "full_name, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, years_experience"
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -374,6 +382,30 @@ export default async function EditProfilePage({
                   className={fieldClass}
                 />
               </Field>
+
+              <fieldset>
+                <legend className="text-sm font-semibold">Services available</legend>
+                <p className="mt-1 text-sm leading-6 text-muted">
+                  These are used when Project Compass explains why a brief may fit.
+                </p>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  {serviceCapabilities.map((capability) => (
+                    <label
+                      key={capability}
+                      className="flex items-center gap-3 rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold"
+                    >
+                      <input
+                        type="checkbox"
+                        name="service_capabilities"
+                        value={capability}
+                        defaultChecked={p.service_capabilities?.includes(capability)}
+                        className="h-4 w-4 accent-primary"
+                      />
+                      {capability}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
 
               <Field label="Bio">
                 <textarea

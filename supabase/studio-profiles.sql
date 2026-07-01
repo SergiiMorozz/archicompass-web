@@ -93,6 +93,7 @@ create table if not exists public.studios (
   bio text check (bio is null or char_length(bio) <= 5000),
   location text check (location is null or char_length(location) <= 200),
   specialties text[] not null default '{}',
+  service_capabilities text[] not null default '{}',
   website text check (website is null or char_length(website) <= 500),
   phone text check (phone is null or char_length(phone) <= 100),
   email text check (email is null or char_length(email) <= 320),
@@ -102,6 +103,12 @@ create table if not exists public.studios (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.profiles
+add column if not exists service_capabilities text[] not null default '{}';
+
+alter table public.studios
+add column if not exists service_capabilities text[] not null default '{}';
 
 create table if not exists public.studio_members (
   studio_id uuid not null references public.studios(id) on delete cascade,
@@ -692,6 +699,7 @@ begin
     user_type = case when new_role = 'designer' then 'professional' else 'client' end,
     profession_type = case when new_role = 'designer' then profession_type else null end,
     specialties = case when new_role = 'designer' then specialties else '{}'::text[] end,
+    service_capabilities = case when new_role = 'designer' then service_capabilities else '{}'::text[] end,
     hourly_rate = case when new_role = 'designer' then hourly_rate else null end,
     years_experience = case when new_role = 'designer' then years_experience else null end
   where id = auth.uid();

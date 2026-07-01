@@ -6,6 +6,12 @@ type BriefForEmail = {
   support_scope: string | null;
   budget_signal: string | null;
   timeline: string | null;
+  area_m2: number | null;
+  room_count: number | null;
+  room_types: string[] | null;
+  property_status: string | null;
+  visualization_need: string | null;
+  supervision_need: string | null;
   location: string | null;
   visual_cues: string[] | null;
   reference_photo_names: string[] | null;
@@ -73,6 +79,12 @@ function emailText({
     briefLine("Support", brief.support_scope),
     briefLine("Budget", brief.budget_signal),
     briefLine("Timeline", brief.timeline),
+    briefLine("Area", brief.area_m2 ? `${brief.area_m2} m2` : null),
+    briefLine("Room count", brief.room_count ? String(brief.room_count) : null),
+    brief.room_types?.length ? `Rooms: ${brief.room_types.join(", ")}` : null,
+    briefLine("Property status", brief.property_status),
+    briefLine("3D visualization", brief.visualization_need),
+    briefLine("Supervision", brief.supervision_need),
     briefLine("Location", brief.location),
     brief.visual_cues?.length ? `Visual cues: ${brief.visual_cues.join(", ")}` : null,
     `Reference photos: ${brief.reference_photo_names?.length ?? 0}`,
@@ -104,6 +116,12 @@ function emailHtml({
     ["Support", brief.support_scope],
     ["Budget", brief.budget_signal],
     ["Timeline", brief.timeline],
+    ["Area", brief.area_m2 ? `${brief.area_m2} m2` : null],
+    ["Room count", brief.room_count ? String(brief.room_count) : null],
+    ["Rooms", brief.room_types?.join(", ")],
+    ["Property status", brief.property_status],
+    ["3D visualization", brief.visualization_need],
+    ["Supervision", brief.supervision_need],
     ["Location", brief.location],
     ["Visual cues", brief.visual_cues?.join(", ")],
     ["Reference photos", String(brief.reference_photo_names?.length ?? 0)],
