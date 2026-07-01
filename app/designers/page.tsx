@@ -1,6 +1,11 @@
 import Link from "next/link";
 import FavoriteButton from "@/components/FavoriteButton";
 import { countLabel } from "@/lib/count-label";
+import {
+  type MatchBrief,
+  type ProfessionalMatch,
+  scoreProfessionalMatch,
+} from "@/lib/designer-matching";
 import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requiredServiceCapabilities } from "@/lib/service-capabilities";
@@ -75,21 +80,13 @@ type SP = {
   view?: "grid" | "list";
 };
 
-type BriefMatchContext = {
-  projectType: string;
-  goal: string;
-  style: string;
-  support: string;
-  budget: string;
-  timeline: string;
-  area: string;
-  roomCount: string;
-  rooms: string[];
-  propertyStatus: string;
-  visualization: string;
-  supervision: string;
-  location: string;
-  cues: string[];
+type BriefMatchContext = MatchBrief;
+
+type PortfolioProject = {
+  profile_id: string;
+  title: string | null;
+  category: string | null;
+  description: string | null;
 };
 
 const trendChips = [
@@ -180,6 +177,7 @@ function StudioCard({
   briefId,
   canSendBrief,
   initialSaved,
+  matchResult,
   memberCount,
   studio,
 }: {
@@ -187,11 +185,16 @@ function StudioCard({
   briefId: string;
   canSendBrief: boolean;
   initialSaved: boolean;
+  matchResult: ProfessionalMatch | null;
   memberCount: number;
   studio: Studio;
 }) {
   const requestedCapabilities = briefContext
-    ? requiredServiceCapabilities(briefContext.visualization, briefContext.supervision)
+    ? requiredServiceCapabilities(
+        briefContext.visualization,
+        briefContext.supervision,
+        briefContext.support
+      )
     : [];
   const availableCapabilities = studio.service_capabilities ?? [];
   const confirmedCapabilities = requestedCapabilities.filter((capability) =>
@@ -223,6 +226,22 @@ function StudioCard({
         <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted">
           {studio.bio || "A collaborative studio profile with a shared team inbox and projects from connected designers."}
         </p>
+        {matchResult ? (
+          <div className="mt-4 rounded-lg bg-primary-soft p-4 text-sm">
+            <div className="flex items-center justify-between gap-3">
+              <div className="font-semibold text-primary">{matchResult.label}</div>
+              <div className="text-lg font-bold text-primary">{matchResult.percent}%</div>
+            </div>
+            <div className="mt-3 grid gap-2">
+              {matchResult.reasons.slice(0, 4).map((reason) => (
+                <div key={reason.label} className="grid gap-1 sm:grid-cols-[90px_1fr]">
+                  <span className="text-muted">{reason.label}</span>
+                  <span className="font-semibold">{reason.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
         <div className="mt-4 flex flex-wrap gap-2">
           {(studio.specialties ?? []).slice(0, 3).map((specialty) => (
             <span key={specialty} className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
@@ -266,6 +285,7 @@ function DesignerCard({
   canSendBrief,
   profile,
   index,
+  matchResult,
   requestedLocation,
   requestedSpecialty,
   initialSaved,
@@ -277,6 +297,7 @@ function DesignerCard({
   canSendBrief: boolean;
   profile: Profile;
   index: number;
+  matchResult: ProfessionalMatch | null;
   requestedLocation: string;
   requestedSpecialty: string;
   initialSaved: boolean;
@@ -305,12 +326,16 @@ function DesignerCard({
     ? normalizeSearchText(location).includes(normalizeSearchText(requestedLocation))
     : false;
   const requestedCapabilities = briefContext
-    ? requiredServiceCapabilities(briefContext.visualization, briefContext.supervision)
+    ? requiredServiceCapabilities(
+        briefContext.visualization,
+        briefContext.supervision,
+        briefContext.support
+      )
     : [];
   const confirmedCapabilities = requestedCapabilities.filter((capability) =>
     availableCapabilities.includes(capability)
   );
-  const matchItems = [
+  const fallbackMatchItems = [
     [briefContext ? "Style match" : "Style / specialty", styleMatch],
     ["Project fit", briefContext?.projectType || demo?.projectFit || "Review the portfolio for similar room and project types"],
     [
@@ -331,6 +356,9 @@ function DesignerCard({
     ["Budget", briefContext?.budget ? `${briefContext.budget} · pricing confirmed after review` : "Pricing after brief review"],
     ["Portfolio", countLabel(portfolioCount, "public project")],
   ];
+  const matchItems = matchResult
+    ? matchResult.reasons.map((reason) => [reason.label, reason.value])
+    : fallbackMatchItems;
   const sendBriefHref = `/account/briefs?designer=${profile.id}${briefId ? `&brief=${briefId}` : ""}`;
 
   if (view === "list") {
@@ -358,6 +386,11 @@ function DesignerCard({
                   {title}
                 </Link>
                 <div className="mt-2 flex flex-wrap gap-2">
+                  {matchResult ? (
+                    <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">
+                      {matchResult.percent}% · {matchResult.label}
+                    </span>
+                  ) : null}
                   <span className="rounded-full bg-[#fff3df] px-3 py-1 text-xs font-semibold text-[#b56b08]">
                     {demo ? "Example profile" : "Early professional"}
                   </span>
@@ -462,6 +495,11 @@ function DesignerCard({
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
+          {matchResult ? (
+            <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">
+              {matchResult.percent}% · {matchResult.label}
+            </span>
+          ) : null}
           <span className="rounded-full bg-[#fff3df] px-3 py-1 text-xs font-semibold text-[#b56b08]">
             {demo ? "Example profile" : "Early professional"}
           </span>
@@ -658,7 +696,7 @@ export default async function DesignersPage({
       );
     });
 
-  const studios = ((studioData ?? []) as Studio[]).filter((studio) => {
+  let studios = ((studioData ?? []) as Studio[]).filter((studio) => {
     const searchable = normalizeSearchText(
       [studio.name, studio.bio, ...(studio.specialties ?? []), ...(studio.service_capabilities ?? [])]
         .filter(Boolean)
@@ -686,44 +724,74 @@ export default async function DesignersPage({
   const { data: studioMemberData } = studioIds.length
     ? await supabase
         .from("studio_members")
-        .select("studio_id")
+        .select("studio_id, user_id")
         .in("studio_id", studioIds)
         .eq("status", "active")
     : { data: [] };
   const studioMemberCounts = new Map<string, number>();
+  const studioMemberProfileIds = new Map<string, string[]>();
   (studioMemberData ?? []).forEach((member) => {
     studioMemberCounts.set(
       member.studio_id,
       (studioMemberCounts.get(member.studio_id) ?? 0) + 1
     );
+    studioMemberProfileIds.set(member.studio_id, [
+      ...(studioMemberProfileIds.get(member.studio_id) ?? []),
+      member.user_id,
+    ]);
   });
 
+  const profileIds = profiles.map((profile) => profile.id);
+  const { data: portfolioProjectData } = profileIds.length
+    ? await supabase
+        .from("projects")
+        .select("profile_id, title, category, description")
+        .in("profile_id", profileIds)
+    : { data: [] };
+  const portfolioCounts = new Map<string, number>();
+  const portfolioProjects = new Map<string, PortfolioProject[]>();
+  ((portfolioProjectData ?? []) as PortfolioProject[]).forEach((project) => {
+    portfolioCounts.set(
+      project.profile_id,
+      (portfolioCounts.get(project.profile_id) ?? 0) + 1
+    );
+    portfolioProjects.set(project.profile_id, [
+      ...(portfolioProjects.get(project.profile_id) ?? []),
+      project,
+    ]);
+  });
+
+  const profileMatchResults = new Map<string, ProfessionalMatch>();
+  const studioMatchResults = new Map<string, ProfessionalMatch>();
+  if (briefContext) {
+    profiles.forEach((profile) => {
+      profileMatchResults.set(
+        profile.id,
+        scoreProfessionalMatch(profile, briefContext, portfolioProjects.get(profile.id) ?? [])
+      );
+    });
+    studios.forEach((studio) => {
+      const memberProjects = (studioMemberProfileIds.get(studio.id) ?? []).flatMap(
+        (profileId) => portfolioProjects.get(profileId) ?? []
+      );
+      studioMatchResults.set(
+        studio.id,
+        scoreProfessionalMatch(studio, briefContext, memberProjects)
+      );
+    });
+  }
+
   if (matchingMode && sort === "recommended") {
-    const matchScore = (profile: Profile) => {
-      const profileSpecialties = normalizeSearchText((profile.specialties ?? []).join(" "));
-      const profileLocation = normalizeSearchText(profile.location ?? "");
-      const profileText = normalizeSearchText(
-        [
-          profile.bio,
-          profile.profession_type,
-          ...(profile.specialties ?? []),
-          ...(profile.service_capabilities ?? []),
-        ]
-          .filter(Boolean)
-          .join(" ")
-      );
-      const requestedCapabilities = requiredServiceCapabilities(visualization, supervision);
-      return (
-        (normalizedSpecialty && profileSpecialties.includes(normalizedSpecialty) ? 4 : 0) +
-        (normalizedLocation && profileLocation.includes(normalizedLocation) ? 3 : 0) +
-        (projectType && profileText.includes(normalizeSearchText(projectType)) ? 2 : 0) +
-        requestedCapabilities.filter((capability) =>
-          profile.service_capabilities?.includes(capability)
-        ).length * 3 +
-        cues.filter((cue) => profileText.includes(normalizeSearchText(cue))).length
-      );
-    };
-    profiles = profiles.sort((left, right) => matchScore(right) - matchScore(left));
+    profiles = profiles.sort(
+      (left, right) =>
+        (profileMatchResults.get(right.id)?.percent ?? 0) -
+        (profileMatchResults.get(left.id)?.percent ?? 0)
+    );
+    studios = studios.sort(
+      (left, right) =>
+        (studioMatchResults.get(right.id)?.percent ?? 0) -
+        (studioMatchResults.get(left.id)?.percent ?? 0)
+    );
   } else if (sort === "rate") {
     profiles = profiles.sort(
       (a, b) =>
@@ -731,18 +799,6 @@ export default async function DesignersPage({
         (b.price_from ?? b.hourly_rate ?? Number.MAX_SAFE_INTEGER)
     );
   }
-
-  const profileIds = profiles.map((profile) => profile.id);
-  const { data: portfolioProjectData } = profileIds.length
-    ? await supabase.from("projects").select("profile_id").in("profile_id", profileIds)
-    : { data: [] };
-  const portfolioCounts = new Map<string, number>();
-  (portfolioProjectData ?? []).forEach((project) => {
-    portfolioCounts.set(
-      project.profile_id,
-      (portfolioCounts.get(project.profile_id) ?? 0) + 1
-    );
-  });
 
   const base = {
     match: matchingMode ? "brief" : "",
@@ -806,6 +862,8 @@ export default async function DesignersPage({
           <form action="/designers" className="mx-auto mt-9 max-w-4xl">
             <input type="hidden" name="view" value={view} />
             <input type="hidden" name="sort" value={sort} />
+            {briefContext && location ? <input type="hidden" name="location" value={location} /> : null}
+            {briefContext && specialty ? <input type="hidden" name="specialty" value={specialty} /> : null}
             {matchingQueryEntries.map(([name, value]) => (
               <input key={name} type="hidden" name={name} value={value} />
             ))}
@@ -847,8 +905,9 @@ export default async function DesignersPage({
                 <div className="text-sm font-semibold text-primary">Matching from Project Compass</div>
                 <h2 className="mt-1 text-2xl font-bold">Designers for your brief</h2>
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
-                  Results use the style and location available in current beta profiles.
-                  The cards explain what matches and what still needs confirmation.
+                  Results compare style, project scope, rooms, services, budget,
+                  location, timing, and portfolio evidence. Missing profile details are
+                  marked for confirmation instead of treated as a promise.
                 </p>
               </div>
               <Link href="/project-compass" className="rounded-xl border border-primary bg-card px-4 py-3 text-center text-sm font-semibold text-primary">
@@ -978,6 +1037,7 @@ export default async function DesignersPage({
                     briefContext={briefContext}
                     briefId={briefId}
                     studio={studio}
+                    matchResult={studioMatchResults.get(studio.id) ?? null}
                     memberCount={studioMemberCounts.get(studio.id) ?? 0}
                     initialSaved={savedStudioIds.has(studio.id)}
                     canSendBrief={canSendBrief}
@@ -1067,6 +1127,7 @@ export default async function DesignersPage({
                   canSendBrief={canSendBrief}
                   profile={profile}
                   index={index}
+                  matchResult={profileMatchResults.get(profile.id) ?? null}
                   requestedLocation={location}
                   requestedSpecialty={specialty}
                   initialSaved={savedDesignerIds.has(profile.id)}
@@ -1085,6 +1146,7 @@ export default async function DesignersPage({
                   canSendBrief={canSendBrief}
                   profile={profile}
                   index={index}
+                  matchResult={profileMatchResults.get(profile.id) ?? null}
                   requestedLocation={location}
                   requestedSpecialty={specialty}
                   initialSaved={savedDesignerIds.has(profile.id)}

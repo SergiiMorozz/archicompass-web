@@ -16,7 +16,8 @@ export function serviceCapabilityValues(formData: FormData) {
 
 export function requiredServiceCapabilities(
   visualizationNeed: string,
-  supervisionNeed: string
+  supervisionNeed: string,
+  supportNeed = ""
 ) {
   const required: string[] = [];
 
@@ -32,5 +33,11 @@ export function requiredServiceCapabilities(
     required.push("Full project coordination");
   }
 
-  return required;
+  if (supportNeed === "Technical design") {
+    required.push("Technical documentation");
+  } else if (supportNeed === "End-to-end support") {
+    required.push("Sourcing and procurement");
+  }
+
+  return Array.from(new Set(required));
 }
