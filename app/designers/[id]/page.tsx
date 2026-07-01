@@ -5,6 +5,7 @@ import ProjectGallery from "@/components/ProjectGallery";
 import ProfileViewTracker from "@/components/ProfileViewTracker";
 import { countLabel } from "@/lib/count-label";
 import { getAccountRole } from "@/lib/studios";
+import { pricingLabel } from "@/lib/profile-pricing";
 import {
   applyDemoProfilePresentation,
   getDemoProfilePresentation,
@@ -26,6 +27,13 @@ type Profile = {
   phone: string | null;
   email: string | null;
   hourly_rate: number | null;
+  pricing_model: string | null;
+  price_from: number | null;
+  price_to: number | null;
+  minimum_project_budget: number | null;
+  work_modes: string[] | null;
+  availability_status: string | null;
+  cooperation_terms: string | null;
   years_experience: number | null;
 };
 
@@ -130,10 +138,6 @@ function experienceLabel(value: number | null) {
   return value === 1 ? "1 year experience" : `${value}+ years experience`;
 }
 
-function rateLabel(rate: number | null) {
-  return rate ? `${rate} PLN/hour` : "Rate on request";
-}
-
 function portfolioHref(profileId: string, category?: string) {
   return category
     ? `/designers/${profileId}?category=${encodeURIComponent(category)}#portfolio`
@@ -168,12 +172,12 @@ function serviceCards(profile: Profile) {
     {
       title: `${type} Consultation`,
       copy: "Clarify the brief, budget, scope, and the best path before starting a full project.",
-      price: rateLabel(profile.hourly_rate),
+      price: pricingLabel(profile),
     },
     {
       title: `${primaryStyle} Concept`,
       copy: "Turn references and needs into a coherent visual direction, moodboard, and room strategy.",
-      price: profile.hourly_rate ? `from ${profile.hourly_rate} PLN/hour` : "Quote-based",
+      price: pricingLabel(profile),
     },
     {
       title: `${secondaryStyle} Support`,
@@ -250,7 +254,7 @@ export default async function DesignerProfilePage({
   const { data: profileData, error: pErr } = await supabase
     .from("profiles")
     .select(
-      "id, full_name, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, years_experience"
+      "id, full_name, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience"
     )
     .eq("id", id)
     .single();
@@ -482,7 +486,7 @@ export default async function DesignerProfilePage({
                 <div className="text-xs font-semibold uppercase tracking-wide text-muted">
                   Rate
                 </div>
-                <div className="mt-1 font-semibold">{rateLabel(profile.hourly_rate)}</div>
+                <div className="mt-1 font-semibold">{pricingLabel(profile)}</div>
               </div>
             </div>
 
@@ -519,6 +523,18 @@ export default async function DesignerProfilePage({
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
                 <span className="text-muted">Contact</span>
                 <span className="truncate text-right font-semibold">{contactLabel(profile)}</span>
+              </div>
+              <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
+                <span className="text-muted">Availability</span>
+                <span className="text-right font-semibold">{profile.availability_status || "On request"}</span>
+              </div>
+              <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
+                <span className="text-muted">Work format</span>
+                <span className="text-right font-semibold">{profile.work_modes?.join(" · ") || "On request"}</span>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-muted">Minimum project</span>
+                <span className="text-right font-semibold">{profile.minimum_project_budget ? `${profile.minimum_project_budget} PLN` : "Not specified"}</span>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <span className="text-muted">Languages</span>
@@ -648,6 +664,13 @@ export default async function DesignerProfilePage({
                 about 3D work, documentation, or supervision.
               </p>
             )}
+
+            {profile.cooperation_terms ? (
+              <div className="mt-5 rounded-2xl border border-line bg-background p-5">
+                <div className="text-sm font-semibold text-primary">Cooperation terms</div>
+                <p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted">{profile.cooperation_terms}</p>
+              </div>
+            ) : null}
 
             <div className="mt-6 grid gap-4 md:grid-cols-3">
               {serviceCards(profile).map((service) => (

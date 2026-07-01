@@ -7,6 +7,12 @@ import {
   serviceCapabilities,
   serviceCapabilityValues,
 } from "@/lib/service-capabilities";
+import {
+  availabilityStatuses,
+  pricingModels,
+  workModes,
+  workModeValues,
+} from "@/lib/profile-pricing";
 
 export const revalidate = 0;
 
@@ -22,6 +28,13 @@ type Studio = {
   phone: string | null;
   email: string | null;
   hourly_rate: number | null;
+  pricing_model: string | null;
+  price_from: number | null;
+  price_to: number | null;
+  minimum_project_budget: number | null;
+  work_modes: string[] | null;
+  availability_status: string | null;
+  cooperation_terms: string | null;
   years_experience: number | null;
   published: boolean;
   created_at: string;
@@ -82,6 +95,13 @@ function studioPayload(formData: FormData) {
     phone: textValue(formData, "phone"),
     email: textValue(formData, "email"),
     hourly_rate: numberValue(formData, "hourly_rate"),
+    pricing_model: textValue(formData, "pricing_model"),
+    price_from: numberValue(formData, "price_from"),
+    price_to: numberValue(formData, "price_to"),
+    minimum_project_budget: numberValue(formData, "minimum_project_budget"),
+    work_modes: workModeValues(formData),
+    availability_status: textValue(formData, "availability_status"),
+    cooperation_terms: textValue(formData, "cooperation_terms"),
     years_experience: numberValue(formData, "years_experience"),
     published: formData.get("published") === "on",
     updated_at: new Date().toISOString(),
@@ -235,7 +255,7 @@ export default async function StudioTeamPage({
   const { data: studioData } = studioIds.length
     ? await supabase
         .from("studios")
-        .select("id, owner_id, name, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, years_experience, published, created_at")
+        .select("id, owner_id, name, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, published, created_at")
         .in("id", studioIds)
         .order("created_at", { ascending: true })
     : { data: [] };
@@ -437,6 +457,18 @@ export default async function StudioTeamPage({
                         <label className="text-sm font-semibold">Rate, PLN<input name="hourly_rate" inputMode="numeric" defaultValue={studio.hourly_rate ?? ""} className={fieldClass} /></label>
                         <label className="text-sm font-semibold">Experience<input name="years_experience" inputMode="numeric" defaultValue={studio.years_experience ?? ""} className={fieldClass} /></label>
                       </div>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="text-sm font-semibold">Pricing model<select name="pricing_model" defaultValue={studio.pricing_model ?? "Custom quote"} className={fieldClass}>{pricingModels.map((model) => <option key={model} value={model}>{model}</option>)}</select></label>
+                        <label className="text-sm font-semibold">Availability<select name="availability_status" defaultValue={studio.availability_status ?? "Waitlist / ask"} className={fieldClass}>{availabilityStatuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></label>
+                        <label className="text-sm font-semibold">Design fee from, PLN<input name="price_from" inputMode="numeric" defaultValue={studio.price_from ?? ""} className={fieldClass} /></label>
+                        <label className="text-sm font-semibold">Design fee to, PLN<input name="price_to" inputMode="numeric" defaultValue={studio.price_to ?? ""} className={fieldClass} /></label>
+                        <label className="text-sm font-semibold sm:col-span-2">Minimum project budget, PLN<input name="minimum_project_budget" inputMode="numeric" defaultValue={studio.minimum_project_budget ?? ""} className={fieldClass} /></label>
+                      </div>
+                      <fieldset>
+                        <legend className="text-sm font-semibold">Work formats</legend>
+                        <div className="mt-3 flex flex-wrap gap-2">{workModes.map((mode) => <label key={mode} className="flex items-center gap-2 rounded-xl border border-line bg-card px-3 py-2 text-sm font-semibold"><input type="checkbox" name="work_modes" value={mode} defaultChecked={studio.work_modes?.includes(mode)} className="h-4 w-4 accent-primary" />{mode}</label>)}</div>
+                      </fieldset>
+                      <label className="text-sm font-semibold">Cooperation terms<textarea name="cooperation_terms" rows={4} defaultValue={studio.cooperation_terms ?? ""} className={fieldClass} /></label>
                       <label className="flex items-center gap-3 text-sm font-semibold">
                         <input name="published" type="checkbox" defaultChecked={studio.published} className="h-5 w-5 accent-primary" />
                         Publish studio profile
@@ -482,6 +514,13 @@ export default async function StudioTeamPage({
             <label className="text-sm font-semibold">Phone<input name="phone" className={fieldClass} /></label>
             <label className="text-sm font-semibold">Hourly rate, PLN<input name="hourly_rate" inputMode="numeric" className={fieldClass} /></label>
             <label className="text-sm font-semibold">Years of experience<input name="years_experience" inputMode="numeric" className={fieldClass} /></label>
+            <label className="text-sm font-semibold">Pricing model<select name="pricing_model" defaultValue="Custom quote" className={fieldClass}>{pricingModels.map((model) => <option key={model} value={model}>{model}</option>)}</select></label>
+            <label className="text-sm font-semibold">Availability<select name="availability_status" defaultValue="Waitlist / ask" className={fieldClass}>{availabilityStatuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></label>
+            <label className="text-sm font-semibold">Design fee from, PLN<input name="price_from" inputMode="numeric" className={fieldClass} /></label>
+            <label className="text-sm font-semibold">Design fee to, PLN<input name="price_to" inputMode="numeric" className={fieldClass} /></label>
+            <label className="text-sm font-semibold md:col-span-2">Minimum project budget, PLN<input name="minimum_project_budget" inputMode="numeric" className={fieldClass} /></label>
+            <fieldset className="md:col-span-2"><legend className="text-sm font-semibold">Work formats</legend><div className="mt-3 flex flex-wrap gap-2">{workModes.map((mode) => <label key={mode} className="flex items-center gap-2 rounded-xl border border-line bg-background px-3 py-2 text-sm font-semibold"><input type="checkbox" name="work_modes" value={mode} className="h-4 w-4 accent-primary" />{mode}</label>)}</div></fieldset>
+            <label className="text-sm font-semibold md:col-span-2">Cooperation terms<textarea name="cooperation_terms" rows={4} className={fieldClass} /></label>
             <label className="flex items-center gap-3 text-sm font-semibold md:col-span-2">
               <input name="published" type="checkbox" defaultChecked className="h-5 w-5 accent-primary" />
               Publish immediately

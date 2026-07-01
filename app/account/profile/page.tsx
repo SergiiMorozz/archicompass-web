@@ -6,6 +6,12 @@ import {
   serviceCapabilities,
   serviceCapabilityValues,
 } from "@/lib/service-capabilities";
+import {
+  availabilityStatuses,
+  pricingModels,
+  workModes,
+  workModeValues,
+} from "@/lib/profile-pricing";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -22,6 +28,13 @@ type Profile = {
   phone: string | null;
   email: string | null;
   hourly_rate: number | null;
+  pricing_model: string | null;
+  price_from: number | null;
+  price_to: number | null;
+  minimum_project_budget: number | null;
+  work_modes: string[] | null;
+  availability_status: string | null;
+  cooperation_terms: string | null;
   years_experience: number | null;
 };
 
@@ -68,6 +81,10 @@ function completionScore(profile: Partial<Profile>) {
     profile.specialties?.length ? "specialties" : null,
     profile.service_capabilities?.length ? "services" : null,
     profile.hourly_rate,
+    profile.pricing_model,
+    profile.price_from || profile.price_to,
+    profile.work_modes?.length ? "work modes" : null,
+    profile.availability_status,
     profile.years_experience,
   ];
   return Math.round((fields.filter(Boolean).length / fields.length) * 100);
@@ -123,6 +140,16 @@ async function updateProfile(formData: FormData) {
     phone: textValue(formData, "phone"),
     email: textValue(formData, "email") ?? user.email ?? null,
     hourly_rate: selectedType === "professional" ? numberValue(formData, "hourly_rate") : null,
+    pricing_model: selectedType === "professional" ? textValue(formData, "pricing_model") : null,
+    price_from: selectedType === "professional" ? numberValue(formData, "price_from") : null,
+    price_to: selectedType === "professional" ? numberValue(formData, "price_to") : null,
+    minimum_project_budget:
+      selectedType === "professional" ? numberValue(formData, "minimum_project_budget") : null,
+    work_modes: selectedType === "professional" ? workModeValues(formData) : [],
+    availability_status:
+      selectedType === "professional" ? textValue(formData, "availability_status") : null,
+    cooperation_terms:
+      selectedType === "professional" ? textValue(formData, "cooperation_terms") : null,
     years_experience:
       selectedType === "professional" ? numberValue(formData, "years_experience") : null,
   };
@@ -199,7 +226,7 @@ export default async function EditProfilePage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "full_name, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, years_experience"
+      "full_name, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience"
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -341,6 +368,30 @@ export default async function EditProfilePage({
                 />
               </Field>
 
+              <Field label="Pricing model">
+                <select name="pricing_model" defaultValue={p.pricing_model ?? "Custom quote"} className={fieldClass}>
+                  {pricingModels.map((model) => <option key={model} value={model}>{model}</option>)}
+                </select>
+              </Field>
+
+              <Field label="Availability">
+                <select name="availability_status" defaultValue={p.availability_status ?? "Waitlist / ask"} className={fieldClass}>
+                  {availabilityStatuses.map((status) => <option key={status} value={status}>{status}</option>)}
+                </select>
+              </Field>
+
+              <Field label="Typical design fee from" hint="PLN">
+                <input name="price_from" defaultValue={p.price_from ?? ""} inputMode="numeric" placeholder="5000" className={fieldClass} />
+              </Field>
+
+              <Field label="Typical design fee to" hint="PLN">
+                <input name="price_to" defaultValue={p.price_to ?? ""} inputMode="numeric" placeholder="15000" className={fieldClass} />
+              </Field>
+
+              <Field label="Minimum project budget" hint="PLN, optional">
+                <input name="minimum_project_budget" defaultValue={p.minimum_project_budget ?? ""} inputMode="numeric" placeholder="30000" className={fieldClass} />
+              </Field>
+
               <Field label="Email">
                 <input
                   name="email"
@@ -361,6 +412,30 @@ export default async function EditProfilePage({
                     defaultValue={p.website ?? ""}
                     placeholder="https://"
                     className={fieldClass}
+                  />
+                </Field>
+              </div>
+
+              <fieldset className="sm:col-span-2">
+                <legend className="text-sm font-semibold">Work formats</legend>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  {workModes.map((mode) => (
+                    <label key={mode} className="flex items-center gap-3 rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold">
+                      <input type="checkbox" name="work_modes" value={mode} defaultChecked={p.work_modes?.includes(mode)} className="h-4 w-4 accent-primary" />
+                      {mode}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <div className="sm:col-span-2">
+                <Field label="Cooperation terms" hint="short public summary">
+                  <textarea
+                    name="cooperation_terms"
+                    defaultValue={p.cooperation_terms ?? ""}
+                    rows={4}
+                    placeholder="For example: what the first call includes, payment stages, revision rounds, and what is quoted separately."
+                    className={areaClass}
                   />
                 </Field>
               </div>

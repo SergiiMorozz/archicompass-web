@@ -4,6 +4,7 @@ import { countLabel } from "@/lib/count-label";
 import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requiredServiceCapabilities } from "@/lib/service-capabilities";
+import { pricingLabel } from "@/lib/profile-pricing";
 import {
   applyDemoProfilePresentation,
   getDemoProfilePresentation,
@@ -21,6 +22,12 @@ type Profile = {
   specialties: string[] | null;
   service_capabilities: string[] | null;
   hourly_rate: number | null;
+  pricing_model: string | null;
+  price_from: number | null;
+  price_to: number | null;
+  minimum_project_budget: number | null;
+  work_modes: string[] | null;
+  availability_status: string | null;
   years_experience: number | null;
   created_at: string;
 };
@@ -33,6 +40,12 @@ type Studio = {
   specialties: string[] | null;
   service_capabilities: string[] | null;
   hourly_rate: number | null;
+  pricing_model: string | null;
+  price_from: number | null;
+  price_to: number | null;
+  minimum_project_budget: number | null;
+  work_modes: string[] | null;
+  availability_status: string | null;
   years_experience: number | null;
   created_at: string;
 };
@@ -145,10 +158,6 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-function rateLabel(rate: number | null) {
-  return rate ? `${rate} PLN/hour` : "Budget discussed after brief";
-}
-
 function profileTitle(profile: Profile) {
   return profile.full_name || "Unnamed professional";
 }
@@ -231,6 +240,11 @@ function StudioCard({
             </div>
           </div>
         ) : null}
+        <div className="mt-4 grid gap-2 text-sm text-muted">
+          <span className="font-semibold text-primary">{pricingLabel(studio)}</span>
+          <span>{studio.availability_status || "Availability on request"}</span>
+          {studio.work_modes?.length ? <span>{studio.work_modes.join(" · ")}</span> : null}
+        </div>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link href={`/studios/${studio.id}`} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
             View studio
@@ -358,6 +372,8 @@ function DesignerCard({
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted">
               <span>{location}</span>
               <span>{experienceLabel(profile.years_experience)}</span>
+              <span>{profile.availability_status || "Availability on request"}</span>
+              {profile.work_modes?.length ? <span>{profile.work_modes.join(" · ")}</span> : null}
             </div>
 
             <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">
@@ -392,7 +408,7 @@ function DesignerCard({
 
             <div className="mt-5 flex flex-col gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-xl font-bold text-primary">{rateLabel(profile.hourly_rate)}</div>
+                <div className="text-xl font-bold text-primary">{pricingLabel(profile)}</div>
                 <div className="text-sm text-muted">{demo?.budgetFit || "Beta portfolio profile"}</div>
               </div>
               <div className="flex gap-3">
@@ -454,6 +470,8 @@ function DesignerCard({
         <div className="mt-4 grid gap-2 text-sm text-muted">
           <span>{location}</span>
           <span>{experienceLabel(profile.years_experience)}</span>
+          <span>{profile.availability_status || "Availability on request"}</span>
+          {profile.work_modes?.length ? <span>{profile.work_modes.join(" · ")}</span> : null}
         </div>
 
         <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">
@@ -482,7 +500,7 @@ function DesignerCard({
 
         <div className="mt-5 flex items-center justify-between gap-3 border-t border-line pt-5">
           <div>
-            <div className="font-bold text-primary">{rateLabel(profile.hourly_rate)}</div>
+            <div className="font-bold text-primary">{pricingLabel(profile)}</div>
             <div className="text-xs text-muted">{demo?.budgetFit || "Beta portfolio profile"}</div>
           </div>
           <Link
@@ -560,7 +578,7 @@ export default async function DesignersPage({
   const query = supabase
     .from("profiles")
     .select(
-      "id, full_name, bio, location, profession_type, user_type, specialties, service_capabilities, hourly_rate, years_experience, created_at"
+      "id, full_name, bio, location, profession_type, user_type, specialties, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, created_at"
     )
     .eq("user_type", "professional")
     .order("created_at", { ascending: false })
@@ -569,7 +587,7 @@ export default async function DesignersPage({
   const { data, error } = await query;
   const { data: studioData } = await supabase
     .from("studios")
-    .select("id, name, bio, location, specialties, service_capabilities, hourly_rate, years_experience, created_at")
+    .select("id, name, bio, location, specialties, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, created_at")
     .eq("published", true)
     .order("created_at", { ascending: false })
     .limit(30);
@@ -624,10 +642,12 @@ export default async function DesignersPage({
         matchingMode || !normalizedSpecialty || specialtyText.includes(normalizedSpecialty);
       const matchesMinimum =
         Number.isNaN(minRate) ||
-        (profile.hourly_rate !== null && profile.hourly_rate >= minRate);
+        ((profile.price_from ?? profile.hourly_rate) !== null &&
+          (profile.price_from ?? profile.hourly_rate)! >= minRate);
       const matchesMaximum =
         Number.isNaN(maxRate) ||
-        (profile.hourly_rate !== null && profile.hourly_rate <= maxRate);
+        ((profile.price_from ?? profile.hourly_rate) !== null &&
+          (profile.price_from ?? profile.hourly_rate)! <= maxRate);
 
       return (
         matchesQuery &&
@@ -654,10 +674,12 @@ export default async function DesignersPage({
       matchingMode || !normalizedSpecialty || specialtyText.includes(normalizedSpecialty);
     const matchesMinimum =
       Number.isNaN(minRate) ||
-      (studio.hourly_rate !== null && studio.hourly_rate >= minRate);
+      ((studio.price_from ?? studio.hourly_rate) !== null &&
+        (studio.price_from ?? studio.hourly_rate)! >= minRate);
     const matchesMaximum =
       Number.isNaN(maxRate) ||
-      (studio.hourly_rate !== null && studio.hourly_rate <= maxRate);
+      ((studio.price_from ?? studio.hourly_rate) !== null &&
+        (studio.price_from ?? studio.hourly_rate)! <= maxRate);
     return matchesQuery && matchesLocation && matchesSpecialty && matchesMinimum && matchesMaximum;
   });
   const studioIds = studios.map((studio) => studio.id);
@@ -704,7 +726,9 @@ export default async function DesignersPage({
     profiles = profiles.sort((left, right) => matchScore(right) - matchScore(left));
   } else if (sort === "rate") {
     profiles = profiles.sort(
-      (a, b) => (a.hourly_rate ?? Number.MAX_SAFE_INTEGER) - (b.hourly_rate ?? Number.MAX_SAFE_INTEGER)
+      (a, b) =>
+        (a.price_from ?? a.hourly_rate ?? Number.MAX_SAFE_INTEGER) -
+        (b.price_from ?? b.hourly_rate ?? Number.MAX_SAFE_INTEGER)
     );
   }
 

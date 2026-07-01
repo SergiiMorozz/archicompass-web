@@ -94,6 +94,13 @@ create table if not exists public.studios (
   location text check (location is null or char_length(location) <= 200),
   specialties text[] not null default '{}',
   service_capabilities text[] not null default '{}',
+  pricing_model text,
+  price_from numeric check (price_from is null or price_from >= 0),
+  price_to numeric check (price_to is null or price_to >= 0),
+  minimum_project_budget numeric check (minimum_project_budget is null or minimum_project_budget >= 0),
+  work_modes text[] not null default '{}',
+  availability_status text,
+  cooperation_terms text,
   website text check (website is null or char_length(website) <= 500),
   phone text check (phone is null or char_length(phone) <= 100),
   email text check (email is null or char_length(email) <= 320),
@@ -107,8 +114,26 @@ create table if not exists public.studios (
 alter table public.profiles
 add column if not exists service_capabilities text[] not null default '{}';
 
+alter table public.profiles
+  add column if not exists pricing_model text,
+  add column if not exists price_from numeric,
+  add column if not exists price_to numeric,
+  add column if not exists minimum_project_budget numeric,
+  add column if not exists work_modes text[] not null default '{}',
+  add column if not exists availability_status text,
+  add column if not exists cooperation_terms text;
+
 alter table public.studios
 add column if not exists service_capabilities text[] not null default '{}';
+
+alter table public.studios
+  add column if not exists pricing_model text,
+  add column if not exists price_from numeric,
+  add column if not exists price_to numeric,
+  add column if not exists minimum_project_budget numeric,
+  add column if not exists work_modes text[] not null default '{}',
+  add column if not exists availability_status text,
+  add column if not exists cooperation_terms text;
 
 create table if not exists public.studio_members (
   studio_id uuid not null references public.studios(id) on delete cascade,
@@ -701,6 +726,13 @@ begin
     specialties = case when new_role = 'designer' then specialties else '{}'::text[] end,
     service_capabilities = case when new_role = 'designer' then service_capabilities else '{}'::text[] end,
     hourly_rate = case when new_role = 'designer' then hourly_rate else null end,
+    pricing_model = case when new_role = 'designer' then pricing_model else null end,
+    price_from = case when new_role = 'designer' then price_from else null end,
+    price_to = case when new_role = 'designer' then price_to else null end,
+    minimum_project_budget = case when new_role = 'designer' then minimum_project_budget else null end,
+    work_modes = case when new_role = 'designer' then work_modes else '{}'::text[] end,
+    availability_status = case when new_role = 'designer' then availability_status else null end,
+    cooperation_terms = case when new_role = 'designer' then cooperation_terms else null end,
     years_experience = case when new_role = 'designer' then years_experience else null end
   where id = auth.uid();
 end;

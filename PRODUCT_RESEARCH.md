@@ -90,6 +90,7 @@ the professional profile exposes corresponding service capabilities.
 ## Priority After The Brief
 
 1. Add clearer price ranges and cooperation terms to professional profiles.
+   Implemented on 2026-07-01.
 2. Add a client comparison view for a small shortlist of designers or studios.
 3. Introduce reviews only when they can be tied to a real completed inquiry.
 4. Build Inspiration HUB on the existing generic favorites model.

@@ -82,6 +82,10 @@ Last checkpoint: 2026-07-01
   such as 3D visualization, site consultations, author's supervision, and full
   project coordination. Brief matching rewards confirmed requested services and
   labels unconfirmed services honestly.
+- Individual designer and studio profiles now support structured pricing models,
+  typical design-fee ranges, minimum project budgets, work formats,
+  availability, and public cooperation terms. Catalog cards and public profiles
+  use these fields while retaining the legacy hourly-rate fallback.
 - Project Compass has optional AI photo style analysis through `/api/style-analysis`.
   It supports `STYLE_ANALYSIS_PROVIDER=openai` or `gemini`, reads up to 6
   reference photos, and suggests a style, materials, colors, visual cues, and
@@ -206,12 +210,15 @@ Last checkpoint: 2026-07-01
   all eight expected columns. The expanded Project Compass passed lint,
   TypeScript, a production build, desktop interaction checks, mobile overflow
   checks, service-capability profile checks, and saved-brief compatibility.
+- Transparent-pricing migration returned all 14 expected profile and studio
+  columns. Pricing forms, catalog fallback states, public profile details,
+  production build, and mobile width were verified locally.
 
 ## Best Next Small Step
 
-Add clearer price ranges and cooperation terms to individual designer and studio
-profiles so clients can compare realistic engagement models before sending a
-brief.
+Add a compact comparison view for shortlisted designers and studios, using
+portfolio fit, published pricing, availability, work format, and confirmed
+service capabilities.
 
 ## Admin Workspace Roadmap
 
@@ -229,7 +236,6 @@ brief.
 
 - Use two test designer accounts to create the first real studio, accept an
   invitation, and exercise one shared client conversation from both team logins.
-- Add a compact comparison view for shortlisted designers and studios.
 - Introduce reviews only when they can be tied to a completed real inquiry.
 - Add richer seed data for designer profiles and portfolio projects.
 - Build the first Inspiration HUB route on top of the existing generic favorites.

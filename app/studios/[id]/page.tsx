@@ -5,6 +5,7 @@ import ProjectGallery from "@/components/ProjectGallery";
 import { countLabel } from "@/lib/count-label";
 import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { pricingLabel } from "@/lib/profile-pricing";
 
 export const revalidate = 0;
 
@@ -20,6 +21,13 @@ type Studio = {
   phone: string | null;
   email: string | null;
   hourly_rate: number | null;
+  pricing_model: string | null;
+  price_from: number | null;
+  price_to: number | null;
+  minimum_project_budget: number | null;
+  work_modes: string[] | null;
+  availability_status: string | null;
+  cooperation_terms: string | null;
   years_experience: number | null;
   published: boolean;
 };
@@ -76,7 +84,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ i
 
   const { data: studioData } = await supabase
     .from("studios")
-    .select("id, owner_id, name, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, years_experience, published")
+    .select("id, owner_id, name, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, published")
     .eq("id", id)
     .maybeSingle();
   if (!studioData) notFound();
@@ -209,9 +217,13 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ i
               context and continue the same conversation.
             </p>
             <div className="mt-5 grid gap-3 text-sm">
-              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Rate</span><span className="font-semibold">{studio.hourly_rate ? `${studio.hourly_rate} PLN/hour` : "On request"}</span></div>
+              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Pricing</span><span className="text-right font-semibold">{pricingLabel(studio)}</span></div>
+              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Availability</span><span className="text-right font-semibold">{studio.availability_status || "On request"}</span></div>
+              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Work format</span><span className="text-right font-semibold">{studio.work_modes?.join(" · ") || "On request"}</span></div>
+              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Minimum project</span><span className="text-right font-semibold">{studio.minimum_project_budget ? `${studio.minimum_project_budget} PLN` : "Not specified"}</span></div>
               <div className="flex justify-between gap-4"><span className="text-muted">Contact</span><span className="truncate font-semibold">{studio.email || studio.phone || "Via brief"}</span></div>
             </div>
+            {studio.cooperation_terms ? <div className="mt-5 rounded-lg border border-line bg-background p-4"><div className="text-sm font-semibold text-primary">Cooperation terms</div><p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted">{studio.cooperation_terms}</p></div> : null}
             {isMember ? (
               <Link href="/studio/inbox" className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"><span className="w-full">Open team inbox</span></Link>
             ) : viewerRole === "client" ? (
