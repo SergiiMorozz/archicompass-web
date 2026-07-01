@@ -93,17 +93,17 @@ export default async function StudioOverviewPage() {
   const inquiries = (inquiryResult.data ?? []) as Inquiry[];
   const views = viewResult.data ?? [];
   const inquiryIds = inquiries.map((inquiry) => inquiry.id);
+  const clientIds = Array.from(new Set(inquiries.map((inquiry) => inquiry.client_id)));
 
   const { count: unreadMessages } = inquiryIds.length
     ? await supabase
         .from("inquiry_messages")
         .select("id", { count: "exact", head: true })
         .in("inquiry_id", inquiryIds)
-        .neq("sender_id", user.id)
+        .in("sender_id", clientIds)
         .is("read_at", null)
     : { count: 0 };
 
-  const clientIds = Array.from(new Set(inquiries.map((inquiry) => inquiry.client_id)));
   const { data: clientsData } = clientIds.length
     ? await supabase.from("profiles").select("id, full_name, email").in("id", clientIds)
     : { data: [] };

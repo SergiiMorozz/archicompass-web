@@ -44,7 +44,13 @@ function statusClass(status: string) {
   return "bg-primary-soft text-primary";
 }
 
-export default async function ClientMessagesPage() {
+export default async function ClientMessagesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ view?: string }>;
+}) {
+  const sp = (await searchParams) ?? {};
+  const selectedView = sp.view === "unread" ? "unread" : "all";
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
@@ -87,6 +93,15 @@ export default async function ClientMessagesPage() {
       unreadByInquiry.set(message.inquiry_id, (unreadByInquiry.get(message.inquiry_id) ?? 0) + 1);
     }
   });
+  const unreadTotal = Array.from(unreadByInquiry.values()).reduce((sum, count) => sum + count, 0);
+  const sortedInquiries = [...inquiries].sort((left, right) => {
+    const leftDate = latestByInquiry.get(left.id)?.created_at || left.created_at;
+    const rightDate = latestByInquiry.get(right.id)?.created_at || right.created_at;
+    return new Date(rightDate).getTime() - new Date(leftDate).getTime();
+  });
+  const visibleInquiries = selectedView === "unread"
+    ? sortedInquiries.filter((inquiry) => (unreadByInquiry.get(inquiry.id) ?? 0) > 0)
+    : sortedInquiries;
 
   return (
     <main>
@@ -101,16 +116,36 @@ export default async function ClientMessagesPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
+          <Link
+            href="/client/messages"
+            className={[
+              "shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold",
+              selectedView === "all" ? "bg-primary text-white" : "border border-line bg-card text-muted",
+            ].join(" ")}
+          >
+            All conversations {inquiries.length}
+          </Link>
+          <Link
+            href="/client/messages?view=unread"
+            className={[
+              "shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold",
+              selectedView === "unread" ? "bg-primary text-white" : "border border-line bg-card text-muted",
+            ].join(" ")}
+          >
+            Unread {unreadTotal}
+          </Link>
+        </div>
         {error ? (
           <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">Messages could not be loaded: {error.message}</div>
-        ) : inquiries.length ? (
+        ) : visibleInquiries.length ? (
           <div className="grid gap-4">
-            {inquiries.map((inquiry) => {
+            {visibleInquiries.map((inquiry) => {
               const profile = profilesById.get(inquiry.designer_id);
               const latest = latestByInquiry.get(inquiry.id);
               const unread = unreadByInquiry.get(inquiry.id) ?? 0;
               return (
-                <article key={inquiry.id} className="rounded-lg border border-line bg-card p-5 shadow-sm">
+                <article key={inquiry.id} className={`rounded-lg border bg-card p-5 shadow-sm ${unread ? "border-primary" : "border-line"}`}>
                   <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
@@ -126,13 +161,19 @@ export default async function ClientMessagesPage() {
                         {profile?.location ? ` · ${profile.location}` : ""}
                       </div>
                       <div className="mt-4 rounded-lg bg-background p-4 text-sm leading-6 text-muted">
-                        <div className="font-semibold text-foreground">{latest ? "Latest message" : "Your introduction"}</div>
+                        <div className="font-semibold text-foreground">
+                          {latest
+                            ? latest.sender_id === user.id
+                              ? "You"
+                              : profile?.full_name || "Professional"
+                            : "Your introduction"}
+                        </div>
                         <p className="mt-1 line-clamp-2">{latest?.body || inquiry.message || "Open the conversation to review the full brief."}</p>
                         <div className="mt-2 text-xs">{formatDate(latest?.created_at || inquiry.created_at)}</div>
                       </div>
                     </div>
                     <Link href={`/account/inquiries/${inquiry.id}`} className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white">
-                      Open conversation
+                      {unread ? "Read message" : "Open conversation"}
                     </Link>
                   </div>
                 </article>
@@ -141,9 +182,15 @@ export default async function ClientMessagesPage() {
           </div>
         ) : (
           <div className="rounded-lg border border-dashed border-line bg-card p-8">
-            <h2 className="text-2xl font-bold">No messages yet</h2>
-            <p className="mt-2 max-w-xl leading-7 text-muted">Send a saved brief to a designer and the conversation will appear here.</p>
-            <Link href="/designers" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">Browse designers</Link>
+            <h2 className="text-2xl font-bold">{selectedView === "unread" ? "You are all caught up" : "No messages yet"}</h2>
+            <p className="mt-2 max-w-xl leading-7 text-muted">
+              {selectedView === "unread"
+                ? "New replies will appear here and in the Messages counter."
+                : "Send a saved brief to a designer and the conversation will appear here."}
+            </p>
+            <Link href={selectedView === "unread" ? "/client/messages" : "/designers"} className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
+              {selectedView === "unread" ? "View all conversations" : "Browse designers"}
+            </Link>
           </div>
         )}
       </section>

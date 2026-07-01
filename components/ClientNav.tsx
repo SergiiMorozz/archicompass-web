@@ -32,6 +32,7 @@ export default function ClientNav({
               const active =
                 pathname === item.href ||
                 (item.href !== "/client" && pathname.startsWith(item.href));
+              const messageCount = item.href === "/client/messages" ? unreadCount : 0;
               return (
                 <Link
                   key={item.href}
@@ -45,9 +46,15 @@ export default function ClientNav({
                   ].join(" ")}
                 >
                   {item.label}
-                  {item.href === "/client/messages" && unreadCount ? (
-                    <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-xs">
-                      {unreadCount}
+                  {messageCount ? (
+                    <span
+                      aria-label={`${messageCount} unread messages`}
+                      className={[
+                        "ml-2 rounded-full px-2 py-0.5 text-xs",
+                        active ? "bg-white/20" : "bg-foreground text-white",
+                      ].join(" ")}
+                    >
+                      {messageCount > 99 ? "99+" : messageCount}
                     </span>
                   ) : null}
                 </Link>

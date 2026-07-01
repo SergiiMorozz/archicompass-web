@@ -61,9 +61,10 @@ function snapshotValue(snapshot: Record<string, unknown> | null, key: string) {
 export default async function StudioInboxPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ status?: string }>;
+  searchParams?: Promise<{ status?: string; view?: string }>;
 }) {
   const sp = (await searchParams) ?? {};
+  const selectedView = sp.view === "unread" ? "unread" : "status";
   const selectedStatus = statusFilters.includes(sp.status as (typeof statusFilters)[number])
     ? (sp.status as (typeof statusFilters)[number])
     : "all";
@@ -94,11 +95,15 @@ export default async function StudioInboxPage({
   const messages = (messageData ?? []) as Message[];
   const latestByInquiry = new Map<string, Message>();
   const unreadByInquiry = new Map<string, number>();
+  const clientByInquiry = new Map(inquiries.map((inquiry) => [inquiry.id, inquiry.client_id]));
+  inquiries.forEach((inquiry) => {
+    if (inquiry.status === "sent") unreadByInquiry.set(inquiry.id, 1);
+  });
   messages.forEach((message) => {
     if (!latestByInquiry.has(message.inquiry_id)) {
       latestByInquiry.set(message.inquiry_id, message);
     }
-    if (message.sender_id !== user.id && !message.read_at) {
+    if (message.sender_id === clientByInquiry.get(message.inquiry_id) && !message.read_at) {
       unreadByInquiry.set(
         message.inquiry_id,
         (unreadByInquiry.get(message.inquiry_id) ?? 0) + 1
@@ -121,10 +126,17 @@ export default async function StudioInboxPage({
   const studiosById = new Map(
     ((studioData ?? []) as Studio[]).map((studio) => [studio.id, studio])
   );
-  const visibleInquiries =
-    selectedStatus === "all"
-      ? inquiries
-      : inquiries.filter((inquiry) => inquiry.status === selectedStatus);
+  const unreadTotal = Array.from(unreadByInquiry.values()).reduce((sum, count) => sum + count, 0);
+  const sortedInquiries = [...inquiries].sort((left, right) => {
+    const leftDate = latestByInquiry.get(left.id)?.created_at || left.created_at;
+    const rightDate = latestByInquiry.get(right.id)?.created_at || right.created_at;
+    return new Date(rightDate).getTime() - new Date(leftDate).getTime();
+  });
+  const visibleInquiries = selectedView === "unread"
+    ? sortedInquiries.filter((inquiry) => (unreadByInquiry.get(inquiry.id) ?? 0) > 0)
+    : selectedStatus === "all"
+      ? sortedInquiries
+      : sortedInquiries.filter((inquiry) => inquiry.status === selectedStatus);
 
   return (
     <main>
@@ -141,6 +153,17 @@ export default async function StudioInboxPage({
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div className="flex gap-2 overflow-x-auto pb-2">
+          <Link
+            href="/studio/inbox?view=unread"
+            className={[
+              "shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold",
+              selectedView === "unread"
+                ? "bg-foreground text-white"
+                : "border border-line bg-card text-muted hover:border-primary hover:text-primary",
+            ].join(" ")}
+          >
+            Unread {unreadTotal}
+          </Link>
           {statusFilters.map((status) => {
             const count =
               status === "all"
@@ -152,7 +175,7 @@ export default async function StudioInboxPage({
                 href={status === "all" ? "/studio/inbox" : `/studio/inbox?status=${status}`}
                 className={[
                   "shrink-0 rounded-xl px-4 py-2.5 text-sm font-semibold capitalize",
-                  selectedStatus === status
+                  selectedView === "status" && selectedStatus === status
                     ? "bg-primary text-white"
                     : "border border-line bg-card text-muted hover:border-primary hover:text-primary",
                 ].join(" ")}
@@ -174,7 +197,7 @@ export default async function StudioInboxPage({
               const latest = latestByInquiry.get(inquiry.id);
               const unread = unreadByInquiry.get(inquiry.id) ?? 0;
               return (
-                <article key={inquiry.id} className="rounded-lg border border-line bg-card p-5 shadow-sm">
+                <article key={inquiry.id} className={`rounded-lg border bg-card p-5 shadow-sm ${unread ? "border-primary" : "border-line"}`}>
                   <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
@@ -208,7 +231,11 @@ export default async function StudioInboxPage({
 
                       <div className="mt-4 rounded-lg bg-background p-4 text-sm leading-6 text-muted">
                         <div className="font-semibold text-foreground">
-                          {latest ? "Latest message" : "Client introduction"}
+                          {latest
+                            ? latest.sender_id === inquiry.client_id
+                              ? client?.full_name || client?.email || "Client"
+                              : "You / studio team"
+                            : "Client introduction"}
                         </div>
                         <p className="mt-1 line-clamp-2">
                           {latest?.body || inquiry.message || "Open the brief to review the full project context."}
@@ -223,7 +250,7 @@ export default async function StudioInboxPage({
                       href={`/studio/inbox/${inquiry.id}`}
                       className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white"
                     >
-                      Open conversation
+                      {unread ? "Reply to client" : "Open conversation"}
                     </Link>
                   </div>
                 </article>
@@ -232,13 +259,16 @@ export default async function StudioInboxPage({
           </div>
         ) : (
           <div className="mt-6 rounded-lg border border-dashed border-line bg-card p-8">
-            <h2 className="text-2xl font-bold">No requests in this view</h2>
+            <h2 className="text-2xl font-bold">
+              {selectedView === "unread" ? "Inbox clear" : "No requests in this view"}
+            </h2>
             <p className="mt-2 max-w-xl leading-7 text-muted">
-              New Project Compass briefs will appear here with their references, scope,
-              budget signal, and client message.
+              {selectedView === "unread"
+                ? "New client replies will appear here and in the Inbox counter."
+                : "New Project Compass briefs will appear here with their references, scope, budget signal, and client message."}
             </p>
-            <Link href="/account/profile" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
-              Improve public profile
+            <Link href={selectedView === "unread" ? "/studio/inbox" : "/account/profile"} className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
+              {selectedView === "unread" ? "View all requests" : "Improve public profile"}
             </Link>
           </div>
         )}

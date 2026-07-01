@@ -55,15 +55,17 @@ export default async function StudioLayout({ children }: { children: React.React
 
   const { data: incoming } = await supabase
     .from("designer_inquiries")
-    .select("id")
+    .select("id, client_id, status")
     .or(inquiryRecipientFilter(user.id, studioIds));
   const inquiryIds = (incoming ?? []).map((item) => item.id);
+  const clientIds = Array.from(new Set((incoming ?? []).map((item) => item.client_id)));
+  const newRequestCount = (incoming ?? []).filter((item) => item.status === "sent").length;
   const { count: unreadCount } = inquiryIds.length
     ? await supabase
         .from("inquiry_messages")
         .select("id", { count: "exact", head: true })
         .in("inquiry_id", inquiryIds)
-        .neq("sender_id", user.id)
+        .in("sender_id", clientIds)
         .is("read_at", null)
     : { count: 0 };
 
@@ -72,7 +74,7 @@ export default async function StudioLayout({ children }: { children: React.React
       <StudioNav
         profileId={profile ? user.id : null}
         profileName={profile?.full_name || user.email || "Professional profile"}
-        unreadCount={unreadCount ?? 0}
+        unreadCount={(unreadCount ?? 0) + newRequestCount}
       />
       {children}
     </div>

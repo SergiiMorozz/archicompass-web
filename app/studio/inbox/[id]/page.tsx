@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
+import ConversationAutoRefresh from "@/components/ConversationAutoRefresh";
+import PendingSubmitButton from "@/components/PendingSubmitButton";
 import ReferencePhotoGrid from "@/components/ReferencePhotoGrid";
 import { referencePhotoPreviews } from "@/lib/reference-photos";
 import { getStudioMemberships } from "@/lib/studios";
@@ -191,11 +193,28 @@ export default async function StudioConversationPage({
   });
   if (!canManage) notFound();
 
+  if (inquiry.status === "sent") {
+    const { data: opened } = await supabase
+      .from("designer_inquiries")
+      .update({ status: "reviewing", updated_at: new Date().toISOString() })
+      .eq("id", inquiry.id)
+      .eq("status", "sent")
+      .select("id")
+      .maybeSingle();
+    if (opened) {
+      inquiry.status = "reviewing";
+      revalidatePath("/studio");
+      revalidatePath("/studio/inbox");
+      revalidatePath("/client");
+      revalidatePath("/client/messages");
+    }
+  }
+
   await supabase
     .from("inquiry_messages")
     .update({ read_at: new Date().toISOString() })
     .eq("inquiry_id", inquiry.id)
-    .neq("sender_id", user.id)
+    .eq("sender_id", inquiry.client_id)
     .is("read_at", null);
 
   const [{ data: messageData }, { data: clientData }, photos] = await Promise.all([
@@ -301,17 +320,20 @@ export default async function StudioConversationPage({
           ) : null}
 
           <section className="rounded-lg border border-line bg-card p-5 shadow-sm sm:p-6">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="text-sm font-semibold text-primary">Messages</div>
                 <h2 className="mt-1 text-3xl font-bold">Client conversation</h2>
               </div>
-              <Link href={`/studio/inbox/${inquiry.id}`} className="text-sm font-semibold text-primary hover:underline">
-                Refresh
-              </Link>
+              <div className="flex flex-wrap items-center gap-3">
+                <ConversationAutoRefresh />
+                <Link href={`/studio/inbox/${inquiry.id}`} className="text-sm font-semibold text-primary hover:underline">
+                  Refresh
+                </Link>
+              </div>
             </div>
 
-            <div className="mt-6 grid gap-4">
+            <div className="mt-6 grid gap-4" aria-live="polite">
               {inquiry.message ? (
                 <div className="mr-auto max-w-[85%] rounded-lg rounded-bl-sm bg-background p-4">
                   <div className="text-xs font-semibold text-primary">{clientName} · original note</div>
@@ -342,6 +364,11 @@ export default async function StudioConversationPage({
                       {senderLabel} · {formatDate(message.created_at)}
                     </div>
                     <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{message.body}</p>
+                    {fromTeam ? (
+                      <div className="mt-2 text-right text-[11px] font-semibold opacity-70">
+                        {message.read_at ? "Read by client" : "Sent"}
+                      </div>
+                    ) : null}
                   </div>
                 );
               })}
@@ -354,7 +381,7 @@ export default async function StudioConversationPage({
               ) : null}
             </div>
 
-            <form action={sendMessage} className="mt-6 border-t border-line pt-6">
+            <form action={sendMessage} className="sticky bottom-3 z-10 mt-6 rounded-xl border border-line bg-card p-4 shadow-lg">
               <input type="hidden" name="inquiry_id" value={inquiry.id} />
               <label className="block text-sm font-semibold">
                 Reply to {clientName}
@@ -372,9 +399,11 @@ export default async function StudioConversationPage({
                   Messages are visible only to this client and the receiving designer or
                   active studio team.
                 </p>
-                <button type="submit" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-                  Send message
-                </button>
+                <PendingSubmitButton
+                  className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"
+                  idleLabel="Send message"
+                  pendingLabel="Sending..."
+                />
               </div>
             </form>
           </section>

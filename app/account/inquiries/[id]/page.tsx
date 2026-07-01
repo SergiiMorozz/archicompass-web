@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
+import ConversationAutoRefresh from "@/components/ConversationAutoRefresh";
+import PendingSubmitButton from "@/components/PendingSubmitButton";
 import ReferencePhotoGrid from "@/components/ReferencePhotoGrid";
 import { referencePhotoPreviews } from "@/lib/reference-photos";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -25,6 +27,7 @@ type Message = {
   id: string;
   sender_id: string;
   body: string;
+  read_at: string | null;
   created_at: string;
 };
 
@@ -137,7 +140,7 @@ export default async function AccountConversationPage({
   const [{ data: messageData }, { data: profileData }, photos] = await Promise.all([
     supabase
       .from("inquiry_messages")
-      .select("id, sender_id, body, created_at")
+      .select("id, sender_id, body, read_at, created_at")
       .eq("inquiry_id", inquiry.id)
       .order("created_at", { ascending: true }),
     supabase.from("profiles").select("id, full_name, email").eq("id", otherId).maybeSingle(),
@@ -180,14 +183,17 @@ export default async function AccountConversationPage({
             </div>
           ) : null}
 
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-2xl font-bold">Messages</h2>
-            <Link href={`/account/inquiries/${inquiry.id}`} className="text-sm font-semibold text-primary hover:underline">
-              Refresh
-            </Link>
+            <div className="flex flex-wrap items-center gap-3">
+              <ConversationAutoRefresh />
+              <Link href={`/account/inquiries/${inquiry.id}`} className="text-sm font-semibold text-primary hover:underline">
+                Refresh
+              </Link>
+            </div>
           </div>
 
-          <div className="mt-6 grid gap-4">
+          <div className="mt-6 grid gap-4" aria-live="polite">
             {inquiry.message ? (
               <div className={[
                 "max-w-[85%] rounded-lg p-4",
@@ -209,20 +215,27 @@ export default async function AccountConversationPage({
                     {mine ? "You" : otherName} · {formatDate(message.created_at)}
                   </div>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{message.body}</p>
+                  {mine ? (
+                    <div className="mt-2 text-right text-[11px] font-semibold opacity-70">
+                      {message.read_at ? "Read" : "Sent"}
+                    </div>
+                  ) : null}
                 </div>
               );
             })}
           </div>
 
-          <form action={sendParticipantMessage} className="mt-6 border-t border-line pt-6">
+          <form action={sendParticipantMessage} className="sticky bottom-3 z-10 mt-6 rounded-xl border border-line bg-card p-4 shadow-lg">
             <input type="hidden" name="inquiry_id" value={inquiry.id} />
             <label className="block text-sm font-semibold">
               Reply
               <textarea name="body" required maxLength={4000} rows={5} placeholder="Write your message..." className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
-            <button type="submit" className="mt-3 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-              Send message
-            </button>
+            <PendingSubmitButton
+              className="mt-3 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"
+              idleLabel="Send message"
+              pendingLabel="Sending..."
+            />
           </form>
         </section>
 
