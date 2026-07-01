@@ -11,17 +11,26 @@ export type StudioMembership = {
   status: "pending" | "active";
 };
 
-export async function getAccountRole(
+export async function getExplicitAccountRole(
   supabase: SupabaseServerClient,
   userId: string
-): Promise<AccountRole> {
+): Promise<AccountRole | null> {
   const { data } = await supabase
     .from("account_roles")
     .select("role")
     .eq("user_id", userId)
     .maybeSingle();
 
-  return data?.role === "designer" ? "designer" : "client";
+  if (data?.role === "designer") return "designer";
+  if (data?.role === "client") return "client";
+  return null;
+}
+
+export async function getAccountRole(
+  supabase: SupabaseServerClient,
+  userId: string
+): Promise<AccountRole> {
+  return (await getExplicitAccountRole(supabase, userId)) ?? "client";
 }
 
 export async function getStudioMemberships(

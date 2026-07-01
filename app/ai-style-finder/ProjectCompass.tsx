@@ -667,7 +667,11 @@ export default function ProjectCompass() {
         referencePhotoCount?: number;
       };
 
-      if (response.status === 401 || payload.code === "AUTH_REQUIRED") {
+      if (
+        response.status === 401 ||
+        payload.code === "AUTH_REQUIRED" ||
+        payload.code === "ONBOARDING_REQUIRED"
+      ) {
         window.sessionStorage.setItem(
           projectCompassDraftKey,
           JSON.stringify({
@@ -688,7 +692,10 @@ export default function ProjectCompass() {
             selectedVisualCues,
           })
         );
-        window.location.href = "/login?next=%2Fproject-compass";
+        window.location.href =
+          payload.code === "ONBOARDING_REQUIRED"
+            ? "/onboarding?intent=client&next=%2Fproject-compass"
+            : "/login?next=%2Fproject-compass";
         return;
       }
 

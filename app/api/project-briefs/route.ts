@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAccountRole } from "@/lib/studios";
+import { getExplicitAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const briefPhotosBucket = "brief-reference-photos";
@@ -60,7 +60,18 @@ export async function POST(request: Request) {
     );
   }
 
-  if ((await getAccountRole(supabase, user.id)) !== "client") {
+  const accountRole = await getExplicitAccountRole(supabase, user.id);
+  if (!accountRole) {
+    return NextResponse.json(
+      {
+        error: "Choose an account type before saving a project brief.",
+        code: "ONBOARDING_REQUIRED",
+      },
+      { status: 403 }
+    );
+  }
+
+  if (accountRole !== "client") {
     return NextResponse.json(
       {
         error: "Designer accounts receive briefs and cannot save client project requests.",

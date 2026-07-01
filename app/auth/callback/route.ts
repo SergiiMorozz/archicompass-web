@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getExplicitAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
@@ -11,7 +12,20 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createSupabaseServerClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    const { data } = await supabase.auth.exchangeCodeForSession(code);
+    const user = data.user;
+
+    if (user) {
+      const role = await getExplicitAccountRole(supabase, user.id);
+      if (!role && !next.startsWith("/onboarding")) {
+        const onboarding = new URL("/onboarding", origin);
+        onboarding.searchParams.set("next", next);
+        return NextResponse.redirect(onboarding);
+      }
+      if (role && next.startsWith("/onboarding")) {
+        return NextResponse.redirect(`${origin}${role === "designer" ? "/studio" : "/client"}`);
+      }
+    }
   }
 
   return NextResponse.redirect(`${origin}${next}`);

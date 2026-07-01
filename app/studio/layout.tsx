@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import StudioNav from "@/components/StudioNav";
 import {
-  getAccountRole,
+  getExplicitAccountRole,
   getStudioMemberships,
   inquiryRecipientFilter,
 } from "@/lib/studios";
@@ -23,7 +23,9 @@ export default async function StudioLayout({ children }: { children: React.React
     .eq("id", user.id)
     .maybeSingle();
 
-  const accountRole = await getAccountRole(supabase, user.id);
+  const accountRole = await getExplicitAccountRole(supabase, user.id);
+
+  if (!accountRole) redirect("/onboarding?next=/studio");
 
   if (accountRole !== "designer") {
     return (
