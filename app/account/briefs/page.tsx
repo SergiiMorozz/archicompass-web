@@ -90,6 +90,18 @@ function designerLabel(designer: Designer) {
   return detail ? `${name} — ${detail}` : name;
 }
 
+function matchingDesignersHref(brief: ProjectBrief) {
+  const source = brief.designer_search_href?.startsWith("/designers")
+    ? brief.designer_search_href
+    : "/designers";
+  const url = new URL(source, "https://archicompass.local");
+  url.searchParams.set("match", "brief");
+  url.searchParams.set("brief", brief.id);
+  if (!url.searchParams.has("sort")) url.searchParams.set("sort", "recommended");
+  if (!url.searchParams.has("view")) url.searchParams.set("view", "list");
+  return `${url.pathname}?${url.searchParams.toString()}`;
+}
+
 function errorRedirect(message: string): never {
   redirect(`/account/briefs?error=${encodeURIComponent(message)}`);
 }
@@ -623,14 +635,12 @@ export default async function SavedBriefsPage({
                   </div>
 
                   <div className="mt-5 flex flex-wrap gap-3">
-                    {brief.designer_search_href ? (
-                      <Link
-                        href={brief.designer_search_href}
-                        className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
-                      >
-                        Find matching designers
-                      </Link>
-                    ) : null}
+                    <Link
+                      href={matchingDesignersHref(brief)}
+                      className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
+                    >
+                      Find matching designers
+                    </Link>
                     {canSendBriefs ? (
                       <Link
                         href="/project-compass"

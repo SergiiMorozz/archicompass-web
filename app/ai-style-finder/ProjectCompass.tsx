@@ -398,6 +398,7 @@ export default function ProjectCompass() {
   const [copied, setCopied] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedBriefId, setSavedBriefId] = useState<string | null>(null);
+  const [savedBriefSignature, setSavedBriefSignature] = useState<string | null>(null);
   const [savedReferenceCount, setSavedReferenceCount] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [styleAnalysis, setStyleAnalysis] = useState<StyleAnalysis | null>(null);
@@ -626,7 +627,14 @@ export default function ProjectCompass() {
     }
   }
 
-  async function saveBrief() {
+  async function saveBrief(openMatches = false) {
+    if (openMatches && savedBriefId && savedBriefSignature === briefText) {
+      const matchesUrl = new URL(designerHref, window.location.origin);
+      matchesUrl.searchParams.set("brief", savedBriefId);
+      window.location.href = `${matchesUrl.pathname}?${matchesUrl.searchParams.toString()}`;
+      return;
+    }
+
     setIsSaving(true);
     setSaveError(null);
     setSavedBriefId(null);
@@ -704,7 +712,15 @@ export default function ProjectCompass() {
       }
 
       setSavedBriefId(payload.id);
+      setSavedBriefSignature(briefText);
       setSavedReferenceCount(payload.referencePhotoCount ?? 0);
+      window.sessionStorage.removeItem(projectCompassDraftKey);
+
+      if (openMatches) {
+        const matchesUrl = new URL(designerHref, window.location.origin);
+        matchesUrl.searchParams.set("brief", payload.id);
+        window.location.href = `${matchesUrl.pathname}?${matchesUrl.searchParams.toString()}`;
+      }
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : "Brief could not be saved.");
     } finally {
@@ -1219,20 +1235,28 @@ export default function ProjectCompass() {
           </div>
 
           <div className="mt-6 grid gap-3">
-            <Link
-              href={designerHref}
-              className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white hover:opacity-90"
-            >
-              Find matching designers
-            </Link>
             <button
               type="button"
-              onClick={saveBrief}
+              onClick={() => saveBrief(true)}
+              disabled={isSaving}
+              className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSaving ? "Saving brief..." : "Save brief & find designers"}
+            </button>
+            <button
+              type="button"
+              onClick={() => saveBrief(false)}
               disabled={isSaving}
               className="rounded-xl border border-primary bg-primary-soft px-5 py-3 text-sm font-semibold text-primary hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSaving ? "Saving brief..." : "Save brief"}
+              {isSaving ? "Saving brief..." : "Save for later"}
             </button>
+            <Link
+              href={designerHref}
+              className="rounded-xl border border-line bg-background px-5 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
+            >
+              Preview matches without saving
+            </Link>
             <button
               type="button"
               onClick={copyBrief}

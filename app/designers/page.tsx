@@ -172,6 +172,11 @@ function experienceLabel(value: number | null) {
   return value === 1 ? "1 year experience" : `${value}+ years experience`;
 }
 
+function professionalHref(type: "designer" | "studio", id: string, briefId: string) {
+  const base = type === "studio" ? `/studios/${id}` : `/designers/${id}`;
+  return briefId ? `${base}?brief=${encodeURIComponent(briefId)}` : base;
+}
+
 function StudioCard({
   briefContext,
   briefId,
@@ -200,10 +205,11 @@ function StudioCard({
   const confirmedCapabilities = requestedCapabilities.filter((capability) =>
     availableCapabilities.includes(capability)
   );
+  const studioHref = professionalHref("studio", studio.id, briefId);
   return (
     <article className="overflow-hidden rounded-lg border border-line bg-card shadow-sm">
       <Link
-        href={`/studios/${studio.id}`}
+        href={studioHref}
         className="relative block h-52 bg-cover bg-center"
         style={{ backgroundImage: `url(${coverImages[1]})` }}
       >
@@ -265,7 +271,7 @@ function StudioCard({
           {studio.work_modes?.length ? <span>{studio.work_modes.join(" · ")}</span> : null}
         </div>
         <div className="mt-5 flex flex-wrap gap-3">
-          <Link href={`/studios/${studio.id}`} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
+          <Link href={studioHref} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
             View studio
           </Link>
           {canSendBrief ? (
@@ -359,6 +365,7 @@ function DesignerCard({
   const matchItems = matchResult
     ? matchResult.reasons.map((reason) => [reason.label, reason.value])
     : fallbackMatchItems;
+  const profileHref = professionalHref("designer", profile.id, briefId);
   const sendBriefHref = `/account/briefs?designer=${profile.id}${briefId ? `&brief=${briefId}` : ""}`;
 
   if (view === "list") {
@@ -366,7 +373,7 @@ function DesignerCard({
       <article className="overflow-hidden rounded-2xl border border-line bg-card shadow-sm">
         <div className="grid lg:grid-cols-[280px_1fr]">
           <Link
-            href={`/designers/${profile.id}`}
+            href={profileHref}
             className="relative min-h-[240px] bg-cover bg-center"
             style={{ backgroundImage: `url(${cover})` }}
           >
@@ -382,7 +389,7 @@ function DesignerCard({
           <div className="p-5">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <Link href={`/designers/${profile.id}`} className="text-2xl font-bold hover:text-primary">
+                <Link href={profileHref} className="text-2xl font-bold hover:text-primary">
                   {title}
                 </Link>
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -446,7 +453,7 @@ function DesignerCard({
               </div>
               <div className="flex gap-3">
                 <Link
-                  href={`/designers/${profile.id}`}
+                  href={profileHref}
                   className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
                 >
                   View Portfolio
@@ -470,7 +477,7 @@ function DesignerCard({
   return (
     <article className="overflow-hidden rounded-2xl border border-line bg-card shadow-sm">
       <Link
-        href={`/designers/${profile.id}`}
+        href={profileHref}
         className="relative block h-64 bg-cover bg-center"
         style={{ backgroundImage: `url(${cover})` }}
       >
@@ -486,7 +493,7 @@ function DesignerCard({
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <Link href={`/designers/${profile.id}`} className="block truncate text-xl font-bold hover:text-primary">
+            <Link href={profileHref} className="block truncate text-xl font-bold hover:text-primary">
               {title}
             </Link>
             <p className="mt-1 text-sm text-muted">{type}</p>
@@ -542,7 +549,7 @@ function DesignerCard({
             <div className="text-xs text-muted">{demo?.budgetFit || "Beta portfolio profile"}</div>
           </div>
           <Link
-            href={`/designers/${profile.id}`}
+            href={profileHref}
             className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
           >
             View Portfolio

@@ -74,8 +74,22 @@ function websiteHref(value: string | null) {
     : `https://${value}`;
 }
 
-export default async function PublicStudioPage({ params }: { params: Promise<{ id: string }> }) {
+function briefRequestHref(studioId: string, briefId: string) {
+  const params = new URLSearchParams({ studio: studioId });
+  if (briefId) params.set("brief", briefId);
+  return `/account/briefs?${params.toString()}`;
+}
+
+export default async function PublicStudioPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ brief?: string }>;
+}) {
   const { id } = await params;
+  const sp = (await searchParams) ?? {};
+  const selectedBriefId = typeof sp.brief === "string" && isUuid(sp.brief) ? sp.brief : "";
   if (!isUuid(id)) notFound();
 
   const supabase = await createSupabaseServerClient();
@@ -227,7 +241,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ i
             {isMember ? (
               <Link href="/studio/inbox" className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"><span className="w-full">Open team inbox</span></Link>
             ) : viewerRole === "client" ? (
-              <Link href={`/account/briefs?studio=${studio.id}`} className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"><span className="w-full">Send brief to studio</span></Link>
+              <Link href={briefRequestHref(studio.id, selectedBriefId)} className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"><span className="w-full">Send brief to studio</span></Link>
             ) : (
               <div className="mt-6 rounded-lg border border-line bg-background p-4 text-sm leading-6 text-muted">Designer accounts receive briefs and cannot send client requests.</div>
             )}
@@ -250,7 +264,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ i
                     <h3 className="mt-2 text-xl font-bold">{profile.full_name || "Design professional"}</h3>
                     <p className="mt-1 text-sm text-muted">{profile.profession_type || "Designer"}{profile.location ? ` · ${profile.location}` : ""}</p>
                     <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">{profile.bio || "Open the individual profile to review this designer's work and approach."}</p>
-                    <Link href={`/designers/${profile.id}`} className="mt-5 inline-flex rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary">Open personal profile</Link>
+                    <Link href={`/designers/${profile.id}${selectedBriefId ? `?brief=${encodeURIComponent(selectedBriefId)}` : ""}`} className="mt-5 inline-flex rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary">Open personal profile</Link>
                   </article>
                 );
               })}

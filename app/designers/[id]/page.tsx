@@ -138,10 +138,12 @@ function experienceLabel(value: number | null) {
   return value === 1 ? "1 year experience" : `${value}+ years experience`;
 }
 
-function portfolioHref(profileId: string, category?: string) {
-  return category
-    ? `/designers/${profileId}?category=${encodeURIComponent(category)}#portfolio`
-    : `/designers/${profileId}#portfolio`;
+function portfolioHref(profileId: string, briefId: string, category?: string) {
+  const params = new URLSearchParams();
+  if (briefId) params.set("brief", briefId);
+  if (category) params.set("category", category);
+  const query = params.toString();
+  return `/designers/${profileId}${query ? `?${query}` : ""}#portfolio`;
 }
 
 function websiteHref(value: string | null) {
@@ -158,8 +160,10 @@ function contactLabel(profile: Profile) {
   return "Shared after a brief is sent";
 }
 
-function briefRequestHref(profileId: string) {
-  return `/account/briefs?designer=${encodeURIComponent(profileId)}`;
+function briefRequestHref(profileId: string, briefId: string) {
+  const params = new URLSearchParams({ designer: profileId });
+  if (briefId) params.set("brief", briefId);
+  return `/account/briefs?${params.toString()}`;
 }
 
 function serviceCards(profile: Profile) {
@@ -217,10 +221,11 @@ export default async function DesignerProfilePage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ category?: string }>;
+  searchParams?: Promise<{ brief?: string; category?: string }>;
 }) {
   const { id } = await params;
   const sp = (await searchParams) ?? {};
+  const selectedBriefId = typeof sp.brief === "string" && isUuid(sp.brief) ? sp.brief : "";
 
   if (!id || !isUuid(id)) {
     return (
@@ -445,7 +450,7 @@ export default async function DesignerProfilePage({
                   </a>
                   {canSendBrief ? (
                     <Link
-                      href={briefRequestHref(profile.id)}
+                      href={briefRequestHref(profile.id, selectedBriefId)}
                       className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                     >
                       Send Brief
@@ -559,7 +564,7 @@ export default async function DesignerProfilePage({
               </div>
             ) : canSendBrief ? (
               <Link
-                href={briefRequestHref(profile.id)}
+                href={briefRequestHref(profile.id, selectedBriefId)}
                 className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
               >
                 <span className="w-full">Send Project Brief</span>
@@ -700,7 +705,7 @@ export default async function DesignerProfilePage({
             {categoryFilters.length ? (
               <div className="mt-5 flex flex-wrap gap-2">
                 <Link
-                  href={portfolioHref(id)}
+                  href={portfolioHref(id, selectedBriefId)}
                   aria-current={selectedCategory ? undefined : "true"}
                   className={selectedCategory ? inactiveFilterClass : activeFilterClass}
                 >
@@ -709,7 +714,7 @@ export default async function DesignerProfilePage({
                 {categoryFilters.map((category) => (
                   <Link
                     key={category}
-                    href={portfolioHref(id, category)}
+                    href={portfolioHref(id, selectedBriefId, category)}
                     aria-current={selectedCategory === category ? "true" : undefined}
                     className={
                       selectedCategory === category
@@ -760,7 +765,7 @@ export default async function DesignerProfilePage({
                   Try all projects or choose another category.
                 </p>
                 <Link
-                  href={portfolioHref(id)}
+                  href={portfolioHref(id, selectedBriefId)}
                   className="mt-4 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                 >
                   Show all projects
@@ -913,7 +918,7 @@ export default async function DesignerProfilePage({
             </Link>
           ) : (
             <Link
-              href={briefRequestHref(profile.id)}
+              href={briefRequestHref(profile.id, selectedBriefId)}
               className="shrink-0 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
             >
               Send brief

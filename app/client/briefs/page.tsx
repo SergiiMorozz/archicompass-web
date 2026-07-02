@@ -22,6 +22,7 @@ type Brief = {
   supervision_need: string | null;
   location: string | null;
   reference_photo_names: string[] | null;
+  designer_search_href: string | null;
   created_at: string;
 };
 
@@ -33,6 +34,18 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function matchingDesignersHref(brief: Brief) {
+  const source = brief.designer_search_href?.startsWith("/designers")
+    ? brief.designer_search_href
+    : "/designers";
+  const url = new URL(source, "https://archicompass.local");
+  url.searchParams.set("match", "brief");
+  url.searchParams.set("brief", brief.id);
+  if (!url.searchParams.has("sort")) url.searchParams.set("sort", "recommended");
+  if (!url.searchParams.has("view")) url.searchParams.set("view", "list");
+  return `${url.pathname}?${url.searchParams.toString()}`;
+}
+
 export default async function ClientBriefsPage() {
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -41,7 +54,7 @@ export default async function ClientBriefsPage() {
 
   const { data, error } = await supabase
     .from("project_briefs")
-    .select("id, title, project_type, goal, style_direction, support_scope, budget_signal, timeline, area_m2, room_count, room_types, property_status, visualization_need, supervision_need, location, reference_photo_names, created_at")
+    .select("id, title, project_type, goal, style_direction, support_scope, budget_signal, timeline, area_m2, room_count, room_types, property_status, visualization_need, supervision_need, location, reference_photo_names, designer_search_href, created_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -103,7 +116,7 @@ export default async function ClientBriefsPage() {
 
                 <div className="mt-5 flex flex-wrap gap-3">
                   <Link href={`/account/briefs#${brief.id}`} className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">Send or manage brief</Link>
-                  <Link href="/designers" className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary">Find designers</Link>
+                  <Link href={matchingDesignersHref(brief)} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary">Find matching designers</Link>
                 </div>
               </article>
             ))}
