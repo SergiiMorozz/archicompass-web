@@ -27,7 +27,7 @@ export default function AdminNav({ accountName, role }: { accountName: string; r
             </div>
           </div>
           <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Admin Workspace">
-            {adminLinks.map((item) => {
+            {[...adminLinks, ...(role === "owner" ? [{ href: "/admin/team", label: "Team" }] : [])].map((item) => {
               const active =
                 pathname === item.href ||
                 (item.href !== "/admin" && pathname.startsWith(item.href));
