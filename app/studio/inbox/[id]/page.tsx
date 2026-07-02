@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import ConversationAutoRefresh from "@/components/ConversationAutoRefresh";
 import PendingSubmitButton from "@/components/PendingSubmitButton";
 import ReferencePhotoGrid from "@/components/ReferencePhotoGrid";
+import { sendConversationNotificationEmail } from "@/lib/email/conversation-notification";
 import { referencePhotoPreviews } from "@/lib/reference-photos";
 import { getStudioMemberships } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -77,7 +78,7 @@ async function sendMessage(formData: FormData) {
 
   const { data: inquiry } = await supabase
     .from("designer_inquiries")
-    .select("id, designer_id, status")
+    .select("id, client_id, designer_id, status, subject")
     .eq("id", inquiryId)
     .maybeSingle();
   if (!inquiry) actionError(inquiryId, "This conversation is not available.");
@@ -94,6 +95,29 @@ async function sendMessage(formData: FormData) {
       .from("designer_inquiries")
       .update({ status: "reviewing", updated_at: new Date().toISOString() })
       .eq("id", inquiryId);
+  }
+
+  const [{ data: clientProfile }, { data: senderProfile }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("full_name, email")
+      .eq("id", inquiry.client_id)
+      .maybeSingle(),
+    supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+  ]);
+  const notification = await sendConversationNotificationEmail({
+    body,
+    inquiryId,
+    recipient: {
+      email: clientProfile?.email || null,
+      name: clientProfile?.full_name || null,
+      role: "client",
+    },
+    senderName: senderProfile?.full_name || user.email || "Design professional",
+    subject: inquiry.subject,
+  });
+  if (notification.error) {
+    console.error("Conversation email notification failed", notification.error);
   }
 
   revalidatePath("/studio");
@@ -123,11 +147,42 @@ async function updateStatus(formData: FormData) {
   });
   if (!canManage) actionError(inquiryId, "Only the receiving designer or studio team can update this request.");
 
+  const [{ data: inquiry }, { data: senderProfile }] = await Promise.all([
+    supabase
+      .from("designer_inquiries")
+      .select("client_id, subject, status")
+      .eq("id", inquiryId)
+      .maybeSingle(),
+    supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+  ]);
+  if (!inquiry) actionError(inquiryId, "This conversation is not available.");
+  if (inquiry.status === status) redirect(`/studio/inbox/${inquiryId}`);
+
   const { error } = await supabase.rpc("update_inquiry_status_with_message", {
     target_inquiry_id: inquiryId,
     new_status: status,
   });
   if (error) actionError(inquiryId, error.message);
+
+  const { data: clientProfile } = await supabase
+    .from("profiles")
+    .select("full_name, email")
+    .eq("id", inquiry.client_id)
+    .maybeSingle();
+  const notification = await sendConversationNotificationEmail({
+    body: `Request status changed to ${status}.`,
+    inquiryId,
+    recipient: {
+      email: clientProfile?.email || null,
+      name: clientProfile?.full_name || null,
+      role: "client",
+    },
+    senderName: senderProfile?.full_name || user.email || "Design professional",
+    subject: inquiry.subject,
+  });
+  if (notification.error) {
+    console.error("Status email notification failed", notification.error);
+  }
 
   revalidatePath("/studio");
   revalidatePath("/studio/inbox");

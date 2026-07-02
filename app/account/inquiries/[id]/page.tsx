@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import ConversationAutoRefresh from "@/components/ConversationAutoRefresh";
 import PendingSubmitButton from "@/components/PendingSubmitButton";
 import ReferencePhotoGrid from "@/components/ReferencePhotoGrid";
+import { sendConversationNotificationEmail } from "@/lib/email/conversation-notification";
 import { referencePhotoPreviews } from "@/lib/reference-photos";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -69,7 +70,7 @@ async function sendParticipantMessage(formData: FormData) {
 
   const { data: inquiry } = await supabase
     .from("designer_inquiries")
-    .select("id, client_id, designer_id")
+    .select("id, client_id, designer_id, studio_id, subject")
     .eq("id", inquiryId)
     .maybeSingle();
   if (!inquiry) redirect("/client/messages");
@@ -82,6 +83,37 @@ async function sendParticipantMessage(formData: FormData) {
   });
   if (error) {
     redirect(`/account/inquiries/${inquiryId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  const [{ data: senderProfile }, { data: designerProfile }, { data: studio }] =
+    await Promise.all([
+      supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+      supabase
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", inquiry.designer_id)
+        .maybeSingle(),
+      inquiry.studio_id
+        ? supabase
+            .from("studios")
+            .select("name, email")
+            .eq("id", inquiry.studio_id)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
+    ]);
+  const notification = await sendConversationNotificationEmail({
+    body,
+    inquiryId,
+    recipient: {
+      email: studio?.email || designerProfile?.email || null,
+      name: studio?.name || designerProfile?.full_name || null,
+      role: "designer",
+    },
+    senderName: senderProfile?.full_name || user.email || "Client",
+    subject: inquiry.subject,
+  });
+  if (notification.error) {
+    console.error("Conversation email notification failed", notification.error);
   }
 
   revalidatePath("/account/inquiries");

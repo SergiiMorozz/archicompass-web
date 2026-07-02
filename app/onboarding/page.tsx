@@ -51,6 +51,20 @@ async function completeOnboarding(formData: FormData) {
     redirect(`/onboarding?${params.toString()}`);
   }
 
+  const { error: profileError } = await supabase.from("profiles").upsert(
+    {
+      id: user.id,
+      email: user.email ?? null,
+      user_type: role === "designer" ? "professional" : "client",
+    },
+    { onConflict: "id" }
+  );
+  if (profileError) {
+    const params = new URLSearchParams({ intent: role, error: profileError.message });
+    if (next) params.set("next", next);
+    redirect(`/onboarding?${params.toString()}`);
+  }
+
   if (role === "client") {
     redirect(next.startsWith("/account/briefs") ? next : "/client");
   }
