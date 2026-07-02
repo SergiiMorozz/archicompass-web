@@ -186,7 +186,7 @@ export default async function AccountPage({
               <p className="mt-3 text-sm leading-6 text-muted">
                 {isProfessional
                   ? "Update your identity, specialties, pricing, contact details, and design approach."
-                  : "Keep client details current or deliberately switch to a designer account."}
+                  : "Keep your client identity and contact details current for briefs and conversations."}
               </p>
               <div className="mt-6 h-2 overflow-hidden rounded-full bg-primary-soft">
                 <div className="h-full rounded-full bg-primary" style={{ width: `${score}%` }} />

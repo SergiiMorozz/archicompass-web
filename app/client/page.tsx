@@ -33,7 +33,12 @@ function statusClass(status: string) {
   return "bg-primary-soft text-primary";
 }
 
-export default async function ClientOverviewPage() {
+export default async function ClientOverviewPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ profileUpdated?: string }>;
+}) {
+  const sp = (await searchParams) ?? {};
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
@@ -111,6 +116,11 @@ export default async function ClientOverviewPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        {sp.profileUpdated ? (
+          <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-900">
+            Account details updated.
+          </div>
+        ) : null}
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map(([label, value, href]) => (
             <Link key={label} href={href} className="rounded-lg border border-line bg-card p-5 shadow-sm transition hover:border-primary">

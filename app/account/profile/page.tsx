@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { getAccountRole } from "@/lib/studios";
+import { getExplicitAccountRole } from "@/lib/studios";
 import {
   serviceCapabilities,
   serviceCapabilityValues,
@@ -71,22 +71,24 @@ function specialtiesValue(formData: FormData) {
     .filter(Boolean);
 }
 
-function completionScore(profile: Partial<Profile>) {
-  const fields = [
-    profile.full_name,
-    profile.location,
-    profile.profession_type,
-    profile.email,
-    profile.bio,
-    profile.specialties?.length ? "specialties" : null,
-    profile.service_capabilities?.length ? "services" : null,
-    profile.hourly_rate,
-    profile.pricing_model,
-    profile.price_from || profile.price_to,
-    profile.work_modes?.length ? "work modes" : null,
-    profile.availability_status,
-    profile.years_experience,
-  ];
+function completionScore(profile: Partial<Profile>, isProfessional: boolean) {
+  const fields = isProfessional
+    ? [
+        profile.full_name,
+        profile.location,
+        profile.profession_type,
+        profile.email,
+        profile.bio,
+        profile.specialties?.length ? "specialties" : null,
+        profile.service_capabilities?.length ? "services" : null,
+        profile.hourly_rate,
+        profile.pricing_model,
+        profile.price_from || profile.price_to,
+        profile.work_modes?.length ? "work modes" : null,
+        profile.availability_status,
+        profile.years_experience,
+      ]
+    : [profile.full_name, profile.location, profile.email, profile.phone];
   return Math.round((fields.filter(Boolean).length / fields.length) * 100);
 }
 
@@ -117,55 +119,47 @@ async function updateProfile(formData: FormData) {
 
   if (!user) redirect("/login");
 
-  const selectedType = textValue(formData, "user_type") === "client" ? "client" : "professional";
-  const accountRole = selectedType === "professional" ? "designer" : "client";
-  const { error: roleError } = await supabase.rpc("set_my_account_role", {
-    new_role: accountRole,
-  });
+  const accountRole = await getExplicitAccountRole(supabase, user.id);
+  if (!accountRole) redirect("/onboarding?next=%2Faccount%2Fprofile");
+  const isProfessional = accountRole === "designer";
 
-  if (roleError) redirect(`/account/profile?error=${encodeURIComponent(roleError.message)}`);
-
-  const payload = {
+  const commonProfile = {
     id: user.id,
     full_name: textValue(formData, "full_name"),
-    bio: textValue(formData, "bio"),
     location: textValue(formData, "location"),
-    profession_type:
-      selectedType === "professional" ? textValue(formData, "profession_type") : null,
-    user_type: selectedType,
-    specialties: selectedType === "professional" ? specialtiesValue(formData) : [],
-    service_capabilities:
-      selectedType === "professional" ? serviceCapabilityValues(formData) : [],
-    website: textValue(formData, "website"),
     phone: textValue(formData, "phone"),
     email: textValue(formData, "email") ?? user.email ?? null,
-    hourly_rate: selectedType === "professional" ? numberValue(formData, "hourly_rate") : null,
-    pricing_model: selectedType === "professional" ? textValue(formData, "pricing_model") : null,
-    price_from: selectedType === "professional" ? numberValue(formData, "price_from") : null,
-    price_to: selectedType === "professional" ? numberValue(formData, "price_to") : null,
-    minimum_project_budget:
-      selectedType === "professional" ? numberValue(formData, "minimum_project_budget") : null,
-    work_modes: selectedType === "professional" ? workModeValues(formData) : [],
-    availability_status:
-      selectedType === "professional" ? textValue(formData, "availability_status") : null,
-    cooperation_terms:
-      selectedType === "professional" ? textValue(formData, "cooperation_terms") : null,
-    years_experience:
-      selectedType === "professional" ? numberValue(formData, "years_experience") : null,
   };
+  const payload = isProfessional
+    ? {
+        ...commonProfile,
+        bio: textValue(formData, "bio"),
+        profession_type: textValue(formData, "profession_type"),
+        user_type: "professional",
+        specialties: specialtiesValue(formData),
+        service_capabilities: serviceCapabilityValues(formData),
+        website: textValue(formData, "website"),
+        hourly_rate: numberValue(formData, "hourly_rate"),
+        pricing_model: textValue(formData, "pricing_model"),
+        price_from: numberValue(formData, "price_from"),
+        price_to: numberValue(formData, "price_to"),
+        minimum_project_budget: numberValue(formData, "minimum_project_budget"),
+        work_modes: workModeValues(formData),
+        availability_status: textValue(formData, "availability_status"),
+        cooperation_terms: textValue(formData, "cooperation_terms"),
+        years_experience: numberValue(formData, "years_experience"),
+      }
+    : { ...commonProfile, user_type: "client" };
 
   const { error } = await supabase.from("profiles").upsert(payload, { onConflict: "id" });
 
   if (error) redirect(`/account/profile?error=${encodeURIComponent(error.message)}`);
 
   revalidatePath("/account");
+  revalidatePath("/client");
   revalidatePath("/designers");
   revalidatePath(`/designers/${user.id}`);
-  redirect(
-    selectedType === "professional"
-      ? `/designers/${user.id}`
-      : "/account?profileUpdated=1"
-  );
+  redirect(isProfessional ? `/designers/${user.id}` : "/client?profileUpdated=1");
 }
 
 async function deleteProfessionalProfile(formData: FormData) {
@@ -232,31 +226,35 @@ export default async function EditProfilePage({
     .maybeSingle();
 
   const p = (profile ?? {}) as Partial<Profile>;
-  const accountRole = await getAccountRole(supabase, user.id);
+  const accountRole = await getExplicitAccountRole(supabase, user.id);
+  if (!accountRole) redirect("/onboarding?next=%2Faccount%2Fprofile");
+  const isProfessional = accountRole === "designer";
   const hasProfile = Boolean(profile);
-  const score = completionScore(p);
+  const score = completionScore(p, isProfessional);
   const specialtyCount = p.specialties?.length ?? 0;
+  const backHref = isProfessional ? "/account" : "/client";
 
   return (
     <main className="bg-background">
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <Link
-            href="/account"
+            href={backHref}
             className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
           >
-            Back to account
+            {isProfessional ? "Back to account" : "Back to client workspace"}
           </Link>
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
               <div className="text-sm font-semibold text-primary">Profile Builder</div>
               <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
-                Edit public profile
+                {isProfessional ? "Edit public profile" : "Account settings"}
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-                Shape the information clients see before they decide to contact you.
-                These details power your marketplace profile.
+                {isProfessional
+                  ? "Shape the information clients see before they decide to contact you. These details power your marketplace profile."
+                  : "Keep your personal and contact details current for briefs and conversations."}
               </p>
             </div>
 
@@ -266,7 +264,7 @@ export default async function EditProfilePage({
                   <div className="text-sm font-semibold text-muted">Profile readiness</div>
                   <div className="mt-1 text-3xl font-bold text-primary">{score}%</div>
                 </div>
-                {accountRole === "designer" && hasProfile ? (
+                {isProfessional && hasProfile ? (
                   <Link
                     href={`/designers/${user.id}`}
                     className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
@@ -296,13 +294,14 @@ export default async function EditProfilePage({
               <div className="text-sm font-semibold text-primary">Identity</div>
               <h2 className="mt-1 text-2xl font-bold">Who clients are meeting</h2>
               <p className="mt-2 text-sm leading-6 text-muted">
-                Personal designer profiles and studio profiles are separate. Create a
-                studio from Designer Studio when several people should work together.
+                {isProfessional
+                  ? "Personal designer profiles and studio profiles are separate. Create a studio from Designer Studio when several people should work together."
+                  : "These details identify you in saved briefs and conversations with professionals."}
               </p>
             </div>
 
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
-              <Field label="Full name / studio name">
+              <Field label={isProfessional ? "Full name" : "Your name"}>
                 <input name="full_name" defaultValue={p.full_name ?? ""} className={fieldClass} />
               </Field>
 
@@ -315,33 +314,34 @@ export default async function EditProfilePage({
                 />
               </Field>
 
-              <Field label="Profession type">
-                <input
-                  name="profession_type"
-                  defaultValue={p.profession_type ?? ""}
-                  placeholder="Interior designer / architect / studio"
-                  className={fieldClass}
-                />
-              </Field>
-
-              <Field label="Account type">
-                <select
-                  name="user_type"
-                  defaultValue={accountRole === "designer" ? "professional" : "client"}
-                  className={fieldClass}
-                >
-                  <option value="client">Client</option>
-                  <option value="professional">Designer</option>
-                </select>
-                <span className="mt-2 block text-xs font-normal leading-5 text-muted">
-                  Clients send briefs. Designers receive briefs and can work independently
-                  or as part of a studio. One account cannot do both at the same time.
-                </span>
-              </Field>
+              {isProfessional ? (
+                <Field label="Profession type">
+                  <input
+                    name="profession_type"
+                    defaultValue={p.profession_type ?? ""}
+                    placeholder="Interior designer / architect"
+                    className={fieldClass}
+                  />
+                </Field>
+              ) : (
+                <>
+                  <Field label="Email">
+                    <input
+                      name="email"
+                      type="email"
+                      defaultValue={p.email ?? user.email ?? ""}
+                      className={fieldClass}
+                    />
+                  </Field>
+                  <Field label="Phone" hint="optional">
+                    <input name="phone" defaultValue={p.phone ?? ""} className={fieldClass} />
+                  </Field>
+                </>
+              )}
             </div>
           </section>
 
-          <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
+          {isProfessional ? <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div>
               <div className="text-sm font-semibold text-primary">Marketplace Details</div>
               <h2 className="mt-1 text-2xl font-bold">Pricing, experience, and contact</h2>
@@ -440,9 +440,9 @@ export default async function EditProfilePage({
                 </Field>
               </div>
             </div>
-          </section>
+          </section> : null}
 
-          <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
+          {isProfessional ? <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div>
               <div className="text-sm font-semibold text-primary">Positioning</div>
               <h2 className="mt-1 text-2xl font-bold">Style, specialties, and story</h2>
@@ -492,17 +492,17 @@ export default async function EditProfilePage({
                 />
               </Field>
             </div>
-          </section>
+          </section> : null}
 
           <div className="flex flex-wrap gap-3">
             <button
               type="submit"
               className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white hover:opacity-90"
             >
-              Save profile
+              {isProfessional ? "Save profile" : "Save account details"}
             </button>
             <Link
-              href={hasProfile && accountRole === "designer" ? `/designers/${user.id}` : "/account"}
+              href={hasProfile && isProfessional ? `/designers/${user.id}` : backHref}
               className="rounded-xl border border-line bg-card px-6 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
             >
               Cancel
@@ -511,40 +511,47 @@ export default async function EditProfilePage({
         </form>
 
         <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
-          <div className="text-sm font-semibold text-primary">Profile preview notes</div>
-          <h2 className="mt-2 text-2xl font-bold">What this affects</h2>
+          <div className="text-sm font-semibold text-primary">
+            {isProfessional ? "Profile preview notes" : "Client account"}
+          </div>
+          <h2 className="mt-2 text-2xl font-bold">
+            {isProfessional ? "What this affects" : "Where details appear"}
+          </h2>
           <div className="mt-5 grid gap-4 text-sm">
             <div className="rounded-2xl border border-line bg-background p-4">
-              <div className="font-semibold">Catalog card</div>
+              <div className="font-semibold">{isProfessional ? "Catalog card" : "Project briefs"}</div>
               <p className="mt-2 leading-6 text-muted">
-                Name, location, specialties, rate, and bio shape how you appear in
-                Find Designer.
+                {isProfessional
+                  ? "Name, location, specialties, rate, and bio shape how you appear in Find Designer."
+                  : "Your name and location help professionals understand who is sending a project brief."}
               </p>
             </div>
             <div className="rounded-2xl border border-line bg-background p-4">
-              <div className="font-semibold">Public profile</div>
+              <div className="font-semibold">{isProfessional ? "Public profile" : "Conversations"}</div>
               <p className="mt-2 leading-6 text-muted">
-                Contact details and experience feed the profile header and contact panel.
+                {isProfessional
+                  ? "Contact details and experience feed the profile header and contact panel."
+                  : "Contact details stay inside your account and support active designer conversations."}
               </p>
             </div>
-            <div className="rounded-2xl border border-line bg-background p-4">
+            {isProfessional ? <div className="rounded-2xl border border-line bg-background p-4">
               <div className="font-semibold">Specialties</div>
               <p className="mt-2 leading-6 text-muted">
                 {specialtyCount
                   ? `${specialtyCount} specialties are ready to show.`
                   : "Add a few specialties so clients can understand your fit quickly."}
               </p>
-            </div>
+            </div> : null}
           </div>
 
-          <Link
+          {isProfessional ? <Link
             href="/account/projects"
             className="mt-6 flex rounded-xl bg-primary-soft px-4 py-3 text-center text-sm font-semibold text-primary hover:bg-primary hover:text-white"
           >
             <span className="w-full">Manage portfolio projects</span>
-          </Link>
+          </Link> : null}
 
-          {accountRole === "designer" && hasProfile ? (
+          {isProfessional && hasProfile ? (
             <details className="mt-6 overflow-hidden rounded-xl border border-red-200 bg-red-50">
               <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-red-700">
                 Delete professional profile

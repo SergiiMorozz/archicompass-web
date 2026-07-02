@@ -36,8 +36,8 @@ export default async function StudioLayout({ children }: { children: React.React
           <div className="text-sm font-semibold text-primary">Professional access</div>
           <h1 className="mt-2 text-4xl font-bold">This is a client account</h1>
           <p className="mt-4 max-w-2xl leading-7 text-muted">
-            Client accounts create and send briefs. To receive requests independently or
-            join a design studio, deliberately switch the account role to Designer first.
+            Client accounts create and send briefs. Designer Studio is available only to
+            accounts created with the Designer role.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/account/profile" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">

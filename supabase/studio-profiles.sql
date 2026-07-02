@@ -682,6 +682,8 @@ language plpgsql
 security definer
 set search_path = public, pg_temp
 as $$
+declare
+  existing_role text;
 begin
   if auth.uid() is null then
     raise exception 'Authentication required' using errcode = '42501';
@@ -691,49 +693,23 @@ begin
     raise exception 'Choose client or designer' using errcode = '22023';
   end if;
 
-  if new_role = 'client' then
-    if exists (select 1 from public.projects where profile_id = auth.uid()) then
-      raise exception 'Delete your portfolio projects before switching to a client account'
-        using errcode = '22023';
-    end if;
-    if exists (
-      select 1 from public.studio_members
-      where user_id = auth.uid() and status = 'active'
-    ) then
-      raise exception 'Leave or transfer your studio memberships before switching to a client account'
-        using errcode = '22023';
-    end if;
-    if exists (
-      select 1 from public.designer_inquiries
-      where designer_id = auth.uid() or studio_id in (
-        select studio_id from public.studio_members where user_id = auth.uid()
-      )
-    ) then
-      raise exception 'Designer request history must remain assigned to a designer account'
-        using errcode = '22023';
-    end if;
+  select role
+  into existing_role
+  from public.account_roles
+  where user_id = auth.uid();
+
+  if existing_role is not null and existing_role <> new_role then
+    raise exception 'Account role cannot be changed after setup. Contact support if you need a different account type.'
+      using errcode = '22023';
   end if;
 
   insert into public.account_roles (user_id, role, created_at, updated_at)
   values (auth.uid(), new_role, now(), now())
   on conflict (user_id) do update
-  set role = excluded.role, updated_at = now();
+  set updated_at = now();
 
   update public.profiles
-  set
-    user_type = case when new_role = 'designer' then 'professional' else 'client' end,
-    profession_type = case when new_role = 'designer' then profession_type else null end,
-    specialties = case when new_role = 'designer' then specialties else '{}'::text[] end,
-    service_capabilities = case when new_role = 'designer' then service_capabilities else '{}'::text[] end,
-    hourly_rate = case when new_role = 'designer' then hourly_rate else null end,
-    pricing_model = case when new_role = 'designer' then pricing_model else null end,
-    price_from = case when new_role = 'designer' then price_from else null end,
-    price_to = case when new_role = 'designer' then price_to else null end,
-    minimum_project_budget = case when new_role = 'designer' then minimum_project_budget else null end,
-    work_modes = case when new_role = 'designer' then work_modes else '{}'::text[] end,
-    availability_status = case when new_role = 'designer' then availability_status else null end,
-    cooperation_terms = case when new_role = 'designer' then cooperation_terms else null end,
-    years_experience = case when new_role = 'designer' then years_experience else null end
+  set user_type = case when new_role = 'designer' then 'professional' else 'client' end
   where id = auth.uid();
 end;
 $$;
