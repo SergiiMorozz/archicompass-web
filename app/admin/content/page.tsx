@@ -79,7 +79,7 @@ function formatDate(value: string | null) {
 export default async function AdminContentPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string; status?: string }>;
+  searchParams?: Promise<{ deleted?: string; error?: string; status?: string }>;
 }) {
   const sp = (await searchParams) ?? {};
   const selectedStatus = sp.status === "draft" || sp.status === "published" ? sp.status : "all";
@@ -110,6 +110,11 @@ export default async function AdminContentPage({
 
       <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div>
+          {sp.deleted ? (
+            <div className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+              Article deleted.
+            </div>
+          ) : null}
           {sp.error ? (
             <div className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
               {sp.error}
