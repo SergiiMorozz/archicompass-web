@@ -31,8 +31,8 @@ NEXT_PUBLIC_SITE_URL=
 When `RESEND_API_KEY` and `INQUIRY_EMAIL_FROM` are missing, requests are still saved
 in `/account/inquiries`; the email notification is marked as `not_configured`.
 
-Unread-message reminders run every hour and email the recipient after 24 hours.
-They require server-only credentials in Vercel:
+Unread-message reminders are called every hour by Supabase Cron and email the
+recipient after 24 hours. They require server-only credentials in Vercel:
 
 ```bash
 SUPABASE_SERVICE_ROLE_KEY=
@@ -41,6 +41,8 @@ CRON_SECRET=
 
 Never expose these two values through `NEXT_PUBLIC_*` variables. The reminder job
 is limited to three delivery attempts and records its result on the request or message.
+Run `supabase/schedule-unread-message-reminders.sql` after both values are configured;
+use the same random `CRON_SECRET` in Vercel and Supabase Vault.
 
 Optional AI photo style analysis in Project Compass:
 
@@ -69,6 +71,7 @@ supabase/designer-studio.sql
 supabase/client-workspace.sql
 supabase/profile-auth-emails.sql
 supabase/unread-message-reminders.sql
+supabase/schedule-unread-message-reminders.sql
 ```
 
 The Studio schema requires `designer_inquiries`, enables RLS, keeps inquiry messages
