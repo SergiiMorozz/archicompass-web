@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import ConversationAutoRefresh from "@/components/ConversationAutoRefresh";
+import UnreadPageTitle from "@/components/UnreadPageTitle";
+import { professionalUnreadByInquiry, unreadTotal } from "@/lib/inquiry-unread";
 import { getStudioMemberships, inquiryRecipientFilter } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -94,22 +97,12 @@ export default async function StudioInboxPage({
     : { data: [] };
   const messages = (messageData ?? []) as Message[];
   const latestByInquiry = new Map<string, Message>();
-  const unreadByInquiry = new Map<string, number>();
-  const clientByInquiry = new Map(inquiries.map((inquiry) => [inquiry.id, inquiry.client_id]));
-  inquiries.forEach((inquiry) => {
-    if (inquiry.status === "sent") unreadByInquiry.set(inquiry.id, 1);
-  });
   messages.forEach((message) => {
     if (!latestByInquiry.has(message.inquiry_id)) {
       latestByInquiry.set(message.inquiry_id, message);
     }
-    if (message.sender_id === clientByInquiry.get(message.inquiry_id) && !message.read_at) {
-      unreadByInquiry.set(
-        message.inquiry_id,
-        (unreadByInquiry.get(message.inquiry_id) ?? 0) + 1
-      );
-    }
   });
+  const unreadByInquiry = professionalUnreadByInquiry(inquiries, messages);
 
   const clientIds = Array.from(new Set(inquiries.map((inquiry) => inquiry.client_id)));
   const { data: clientData } = clientIds.length
@@ -126,7 +119,7 @@ export default async function StudioInboxPage({
   const studiosById = new Map(
     ((studioData ?? []) as Studio[]).map((studio) => [studio.id, studio])
   );
-  const unreadTotal = Array.from(unreadByInquiry.values()).reduce((sum, count) => sum + count, 0);
+  const totalUnread = unreadTotal(unreadByInquiry);
   const sortedInquiries = [...inquiries].sort((left, right) => {
     const leftDate = latestByInquiry.get(left.id)?.created_at || left.created_at;
     const rightDate = latestByInquiry.get(right.id)?.created_at || right.created_at;
@@ -140,6 +133,7 @@ export default async function StudioInboxPage({
 
   return (
     <main>
+      <UnreadPageTitle count={totalUnread} label="Designer Inbox" />
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <div className="text-sm font-semibold text-primary">Client communication</div>
@@ -152,7 +146,8 @@ export default async function StudioInboxPage({
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-2 overflow-x-auto pb-2">
           <Link
             href="/studio/inbox?view=unread"
             className={[
@@ -162,7 +157,7 @@ export default async function StudioInboxPage({
                 : "border border-line bg-card text-muted hover:border-primary hover:text-primary",
             ].join(" ")}
           >
-            Unread {unreadTotal}
+            Unread {totalUnread}
           </Link>
           {statusFilters.map((status) => {
             const count =
@@ -184,6 +179,8 @@ export default async function StudioInboxPage({
               </Link>
             );
           })}
+          </div>
+          <ConversationAutoRefresh />
         </div>
 
         {error ? (

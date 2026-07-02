@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import ConversationAutoRefresh from "@/components/ConversationAutoRefresh";
+import UnreadPageTitle from "@/components/UnreadPageTitle";
+import { clientUnreadByInquiry, unreadTotal } from "@/lib/inquiry-unread";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -7,6 +10,7 @@ export const revalidate = 0;
 type Inquiry = {
   id: string;
   designer_id: string;
+  studio_id: string | null;
   subject: string;
   message: string | null;
   status: string;
@@ -25,6 +29,12 @@ type Profile = {
   id: string;
   full_name: string | null;
   profession_type: string | null;
+  location: string | null;
+};
+
+type Studio = {
+  id: string;
+  name: string;
   location: string | null;
 };
 
@@ -58,15 +68,18 @@ export default async function ClientMessagesPage({
 
   const { data: inquiryData, error } = await supabase
     .from("designer_inquiries")
-    .select("id, designer_id, subject, message, status, created_at")
+    .select("id, designer_id, studio_id, subject, message, status, created_at")
     .eq("client_id", user.id)
     .order("created_at", { ascending: false })
     .limit(100);
   const inquiries = (inquiryData ?? []) as Inquiry[];
   const inquiryIds = inquiries.map((inquiry) => inquiry.id);
   const designerIds = Array.from(new Set(inquiries.map((inquiry) => inquiry.designer_id)));
+  const studioIds = Array.from(
+    new Set(inquiries.map((inquiry) => inquiry.studio_id).filter((id): id is string => Boolean(id)))
+  );
 
-  const [{ data: messageData }, { data: profileData }] = await Promise.all([
+  const [{ data: messageData }, { data: profileData }, { data: studioData }] = await Promise.all([
     inquiryIds.length
       ? supabase
           .from("inquiry_messages")
@@ -80,20 +93,22 @@ export default async function ClientMessagesPage({
           .select("id, full_name, profession_type, location")
           .in("id", designerIds)
       : Promise.resolve({ data: [] }),
+    studioIds.length
+      ? supabase.from("studios").select("id, name, location").in("id", studioIds)
+      : Promise.resolve({ data: [] }),
   ]);
 
   const messages = (messageData ?? []) as Message[];
   const profiles = (profileData ?? []) as Profile[];
   const profilesById = new Map(profiles.map((profile) => [profile.id, profile]));
+  const studios = (studioData ?? []) as Studio[];
+  const studiosById = new Map(studios.map((studio) => [studio.id, studio]));
   const latestByInquiry = new Map<string, Message>();
-  const unreadByInquiry = new Map<string, number>();
   messages.forEach((message) => {
     if (!latestByInquiry.has(message.inquiry_id)) latestByInquiry.set(message.inquiry_id, message);
-    if (message.sender_id !== user.id && !message.read_at) {
-      unreadByInquiry.set(message.inquiry_id, (unreadByInquiry.get(message.inquiry_id) ?? 0) + 1);
-    }
   });
-  const unreadTotal = Array.from(unreadByInquiry.values()).reduce((sum, count) => sum + count, 0);
+  const unreadByInquiry = clientUnreadByInquiry(inquiries, messages, user.id);
+  const totalUnread = unreadTotal(unreadByInquiry);
   const sortedInquiries = [...inquiries].sort((left, right) => {
     const leftDate = latestByInquiry.get(left.id)?.created_at || left.created_at;
     const rightDate = latestByInquiry.get(right.id)?.created_at || right.created_at;
@@ -105,6 +120,7 @@ export default async function ClientMessagesPage({
 
   return (
     <main>
+      <UnreadPageTitle count={totalUnread} label="Messages" />
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <div className="text-sm font-semibold text-primary">Client communication</div>
@@ -116,7 +132,8 @@ export default async function ClientMessagesPage({
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-        <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-2 overflow-x-auto pb-2">
           <Link
             href="/client/messages"
             className={[
@@ -133,8 +150,10 @@ export default async function ClientMessagesPage({
               selectedView === "unread" ? "bg-primary text-white" : "border border-line bg-card text-muted",
             ].join(" ")}
           >
-            Unread {unreadTotal}
+            Unread {totalUnread}
           </Link>
+          </div>
+          <ConversationAutoRefresh />
         </div>
         {error ? (
           <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">Messages could not be loaded: {error.message}</div>
@@ -142,6 +161,8 @@ export default async function ClientMessagesPage({
           <div className="grid gap-4">
             {visibleInquiries.map((inquiry) => {
               const profile = profilesById.get(inquiry.designer_id);
+              const studio = inquiry.studio_id ? studiosById.get(inquiry.studio_id) : null;
+              const recipientName = studio?.name || profile?.full_name || "Design professional";
               const latest = latestByInquiry.get(inquiry.id);
               const unread = unreadByInquiry.get(inquiry.id) ?? 0;
               return (
@@ -156,16 +177,16 @@ export default async function ClientMessagesPage({
                       </div>
                       <h2 className="mt-3 text-2xl font-bold">{inquiry.subject}</h2>
                       <div className="mt-2 text-sm text-muted">
-                        {profile?.full_name || "Design professional"}
-                        {profile?.profession_type ? ` · ${profile.profession_type}` : ""}
-                        {profile?.location ? ` · ${profile.location}` : ""}
+                        {recipientName}
+                        {studio ? " · Design studio" : profile?.profession_type ? ` · ${profile.profession_type}` : ""}
+                        {studio?.location || profile?.location ? ` · ${studio?.location || profile?.location}` : ""}
                       </div>
                       <div className="mt-4 rounded-lg bg-background p-4 text-sm leading-6 text-muted">
                         <div className="font-semibold text-foreground">
                           {latest
                             ? latest.sender_id === user.id
                               ? "You"
-                              : profile?.full_name || "Professional"
+                              : recipientName
                             : "Your introduction"}
                         </div>
                         <p className="mt-1 line-clamp-2">{latest?.body || inquiry.message || "Open the conversation to review the full brief."}</p>

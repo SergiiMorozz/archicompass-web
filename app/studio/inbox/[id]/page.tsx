@@ -123,19 +123,19 @@ async function updateStatus(formData: FormData) {
   });
   if (!canManage) actionError(inquiryId, "Only the receiving designer or studio team can update this request.");
 
-  const { data: updated, error } = await supabase
-    .from("designer_inquiries")
-    .update({ status, updated_at: new Date().toISOString() })
-    .eq("id", inquiryId)
-    .select("id")
-    .maybeSingle();
+  const { error } = await supabase.rpc("update_inquiry_status_with_message", {
+    target_inquiry_id: inquiryId,
+    new_status: status,
+  });
   if (error) actionError(inquiryId, error.message);
-  if (!updated) actionError(inquiryId, "Only the receiving designer or studio team can update this request.");
 
   revalidatePath("/studio");
   revalidatePath("/studio/inbox");
   revalidatePath(`/studio/inbox/${inquiryId}`);
+  revalidatePath("/client");
+  revalidatePath("/client/messages");
   revalidatePath("/account/inquiries");
+  revalidatePath(`/account/inquiries/${inquiryId}`);
   redirect(`/studio/inbox/${inquiryId}?status=1`);
 }
 

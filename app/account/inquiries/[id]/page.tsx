@@ -13,6 +13,7 @@ type Inquiry = {
   id: string;
   client_id: string;
   designer_id: string;
+  studio_id: string | null;
   subject: string;
   message: string | null;
   status: string;
@@ -34,6 +35,12 @@ type Message = {
 type Profile = {
   id: string;
   full_name: string | null;
+  email: string | null;
+};
+
+type Studio = {
+  id: string;
+  name: string;
   email: string | null;
 };
 
@@ -65,9 +72,8 @@ async function sendParticipantMessage(formData: FormData) {
     .select("id, client_id, designer_id")
     .eq("id", inquiryId)
     .maybeSingle();
-  if (!inquiry || (inquiry.client_id !== user.id && inquiry.designer_id !== user.id)) {
-    redirect("/account/inquiries");
-  }
+  if (!inquiry) redirect("/client/messages");
+  if (inquiry.client_id !== user.id) redirect(`/studio/inbox/${inquiryId}`);
 
   const { error } = await supabase.from("inquiry_messages").insert({
     inquiry_id: inquiryId,
@@ -122,12 +128,12 @@ export default async function AccountConversationPage({
 
   const { data: inquiryData } = await supabase
     .from("designer_inquiries")
-    .select("id, client_id, designer_id, subject, message, status, brief_snapshot, brief_text, reference_photo_names, reference_photo_paths, created_at")
+    .select("id, client_id, designer_id, studio_id, subject, message, status, brief_snapshot, brief_text, reference_photo_names, reference_photo_paths, created_at")
     .eq("id", id)
     .maybeSingle();
   if (!inquiryData) notFound();
   const inquiry = inquiryData as Inquiry;
-  if (inquiry.client_id !== user.id && inquiry.designer_id !== user.id) notFound();
+  if (inquiry.client_id !== user.id) redirect(`/studio/inbox/${inquiry.id}`);
 
   await supabase
     .from("inquiry_messages")
@@ -136,20 +142,23 @@ export default async function AccountConversationPage({
     .neq("sender_id", user.id)
     .is("read_at", null);
 
-  const otherId = inquiry.client_id === user.id ? inquiry.designer_id : inquiry.client_id;
-  const [{ data: messageData }, { data: profileData }, photos] = await Promise.all([
+  const [{ data: messageData }, { data: profileData }, { data: studioData }, photos] = await Promise.all([
     supabase
       .from("inquiry_messages")
       .select("id, sender_id, body, read_at, created_at")
       .eq("inquiry_id", inquiry.id)
       .order("created_at", { ascending: true }),
-    supabase.from("profiles").select("id, full_name, email").eq("id", otherId).maybeSingle(),
+    supabase.from("profiles").select("id, full_name, email").eq("id", inquiry.designer_id).maybeSingle(),
+    inquiry.studio_id
+      ? supabase.from("studios").select("id, name, email").eq("id", inquiry.studio_id).maybeSingle()
+      : Promise.resolve({ data: null }),
     referencePhotoPreviews(supabase, inquiry.reference_photo_names, inquiry.reference_photo_paths),
   ]);
   const messages = (messageData ?? []) as Message[];
   const other = profileData as Profile | null;
-  const otherName = other?.full_name || other?.email || "Conversation participant";
-  const originalAuthor = inquiry.client_id === user.id ? "You" : otherName;
+  const studio = studioData as Studio | null;
+  const otherName = studio?.name || other?.full_name || studio?.email || other?.email || "Design professional";
+  const originalAuthor = "You";
 
   return (
     <main>
