@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-const supportedEntityTypes = ["designer", "studio", "project"] as const;
+const supportedEntityTypes = ["designer", "studio", "project", "article"] as const;
 type SupportedEntityType = (typeof supportedEntityTypes)[number];
 
 function isUuid(value: string) {
@@ -45,7 +45,9 @@ export async function POST(request: Request) {
         ? "profiles"
         : entityType === "studio"
           ? "studios"
-          : "projects";
+          : entityType === "project"
+            ? "projects"
+            : "inspiration_articles";
     const { data: target } = await supabase
       .from(targetTable)
       .select("id")

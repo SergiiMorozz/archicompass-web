@@ -42,6 +42,15 @@ type Studio = {
   specialties: string[] | null;
 };
 
+type Article = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  image_url: string | null;
+};
+
 const fallbackProjectImage =
   "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=80";
 
@@ -60,8 +69,9 @@ export default async function ClientFavoritesPage() {
   const designerIds = favorites.filter((item) => item.entity_type === "designer").map((item) => item.entity_key);
   const studioIds = favorites.filter((item) => item.entity_type === "studio").map((item) => item.entity_key);
   const projectIds = favorites.filter((item) => item.entity_type === "project").map((item) => item.entity_key);
+  const articleIds = favorites.filter((item) => item.entity_type === "article").map((item) => item.entity_key);
 
-  const [{ data: profileData }, { data: studioData }, { data: projectData }] = await Promise.all([
+  const [{ data: profileData }, { data: studioData }, { data: projectData }, { data: articleData }] = await Promise.all([
     designerIds.length
       ? supabase
           .from("profiles")
@@ -80,6 +90,12 @@ export default async function ClientFavoritesPage() {
           .select("id, profile_id, title, category, description, image_url, image_path")
           .in("id", projectIds)
       : Promise.resolve({ data: [] }),
+    articleIds.length
+      ? supabase
+          .from("inspiration_articles")
+          .select("id, slug, title, excerpt, category, image_url")
+          .in("id", articleIds)
+      : Promise.resolve({ data: [] }),
   ]);
   const designers = ((profileData ?? []) as Profile[]).map(applyDemoProfilePresentation);
   const studios = (studioData ?? []) as Studio[];
@@ -87,6 +103,7 @@ export default async function ClientFavoritesPage() {
     const presentation = getDemoProjectPresentation(project.profile_id, project.id);
     return presentation ? { ...project, ...presentation } : project;
   });
+  const articles = (articleData ?? []) as Article[];
   const ownerIds = Array.from(new Set(projects.map((project) => project.profile_id)));
   const { data: ownerData } = ownerIds.length
     ? await supabase.from("profiles").select("id, full_name").in("id", ownerIds)
@@ -105,7 +122,7 @@ export default async function ClientFavoritesPage() {
           <div className="text-sm font-semibold text-primary">Your shortlist</div>
           <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Favorites</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-            Compare designers and projects without losing the work that feels right for your space.
+            Compare designers, projects, and inspiration without losing what feels right for your space.
           </p>
         </div>
       </section>
@@ -199,10 +216,33 @@ export default async function ClientFavoritesPage() {
           ) : <div className="mt-5 rounded-lg border border-dashed border-line bg-card p-6 text-muted">Save portfolio projects while comparing visual directions.</div>}
         </section>
 
-        <section className="rounded-lg border border-dashed border-line bg-card p-6">
-          <div className="text-sm font-semibold text-primary">Coming later</div>
-          <h2 className="mt-1 text-2xl font-bold">Inspiration HUB</h2>
-          <p className="mt-2 max-w-2xl leading-7 text-muted">Articles and curated inspiration will use this same Favorites space when the hub launches.</p>
+        <section>
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <div className="text-sm font-semibold text-primary">Ideas to revisit</div>
+              <h2 className="mt-1 text-3xl font-bold">Saved inspiration</h2>
+            </div>
+            <Link href="/inspiration" className="text-sm font-semibold text-primary hover:underline">Explore Hub</Link>
+          </div>
+          {articles.length ? (
+            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {articles.map((article) => (
+                <article key={article.id} className="overflow-hidden rounded-lg border border-line bg-card shadow-sm">
+                  <Link href={`/inspiration/${article.slug}`} className="block aspect-[4/3] bg-cover bg-center" style={{ backgroundImage: article.image_url ? `url(${article.image_url})` : undefined }} aria-label={`Open ${article.title}`} />
+                  <div className="p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <span className="text-xs font-semibold text-primary">{article.category}</span>
+                        <Link href={`/inspiration/${article.slug}`} className="mt-1 block text-xl font-bold hover:text-primary">{article.title}</Link>
+                      </div>
+                      <FavoriteButton compact entityType="article" entityKey={article.id} initialSaved />
+                    </div>
+                    <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">{article.excerpt}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : <div className="mt-5 rounded-lg border border-dashed border-line bg-card p-6 text-muted">Save articles from Inspiration Hub to keep useful ideas here.</div>}
         </section>
       </section>
     </main>

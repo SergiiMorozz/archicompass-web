@@ -54,7 +54,7 @@ function reviewClass(status: string) {
 
 export default async function AdminOverviewPage() {
   const { supabase } = await requireAdmin();
-  const [statsResult, usersResult] = await Promise.all([
+  const [statsResult, usersResult, contentResult] = await Promise.all([
     supabase.rpc("admin_dashboard_stats"),
     supabase.rpc("admin_user_directory", {
       account_type: "all",
@@ -64,12 +64,15 @@ export default async function AdminOverviewPage() {
       search_text: null,
       visibility_filter: "all",
     }),
+    supabase.from("inspiration_articles").select("status"),
   ]);
 
   const stats = (statsResult.data ?? {}) as AdminStats;
   const users = (usersResult.data ?? []) as AdminUser[];
   const briefCount = numberValue(stats.briefs);
   const inquiryCount = numberValue(stats.inquiries);
+  const contentRows = contentResult.data ?? [];
+  const publishedArticles = contentRows.filter((article) => article.status === "published").length;
   const cards = [
     ["Accounts", numberValue(stats.users), `${numberValue(stats.signups_30)} new in 30 days`],
     ["Professionals", numberValue(stats.professionals), "Profile supply"],
@@ -77,6 +80,7 @@ export default async function AdminOverviewPage() {
     ["Portfolio projects", numberValue(stats.projects), "Public work"],
     ["Saved briefs", briefCount, "Project Compass output"],
     ["Designer requests", inquiryCount, "Across the closed beta"],
+    ["Inspiration articles", contentRows.length, `${publishedArticles} published`],
     ["Hidden content", numberValue(stats.hidden_profiles) + numberValue(stats.hidden_projects), `${numberValue(stats.hidden_profiles)} profiles, ${numberValue(stats.hidden_projects)} projects`],
     ["Profile views", numberValue(stats.profile_views_30), "Last 30 days"],
   ];
@@ -103,10 +107,10 @@ export default async function AdminOverviewPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-        {statsResult.error || usersResult.error ? (
+        {statsResult.error || usersResult.error || contentResult.error ? (
           <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-5 text-sm text-red-700">
             Admin data could not be loaded. Apply the Admin Workspace database migration
-            and confirm this account has an active owner role.
+            and Inspiration Content migration, then confirm this account has an active owner role.
           </div>
         ) : null}
 
@@ -169,12 +173,14 @@ export default async function AdminOverviewPage() {
             </section>
 
             <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-              <div className="text-sm font-semibold text-primary">Coming next</div>
-              <h2 className="mt-1 text-2xl font-bold">Content operations</h2>
+              <div className="text-sm font-semibold text-primary">Content operations</div>
+              <h2 className="mt-1 text-2xl font-bold">Inspiration Hub</h2>
               <p className="mt-3 text-sm leading-6 text-muted">
-                Inspiration HUB and article publishing will use this same protected
-                workspace, followed by staff permissions and future payment oversight.
+                Create drafts, publish articles, and manage featured inspiration from the protected editor.
               </p>
+              <Link href="/admin/content" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
+                Manage content
+              </Link>
             </section>
           </aside>
         </div>
