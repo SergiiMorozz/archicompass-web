@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import StudioNav from "@/components/StudioNav";
+import { currentRequestPath } from "@/lib/request-path";
 import {
   getExplicitAccountRole,
   getStudioMemberships,
@@ -14,8 +15,9 @@ export default async function StudioLayout({ children }: { children: React.React
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
+  const requestedPath = await currentRequestPath("/studio");
 
-  if (!user) redirect("/login");
+  if (!user) redirect(`/login?next=${encodeURIComponent(requestedPath)}`);
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -25,7 +27,7 @@ export default async function StudioLayout({ children }: { children: React.React
 
   const accountRole = await getExplicitAccountRole(supabase, user.id);
 
-  if (!accountRole) redirect("/onboarding?next=/studio");
+  if (!accountRole) redirect(`/onboarding?next=${encodeURIComponent(requestedPath)}`);
 
   if (accountRole !== "designer") {
     return (

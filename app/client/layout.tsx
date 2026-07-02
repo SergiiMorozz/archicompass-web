@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import ClientNav from "@/components/ClientNav";
+import { currentRequestPath } from "@/lib/request-path";
 import { getExplicitAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -9,9 +10,10 @@ export default async function ClientLayout({ children }: { children: React.React
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
-  if (!user) redirect("/login");
+  const requestedPath = await currentRequestPath("/client");
+  if (!user) redirect(`/login?next=${encodeURIComponent(requestedPath)}`);
   const accountRole = await getExplicitAccountRole(supabase, user.id);
-  if (!accountRole) redirect("/onboarding?next=/client");
+  if (!accountRole) redirect(`/onboarding?next=${encodeURIComponent(requestedPath)}`);
   if (accountRole !== "client") redirect("/studio");
 
   const [{ data: profile }, { data: inquiries }] = await Promise.all([
