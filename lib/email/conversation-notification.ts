@@ -38,12 +38,14 @@ function conversationUrl(inquiryId: string, role: ConversationRecipient["role"])
 export async function sendConversationNotificationEmail({
   body,
   inquiryId,
+  kind = "new_message",
   recipient,
   senderName,
   subject,
 }: {
   body: string;
   inquiryId: string;
+  kind?: "new_message" | "unread_reminder";
   recipient: ConversationRecipient;
   senderName: string;
   subject: string;
@@ -60,11 +62,16 @@ export async function sendConversationNotificationEmail({
 
   const url = conversationUrl(inquiryId, recipient.role);
   const preview = body.trim().slice(0, 1200);
-  const title = `New ArchiCompass message: ${short(subject, 120) || "Project conversation"}`;
+  const isReminder = kind === "unread_reminder";
+  const title = `${isReminder ? "Unread message reminder" : "New ArchiCompass message"}: ${
+    short(subject, 120) || "Project conversation"
+  }`;
   const text = [
     `${recipient.name || "Hello"},`,
     "",
-    `${senderName} sent a new message on ArchiCompass:`,
+    isReminder
+      ? `A message from ${senderName} has been waiting for 24 hours on ArchiCompass.`
+      : `${senderName} sent a new message on ArchiCompass:`,
     "",
     preview,
     "",
@@ -75,16 +82,22 @@ export async function sendConversationNotificationEmail({
   <body style="margin:0;background:#f7f3ee;color:#1f172a;font-family:Arial,sans-serif;">
     <div style="max-width:640px;margin:0 auto;padding:28px;">
       <div style="font-size:14px;font-weight:700;color:#6f2f9f;">ArchiCompass</div>
-      <h1 style="margin:12px 0 8px;font-size:28px;line-height:1.2;">New message</h1>
+      <h1 style="margin:12px 0 8px;font-size:28px;line-height:1.2;">${
+        isReminder ? "Unread message reminder" : "New message"
+      }</h1>
       <p style="margin:0 0 20px;color:#665f68;line-height:1.6;">
-        ${escapeHtml(recipient.name || "Hello")}, ${escapeHtml(senderName)} replied in your project conversation.
+        ${escapeHtml(recipient.name || "Hello")}, ${
+          isReminder
+            ? `a message from ${escapeHtml(senderName)} has been unread for 24 hours.`
+            : `${escapeHtml(senderName)} replied in your project conversation.`
+        }
       </p>
       <div style="margin:0 0 20px;padding:16px;border:1px solid #e2d8ce;border-radius:12px;background:#fff;">
         <div style="font-size:13px;font-weight:700;color:#6f2f9f;">${escapeHtml(subject)}</div>
         <p style="margin:8px 0 0;white-space:pre-wrap;line-height:1.6;">${escapeHtml(preview)}</p>
       </div>
       <a href="${url}" style="display:inline-block;padding:12px 18px;border-radius:10px;background:#6f2f9f;color:#fff;text-decoration:none;font-weight:700;">
-        Open conversation
+        ${isReminder ? "Read message" : "Open conversation"}
       </a>
     </div>
   </body>
