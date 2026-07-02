@@ -185,15 +185,23 @@ async function sendBriefInquiry(formData: FormData) {
     designer = designerData as Designer;
   }
   const subject = `Project request: ${brief.title || brief.project_type || "Project brief"}`;
-  const notification = await sendInquiryNotificationEmail({
-    brief,
-    clientEmail: user.email ?? null,
-    designer,
-    message,
-  });
+  let duplicateQuery = supabase
+    .from("designer_inquiries")
+    .select("id")
+    .eq("client_id", user.id)
+    .eq("brief_id", brief.id);
+  duplicateQuery = studioId
+    ? duplicateQuery.eq("studio_id", studioId)
+    : duplicateQuery.eq("designer_id", designerId).is("studio_id", null);
+  const { data: existingInquiry, error: duplicateError } = await duplicateQuery.limit(1).maybeSingle();
+  if (duplicateError) errorRedirect(duplicateError.message);
+  if (existingInquiry) {
+    errorRedirect("This brief has already been sent to the selected professional.");
+  }
 
+  const inquiryId = crypto.randomUUID();
   const { error } = await supabase.from("designer_inquiries").insert({
-    id: crypto.randomUUID(),
+    id: inquiryId,
     client_id: user.id,
     designer_id: designerId,
     studio_id: studioId,
@@ -223,12 +231,29 @@ async function sendBriefInquiry(formData: FormData) {
     brief_text: brief.brief_text,
     reference_photo_names: brief.reference_photo_names ?? [],
     reference_photo_paths: brief.reference_photo_paths ?? [],
-    notification_email_error: notification.error,
-    notification_email_sent_at: notification.sentAt,
-    notification_email_status: notification.status,
   });
 
   if (error) errorRedirect(error.message);
+
+  const notification = await sendInquiryNotificationEmail({
+    brief,
+    clientEmail: user.email ?? null,
+    designer,
+    inquiryId,
+    message,
+  });
+  const { error: notificationRecordError } = await supabase.rpc(
+    "record_my_inquiry_email_delivery",
+    {
+      delivered_at: notification.sentAt,
+      delivery_error: notification.error,
+      delivery_status: notification.status,
+      target_inquiry_id: inquiryId,
+    }
+  );
+  if (notificationRecordError) {
+    console.error("Inquiry email delivery result was not recorded", notificationRecordError);
+  }
 
   revalidatePath("/account");
   revalidatePath("/account/briefs");

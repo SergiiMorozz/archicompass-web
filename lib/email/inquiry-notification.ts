@@ -61,10 +61,12 @@ function emailSubject(brief: BriefForEmail) {
 function emailText({
   brief,
   clientEmail,
+  inquiryId,
   message,
 }: {
   brief: BriefForEmail;
   clientEmail: string | null;
+  inquiryId: string;
   message: string | null;
 }) {
   return [
@@ -92,7 +94,7 @@ function emailText({
     "Brief:",
     brief.brief_text,
     "",
-    `Open requests: ${appUrl()}/studio/inbox`,
+    `Open request: ${appUrl()}/studio/inbox/${inquiryId}`,
   ]
     .filter((line): line is string => line !== null)
     .join("\n");
@@ -102,11 +104,13 @@ function emailHtml({
   brief,
   clientEmail,
   designer,
+  inquiryId,
   message,
 }: {
   brief: BriefForEmail;
   clientEmail: string | null;
   designer: DesignerForEmail;
+  inquiryId: string;
   message: string | null;
 }) {
   const rows: Array<[string, string | null | undefined]> = [
@@ -174,7 +178,7 @@ function emailHtml({
           : ""
       }
 
-      <a href="${appUrl()}/studio/inbox" style="display:inline-block;padding:12px 18px;border-radius:12px;background:#8b5e34;color:#fff;text-decoration:none;font-weight:700;">
+      <a href="${appUrl()}/studio/inbox/${inquiryId}" style="display:inline-block;padding:12px 18px;border-radius:12px;background:#8b5e34;color:#fff;text-decoration:none;font-weight:700;">
         Open request
       </a>
     </div>
@@ -186,11 +190,13 @@ export async function sendInquiryNotificationEmail({
   brief,
   clientEmail,
   designer,
+  inquiryId,
   message,
 }: {
   brief: BriefForEmail;
   clientEmail: string | null;
   designer: DesignerForEmail;
+  inquiryId: string;
   message: string | null;
 }): Promise<NotificationResult> {
   const apiKey = process.env.RESEND_API_KEY;
@@ -216,10 +222,10 @@ export async function sendInquiryNotificationEmail({
     const response = await fetch("https://api.resend.com/emails", {
       body: JSON.stringify({
         from,
-        html: emailHtml({ brief, clientEmail, designer, message }),
+        html: emailHtml({ brief, clientEmail, designer, inquiryId, message }),
         reply_to: process.env.INQUIRY_EMAIL_REPLY_TO || clientEmail || undefined,
         subject: emailSubject(brief),
-        text: emailText({ brief, clientEmail, message }),
+        text: emailText({ brief, clientEmail, inquiryId, message }),
         to: designer.email,
       }),
       headers: {
