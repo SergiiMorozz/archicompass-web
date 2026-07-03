@@ -378,7 +378,7 @@ function OptionGrid({
   );
 }
 
-export default function ProjectCompass() {
+export default function ProjectCompass({ isDesigner = false }: { isDesigner?: boolean }) {
   const [projectType, setProjectType] = useState(projectTypes[0].value);
   const [goal, setGoal] = useState(goals[1].value);
   const [style, setStyle] = useState(styles[0].value);
@@ -1235,10 +1235,19 @@ export default function ProjectCompass() {
           </div>
 
           <div className="mt-6 grid gap-3">
+            {isDesigner ? (
+              <div className="rounded-xl border border-primary/30 bg-primary-soft p-4 text-sm leading-6 text-foreground">
+                <div className="font-semibold text-primary">You are signed in as a designer</div>
+                <p className="mt-1 text-muted">
+                  AI photo analysis, style guidance, copying, and match previews remain
+                  available. Designer accounts cannot save or send client briefs.
+                </p>
+              </div>
+            ) : null}
             <button
               type="button"
               onClick={() => saveBrief(true)}
-              disabled={isSaving}
+              disabled={isSaving || isDesigner}
               className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSaving ? "Saving brief..." : "Save brief & find designers"}
@@ -1246,7 +1255,7 @@ export default function ProjectCompass() {
             <button
               type="button"
               onClick={() => saveBrief(false)}
-              disabled={isSaving}
+              disabled={isSaving || isDesigner}
               className="rounded-xl border border-primary bg-primary-soft px-5 py-3 text-sm font-semibold text-primary hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSaving ? "Saving brief..." : "Save for later"}
