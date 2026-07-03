@@ -36,6 +36,9 @@ type Profile = {
   availability_status: string | null;
   cooperation_terms: string | null;
   years_experience: number | null;
+  google_business_url: string | null;
+  google_rating: number | null;
+  google_review_count: number | null;
 };
 
 type ProjectImagePaths = {
@@ -60,6 +63,16 @@ function numberValue(formData: FormData, key: string) {
   if (typeof value !== "string" || !value.trim()) return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function googleRatingValue(formData: FormData) {
+  const value = numberValue(formData, "google_rating");
+  return value !== null && value >= 1 && value <= 5 ? Math.round(value * 10) / 10 : null;
+}
+
+function nonNegativeIntegerValue(formData: FormData, key: string) {
+  const value = numberValue(formData, key);
+  return value !== null && value >= 0 ? Math.floor(value) : null;
 }
 
 function specialtiesValue(formData: FormData) {
@@ -148,6 +161,10 @@ async function updateProfile(formData: FormData) {
         availability_status: textValue(formData, "availability_status"),
         cooperation_terms: textValue(formData, "cooperation_terms"),
         years_experience: numberValue(formData, "years_experience"),
+        google_business_url: textValue(formData, "google_business_url"),
+        google_rating: googleRatingValue(formData),
+        google_review_count: nonNegativeIntegerValue(formData, "google_review_count"),
+        google_rating_updated_at: new Date().toISOString(),
       }
     : { ...commonProfile, user_type: "client" };
 
@@ -220,7 +237,7 @@ export default async function EditProfilePage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "full_name, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience"
+      "full_name, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count"
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -414,6 +431,49 @@ export default async function EditProfilePage({
                     className={fieldClass}
                   />
                 </Field>
+              </div>
+
+              <div className="sm:col-span-2 rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-5">
+                <div className="text-sm font-bold text-foreground">Google Business rating</div>
+                <p className="mt-1 text-sm leading-6 text-muted">
+                  Link your public Google profile and show its current rating on your ArchiCompass profile.
+                </p>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <Field label="Google Business profile URL">
+                      <input
+                        name="google_business_url"
+                        type="url"
+                        defaultValue={p.google_business_url ?? ""}
+                        placeholder="https://g.page/..."
+                        className={fieldClass}
+                      />
+                    </Field>
+                  </div>
+                  <Field label="Google rating" hint="1.0-5.0">
+                    <input
+                      name="google_rating"
+                      type="number"
+                      min="1"
+                      max="5"
+                      step="0.1"
+                      defaultValue={p.google_rating ?? ""}
+                      placeholder="4.8"
+                      className={fieldClass}
+                    />
+                  </Field>
+                  <Field label="Number of Google reviews">
+                    <input
+                      name="google_review_count"
+                      type="number"
+                      min="0"
+                      step="1"
+                      defaultValue={p.google_review_count ?? ""}
+                      placeholder="24"
+                      className={fieldClass}
+                    />
+                  </Field>
+                </div>
               </div>
 
               <fieldset className="sm:col-span-2">

@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import FavoriteButton from "@/components/FavoriteButton";
 import ProjectGallery from "@/components/ProjectGallery";
 import ProfileViewTracker from "@/components/ProfileViewTracker";
+import GoogleRating from "@/components/GoogleRating";
 import { countLabel } from "@/lib/count-label";
 import { getAccountRole } from "@/lib/studios";
 import { pricingLabel } from "@/lib/profile-pricing";
@@ -35,6 +36,9 @@ type Profile = {
   availability_status: string | null;
   cooperation_terms: string | null;
   years_experience: number | null;
+  google_business_url: string | null;
+  google_rating: number | null;
+  google_review_count: number | null;
 };
 
 type Project = {
@@ -259,7 +263,7 @@ export default async function DesignerProfilePage({
   const { data: profileData, error: pErr } = await supabase
     .from("profiles")
     .select(
-      "id, full_name, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience"
+      "id, full_name, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count"
     )
     .eq("id", id)
     .single();
@@ -824,22 +828,39 @@ export default async function DesignerProfilePage({
                 <div className="text-sm font-semibold text-primary">Reviews</div>
                 <h2 className="mt-1 text-3xl font-bold">Client feedback</h2>
               </div>
-              <span className="rounded-full bg-background px-4 py-2 text-sm font-semibold text-muted">
-                No public reviews yet
-              </span>
+              {profile.google_rating || profile.google_review_count || profile.google_business_url ? (
+                <GoogleRating rating={profile.google_rating} count={profile.google_review_count} url={profile.google_business_url} />
+              ) : (
+                <span className="rounded-full bg-background px-4 py-2 text-sm font-semibold text-muted">
+                  No linked Google reviews yet
+                </span>
+              )}
             </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-[220px_1fr]">
-              <div className="rounded-2xl border border-line bg-background p-5 text-center">
-                <div className="text-5xl font-bold text-primary">Beta</div>
-                <div className="mt-2 text-sm text-muted">No ratings collected</div>
+              <div className="rounded-lg border border-line bg-background p-5 text-center">
+                <div className="text-5xl font-bold text-primary">
+                  {profile.google_rating ? profile.google_rating.toFixed(1) : "New"}
+                </div>
+                <div className="mt-2 text-sm text-muted">
+                  {profile.google_review_count
+                    ? `${profile.google_review_count} Google ${profile.google_review_count === 1 ? "review" : "reviews"}`
+                    : "No linked rating yet"}
+                </div>
               </div>
-              <div className="rounded-2xl border border-dashed border-line bg-background p-5">
-                <h3 className="text-lg font-bold">Reviews will appear here</h3>
+              <div className="rounded-lg border border-dashed border-line bg-background p-5">
+                <h3 className="text-lg font-bold">
+                  {profile.google_business_url ? "View the source on the linked Google profile" : "Google reviews can be linked here"}
+                </h3>
                 <p className="mt-2 text-sm leading-6 text-muted">
-                  Once ArchiCompass starts collecting verified client feedback, this
-                  section can show ratings, review cards, and project-specific comments.
+                  ArchiCompass shows the public rating summary while the original review
+                  content remains on Google. Platform-specific client feedback will be added separately.
                 </p>
+                {websiteHref(profile.google_business_url) ? (
+                  <a href={websiteHref(profile.google_business_url)!} target="_blank" rel="noreferrer" className="mt-4 inline-flex rounded-lg bg-primary px-4 py-3 text-sm font-bold text-white">
+                    Read reviews on Google
+                  </a>
+                ) : null}
               </div>
             </div>
           </section>

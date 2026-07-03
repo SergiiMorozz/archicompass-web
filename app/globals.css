@@ -25,13 +25,18 @@
 
 :root {
   --font-outfit: "Outfit";
-  --background: #faf9fb;
-  --foreground: #251d30;
-  --primary: #592d86;
-  --primary-soft: #f1eaf7;
-  --muted: #706284;
-  --line: #e5e1ea;
+  --background: #fbfaff;
+  --foreground: #21172d;
+  --primary: #6828c8;
+  --primary-soft: #f0e8ff;
+  --muted: #6f617f;
+  --line: #e5deed;
   --card: #ffffff;
+  --accent: #0f9487;
+  --accent-soft: #def7f2;
+  --warm: #e85f43;
+  --warm-soft: #fff0ec;
+  --sun: #e9a825;
 }
 
 @theme inline {
@@ -42,6 +47,11 @@
   --color-muted: var(--muted);
   --color-line: var(--line);
   --color-card: var(--card);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-warm: var(--warm);
+  --color-warm-soft: var(--warm-soft);
+  --color-sun: var(--sun);
   --font-sans: var(--font-outfit);
 }
 
@@ -49,6 +59,23 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-outfit), Arial, Helvetica, sans-serif;
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  outline-color: color-mix(in srgb, var(--primary) 55%, transparent);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 32%, transparent);
+  outline-offset: 2px;
 }
 
 ::selection {

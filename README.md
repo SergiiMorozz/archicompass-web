@@ -78,6 +78,7 @@ profile analytics, and Client Workspace favorites are defined in:
 supabase/designer-studio.sql
 supabase/client-workspace.sql
 supabase/profile-auth-emails.sql
+supabase/google-business-ratings.sql
 supabase/unread-message-reminders.sql
 supabase/schedule-unread-message-reminders.sql
 ```
@@ -88,6 +89,9 @@ profile owner.
 
 The Client Workspace schema adds owner-only favorites for designers, projects,
 and future Inspiration HUB content, plus a preferred timeline on saved briefs.
+
+Google Business ratings store only a professional-supplied public profile link,
+rating summary, and review count. Review text remains on Google.
 
 ## Checks
 

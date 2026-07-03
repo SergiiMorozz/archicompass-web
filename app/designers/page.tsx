@@ -1,5 +1,6 @@
 import Link from "next/link";
 import FavoriteButton from "@/components/FavoriteButton";
+import GoogleRating from "@/components/GoogleRating";
 import { countLabel } from "@/lib/count-label";
 import {
   type MatchBrief,
@@ -34,6 +35,9 @@ type Profile = {
   work_modes: string[] | null;
   availability_status: string | null;
   years_experience: number | null;
+  google_business_url: string | null;
+  google_rating: number | null;
+  google_review_count: number | null;
   created_at: string;
 };
 
@@ -52,6 +56,9 @@ type Studio = {
   work_modes: string[] | null;
   availability_status: string | null;
   years_experience: number | null;
+  google_business_url: string | null;
+  google_rating: number | null;
+  google_review_count: number | null;
   created_at: string;
 };
 
@@ -270,6 +277,9 @@ function StudioCard({
           <span>{studio.availability_status || "Availability on request"}</span>
           {studio.work_modes?.length ? <span>{studio.work_modes.join(" · ")}</span> : null}
         </div>
+        <div className="mt-4">
+          <GoogleRating compact rating={studio.google_rating} count={studio.google_review_count} url={studio.google_business_url} />
+        </div>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link href={studioHref} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
             View studio
@@ -415,6 +425,9 @@ function DesignerCard({
               <span>{profile.availability_status || "Availability on request"}</span>
               {profile.work_modes?.length ? <span>{profile.work_modes.join(" · ")}</span> : null}
             </div>
+            <div className="mt-3">
+              <GoogleRating compact rating={profile.google_rating} count={profile.google_review_count} url={profile.google_business_url} />
+            </div>
 
             <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">
               {profile.bio || "This beta profile has not added a public introduction yet."}
@@ -517,6 +530,9 @@ function DesignerCard({
           <span>{experienceLabel(profile.years_experience)}</span>
           <span>{profile.availability_status || "Availability on request"}</span>
           {profile.work_modes?.length ? <span>{profile.work_modes.join(" · ")}</span> : null}
+        </div>
+        <div className="mt-3">
+          <GoogleRating compact rating={profile.google_rating} count={profile.google_review_count} url={profile.google_business_url} />
         </div>
 
         <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">
@@ -623,7 +639,7 @@ export default async function DesignersPage({
   const query = supabase
     .from("profiles")
     .select(
-      "id, full_name, bio, location, profession_type, user_type, specialties, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, created_at"
+      "id, full_name, bio, location, profession_type, user_type, specialties, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, created_at"
     )
     .eq("user_type", "professional")
     .order("created_at", { ascending: false })
@@ -632,7 +648,7 @@ export default async function DesignersPage({
   const { data, error } = await query;
   const { data: studioData } = await supabase
     .from("studios")
-    .select("id, name, bio, location, specialties, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, created_at")
+    .select("id, name, bio, location, specialties, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, created_at")
     .eq("published", true)
     .order("created_at", { ascending: false })
     .limit(30);
@@ -856,10 +872,13 @@ export default async function DesignersPage({
 
   return (
     <main>
-      <section className="border-b border-line bg-card px-4 py-14 sm:px-6">
+      <section className="border-b border-primary/15 bg-primary-soft px-4 py-14 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-3xl text-center">
-            <h1 className="text-5xl font-bold tracking-tight">Find Designer</h1>
+            <span className="inline-flex rounded-full bg-accent px-3 py-1 text-xs font-bold text-white">
+              Designer discovery
+            </span>
+            <h1 className="mt-3 text-5xl font-bold tracking-tight">Find Designer</h1>
             <p className="mt-4 text-lg leading-8 text-muted">
               Browse beta designer and architect profiles by style, location, and
               project fit.
@@ -874,7 +893,7 @@ export default async function DesignersPage({
             {matchingQueryEntries.map(([name, value]) => (
               <input key={name} type="hidden" name={name} value={value} />
             ))}
-            <div className="flex flex-col gap-3 rounded-2xl border border-line bg-background p-3 shadow-sm sm:flex-row">
+            <div className="flex flex-col gap-3 rounded-lg border border-primary/15 bg-card p-3 shadow-[0_14px_40px_rgba(104,40,200,0.10)] sm:flex-row">
               <input
                 name="q"
                 defaultValue={q}

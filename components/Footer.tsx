@@ -10,7 +10,7 @@ const navigation = [
 
 export default function Footer() {
   return (
-    <footer className="bg-[#1f172a] text-white">
+    <footer className="border-t-4 border-accent bg-[#21152d] text-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.5fr_1fr_1fr]">
         <div>
           <Link href="/" className="inline-flex items-center" aria-label="ArchiCompass home">

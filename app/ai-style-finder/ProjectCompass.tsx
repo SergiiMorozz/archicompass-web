@@ -796,22 +796,24 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
   return (
     <main className="bg-background">
-      <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
+      <section className="border-b border-primary/20 bg-[#2a1836] px-4 py-10 text-white sm:px-6">
         <div className="mx-auto grid max-w-7xl gap-7 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-end">
           <div>
-            <div className="text-sm font-semibold text-primary">Project Compass</div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#4fd8c7] px-3 py-1 text-xs font-bold text-[#173d39]">
+              AI Project Compass
+            </div>
             <h1 className="mt-2 max-w-4xl text-4xl font-bold tracking-tight sm:text-6xl">
               Turn a vague idea into a usable project brief
             </h1>
-            <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
+            <p className="mt-4 max-w-2xl text-lg leading-8 text-white/72">
               Style matters, but the real match depends on scope, budget, room type,
               reference images, timeline, and the kind of help you need.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-line bg-background p-5 shadow-sm">
-            <div className="text-sm font-semibold text-muted">Why this is better</div>
-            <p className="mt-2 text-sm leading-6 text-muted">
+          <div className="rounded-lg border border-white/15 bg-white/10 p-5 shadow-sm">
+            <div className="text-sm font-semibold text-[#64dfd0]">Why this is better</div>
+            <p className="mt-2 text-sm leading-6 text-white/70">
               Instead of guessing a style name, ArchiCompass prepares the information a
               designer needs to decide if the project is a good fit.
             </p>
@@ -820,7 +822,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_390px]">
-        <div className="grid gap-7 rounded-2xl border border-line bg-card p-5 shadow-sm sm:p-6">
+        <div className="grid gap-7 rounded-lg border border-line bg-card p-5 shadow-[0_18px_50px_rgba(54,31,73,0.08)] sm:p-6">
           <OptionGrid
             label="1. What are you planning?"
             onChange={setProjectType}
@@ -985,10 +987,13 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
               </div>
             )}
 
-            <div className="mt-4 rounded-2xl border border-line bg-background p-4">
+            <div className="mt-4 rounded-lg border-2 border-primary/25 bg-primary-soft p-4 shadow-[0_12px_30px_rgba(104,40,200,0.10)]">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h3 className="text-sm font-bold">AI photo style analysis</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-white">AI</span>
+                    <h3 className="text-sm font-bold text-primary">Photo style analysis</h3>
+                  </div>
                   <p className="mt-1 text-sm leading-6 text-muted">
                     Let ArchiCompass read the reference photos and suggest a style name,
                     materials, colors, and designer-search clues.

@@ -9,17 +9,19 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const navItems = [
   { href: "/", label: "Home" },
-  { href: "/project-compass", label: "Project Compass" },
+  { href: "/project-compass", label: "Project Compass", featured: true },
   { href: "/designers", label: "Find Designer" },
 ];
 
 function NavLink({
   href,
   children,
+  featured = false,
   onClick,
 }: {
   href: string;
   children: React.ReactNode;
+  featured?: boolean;
   onClick?: () => void;
 }) {
   const pathname = usePathname();
@@ -33,9 +35,19 @@ function NavLink({
         "rounded-full px-3 py-2 text-sm font-medium transition",
         isActive
           ? "bg-primary text-white shadow-sm"
+          : featured
+            ? "border border-primary/20 bg-primary-soft text-primary hover:bg-primary hover:text-white"
           : "text-muted hover:bg-primary-soft hover:text-primary",
       ].join(" ")}
     >
+      {featured ? (
+        <span aria-hidden="true" className={[
+          "mr-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none",
+          isActive ? "bg-white text-primary" : "bg-primary text-white",
+        ].join(" ")}>
+          AI
+        </span>
+      ) : null}
       {children}
     </Link>
   );
@@ -140,13 +152,13 @@ export default function Header() {
       ]
     : [];
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-line/80 bg-background/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-line/80 bg-card/95 shadow-[0_8px_30px_rgba(73,35,102,0.06)] backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <Brand />
 
         <nav className="hidden items-center gap-1 xl:flex">
           {navItems.map((item) => (
-            <NavLink key={item.href} href={item.href}>
+            <NavLink key={item.href} href={item.href} featured={item.featured}>
               {item.label}
             </NavLink>
           ))}
@@ -217,7 +229,7 @@ export default function Header() {
         <div className="border-t border-line bg-background px-4 py-4 xl:hidden">
           <nav className="mx-auto grid max-w-7xl gap-2">
             {navItems.map((item) => (
-              <NavLink key={item.href} href={item.href} onClick={() => setIsOpen(false)}>
+              <NavLink key={item.href} href={item.href} featured={item.featured} onClick={() => setIsOpen(false)}>
                 {item.label}
               </NavLink>
             ))}

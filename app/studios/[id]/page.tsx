@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import FavoriteButton from "@/components/FavoriteButton";
+import GoogleRating from "@/components/GoogleRating";
 import ProjectGallery from "@/components/ProjectGallery";
 import { countLabel } from "@/lib/count-label";
 import { getAccountRole } from "@/lib/studios";
@@ -29,6 +30,9 @@ type Studio = {
   availability_status: string | null;
   cooperation_terms: string | null;
   years_experience: number | null;
+  google_business_url: string | null;
+  google_rating: number | null;
+  google_review_count: number | null;
   published: boolean;
 };
 
@@ -98,7 +102,7 @@ export default async function PublicStudioPage({
 
   const { data: studioData } = await supabase
     .from("studios")
-    .select("id, owner_id, name, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, published")
+    .select("id, owner_id, name, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count, published")
     .eq("id", id)
     .maybeSingle();
   if (!studioData) notFound();
@@ -238,6 +242,9 @@ export default async function PublicStudioPage({
               <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Work format</span><span className="text-right font-semibold">{studio.work_modes?.join(" · ") || "On request"}</span></div>
               <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Minimum project</span><span className="text-right font-semibold">{studio.minimum_project_budget ? `${studio.minimum_project_budget} PLN` : "Not specified"}</span></div>
               <div className="flex justify-between gap-4"><span className="text-muted">Contact</span><span className="truncate font-semibold">{studio.email || studio.phone || "Via brief"}</span></div>
+            </div>
+            <div className="mt-5">
+              <GoogleRating rating={studio.google_rating} count={studio.google_review_count} url={studio.google_business_url} />
             </div>
             {studio.cooperation_terms ? <div className="mt-5 rounded-lg border border-line bg-background p-4"><div className="text-sm font-semibold text-primary">Cooperation terms</div><p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted">{studio.cooperation_terms}</p></div> : null}
             {isMember ? (

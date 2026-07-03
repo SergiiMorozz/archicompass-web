@@ -1,75 +1,139 @@
 import Link from "next/link";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+export const revalidate = 0;
 
 const heroImage =
-  "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1800&q=80";
+  "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1800&q=85";
 
-const betaSignals = [
-  ["Poland", "Beta launch"],
-  ["Available now", "AI brief builder"],
-  ["Free", "For early professionals"],
-  ["0%", "Commission during beta"],
+const projectFallbacks = [
+  "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=82",
+  "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1000&q=82",
+  "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1000&q=82",
 ];
 
-const briefOutputs = [
-  ["Style direction", "A useful name for the look, plus the visual cues behind it."],
-  ["Colors and materials", "A practical palette designers can immediately understand."],
-  ["Scope and constraints", "Room type, support level, budget, location, and priorities."],
-  ["Matching signals", "The specialties and project fit to look for in a professional."],
-];
+type FeaturedProject = {
+  category: string | null;
+  id: string;
+  image_path: string | null;
+  image_url: string | null;
+  image_urls: string[] | null;
+  title: string | null;
+};
 
-export default function Home() {
+function metricValue(value: number) {
+  return new Intl.NumberFormat("en-US").format(value);
+}
+
+async function homeData() {
+  const supabase = await createSupabaseServerClient();
+  const [designers, studios, projects, profilesWithReviews, studiosWithReviews, featured] =
+    await Promise.all([
+      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("user_type", "professional"),
+      supabase.from("studios").select("id", { count: "exact", head: true }).eq("published", true),
+      supabase.from("projects").select("id", { count: "exact", head: true }),
+      supabase.from("profiles").select("google_review_count").eq("user_type", "professional"),
+      supabase.from("studios").select("google_review_count").eq("published", true),
+      supabase
+        .from("projects")
+        .select("id, title, category, image_url, image_path, image_urls")
+        .order("created_at", { ascending: false })
+        .limit(3),
+    ]);
+
+  const reviewCount = [
+    ...(profilesWithReviews.data ?? []),
+    ...(studiosWithReviews.data ?? []),
+  ].reduce((sum, item) => sum + (Number(item.google_review_count) || 0), 0);
+
+  const featuredProjects = ((featured.data ?? []) as FeaturedProject[]).map((project, index) => {
+    const publicStorageUrl = project.image_path
+      ? supabase.storage.from("project-images").getPublicUrl(project.image_path).data.publicUrl
+      : null;
+    return {
+      ...project,
+      image: project.image_url || project.image_urls?.[0] || publicStorageUrl || projectFallbacks[index],
+    };
+  });
+
+  return {
+    metrics: [
+      [metricValue((designers.count ?? 0) + (studios.count ?? 0)), "Designers & studios"],
+      [metricValue(projects.count ?? 0), "Published projects"],
+      [metricValue(reviewCount), "Linked Google reviews"],
+    ],
+    featuredProjects,
+  };
+}
+
+export default async function Home() {
+  const { featuredProjects, metrics } = await homeData();
+
   return (
     <main>
       <section
-        className="relative min-h-[680px] overflow-hidden bg-foreground text-white"
+        className="relative min-h-[700px] overflow-hidden bg-foreground text-white"
         style={{
           backgroundImage: `url(${heroImage})`,
           backgroundPosition: "center",
           backgroundSize: "cover",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1f172a]/92 via-[#1f172a]/68 to-[#1f172a]/25" />
-        <div className="relative mx-auto flex min-h-[680px] max-w-7xl items-center px-4 py-20 sm:px-6">
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(27,17,38,0.96)_0%,rgba(52,24,74,0.82)_48%,rgba(27,17,38,0.30)_100%)]" />
+        <div className="relative mx-auto flex min-h-[700px] max-w-7xl items-center px-4 py-16 sm:px-6">
           <div className="max-w-3xl">
-            <div className="inline-flex rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white/85 backdrop-blur">
-              AI-powered project brief and designer matching
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/12 px-4 py-2 text-sm font-semibold backdrop-blur">
+              <span className="h-2 w-2 rounded-full bg-[#48d9c7]" />
+              AI-assisted interior designer matching
             </div>
-            <h1 className="mt-6 text-5xl font-bold leading-[1.02] tracking-tight sm:text-7xl">
-              Turn saved inspiration into a clear interior design brief.
+            <h1 className="mt-6 text-5xl font-bold leading-[1.03] sm:text-7xl">
+              Find the right interior designer for your project.
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-white/82">
-              Upload references, define your space, budget, goals, and timeline, then
-              find designers who fit the project, not just the style.
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-white/82 sm:text-xl">
+              Turn inspiration photos into a clear project brief, understand your style,
+              and compare professionals who fit the real scope of your space.
             </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-9 grid max-w-2xl gap-3 sm:grid-cols-[1.25fr_0.75fr]">
               <Link
                 href="/project-compass"
-                className="rounded-xl bg-primary px-6 py-4 text-center text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:opacity-95"
+                className="group rounded-lg border border-[#a57aff] bg-[#7c3aed] px-6 py-5 text-center font-bold text-white shadow-[0_18px_45px_rgba(86,35,168,0.38)] transition hover:bg-[#8b4cf0]"
               >
-                Build Your Project Brief
+                <span className="mr-2 rounded-full bg-white px-2 py-1 text-xs font-bold text-primary">AI</span>
+                Discover Your Style & Build a Brief
+                <span className="ml-2 transition group-hover:translate-x-1">&#8594;</span>
               </Link>
               <Link
                 href="/designers"
-                className="rounded-xl border border-white/55 bg-white/10 px-6 py-4 text-center text-sm font-semibold text-white backdrop-blur transition hover:bg-white/18"
+                className="rounded-lg border border-white/55 bg-white/12 px-6 py-5 text-center font-semibold text-white backdrop-blur transition hover:bg-white/20"
               >
-                Browse Designers
+                Find a Designer
               </Link>
             </div>
 
-            <p className="mt-5 text-sm text-white/72">
-              Free during beta. No commission. Built for interior projects in Poland.
-            </p>
+            <Link href="/get-started" className="mt-5 inline-flex text-sm font-semibold text-white/80 hover:text-white">
+              Are you a designer or architect? Join the beta &#8594;
+            </Link>
+
+            <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/78">
+              <span><b className="text-[#5de1d1]">&#10003;</b> Real portfolios</span>
+              <span><b className="text-[#5de1d1]">&#10003;</b> Direct conversations</span>
+              <span><b className="text-[#5de1d1]">&#10003;</b> Free during beta</span>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="border-b border-line bg-card">
-        <div className="mx-auto grid max-w-7xl gap-px bg-line px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
-          {betaSignals.map(([value, label]) => (
-            <div key={label} className="bg-card px-5 py-7">
-              <div className="text-2xl font-bold text-primary">{value}</div>
-              <div className="mt-1 text-sm text-muted">{label}</div>
+        <div className="mx-auto grid max-w-7xl sm:grid-cols-3">
+          {metrics.map(([value, label], index) => (
+            <div key={label} className="border-b border-line px-6 py-7 text-center last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0">
+              <div className={[
+                "text-4xl font-bold",
+                index === 0 ? "text-primary" : index === 1 ? "text-accent" : "text-warm",
+              ].join(" ")}>{value}</div>
+              <div className="mt-1 text-sm font-semibold text-muted">{label}</div>
+              <div className="mt-2 text-xs text-muted">Live platform count</div>
             </div>
           ))}
         </div>
@@ -77,67 +141,64 @@ export default function Home() {
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <div className="max-w-3xl">
-          <p className="text-sm font-semibold uppercase text-primary">How it works</p>
-          <h2 className="mt-3 text-4xl font-bold tracking-tight">
-            From saved references to a useful first conversation.
-          </h2>
+          <p className="text-sm font-bold uppercase text-accent">How it works</p>
+          <h2 className="mt-3 text-4xl font-bold">From saved images to a useful first conversation.</h2>
           <p className="mt-4 text-lg leading-8 text-muted">
-            Most interior projects start with scattered screenshots and vague messages.
-            ArchiCompass turns them into a structured brief designers can actually respond to.
+            ArchiCompass connects visual taste with the information a professional needs:
+            scope, rooms, budget, timeline, services, and project status.
           </p>
         </div>
 
         <div className="mt-9 grid gap-5 lg:grid-cols-3">
           {[
-            ["1", "Upload your references", "Add rooms, details, and moods you like. AI looks for recurring style signals."],
-            ["2", "Build a clear brief", "Combine the visual analysis with project type, scope, budget, and location."],
-            ["3", "Match and send", "Compare relevant professionals and send a useful brief instead of a vague message."],
-          ].map(([number, title, copy]) => (
-            <article key={title} className="rounded-lg border border-line bg-card p-6 shadow-sm">
-              <div className="grid h-10 w-10 place-items-center rounded-full bg-primary-soft font-bold text-primary">
-                {number}
-              </div>
-              <h3 className="mt-5 text-xl font-bold">{title}</h3>
+            ["01", "Add inspiration", "Upload rooms, details, and moods. AI reads recurring visual signals."],
+            ["02", "Shape the brief", "Add space, rooms, budget, timing, 3D, and supervision needs."],
+            ["03", "Meet the right pro", "Compare portfolio evidence and send a structured request."],
+          ].map(([number, title, copy], index) => (
+            <article key={title} className="rounded-lg border border-line bg-card p-6 shadow-[0_14px_40px_rgba(54,31,73,0.07)]">
+              <div className={[
+                "grid h-11 w-11 place-items-center rounded-lg text-sm font-bold text-white",
+                index === 0 ? "bg-primary" : index === 1 ? "bg-accent" : "bg-warm",
+              ].join(" ")}>{number}</div>
+              <h3 className="mt-5 text-2xl font-bold">{title}</h3>
               <p className="mt-3 text-sm leading-6 text-muted">{copy}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="border-y border-line bg-card">
+      <section className="border-y border-line bg-[#261631] text-white">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
-            <p className="text-sm font-semibold uppercase text-primary">The useful output</p>
-            <h2 className="mt-3 text-4xl font-bold tracking-tight">
-              More than a style label.
-            </h2>
-            <p className="mt-4 max-w-xl text-lg leading-8 text-muted">
-              Project Compass turns a moodboard into decisions a professional can act
-              on, while keeping your budget and required level of support in view.
+            <span className="rounded-full bg-[#4fd8c7] px-3 py-1 text-xs font-bold text-[#173d39]">AI PROJECT COMPASS</span>
+            <h2 className="mt-5 text-4xl font-bold">Your photos become more than a moodboard.</h2>
+            <p className="mt-4 text-lg leading-8 text-white/72">
+              Get a style direction, palette, material clues, and matching signals. Then
+              keep building the same brief instead of starting over in another tool.
             </p>
-            <Link
-              href="/project-compass"
-              className="mt-7 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"
-            >
-              Try Project Compass
+            <Link href="/project-compass" className="mt-7 inline-flex rounded-lg bg-[#7c3aed] px-6 py-4 font-bold text-white shadow-lg shadow-[#7c3aed]/25">
+              Analyze inspiration photos &#8594;
             </Link>
           </div>
 
-          <div className="rounded-lg border border-line bg-background p-6 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
+          <div className="rounded-lg border border-white/15 bg-white p-6 text-foreground shadow-2xl">
+            <div className="flex items-start justify-between gap-4 border-b border-line pb-4">
               <div>
-                <div className="text-xs font-semibold uppercase text-muted">Example output</div>
-                <div className="mt-1 text-2xl font-bold">Warm Japandi apartment</div>
+                <div className="text-xs font-bold uppercase text-primary">Example AI direction</div>
+                <div className="mt-1 text-3xl font-bold">Warm Japandi</div>
               </div>
-              <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-                AI-assisted
-              </span>
+              <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-bold text-accent">Ready to brief</span>
             </div>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {briefOutputs.map(([title, copy]) => (
-                <div key={title}>
-                  <h3 className="font-semibold">{title}</h3>
-                  <p className="mt-1 text-sm leading-6 text-muted">{copy}</p>
+              {[
+                ["Palette", "Cream, clay, warm oak"],
+                ["Materials", "Light wood, linen, stone"],
+                ["Mood", "Calm, tactile, uncluttered"],
+                ["Designer signals", "Residential, joinery, natural finishes"],
+              ].map(([title, copy]) => (
+                <div key={title} className="rounded-lg border border-line bg-background p-4">
+                  <div className="text-xs font-bold uppercase text-muted">{title}</div>
+                  <div className="mt-2 font-semibold">{copy}</div>
                 </div>
               ))}
             </div>
@@ -145,46 +206,45 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-primary text-white">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase text-white/65">
-              For designers and architects
-            </p>
-            <h2 className="mt-3 max-w-2xl text-4xl font-bold tracking-tight">
-              Meet clients who already understand their project.
-            </h2>
-            <p className="mt-4 max-w-xl leading-7 text-white/78">
-              Show your portfolio and receive structured requests with references,
-              scope, budget signals, and project goals.
-            </p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/get-started"
-                className="rounded-xl bg-white px-5 py-3 text-center text-sm font-semibold text-primary"
-              >
-                Join the Beta
-              </Link>
-              <Link
-                href="/designers"
-                className="rounded-xl border border-white/35 px-5 py-3 text-center text-sm font-semibold text-white"
-              >
-                View Example Profiles
-              </Link>
-            </div>
+            <p className="text-sm font-bold uppercase text-warm">Fresh portfolio work</p>
+            <h2 className="mt-2 text-4xl font-bold">Projects on ArchiCompass</h2>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {[
-              "Free to join during beta",
-              "No commission on projects",
-              "Structured client briefs",
-              "Direct project conversations",
-            ].map((item) => (
-              <div key={item} className="rounded-lg bg-white/10 p-5 text-sm font-medium backdrop-blur">
-                {item}
-              </div>
+          <Link href="/designers" className="font-bold text-primary hover:underline">Browse all professionals &#8594;</Link>
+        </div>
+
+        {featuredProjects.length ? (
+          <div className="mt-8 grid gap-5 md:grid-cols-3">
+            {featuredProjects.map((project) => (
+              <article key={project.id} className="overflow-hidden rounded-lg border border-line bg-card shadow-[0_14px_40px_rgba(54,31,73,0.08)]">
+                <Link href={`/projects/${project.id}`} className="block">
+                  <div className="aspect-[4/3] bg-cover bg-center" style={{ backgroundImage: `url(${project.image})` }} />
+                  <div className="p-5">
+                    <div className="text-xs font-bold uppercase text-accent">{project.category || "Interior project"}</div>
+                    <h3 className="mt-2 text-xl font-bold">{project.title || "Untitled project"}</h3>
+                  </div>
+                </Link>
+              </article>
             ))}
           </div>
+        ) : (
+          <div className="mt-8 rounded-lg border border-dashed border-line bg-card p-8 text-center">
+            <h3 className="text-xl font-bold">The first public projects will appear here.</h3>
+            <p className="mt-2 text-muted">Every published project will immediately update the live counter above.</p>
+          </div>
+        )}
+      </section>
+
+      <section className="bg-accent text-white">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div>
+            <p className="text-sm font-bold uppercase text-white/65">For designers and studios</p>
+            <h2 className="mt-2 text-4xl font-bold">Show strong work. Receive clearer client requests.</h2>
+            <p className="mt-4 max-w-2xl leading-7 text-white/80">Create a public portfolio, connect your Google rating, and manage structured briefs in one workspace.</p>
+          </div>
+          <Link href="/get-started" className="rounded-lg bg-white px-6 py-4 text-center font-bold text-accent">Join as a Professional</Link>
         </div>
       </section>
     </main>

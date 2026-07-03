@@ -36,6 +36,9 @@ type Studio = {
   availability_status: string | null;
   cooperation_terms: string | null;
   years_experience: number | null;
+  google_business_url: string | null;
+  google_rating: number | null;
+  google_review_count: number | null;
   published: boolean;
   created_at: string;
 };
@@ -68,6 +71,16 @@ function numberValue(formData: FormData, key: string) {
   if (!value) return null;
   const number = Number(value);
   return Number.isFinite(number) && number >= 0 ? number : null;
+}
+
+function googleRatingValue(formData: FormData) {
+  const value = numberValue(formData, "google_rating");
+  return value !== null && value >= 1 && value <= 5 ? Math.round(value * 10) / 10 : null;
+}
+
+function reviewCountValue(formData: FormData) {
+  const value = numberValue(formData, "google_review_count");
+  return value !== null ? Math.floor(value) : null;
 }
 
 function listValue(formData: FormData, key: string) {
@@ -103,6 +116,10 @@ function studioPayload(formData: FormData) {
     availability_status: textValue(formData, "availability_status"),
     cooperation_terms: textValue(formData, "cooperation_terms"),
     years_experience: numberValue(formData, "years_experience"),
+    google_business_url: textValue(formData, "google_business_url"),
+    google_rating: googleRatingValue(formData),
+    google_review_count: reviewCountValue(formData),
+    google_rating_updated_at: new Date().toISOString(),
     published: formData.get("published") === "on",
     updated_at: new Date().toISOString(),
   };
@@ -255,7 +272,7 @@ export default async function StudioTeamPage({
   const { data: studioData } = studioIds.length
     ? await supabase
         .from("studios")
-        .select("id, owner_id, name, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, published, created_at")
+        .select("id, owner_id, name, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count, published, created_at")
         .in("id", studioIds)
         .order("created_at", { ascending: true })
     : { data: [] };
@@ -469,6 +486,14 @@ export default async function StudioTeamPage({
                         <div className="mt-3 flex flex-wrap gap-2">{workModes.map((mode) => <label key={mode} className="flex items-center gap-2 rounded-xl border border-line bg-card px-3 py-2 text-sm font-semibold"><input type="checkbox" name="work_modes" value={mode} defaultChecked={studio.work_modes?.includes(mode)} className="h-4 w-4 accent-primary" />{mode}</label>)}</div>
                       </fieldset>
                       <label className="text-sm font-semibold">Cooperation terms<textarea name="cooperation_terms" rows={4} defaultValue={studio.cooperation_terms ?? ""} className={fieldClass} /></label>
+                      <div className="rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-4">
+                        <div className="font-bold">Google Business rating</div>
+                        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                          <label className="text-sm font-semibold sm:col-span-2">Google profile URL<input name="google_business_url" type="url" defaultValue={studio.google_business_url ?? ""} placeholder="https://g.page/..." className={fieldClass} /></label>
+                          <label className="text-sm font-semibold">Rating<input name="google_rating" type="number" min="1" max="5" step="0.1" defaultValue={studio.google_rating ?? ""} className={fieldClass} /></label>
+                          <label className="text-sm font-semibold">Review count<input name="google_review_count" type="number" min="0" step="1" defaultValue={studio.google_review_count ?? ""} className={fieldClass} /></label>
+                        </div>
+                      </div>
                       <label className="flex items-center gap-3 text-sm font-semibold">
                         <input name="published" type="checkbox" defaultChecked={studio.published} className="h-5 w-5 accent-primary" />
                         Publish studio profile
@@ -521,6 +546,14 @@ export default async function StudioTeamPage({
             <label className="text-sm font-semibold md:col-span-2">Minimum project budget, PLN<input name="minimum_project_budget" inputMode="numeric" className={fieldClass} /></label>
             <fieldset className="md:col-span-2"><legend className="text-sm font-semibold">Work formats</legend><div className="mt-3 flex flex-wrap gap-2">{workModes.map((mode) => <label key={mode} className="flex items-center gap-2 rounded-xl border border-line bg-background px-3 py-2 text-sm font-semibold"><input type="checkbox" name="work_modes" value={mode} className="h-4 w-4 accent-primary" />{mode}</label>)}</div></fieldset>
             <label className="text-sm font-semibold md:col-span-2">Cooperation terms<textarea name="cooperation_terms" rows={4} className={fieldClass} /></label>
+            <div className="rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-4 md:col-span-2">
+              <div className="font-bold">Google Business rating</div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <label className="text-sm font-semibold sm:col-span-2">Google profile URL<input name="google_business_url" type="url" placeholder="https://g.page/..." className={fieldClass} /></label>
+                <label className="text-sm font-semibold">Rating<input name="google_rating" type="number" min="1" max="5" step="0.1" className={fieldClass} /></label>
+                <label className="text-sm font-semibold">Review count<input name="google_review_count" type="number" min="0" step="1" className={fieldClass} /></label>
+              </div>
+            </div>
             <label className="flex items-center gap-3 text-sm font-semibold md:col-span-2">
               <input name="published" type="checkbox" defaultChecked className="h-5 w-5 accent-primary" />
               Publish immediately
