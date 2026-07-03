@@ -26,7 +26,31 @@ RESEND_API_KEY=
 INQUIRY_EMAIL_FROM="ArchiCompass <briefs@your-domain.com>"
 INQUIRY_EMAIL_REPLY_TO=
 NEXT_PUBLIC_SITE_URL=
+GOOGLE_SITE_VERIFICATION=
 ```
+
+`NEXT_PUBLIC_SITE_URL` must contain the canonical production origin without a
+trailing slash. When a custom domain is connected, change this value before the
+first indexed release so canonical links, structured data, robots.txt, and the
+sitemap all move together.
+
+`GOOGLE_SITE_VERIFICATION` is the Search Console HTML verification token only
+(not the whole meta tag). It can be added after the production domain is ready.
+
+## Search indexing
+
+- `/sitemap.xml` is generated from public designers, studios, projects, articles,
+  and location pages that have at least one local professional.
+- `/robots.txt` allows public discovery and blocks authenticated workspaces,
+  account setup, admin pages, APIs, and conversations.
+- Public designer profiles use the professional's exact name in the page title,
+  canonical URL metadata, social preview, breadcrumbs, and structured data.
+- Imported Google ratings are visible on profile pages but are intentionally not
+  marked up as ArchiCompass review snippets. Google does not allow ratings copied
+  from another website to be presented as first-party review structured data.
+- After connecting the final domain, verify it in Google Search Console and submit
+  `https://YOUR-DOMAIN/sitemap.xml`. Monitor Pages, Core Web Vitals, Enhancements,
+  and Manual Actions before expanding city or language directories.
 
 When `RESEND_API_KEY` and `INQUIRY_EMAIL_FROM` are missing, requests are still saved
 in `/account/inquiries`; the email notification is marked as `not_configured`.

@@ -1,8 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import FavoriteButton from "@/components/FavoriteButton";
+import JsonLd from "@/components/JsonLd";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 
 export const revalidate = 0;
+
+export const metadata: Metadata = pageMetadata({
+  title: "Interior Design Inspiration and Practical Guides",
+  description:
+    "Explore interior design ideas, room guides, materials, sustainable architecture, and practical advice. Save inspiration and turn it into an actionable project brief.",
+  path: "/inspiration",
+});
 
 type Article = {
   id: string;
@@ -67,6 +77,30 @@ export default async function InspirationPage({
 
   return (
     <main>
+      <JsonLd
+        data={[
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Inspiration Hub", path: "/inspiration" },
+          ]),
+          {
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: "ArchiCompass Inspiration Hub",
+            url: absoluteUrl("/inspiration"),
+            mainEntity: {
+              "@type": "ItemList",
+              numberOfItems: allArticles.length,
+              itemListElement: allArticles.map((article, index) => ({
+                "@type": "ListItem",
+                position: index + 1,
+                name: article.title,
+                url: absoluteUrl(`/inspiration/${article.slug}`),
+              })),
+            },
+          },
+        ]}
+      />
       <section className="px-4 py-16 text-center sm:px-6">
         <h1 className="text-5xl font-bold tracking-tight">
           Inspiration <span className="text-primary">Hub</span>
@@ -123,10 +157,21 @@ export default async function InspirationPage({
               <article key={article.id} className="overflow-hidden rounded-lg border border-line bg-card shadow-sm">
                 <Link
                   href={`/inspiration/${article.slug}`}
-                  className="block h-60 bg-cover bg-center"
-                  style={{ backgroundImage: article.image_url ? `url(${article.image_url})` : undefined }}
+                  className="block h-60 overflow-hidden bg-primary-soft"
                   aria-label={`Open ${article.title}`}
-                />
+                >
+                  {article.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={article.image_url}
+                      alt={article.title}
+                      width="1000"
+                      height="700"
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : null}
+                </Link>
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-3">
                     <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">

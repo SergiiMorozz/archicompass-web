@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import StudioNav from "@/components/StudioNav";
@@ -10,6 +11,10 @@ import {
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
+export const metadata: Metadata = {
+  title: "Designer Studio",
+  robots: { index: false, follow: false, nocache: true },
+};
 
 export default async function StudioLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createSupabaseServerClient();

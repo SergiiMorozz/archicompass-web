@@ -1,7 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import FavoriteButton from "@/components/FavoriteButton";
+import JsonLd from "@/components/JsonLd";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createPublicSupabaseClient } from "@/lib/supabase/public";
+import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 
 export const revalidate = 0;
 
@@ -15,7 +19,33 @@ type Article = {
   image_url: string | null;
   author_name: string | null;
   published_at: string | null;
+  updated_at: string;
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = createPublicSupabaseClient();
+  const { data: article } = await supabase
+    .from("inspiration_articles")
+    .select("title, excerpt, image_url")
+    .eq("slug", slug)
+    .eq("status", "published")
+    .maybeSingle();
+  if (!article) {
+    return pageMetadata({ title: "Article not found", description: "This inspiration article is not available.", path: `/inspiration/${slug}`, noIndex: true });
+  }
+  return pageMetadata({
+    title: article.title,
+    description: article.excerpt,
+    path: `/inspiration/${slug}`,
+    image: article.image_url,
+    type: "article",
+  });
+}
 
 function formatDate(value: string | null) {
   if (!value) return "";
@@ -31,7 +61,7 @@ export default async function InspirationArticlePage({ params }: { params: Promi
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("inspiration_articles")
-    .select("id, slug, title, excerpt, body, category, image_url, author_name, published_at")
+    .select("id, slug, title, excerpt, body, category, image_url, author_name, published_at, updated_at")
     .eq("slug", slug)
     .eq("status", "published")
     .maybeSingle();
@@ -51,6 +81,32 @@ export default async function InspirationArticlePage({ params }: { params: Promi
 
   return (
     <main>
+      <JsonLd
+        data={[
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Inspiration Hub", path: "/inspiration" },
+            { name: article.title, path: `/inspiration/${article.slug}` },
+          ]),
+          {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "@id": absoluteUrl(`/inspiration/${article.slug}#article`),
+            headline: article.title,
+            description: article.excerpt,
+            image: article.image_url || undefined,
+            datePublished: article.published_at || undefined,
+            dateModified: article.updated_at,
+            inLanguage: "en",
+            mainEntityOfPage: absoluteUrl(`/inspiration/${article.slug}`),
+            author: {
+              "@type": "Organization",
+              name: article.author_name || "ArchiCompass Editorial",
+            },
+            publisher: { "@id": absoluteUrl("/#organization") },
+          },
+        ]}
+      />
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-4xl">
           <Link href="/inspiration" className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted">
@@ -70,7 +126,15 @@ export default async function InspirationArticlePage({ params }: { params: Promi
       </section>
 
       {article.image_url ? (
-        <div className="mx-auto mt-8 aspect-[16/8] max-w-6xl bg-cover bg-center" style={{ backgroundImage: `url(${article.image_url})` }} />
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={article.image_url}
+          alt={article.title}
+          width="1600"
+          height="800"
+          fetchPriority="high"
+          className="mx-auto mt-8 aspect-[16/8] w-full max-w-6xl object-cover"
+        />
       ) : null}
 
       <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6">

@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Privacy Policy",
+  description: "How ArchiCompass processes account, profile, project, message, photo, and AI analysis data.",
+  path: "/privacy",
+});
 
 const sections = [
   {

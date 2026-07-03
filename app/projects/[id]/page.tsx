@@ -1,13 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import FavoriteButton from "@/components/FavoriteButton";
 import ProjectGallery from "@/components/ProjectGallery";
+import JsonLd from "@/components/JsonLd";
 import { getAccountRole } from "@/lib/studios";
 import {
   applyDemoProfilePresentation,
   getDemoProfilePresentation,
   getDemoProjectPresentation,
 } from "@/lib/public-demo-profiles";
+import { createPublicSupabaseClient } from "@/lib/supabase/public";
+import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 
 export const revalidate = 0;
 
@@ -48,6 +53,41 @@ const fallbackProjectImages = [
 
 function isUuid(v: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  if (!isUuid(id)) {
+    return pageMetadata({ title: "Project not found", description: "This interior design project is not available.", path: `/projects/${id}`, noIndex: true });
+  }
+  const supabase = createPublicSupabaseClient();
+  const { data: project } = await supabase
+    .from("projects")
+    .select("title, description, category, image_url, image_urls, profile_id")
+    .eq("id", id)
+    .maybeSingle();
+  if (!project) {
+    return pageMetadata({ title: "Project not found", description: "This interior design project is not available.", path: `/projects/${id}`, noIndex: true });
+  }
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, location")
+    .eq("id", project.profile_id)
+    .maybeSingle();
+  const title = project.title || "Interior design project";
+  const byline = profile?.full_name ? ` by ${profile.full_name}` : "";
+  const location = profile?.location ? ` in ${profile.location}` : "";
+  return pageMetadata({
+    title: `${title}${byline}${location}`,
+    description: project.description || `Explore this ${project.category || "interior design"} project, gallery, and designer profile on ArchiCompass.`,
+    path: `/projects/${id}`,
+    image: project.image_url || project.image_urls?.[0] || null,
+    type: "article",
+  });
 }
 
 function publicImageUrl(supabase: SupabaseServerClient, imagePath: string | null) {
@@ -105,31 +145,6 @@ function websiteHref(value: string | null | undefined) {
     : `https://${value}`;
 }
 
-function EmptyProjectState({
-  title,
-  message,
-}: {
-  title: string;
-  message: string;
-}) {
-  return (
-    <main className="min-h-screen bg-background">
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <div className="rounded-2xl border border-line bg-card p-8 shadow-sm">
-          <h1 className="text-3xl font-bold">{title}</h1>
-          <p className="mt-3 text-muted">{message}</p>
-          <Link
-            className="mt-6 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"
-            href="/designers"
-          >
-            Browse designers
-          </Link>
-        </div>
-      </section>
-    </main>
-  );
-}
-
 export default async function ProjectDetailPage({
   params,
 }: {
@@ -138,12 +153,7 @@ export default async function ProjectDetailPage({
   const { id } = await params;
 
   if (!id || !isUuid(id)) {
-    return (
-      <EmptyProjectState
-        title="Invalid project link"
-        message="This project link has an invalid format."
-      />
-    );
+    notFound();
   }
 
   const supabase = await createSupabaseServerClient();
@@ -162,12 +172,7 @@ export default async function ProjectDetailPage({
     .single();
 
   if (projectError || !projectData) {
-    return (
-      <EmptyProjectState
-        title="Project not found"
-        message={projectError?.message ?? "No public project data was found for this link."}
-      />
-    );
+    notFound();
   }
 
   let project = hydrateProjectImages(supabase, projectData as Project);
@@ -202,6 +207,32 @@ export default async function ProjectDetailPage({
 
   return (
     <main className="bg-background">
+      <JsonLd
+        data={[
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Find designers", path: "/designers" },
+            { name: designerName, path: `/designers/${project.profile_id}` },
+            { name: title, path: `/projects/${project.id}` },
+          ]),
+          {
+            "@context": "https://schema.org",
+            "@type": "CreativeWork",
+            "@id": absoluteUrl(`/projects/${project.id}#project`),
+            name: title,
+            url: absoluteUrl(`/projects/${project.id}`),
+            description: project.description || undefined,
+            image: gallery,
+            genre: project.category || "Interior design",
+            dateCreated: project.created_at,
+            creator: {
+              "@type": "Person",
+              name: designerName,
+              url: absoluteUrl(`/designers/${project.profile_id}`),
+            },
+          },
+        ]}
+      />
       <section className="border-b border-line bg-card px-4 py-8 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-wrap gap-3">

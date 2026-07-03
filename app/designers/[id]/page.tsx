@@ -1,12 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import FavoriteButton from "@/components/FavoriteButton";
 import ProjectGallery from "@/components/ProjectGallery";
 import ProfileViewTracker from "@/components/ProfileViewTracker";
 import GoogleRating from "@/components/GoogleRating";
+import JsonLd from "@/components/JsonLd";
 import { countLabel } from "@/lib/count-label";
 import { getAccountRole } from "@/lib/studios";
 import { pricingLabel } from "@/lib/profile-pricing";
+import { createPublicSupabaseClient } from "@/lib/supabase/public";
+import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import {
   applyDemoProfilePresentation,
   getDemoProfilePresentation,
@@ -86,6 +91,46 @@ const inactiveFilterClass =
 
 function isUuid(v: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  if (!isUuid(id)) {
+    return pageMetadata({ title: "Designer not found", description: "This designer profile is not available.", path: `/designers/${id}`, noIndex: true });
+  }
+  const supabase = createPublicSupabaseClient();
+  const [{ data: profile }, { data: projects }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("full_name, bio, location, profession_type")
+      .eq("id", id)
+      .eq("user_type", "professional")
+      .maybeSingle(),
+    supabase
+      .from("projects")
+      .select("image_url, image_urls")
+      .eq("profile_id", id)
+      .order("created_at", { ascending: false })
+      .limit(1),
+  ]);
+  if (!profile) {
+    return pageMetadata({ title: "Designer not found", description: "This designer profile is not available.", path: `/designers/${id}`, noIndex: true });
+  }
+  const name = profile.full_name || "ArchiCompass professional";
+  const profession = profile.profession_type || "Interior designer";
+  const location = profile.location ? ` in ${profile.location}` : "";
+  const image = projects?.[0]?.image_url || projects?.[0]?.image_urls?.[0] || null;
+  return pageMetadata({
+    title: `${name} – ${profession}${location}`,
+    description: profile.bio || `View ${name}'s interior design profile, portfolio, specialties, services, availability, and project fit on ArchiCompass.`,
+    path: `/designers/${id}`,
+    image,
+    type: "profile",
+  });
 }
 
 function profileTitle(profile: Profile) {
@@ -195,31 +240,6 @@ function serviceCards(profile: Profile) {
   ];
 }
 
-function EmptyProfileState({
-  title,
-  message,
-}: {
-  title: string;
-  message: string;
-}) {
-  return (
-    <main className="min-h-screen bg-background">
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <div className="rounded-2xl border border-line bg-card p-8 shadow-sm">
-          <h1 className="text-3xl font-bold">{title}</h1>
-          <p className="mt-3 text-muted">{message}</p>
-          <Link
-            className="mt-6 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"
-            href="/designers"
-          >
-            Back to Designers
-          </Link>
-        </div>
-      </section>
-    </main>
-  );
-}
-
 export default async function DesignerProfilePage({
   params,
   searchParams,
@@ -232,12 +252,7 @@ export default async function DesignerProfilePage({
   const selectedBriefId = typeof sp.brief === "string" && isUuid(sp.brief) ? sp.brief : "";
 
   if (!id || !isUuid(id)) {
-    return (
-      <EmptyProfileState
-        title="Invalid profile"
-        message="This designer profile link has an invalid format."
-      />
-    );
+    notFound();
   }
 
   const supabase = await createSupabaseServerClient();
@@ -252,12 +267,7 @@ export default async function DesignerProfilePage({
     target_user_id: id,
   });
   if (!isDesignerAccount) {
-    return (
-      <EmptyProfileState
-        title="Profile not found"
-        message="This account does not have an active public designer profile."
-      />
-    );
+    notFound();
   }
 
   const { data: profileData, error: pErr } = await supabase
@@ -269,12 +279,7 @@ export default async function DesignerProfilePage({
     .single();
 
   if (pErr || !profileData) {
-    return (
-      <EmptyProfileState
-        title="Profile not found"
-        message={pErr?.message ?? "No public profile data was found for this designer."}
-      />
-    );
+    notFound();
   }
 
   const profile = applyDemoProfilePresentation(profileData as Profile);
@@ -367,6 +372,35 @@ export default async function DesignerProfilePage({
 
   return (
     <main className="bg-background pb-28 lg:pb-0">
+      <JsonLd
+        data={[
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Find designers", path: "/designers" },
+            { name: title, path: `/designers/${profile.id}` },
+          ]),
+          {
+            "@context": "https://schema.org",
+            "@type": "Person",
+            "@id": absoluteUrl(`/designers/${profile.id}#professional`),
+            name: title,
+            url: absoluteUrl(`/designers/${profile.id}`),
+            image: profileHero,
+            description: profile.bio || undefined,
+            jobTitle: type,
+            workLocation: profile.location
+              ? { "@type": "Place", name: profile.location }
+              : undefined,
+            knowsAbout: specialties,
+            sameAs: [webHref, profile.google_business_url].filter(Boolean),
+            memberOf: studios.map((studio) => ({
+              "@type": "Organization",
+              name: studio.name,
+              url: absoluteUrl(`/studios/${studio.id}`),
+            })),
+          },
+        ]}
+      />
       <ProfileViewTracker disabled={isOwner} profileId={profile.id} />
       <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
         <Link

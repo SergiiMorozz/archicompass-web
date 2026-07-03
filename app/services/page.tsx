@@ -1,4 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Home Improvement Services",
+  description: "The ArchiCompass implementation services directory is being prepared.",
+  path: "/services",
+  noIndex: true,
+});
 
 const heroImage =
   "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1800&q=80";

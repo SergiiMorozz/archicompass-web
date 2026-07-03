@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import ClientNav from "@/components/ClientNav";
 import { currentRequestPath } from "@/lib/request-path";
@@ -5,6 +6,10 @@ import { getExplicitAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
+export const metadata: Metadata = {
+  title: "Client Workspace",
+  robots: { index: false, follow: false, nocache: true },
+};
 
 export default async function ClientLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createSupabaseServerClient();

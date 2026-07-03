@@ -1,6 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import FavoriteButton from "@/components/FavoriteButton";
 import GoogleRating from "@/components/GoogleRating";
+import JsonLd from "@/components/JsonLd";
 import { countLabel } from "@/lib/count-label";
 import {
   type MatchBrief,
@@ -11,12 +13,21 @@ import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requiredServiceCapabilities } from "@/lib/service-capabilities";
 import { pricingLabel } from "@/lib/profile-pricing";
+import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import { locationPath, seoLocations } from "@/lib/seo-locations";
 import {
   applyDemoProfilePresentation,
   getDemoProfilePresentation,
 } from "@/lib/public-demo-profiles";
 
 export const revalidate = 0;
+
+export const metadata: Metadata = pageMetadata({
+  title: "Find Interior Designers and Design Studios",
+  description:
+    "Search interior designers and design studios by city, style, services, budget, availability, portfolio, and Google rating. Compare profiles and send one structured brief.",
+  path: "/designers",
+});
 
 type Profile = {
   id: string;
@@ -872,13 +883,46 @@ export default async function DesignersPage({
 
   return (
     <main>
+      <JsonLd
+        data={[
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Find designers", path: "/designers" },
+          ]),
+          {
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: "Interior designers and design studios",
+            description: "Public interior designer and design studio profiles on ArchiCompass.",
+            url: absoluteUrl("/designers"),
+            mainEntity: {
+              "@type": "ItemList",
+              numberOfItems: profiles.length + studios.length,
+              itemListElement: [
+                ...studios.map((studio, index) => ({
+                  "@type": "ListItem",
+                  position: index + 1,
+                  name: studio.name,
+                  url: absoluteUrl(`/studios/${studio.id}`),
+                })),
+                ...profiles.map((profile, index) => ({
+                  "@type": "ListItem",
+                  position: studios.length + index + 1,
+                  name: profileTitle(profile),
+                  url: absoluteUrl(`/designers/${profile.id}`),
+                })),
+              ],
+            },
+          },
+        ]}
+      />
       <section className="border-b border-primary/15 bg-primary-soft px-4 py-14 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex rounded-full bg-accent px-3 py-1 text-xs font-bold text-white">
               Designer discovery
             </span>
-            <h1 className="mt-3 text-5xl font-bold tracking-tight">Find Designer</h1>
+            <h1 className="mt-3 text-5xl font-bold tracking-tight">Find Interior Designers and Studios</h1>
             <p className="mt-4 text-lg leading-8 text-muted">
               Browse beta designer and architect profiles by style, location, and
               project fit.
@@ -1182,6 +1226,23 @@ export default async function DesignersPage({
               ))}
             </div>
           )}
+        </div>
+      </section>
+      <section className="border-t border-line bg-card px-4 py-12 sm:px-6">
+        <div className="mx-auto max-w-7xl">
+          <p className="text-sm font-bold uppercase text-accent">Search by location</p>
+          <h2 className="mt-2 text-3xl font-bold">Find an interior designer near your project</h2>
+          <p className="mt-3 max-w-3xl leading-7 text-muted">
+            Explore city directories, then compare each professional by portfolio evidence,
+            services, project fit, availability, and connected Google rating.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            {seoLocations.map((item) => (
+              <Link key={`${item.countrySlug}-${item.citySlug}`} href={locationPath(item)} className="rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold hover:border-primary hover:text-primary">
+                {item.city}, {item.country}
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
     </main>

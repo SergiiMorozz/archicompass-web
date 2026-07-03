@@ -1,4 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Join ArchiCompass as a Client or Designer",
+  description:
+    "Create an ArchiCompass account to plan an interior project, save designers, or publish a professional profile and portfolio for new clients.",
+  path: "/get-started",
+});
 
 export default function Page() {
   return (

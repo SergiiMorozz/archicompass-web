@@ -1,5 +1,5 @@
-import ProjectCompassView from "@/components/ProjectCompassView";
+import { permanentRedirect } from "next/navigation";
 
 export default function Page() {
-  return <ProjectCompassView />;
+  permanentRedirect("/project-compass");
 }

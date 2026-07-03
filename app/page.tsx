@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Find Interior Designers with AI",
+  description:
+    "Find interior designers and design studios by location, style, services, and portfolio. Turn inspiration photos into a clear AI-assisted project brief.",
+  path: "/",
+});
 
 export const revalidate = 0;
 
@@ -71,14 +80,17 @@ export default async function Home() {
 
   return (
     <main>
-      <section
-        className="relative min-h-[700px] overflow-hidden bg-foreground text-white"
-        style={{
-          backgroundImage: `url(${heroImage})`,
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-        }}
-      >
+      <section className="relative min-h-[700px] overflow-hidden bg-foreground text-white">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={heroImage}
+          alt="Contemporary living room by an interior design professional"
+          width="1800"
+          height="1200"
+          loading="eager"
+          fetchPriority="high"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(27,17,38,0.96)_0%,rgba(52,24,74,0.82)_48%,rgba(27,17,38,0.30)_100%)]" />
         <div className="relative mx-auto flex min-h-[700px] max-w-7xl items-center px-4 py-16 sm:px-6">
           <div className="max-w-3xl">
@@ -220,7 +232,15 @@ export default async function Home() {
             {featuredProjects.map((project) => (
               <article key={project.id} className="overflow-hidden rounded-lg border border-line bg-card shadow-[0_14px_40px_rgba(54,31,73,0.08)]">
                 <Link href={`/projects/${project.id}`} className="block">
-                  <div className="aspect-[4/3] bg-cover bg-center" style={{ backgroundImage: `url(${project.image})` }} />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={project.image}
+                    alt={`${project.title || "Interior design project"}${project.category ? ` - ${project.category}` : ""}`}
+                    width="1000"
+                    height="750"
+                    loading="lazy"
+                    className="aspect-[4/3] w-full object-cover"
+                  />
                   <div className="p-5">
                     <div className="text-xs font-bold uppercase text-accent">{project.category || "Interior project"}</div>
                     <h3 className="mt-2 text-xl font-bold">{project.title || "Untitled project"}</h3>

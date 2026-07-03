@@ -1,12 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import FavoriteButton from "@/components/FavoriteButton";
 import GoogleRating from "@/components/GoogleRating";
+import JsonLd from "@/components/JsonLd";
 import ProjectGallery from "@/components/ProjectGallery";
 import { countLabel } from "@/lib/count-label";
 import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { pricingLabel } from "@/lib/profile-pricing";
+import { createPublicSupabaseClient } from "@/lib/supabase/public";
+import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 
 export const revalidate = 0;
 
@@ -69,6 +73,33 @@ const fallbackImage =
 
 function isUuid(value: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  if (!isUuid(id)) {
+    return pageMetadata({ title: "Studio not found", description: "This design studio profile is not available.", path: `/studios/${id}`, noIndex: true });
+  }
+  const supabase = createPublicSupabaseClient();
+  const { data: studio } = await supabase
+    .from("studios")
+    .select("name, bio, location")
+    .eq("id", id)
+    .eq("published", true)
+    .maybeSingle();
+  if (!studio) {
+    return pageMetadata({ title: "Studio not found", description: "This design studio profile is not available.", path: `/studios/${id}`, noIndex: true });
+  }
+  return pageMetadata({
+    title: `${studio.name} – Interior Design Studio${studio.location ? ` in ${studio.location}` : ""}`,
+    description: studio.bio || `View ${studio.name}'s team, interior design portfolio, specialties, services, and availability on ArchiCompass.`,
+    path: `/studios/${id}`,
+    type: "profile",
+  });
 }
 
 function websiteHref(value: string | null) {
@@ -178,6 +209,37 @@ export default async function PublicStudioPage({
 
   return (
     <main className="bg-background pb-24 lg:pb-0">
+      <JsonLd
+        data={[
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Find designers", path: "/designers" },
+            { name: studio.name, path: `/studios/${studio.id}` },
+          ]),
+          {
+            "@context": "https://schema.org",
+            "@type": ["Organization", "ProfessionalService"],
+            "@id": absoluteUrl(`/studios/${studio.id}#studio`),
+            name: studio.name,
+            url: absoluteUrl(`/studios/${studio.id}`),
+            image: hero,
+            description: studio.bio || undefined,
+            areaServed: studio.location
+              ? { "@type": "Place", name: studio.location }
+              : undefined,
+            knowsAbout: studio.specialties || [],
+            sameAs: [website, studio.google_business_url].filter(Boolean),
+            employee: visibleMembers.map((member) => {
+              const memberProfile = profilesById.get(member.user_id);
+              return {
+                "@type": "Person",
+                name: memberProfile?.full_name || "Design professional",
+                url: absoluteUrl(`/designers/${member.user_id}`),
+              };
+            }),
+          },
+        ]}
+      />
       <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
         <Link href="/designers" className="inline-flex rounded-full border border-line bg-card px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary">
           Back to Find Designer
