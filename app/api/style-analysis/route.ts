@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { createHash } from "node:crypto";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
@@ -8,6 +10,8 @@ const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
 const styleProvider = process.env.STYLE_ANALYSIS_PROVIDER || "openai";
 const openAiStyleModel = process.env.OPENAI_STYLE_MODEL || "gpt-4.1-mini";
 const geminiStyleModel = process.env.GEMINI_STYLE_MODEL || "gemini-3.1-flash-lite";
+const anonymousDailyLimit = positiveLimit(process.env.STYLE_ANALYSIS_DAILY_ANON_LIMIT, 5);
+const accountDailyLimit = positiveLimit(process.env.STYLE_ANALYSIS_DAILY_ACCOUNT_LIMIT, 15);
 
 const allowedVisualCues = [
   "Natural wood",
@@ -56,6 +60,41 @@ type AnalysisInput = {
   images: ImageInput[];
   projectType: string;
 };
+
+type QuotaResult = {
+  allowed: boolean;
+  remaining: number;
+  reset_at: string;
+};
+
+function positiveLimit(value: string | undefined, fallback: number) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 && parsed <= 100 ? parsed : fallback;
+}
+
+function requestIp(request: Request) {
+  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  return forwarded || request.headers.get("x-real-ip") || "unknown";
+}
+
+async function consumeAnalysisQuota(request: Request) {
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+  const identity = user
+    ? `account:${user.id}`
+    : `guest:${requestIp(request)}:${request.headers.get("user-agent")?.slice(0, 160) || "unknown"}`;
+  const actorHash = createHash("sha256").update(identity).digest("hex");
+  const dailyLimit = user ? accountDailyLimit : anonymousDailyLimit;
+  const { data: quotaData, error } = await supabase.rpc("consume_style_analysis_quota", {
+    target_actor_hash: actorHash,
+    daily_limit: dailyLimit,
+  });
+
+  if (error) return { error, quota: null };
+  const quota = Array.isArray(quotaData) ? (quotaData[0] as QuotaResult | undefined) : null;
+  return { error: null, quota };
+}
 
 const analysisSchema = {
   type: "object",
@@ -484,12 +523,42 @@ export async function POST(request: Request) {
     }
   }
 
+  const { error: quotaError, quota } = await consumeAnalysisQuota(request);
+  if (quotaError || !quota) {
+    console.error("Style analysis quota check failed", quotaError);
+    return NextResponse.json(
+      { error: "AI analysis is temporarily unavailable. Please try again shortly." },
+      { status: 503 }
+    );
+  }
+  if (!quota.allowed) {
+    return NextResponse.json(
+      {
+        code: "AI_DAILY_LIMIT_REACHED",
+        error: "The daily AI photo-analysis limit has been reached. Try again tomorrow.",
+        resetAt: quota.reset_at,
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(
+            Math.max(60, Math.ceil((new Date(quota.reset_at).getTime() - Date.now()) / 1000))
+          ),
+          "X-RateLimit-Remaining": "0",
+        },
+      }
+    );
+  }
+
   const projectType = textValue(formData, "project_type") ?? "Interior project";
   const currentStyle = textValue(formData, "style_direction") ?? "Not sure yet";
   const currentCues = textValue(formData, "visual_cues") ?? "None selected yet";
   const images = await Promise.all(photos.map(fileToImageInput));
   const input = { currentCues, currentStyle, images, projectType };
 
-  if (styleProvider === "gemini") return analyzeWithGemini(input);
-  return analyzeWithOpenAi(input);
+  const response = styleProvider === "gemini"
+    ? await analyzeWithGemini(input)
+    : await analyzeWithOpenAi(input);
+  response.headers.set("X-RateLimit-Remaining", String(quota.remaining));
+  return response;
 }

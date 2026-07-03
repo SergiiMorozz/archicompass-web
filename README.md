@@ -55,11 +55,19 @@ OPENAI_STYLE_MODEL=gpt-4.1-mini
 STYLE_ANALYSIS_PROVIDER=gemini
 GEMINI_API_KEY=
 GEMINI_STYLE_MODEL=gemini-3.1-flash-lite
+
+# Optional daily limits (defaults shown)
+STYLE_ANALYSIS_DAILY_ANON_LIMIT=5
+STYLE_ANALYSIS_DAILY_ACCOUNT_LIMIT=15
 ```
 
 When the selected provider key is missing, Project Compass still works as a manual
 brief builder, but photo style analysis shows a configuration message instead of an
 AI result.
+
+Run `supabase/style-analysis-rate-limit.sql` before deploying the public AI endpoint.
+The quota counts valid analysis attempts after image validation and does not require
+guests to create an account.
 
 ## Supabase Schema
 
