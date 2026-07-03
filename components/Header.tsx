@@ -139,6 +139,9 @@ export default function Header() {
         ...(account.isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
       ]
     : [];
+  const visibleNavItems = account?.isProfessional
+    ? navItems.filter((item) => item.href !== "/project-compass")
+    : navItems;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-line/80 bg-background/90 backdrop-blur-md">
@@ -146,7 +149,7 @@ export default function Header() {
         <Brand />
 
         <nav className="hidden items-center gap-1 xl:flex">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <NavLink key={item.href} href={item.href}>
               {item.label}
             </NavLink>
@@ -217,7 +220,7 @@ export default function Header() {
       {isOpen ? (
         <div className="border-t border-line bg-background px-4 py-4 xl:hidden">
           <nav className="mx-auto grid max-w-7xl gap-2">
-            {navItems.map((item) => (
+            {visibleNavItems.map((item) => (
               <NavLink key={item.href} href={item.href} onClick={() => setIsOpen(false)}>
                 {item.label}
               </NavLink>

@@ -1,5 +1,5 @@
-import ProjectCompass from "./ProjectCompass";
+import ProjectCompassGate from "@/components/ProjectCompassGate";
 
 export default function Page() {
-  return <ProjectCompass />;
+  return <ProjectCompassGate />;
 }
