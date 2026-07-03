@@ -1,18 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function FavoriteButton({
   compact = false,
   entityKey,
   entityType,
   initialSaved = false,
+  refreshOnChange = false,
 }: {
   compact?: boolean;
   entityKey: string;
   entityType: "designer" | "studio" | "project" | "article";
   initialSaved?: boolean;
+  refreshOnChange?: boolean;
 }) {
+  const router = useRouter();
   const [saved, setSaved] = useState(initialSaved);
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +47,7 @@ export default function FavoriteButton({
       }
 
       setSaved(payload.saved);
+      if (refreshOnChange) router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Favorite could not be updated.");
     } finally {

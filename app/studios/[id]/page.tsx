@@ -154,15 +154,17 @@ export default async function PublicStudioPage({
   const memberIdSet = new Set(memberIds);
   const isMember = Boolean(user && memberIdSet.has(user.id));
   const viewerRole = user ? await getAccountRole(supabase, user.id) : "client";
+  const favoriteKeys = [studio.id, ...projects.map((project) => project.id)];
   const { data: favoriteData } = user
     ? await supabase
         .from("favorites")
-        .select("id")
+        .select("entity_type, entity_key")
         .eq("user_id", user.id)
-        .eq("entity_type", "studio")
-        .eq("entity_key", studio.id)
-        .maybeSingle()
-    : { data: null };
+        .in("entity_key", favoriteKeys)
+    : { data: [] };
+  const savedFavorites = new Set(
+    (favoriteData ?? []).map((favorite) => `${favorite.entity_type}:${favorite.entity_key}`)
+  );
   const website = websiteHref(studio.website);
   const hero = projects[0]?.image_url || fallbackImage;
   const totalExperience = profiles.reduce(
@@ -203,7 +205,7 @@ export default async function PublicStudioPage({
               {isMember ? (
                 <Link href="/studio/team" className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white">Manage studio</Link>
               ) : (
-                <FavoriteButton entityType="studio" entityKey={studio.id} initialSaved={Boolean(favoriteData)} />
+                <FavoriteButton entityType="studio" entityKey={studio.id} initialSaved={savedFavorites.has(`studio:${studio.id}`)} />
               )}
             </div>
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -288,7 +290,7 @@ export default async function PublicStudioPage({
                       <div className="text-sm text-muted">By {designer?.full_name || "Studio designer"}</div>
                       <div className="mt-4 flex flex-wrap gap-2">
                         <Link href={`/projects/${project.id}`} className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">View project</Link>
-                        <FavoriteButton entityType="project" entityKey={project.id} />
+                        <FavoriteButton entityType="project" entityKey={project.id} initialSaved={savedFavorites.has(`project:${project.id}`)} />
                       </div>
                     </div>
                   </article>

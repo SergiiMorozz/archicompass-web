@@ -147,7 +147,7 @@ export default async function ClientFavoritesPage() {
                       <Link href={`/designers/${designer.id}`} className="text-xl font-bold hover:text-primary">{designer.full_name || "Design professional"}</Link>
                       <div className="mt-1 text-sm text-muted">{designer.profession_type || designer.user_type || "Professional"}{designer.location ? ` · ${designer.location}` : ""}</div>
                     </div>
-                    <FavoriteButton compact entityType="designer" entityKey={designer.id} initialSaved />
+                    <FavoriteButton compact entityType="designer" entityKey={designer.id} initialSaved refreshOnChange />
                   </div>
                   <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">{designer.bio || "Open the profile to review this professional's approach and work."}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -174,7 +174,7 @@ export default async function ClientFavoritesPage() {
                       <Link href={`/studios/${studio.id}`} className="text-xl font-bold hover:text-primary">{studio.name}</Link>
                       <div className="mt-1 text-sm text-muted">Design studio{studio.location ? ` · ${studio.location}` : ""}</div>
                     </div>
-                    <FavoriteButton compact entityType="studio" entityKey={studio.id} initialSaved />
+                    <FavoriteButton compact entityType="studio" entityKey={studio.id} initialSaved refreshOnChange />
                   </div>
                   <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">{studio.bio || "Open the studio to review its connected designers and combined portfolio."}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -205,7 +205,7 @@ export default async function ClientFavoritesPage() {
                           <Link href={`/projects/${project.id}`} className="text-xl font-bold hover:text-primary">{project.title || "Untitled project"}</Link>
                           <div className="mt-1 text-sm text-muted">{project.category || "Portfolio"} · {ownersById.get(project.profile_id) || "Design professional"}</div>
                         </div>
-                        <FavoriteButton compact entityType="project" entityKey={project.id} initialSaved />
+                        <FavoriteButton compact entityType="project" entityKey={project.id} initialSaved refreshOnChange />
                       </div>
                       <p className="mt-4 line-clamp-2 text-sm leading-6 text-muted">{project.description || "Open the project to review its gallery and designer."}</p>
                     </div>
@@ -235,7 +235,7 @@ export default async function ClientFavoritesPage() {
                         <span className="text-xs font-semibold text-primary">{article.category}</span>
                         <Link href={`/inspiration/${article.slug}`} className="mt-1 block text-xl font-bold hover:text-primary">{article.title}</Link>
                       </div>
-                      <FavoriteButton compact entityType="article" entityKey={article.id} initialSaved />
+                      <FavoriteButton compact entityType="article" entityKey={article.id} initialSaved refreshOnChange />
                     </div>
                     <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">{article.excerpt}</p>
                   </div>
