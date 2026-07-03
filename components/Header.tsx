@@ -11,7 +11,7 @@ const navItems = [
   { href: "/", label: "Home" },
   { href: "/project-compass", label: "Project Compass", featured: true },
   { href: "/designers", label: "Find Designer" },
-  { href: "/inspiration", label: "Inspiration" },
+  { href: "/inspiration", label: "Inspiration Hub" },
 ];
 
 function NavLink({

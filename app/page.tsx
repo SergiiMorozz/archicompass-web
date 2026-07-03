@@ -30,13 +30,21 @@ type FeaturedProject = {
   title: string | null;
 };
 
+type FeaturedArticle = {
+  category: string;
+  excerpt: string;
+  image_url: string | null;
+  slug: string;
+  title: string;
+};
+
 function metricValue(value: number) {
   return new Intl.NumberFormat("en-US").format(value);
 }
 
 async function homeData() {
   const supabase = await createSupabaseServerClient();
-  const [designers, studios, projects, profilesWithReviews, studiosWithReviews, featured] =
+  const [designers, studios, projects, profilesWithReviews, studiosWithReviews, featured, articles] =
     await Promise.all([
       supabase.from("profiles").select("id", { count: "exact", head: true }).eq("user_type", "professional"),
       supabase.from("studios").select("id", { count: "exact", head: true }).eq("published", true),
@@ -47,6 +55,13 @@ async function homeData() {
         .from("projects")
         .select("id, title, category, image_url, image_path, image_urls")
         .order("created_at", { ascending: false })
+        .limit(3),
+      supabase
+        .from("inspiration_articles")
+        .select("slug, title, excerpt, category, image_url")
+        .eq("status", "published")
+        .order("featured", { ascending: false })
+        .order("published_at", { ascending: false })
         .limit(3),
     ]);
 
@@ -72,11 +87,12 @@ async function homeData() {
       [metricValue(reviewCount), "Linked Google reviews"],
     ],
     featuredProjects,
+    featuredArticles: (articles.data ?? []) as FeaturedArticle[],
   };
 }
 
 export default async function Home() {
-  const { featuredProjects, metrics } = await homeData();
+  const { featuredArticles, featuredProjects, metrics } = await homeData();
 
   return (
     <main>
@@ -255,6 +271,59 @@ export default async function Home() {
             <p className="mt-2 text-muted">Every published project will immediately update the live counter above.</p>
           </div>
         )}
+      </section>
+
+      <section className="border-y border-line bg-card px-4 py-16 sm:px-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-sm font-bold uppercase text-accent">Inspiration Hub</p>
+              <h2 className="mt-2 text-4xl font-bold">Ideas that help you make better project decisions.</h2>
+              <p className="mt-4 text-lg leading-8 text-muted">
+                Explore practical guides to styles, materials, rooms, renovation planning,
+                and sustainable interiors. Save useful articles to your client workspace.
+              </p>
+            </div>
+            <Link href="/inspiration" className="font-bold text-primary hover:underline">
+              Explore Inspiration Hub &#8594;
+            </Link>
+          </div>
+
+          {featuredArticles.length ? (
+            <div className="mt-8 grid gap-5 md:grid-cols-3">
+              {featuredArticles.map((article) => (
+                <article key={article.slug} className="overflow-hidden rounded-lg border border-line bg-background shadow-sm">
+                  <Link href={`/inspiration/${article.slug}`} className="block">
+                    {article.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={article.image_url}
+                        alt={article.title}
+                        width="1000"
+                        height="700"
+                        loading="lazy"
+                        className="aspect-[4/3] w-full object-cover"
+                      />
+                    ) : (
+                      <div className="aspect-[4/3] bg-primary-soft" aria-hidden="true" />
+                    )}
+                    <div className="p-5">
+                      <div className="text-xs font-bold uppercase text-accent">{article.category}</div>
+                      <h3 className="mt-2 text-xl font-bold hover:text-primary">{article.title}</h3>
+                      <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted">{article.excerpt}</p>
+                      <div className="mt-5 text-sm font-bold text-primary">Read article &#8594;</div>
+                    </div>
+                  </Link>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-8 rounded-lg border border-dashed border-line bg-background p-7">
+              <h3 className="text-xl font-bold">The first inspiration guides are being prepared.</h3>
+              <Link href="/inspiration" className="mt-3 inline-flex font-bold text-primary hover:underline">Open the Hub</Link>
+            </div>
+          )}
+        </div>
       </section>
 
       <section className="bg-accent text-white">
