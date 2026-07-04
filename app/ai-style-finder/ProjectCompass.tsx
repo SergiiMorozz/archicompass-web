@@ -5,6 +5,7 @@ import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ShareableStyleResult from "@/components/ShareableStyleResult";
 import { countLabel } from "@/lib/count-label";
+import { copyText } from "@/lib/copy-text";
 
 type Option = {
   label: string;
@@ -116,6 +117,60 @@ const styles: Option[] = [
     specialty: "minimalist",
   },
   {
+    label: "Contemporary",
+    value: "Contemporary",
+    description: "Current forms, tailored details, and a balanced material palette.",
+    specialty: "contemporary",
+  },
+  {
+    label: "Mid-century modern",
+    value: "Mid-century modern",
+    description: "Clean lines, warm timber, vintage references, functional furniture.",
+    specialty: "mid-century",
+  },
+  {
+    label: "Art Deco",
+    value: "Art Deco",
+    description: "Geometry, rich materials, symmetry, and elegant statement details.",
+    specialty: "art deco",
+  },
+  {
+    label: "Mediterranean",
+    value: "Mediterranean",
+    description: "Sun-washed color, stone, plaster, timber, and relaxed texture.",
+    specialty: "mediterranean",
+  },
+  {
+    label: "Bohemian",
+    value: "Bohemian",
+    description: "Layered textiles, collected objects, color, and personal expression.",
+    specialty: "bohemian",
+  },
+  {
+    label: "Eclectic",
+    value: "Eclectic",
+    description: "A deliberate mix of eras, colors, art, and custom pieces.",
+    specialty: "eclectic",
+  },
+  {
+    label: "Rustic / organic",
+    value: "Rustic / organic",
+    description: "Natural stone, aged timber, handmade texture, and earthy warmth.",
+    specialty: "rustic",
+  },
+  {
+    label: "Traditional",
+    value: "Traditional",
+    description: "Classic proportions, detailed joinery, and familiar forms.",
+    specialty: "traditional",
+  },
+  {
+    label: "Luxury contemporary",
+    value: "Luxury contemporary",
+    description: "Bespoke joinery, premium stone, lighting, and polished detailing.",
+    specialty: "luxury",
+  },
+  {
     label: "Not sure yet",
     value: "Not sure yet",
     description: "I want the system to help me name it.",
@@ -147,24 +202,39 @@ const scopes: Option[] = [
 
 const budgets: Option[] = [
   {
-    label: "Under 10k PLN",
-    value: "Under 10k PLN",
-    description: "Advice, light concept, or one focused area.",
+    label: "Under 50k PLN",
+    value: "Under 50k PLN total project budget",
+    description: "One room, furnishing, or a focused light renovation.",
   },
   {
-    label: "10k-30k PLN",
-    value: "10k-30k PLN",
-    description: "Small project, concept, or selected rooms.",
+    label: "50k-100k PLN",
+    value: "50k-100k PLN total project budget",
+    description: "Several rooms or a compact apartment with controlled scope.",
   },
   {
-    label: "30k-80k PLN",
-    value: "30k-80k PLN",
-    description: "Serious renovation or full interior design scope.",
+    label: "100k-200k PLN",
+    value: "100k-200k PLN total project budget",
+    description: "A substantial apartment renovation or compact full interior.",
   },
   {
-    label: "80k+ PLN",
-    value: "80k+ PLN",
-    description: "Full home, premium scope, or implementation support.",
+    label: "200k-400k PLN",
+    value: "200k-400k PLN total project budget",
+    description: "A complete apartment or house interior with custom elements.",
+  },
+  {
+    label: "400k-800k PLN",
+    value: "400k-800k PLN total project budget",
+    description: "Larger home, premium materials, and extensive implementation.",
+  },
+  {
+    label: "800k+ PLN",
+    value: "800k+ PLN total project budget",
+    description: "Large-scale or high-end design and construction scope.",
+  },
+  {
+    label: "Not sure yet",
+    value: "Total project budget not decided",
+    description: "I need a designer to help establish a realistic total budget.",
   },
 ];
 
@@ -378,6 +448,54 @@ function OptionGrid({
   );
 }
 
+function MultiOptionGrid({
+  label,
+  options,
+  values,
+  onChange,
+}: {
+  label: string;
+  options: Option[];
+  values: string[];
+  onChange: (values: string[]) => void;
+}) {
+  return (
+    <section>
+      <h2 className="text-base font-bold">{label}</h2>
+      <p className="mt-1 text-sm leading-6 text-muted">Choose one or several directions. Mixed tastes are normal and useful for matching.</p>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        {options.map((option) => {
+          const selected = values.includes(option.value);
+          return (
+            <button
+              key={option.value}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => {
+                const withoutUnsure = values.filter((item) => item !== "Not sure yet");
+                if (option.value === "Not sure yet") {
+                  onChange(selected ? [] : [option.value]);
+                } else if (selected) {
+                  onChange(withoutUnsure.filter((item) => item !== option.value));
+                } else {
+                  onChange([...withoutUnsure, option.value].slice(0, 4));
+                }
+              }}
+              className={[
+                "rounded-2xl border p-4 text-left transition",
+                selected ? "border-primary bg-primary-soft" : "border-line bg-background hover:border-primary",
+              ].join(" ")}
+            >
+              <span className="block text-sm font-bold">{option.label}</span>
+              <span className="mt-1 block text-sm leading-6 text-muted">{option.description}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export default function ProjectCompass({ isDesigner = false }: { isDesigner?: boolean }) {
   const [projectType, setProjectType] = useState(projectTypes[0].value);
   const [goal, setGoal] = useState(goals[1].value);
@@ -406,7 +524,8 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const objectUrls = useRef<string[]>([]);
 
-  const selectedStyle = selectedOption(styles, style);
+  const selectedStyles = style.split(" | ").filter(Boolean);
+  const selectedStyle = selectedOption(styles, selectedStyles[0]);
   const selectedScope = selectedOption(scopes, scope);
   const selectedCueOptions = useMemo(
     () => visualCues.filter((cue) => selectedVisualCues.includes(cue.value)),
@@ -415,6 +534,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   const visualSearchSpecialty =
     styleAnalysis?.searchSpecialty ||
     selectedCueOptions.find((cue) => cue.specialty)?.specialty ||
+    styles.find((option) => selectedStyles.includes(option.value) && option.specialty)?.specialty ||
     selectedStyle.specialty;
   const visualCueLabel = selectedVisualCues.length
     ? selectedVisualCues.slice(0, 3).join(", ")
@@ -529,9 +649,13 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   }, [goal, scope]);
 
   async function copyBrief() {
-    await navigator.clipboard.writeText(briefText);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
+    try {
+      await copyText(briefText);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Brief could not be copied.");
+    }
   }
 
   function addReferencePhotos(event: ChangeEvent<HTMLInputElement>) {
@@ -795,7 +919,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   }, []);
 
   return (
-    <main className="bg-background">
+    <main className="bg-background pb-24 lg:pb-0">
       <section className="border-b border-primary/20 bg-[#2a1836] px-4 py-10 text-white sm:px-6">
         <div className="mx-auto grid max-w-7xl gap-7 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-end">
           <div>
@@ -904,17 +1028,10 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
             value={goal}
           />
 
-          <OptionGrid
-            label="5. Which direction feels closest?"
-            onChange={setStyle}
-            options={styles}
-            value={style}
-          />
-
           <section>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-base font-bold">6. Add reference photos</h2>
+                <h2 className="text-base font-bold">5. Add reference photos</h2>
                 <p className="mt-1 text-sm leading-6 text-muted">
                   Add 4-10 rooms, details, or moods you like. Previews stay in this
                   browser until you choose analysis or save the brief. Saving uploads
@@ -1127,6 +1244,13 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
             </div>
           </section>
 
+          <MultiOptionGrid
+            label="6. Which directions feel closest?"
+            onChange={(values) => setStyle(values.length ? values.join(" | ") : "Not sure yet")}
+            options={styles}
+            values={selectedStyles}
+          />
+
           <OptionGrid
             label="7. What level of help do you want?"
             onChange={setScope}
@@ -1135,7 +1259,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
           />
 
           <OptionGrid
-            label="8. What budget range should the designer respect?"
+            label="8. Total project budget (designer fee + materials + construction)"
             onChange={setBudget}
             options={budgets}
             value={budget}
@@ -1304,6 +1428,22 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
           </pre>
         </aside>
       </section>
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-card/96 p-3 shadow-[0_-12px_30px_rgba(54,31,73,0.12)] backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-7xl gap-3">
+          {isDesigner ? (
+            <Link href={designerHref} className="flex-1 rounded-xl bg-primary px-4 py-3 text-center text-sm font-bold text-white">
+              Preview designer matches
+            </Link>
+          ) : (
+            <button type="button" onClick={() => saveBrief(true)} disabled={isSaving} className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white disabled:opacity-60">
+              {isSaving ? "Saving..." : "Save & find designers"}
+            </button>
+          )}
+          <button type="button" onClick={copyBrief} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-bold">
+            {copied ? "Copied" : "Copy"}
+          </button>
+        </div>
+      </div>
     </main>
   );
 }

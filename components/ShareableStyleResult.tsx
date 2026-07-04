@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import BrandLogo from "@/components/BrandLogo";
+import { copyText } from "@/lib/copy-text";
 
 type ShareableStyleAnalysis = {
   primaryStyle: string;
@@ -416,7 +417,7 @@ export default function ShareableStyleResult({
         });
         setNotice("Result link shared. Use Download PNG to share the visual card.");
       } else {
-        await navigator.clipboard.writeText(`${shareText} ${window.location.href}`);
+        await copyText(`${shareText} ${window.location.href}`);
         downloadBlob(blob, fileName);
         setNotice("Share text copied and PNG downloaded.");
       }
@@ -433,7 +434,7 @@ export default function ShareableStyleResult({
     setNotice(null);
     setError(null);
     try {
-      await navigator.clipboard.writeText(shareCaption);
+      await copyText(shareCaption);
       setNotice("Caption copied. It is ready to paste into a post or message.");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "The caption could not be copied.");
