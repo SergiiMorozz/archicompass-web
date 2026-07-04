@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getAccountRole } from "@/lib/studios";
 import ProjectGallery from "@/components/ProjectGallery";
+import ProjectCreateForm from "@/components/ProjectCreateForm";
+import { publicTextError } from "@/lib/content-moderation";
 
 export const revalidate = 0;
 
@@ -30,7 +32,7 @@ const fileClass =
   "mt-2 w-full rounded-xl border border-dashed border-line bg-background px-4 py-4 text-sm font-normal text-muted file:mr-4 file:rounded-xl file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white";
 const projectImagesBucket = "project-images";
 const maxImageSize = 10 * 1024 * 1024;
-const maxProjectImages = 12;
+const maxProjectImages = 30;
 const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
 
 const fallbackImages = [
@@ -50,12 +52,6 @@ function urlValue(formData: FormData, key: string) {
   return value.startsWith("http://") || value.startsWith("https://")
     ? value
     : `https://${value}`;
-}
-
-function fileValue(formData: FormData, key: string) {
-  const value = formData.get(key);
-  if (!value || typeof value === "string" || value.size === 0) return null;
-  return value;
 }
 
 function fileValues(formData: FormData, key: string) {
@@ -218,61 +214,6 @@ async function uploadProjectImages(
   };
 }
 
-async function addProject(formData: FormData) {
-  "use server";
-
-  const supabase = await createSupabaseServerClient();
-  const { data } = await supabase.auth.getUser();
-  const user = data.user;
-
-  if (!user) redirect("/login");
-  if ((await getAccountRole(supabase, user.id)) !== "designer") {
-    redirect("/account/profile?error=Switch%20to%20a%20designer%20account%20before%20creating%20a%20portfolio.");
-  }
-
-  const title = textValue(formData, "title");
-  if (!title) redirect("/account/projects?error=Project%20title%20is%20required");
-
-  const legacyImageFile = fileValue(formData, "image_file");
-  const imageFiles = fileValues(formData, "image_files");
-  if (legacyImageFile && !imageFiles.length) imageFiles.push(legacyImageFile);
-
-  const upload = await uploadProjectImages(supabase, user.id, imageFiles);
-  if (upload.error) {
-    redirect(`/account/projects?error=${encodeURIComponent(upload.error)}`);
-  }
-
-  const imageUrls = upload.uploadedUrls;
-  const imagePaths = upload.uploadedPaths;
-  const imageUrl = imageUrls[0] ?? null;
-  const imagePath = imagePaths[0] ?? null;
-
-  const { error } = await supabase.from("projects").insert({
-    id: crypto.randomUUID(),
-    profile_id: user.id,
-    title,
-    category: textValue(formData, "category"),
-    description: textValue(formData, "description"),
-    project_url: urlValue(formData, "project_url"),
-    image_url: imageUrl,
-    image_path: imagePath,
-    image_urls: imageUrls,
-    image_paths: imagePaths,
-  });
-
-  if (error) {
-    if (upload.uploadedPaths.length) {
-      await supabase.storage.from(projectImagesBucket).remove(upload.uploadedPaths);
-    }
-    redirect(`/account/projects?error=${encodeURIComponent(error.message)}`);
-  }
-
-  revalidatePath("/account");
-  revalidatePath("/account/projects");
-  revalidatePath(`/designers/${user.id}`);
-  redirect("/account/projects?created=1");
-}
-
 async function updateProject(formData: FormData) {
   "use server";
 
@@ -287,6 +228,10 @@ async function updateProject(formData: FormData) {
 
   if (!projectId) redirect("/account/projects?error=Project%20id%20is%20required");
   if (!title) redirect("/account/projects?error=Project%20title%20is%20required");
+  const category = textValue(formData, "category");
+  const description = textValue(formData, "description");
+  const moderationError = publicTextError([title, category, description]);
+  if (moderationError) redirect(`/account/projects?error=${encodeURIComponent(moderationError)}`);
 
   const { data: currentProject, error: currentError } = await supabase
     .from("projects")
@@ -355,8 +300,8 @@ async function updateProject(formData: FormData) {
     .from("projects")
     .update({
       title,
-      category: textValue(formData, "category"),
-      description: textValue(formData, "description"),
+      category,
+      description,
       project_url: urlValue(formData, "project_url"),
       image_url: nextUrls[0] ?? null,
       image_path: nextPaths[0] ?? null,
@@ -870,53 +815,7 @@ export default async function ManageProjectsPage({
             for now.
           </p>
 
-          <form action={addProject} className="mt-6 grid gap-5">
-            <Field label="Title">
-              <input name="title" placeholder="Modern Warsaw apartment" className={fieldClass} />
-            </Field>
-
-            <Field label="Category" hint="room or project type, used as a public filter">
-              <input
-                name="category"
-                placeholder="Apartment, house, office..."
-                className={fieldClass}
-              />
-            </Field>
-
-            <Field label="Project images" hint="up to 12 JPEG, PNG, or WebP files">
-              <input
-                name="image_files"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                multiple
-                className={fileClass}
-              />
-            </Field>
-
-            <Field label="Project link" hint="optional external page">
-              <input
-                name="project_url"
-                placeholder="https://your-studio.com/projects/..."
-                className={fieldClass}
-              />
-            </Field>
-
-            <Field label="Description">
-              <textarea
-                name="description"
-                rows={5}
-                placeholder="Describe the brief, design direction, and what changed for the client."
-                className={areaClass}
-              />
-            </Field>
-
-            <button
-              type="submit"
-              className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90"
-            >
-              Add project
-            </button>
-          </form>
+          <ProjectCreateForm />
 
           <div className="mt-6 rounded-2xl border border-line bg-background p-4 text-sm leading-6 text-muted">
             Images stay embedded in the project card as a gallery preview. The project link is

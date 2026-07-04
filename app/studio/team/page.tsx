@@ -2,6 +2,8 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { publicTextError } from "@/lib/content-moderation";
+import { fetchGooglePlaceSummary } from "@/lib/google-places";
 import { getAccountRole, getStudioMemberships } from "@/lib/studios";
 import {
   serviceCapabilities,
@@ -20,6 +22,9 @@ type Studio = {
   id: string;
   owner_id: string;
   name: string;
+  profile_headline: string | null;
+  profile_logo_path: string | null;
+  profile_banner_path: string | null;
   bio: string | null;
   location: string | null;
   specialties: string[] | null;
@@ -37,6 +42,7 @@ type Studio = {
   cooperation_terms: string | null;
   years_experience: number | null;
   google_business_url: string | null;
+  google_place_id: string | null;
   google_rating: number | null;
   google_review_count: number | null;
   published: boolean;
@@ -60,6 +66,8 @@ type MemberProfile = {
 
 const fieldClass =
   "mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal text-foreground outline-none transition focus:border-primary";
+const fileClass =
+  "mt-2 w-full rounded-xl border border-dashed border-line bg-background px-4 py-4 text-sm font-normal text-muted file:mr-4 file:rounded-xl file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white";
 
 function textValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -73,16 +81,6 @@ function numberValue(formData: FormData, key: string) {
   return Number.isFinite(number) && number >= 0 ? number : null;
 }
 
-function googleRatingValue(formData: FormData) {
-  const value = numberValue(formData, "google_rating");
-  return value !== null && value >= 1 && value <= 5 ? Math.round(value * 10) / 10 : null;
-}
-
-function reviewCountValue(formData: FormData) {
-  const value = numberValue(formData, "google_review_count");
-  return value !== null ? Math.floor(value) : null;
-}
-
 function listValue(formData: FormData, key: string) {
   return (textValue(formData, key) ?? "")
     .split(",")
@@ -94,32 +92,77 @@ function actionRedirect(message: string): never {
   redirect(`/studio/team?error=${encodeURIComponent(message)}`);
 }
 
-function studioPayload(formData: FormData) {
+function fileValue(formData: FormData, key: string) {
+  const value = formData.get(key);
+  return value instanceof File && value.size > 0 ? value : null;
+}
+
+async function uploadStudioMedia(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  userId: string,
+  kind: "logo" | "banner",
+  file: File | null
+) {
+  if (!file) return null;
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024) {
+    actionRedirect(`${kind === "logo" ? "Logo" : "Banner"} must be a JPEG, PNG, or WebP image smaller than 5 MB.`);
+  }
+  const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+  const path = `${userId}/studio-${kind}-${crypto.randomUUID()}.${extension}`;
+  const { error } = await supabase.storage.from("profile-media").upload(path, file, {
+    contentType: file.type,
+    upsert: false,
+  });
+  if (error) actionRedirect(error.message);
+  return path;
+}
+
+async function studioPayload(
+  formData: FormData,
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  userId: string,
+  current?: Pick<Studio, "profile_logo_path" | "profile_banner_path"> | null
+) {
   const name = textValue(formData, "name");
   if (!name || name.length < 2) actionRedirect("Studio name must contain at least two characters.");
 
+  const headline = textValue(formData, "profile_headline");
+  const bio = textValue(formData, "bio");
+  const cooperationTerms = textValue(formData, "cooperation_terms");
+  const specialties = listValue(formData, "specialties");
+  const moderationError = publicTextError([name, headline, bio, cooperationTerms, ...specialties]);
+  if (moderationError) actionRedirect(moderationError);
+  const placeId = textValue(formData, "google_place_id");
+  const google = placeId ? await fetchGooglePlaceSummary(placeId) : { data: null };
+  const logoPath = await uploadStudioMedia(supabase, userId, "logo", fileValue(formData, "profile_logo"));
+  const bannerPath = await uploadStudioMedia(supabase, userId, "banner", fileValue(formData, "profile_banner"));
+
   return {
     name,
-    bio: textValue(formData, "bio"),
+    profile_headline: headline,
+    profile_logo_path: logoPath ?? current?.profile_logo_path ?? null,
+    profile_banner_path: bannerPath ?? current?.profile_banner_path ?? null,
+    bio,
     location: textValue(formData, "location"),
-    specialties: listValue(formData, "specialties"),
+    specialties,
     service_capabilities: serviceCapabilityValues(formData),
     website: textValue(formData, "website"),
     phone: textValue(formData, "phone"),
     email: textValue(formData, "email"),
-    hourly_rate: numberValue(formData, "hourly_rate"),
+    hourly_rate: null,
     pricing_model: textValue(formData, "pricing_model"),
     price_from: numberValue(formData, "price_from"),
     price_to: numberValue(formData, "price_to"),
     minimum_project_budget: numberValue(formData, "minimum_project_budget"),
     work_modes: workModeValues(formData),
     availability_status: textValue(formData, "availability_status"),
-    cooperation_terms: textValue(formData, "cooperation_terms"),
+    cooperation_terms: cooperationTerms,
     years_experience: numberValue(formData, "years_experience"),
-    google_business_url: textValue(formData, "google_business_url"),
-    google_rating: googleRatingValue(formData),
-    google_review_count: reviewCountValue(formData),
-    google_rating_updated_at: new Date().toISOString(),
+    google_place_id: placeId,
+    google_business_url: google.data?.businessUrl ?? null,
+    google_rating: google.data?.rating ?? null,
+    google_review_count: google.data?.reviewCount ?? null,
+    google_rating_updated_at: google.data ? new Date().toISOString() : null,
     published: formData.get("published") === "on",
     updated_at: new Date().toISOString(),
   };
@@ -138,7 +181,7 @@ async function createStudio(formData: FormData) {
 
   const { data, error } = await supabase
     .from("studios")
-    .insert({ ...studioPayload(formData), owner_id: user.id })
+    .insert({ ...(await studioPayload(formData, supabase, user.id)), owner_id: user.id })
     .select("id")
     .single();
   if (error || !data) actionRedirect(error?.message ?? "Studio could not be created.");
@@ -159,9 +202,15 @@ async function updateStudio(formData: FormData) {
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) redirect("/login");
 
+  const { data: currentStudio } = await supabase
+    .from("studios")
+    .select("profile_logo_path, profile_banner_path")
+    .eq("id", studioId)
+    .maybeSingle();
+
   const { data, error } = await supabase
     .from("studios")
-    .update(studioPayload(formData))
+    .update(await studioPayload(formData, supabase, userData.user.id, currentStudio as Pick<Studio, "profile_logo_path" | "profile_banner_path"> | null))
     .eq("id", studioId)
     .select("id")
     .maybeSingle();
@@ -272,7 +321,7 @@ export default async function StudioTeamPage({
   const { data: studioData } = studioIds.length
     ? await supabase
         .from("studios")
-        .select("id, owner_id, name, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count, published, created_at")
+        .select("id, owner_id, name, profile_headline, profile_logo_path, profile_banner_path, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_place_id, google_rating, google_review_count, published, created_at")
         .in("id", studioIds)
         .order("created_at", { ascending: true })
     : { data: [] };
@@ -453,6 +502,11 @@ export default async function StudioTeamPage({
                     <form action={updateStudio} className="mt-5 grid gap-4">
                       <input type="hidden" name="studio_id" value={studio.id} />
                       <label className="text-sm font-semibold">Studio name<input name="name" required defaultValue={studio.name} className={fieldClass} /></label>
+                      <label className="text-sm font-semibold">Profile headline<input name="profile_headline" maxLength={140} defaultValue={studio.profile_headline ?? ""} className={fieldClass} /></label>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="text-sm font-semibold">Studio logo<input name="profile_logo" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} /></label>
+                        <label className="text-sm font-semibold">Studio banner<input name="profile_banner" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} /></label>
+                      </div>
                       <label className="text-sm font-semibold">Location<input name="location" defaultValue={studio.location ?? ""} className={fieldClass} /></label>
                       <label className="text-sm font-semibold">Specialties<input name="specialties" defaultValue={studio.specialties?.join(", ") ?? ""} className={fieldClass} /></label>
                       <fieldset>
@@ -470,15 +524,12 @@ export default async function StudioTeamPage({
                       <label className="text-sm font-semibold">Website<input name="website" defaultValue={studio.website ?? ""} className={fieldClass} /></label>
                       <label className="text-sm font-semibold">Public email<input name="email" type="email" defaultValue={studio.email ?? ""} className={fieldClass} /></label>
                       <label className="text-sm font-semibold">Phone<input name="phone" defaultValue={studio.phone ?? ""} className={fieldClass} /></label>
-                      <div className="grid grid-cols-2 gap-3">
-                        <label className="text-sm font-semibold">Rate, PLN<input name="hourly_rate" inputMode="numeric" defaultValue={studio.hourly_rate ?? ""} className={fieldClass} /></label>
-                        <label className="text-sm font-semibold">Experience<input name="years_experience" inputMode="numeric" defaultValue={studio.years_experience ?? ""} className={fieldClass} /></label>
-                      </div>
+                      <label className="text-sm font-semibold">Experience<input name="years_experience" inputMode="numeric" defaultValue={studio.years_experience ?? ""} className={fieldClass} /></label>
                       <div className="grid gap-3 sm:grid-cols-2">
                         <label className="text-sm font-semibold">Pricing model<select name="pricing_model" defaultValue={studio.pricing_model ?? "Custom quote"} className={fieldClass}>{pricingModels.map((model) => <option key={model} value={model}>{model}</option>)}</select></label>
                         <label className="text-sm font-semibold">Availability<select name="availability_status" defaultValue={studio.availability_status ?? "Waitlist / ask"} className={fieldClass}>{availabilityStatuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></label>
-                        <label className="text-sm font-semibold">Design fee from, PLN<input name="price_from" inputMode="numeric" defaultValue={studio.price_from ?? ""} className={fieldClass} /></label>
-                        <label className="text-sm font-semibold">Design fee to, PLN<input name="price_to" inputMode="numeric" defaultValue={studio.price_to ?? ""} className={fieldClass} /></label>
+                        <label className="text-sm font-semibold">Price from, PLN per selected model<input name="price_from" inputMode="numeric" defaultValue={studio.price_from ?? ""} className={fieldClass} /></label>
+                        <label className="text-sm font-semibold">Price to, PLN per selected model<input name="price_to" inputMode="numeric" defaultValue={studio.price_to ?? ""} className={fieldClass} /></label>
                         <label className="text-sm font-semibold sm:col-span-2">Minimum project budget, PLN<input name="minimum_project_budget" inputMode="numeric" defaultValue={studio.minimum_project_budget ?? ""} className={fieldClass} /></label>
                       </div>
                       <fieldset>
@@ -489,9 +540,8 @@ export default async function StudioTeamPage({
                       <div className="rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-4">
                         <div className="font-bold">Google Business rating</div>
                         <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                          <label className="text-sm font-semibold sm:col-span-2">Google profile URL<input name="google_business_url" type="url" defaultValue={studio.google_business_url ?? ""} placeholder="https://g.page/..." className={fieldClass} /></label>
-                          <label className="text-sm font-semibold">Rating<input name="google_rating" type="number" min="1" max="5" step="0.1" defaultValue={studio.google_rating ?? ""} className={fieldClass} /></label>
-                          <label className="text-sm font-semibold">Review count<input name="google_review_count" type="number" min="0" step="1" defaultValue={studio.google_review_count ?? ""} className={fieldClass} /></label>
+                          <label className="text-sm font-semibold sm:col-span-2">Google Place ID<input name="google_place_id" defaultValue={studio.google_place_id ?? ""} placeholder="ChIJ..." className={fieldClass} /></label>
+                          <p className="text-sm text-muted sm:col-span-2">Rating and review count are verified automatically and cannot be typed manually.</p>
                         </div>
                       </div>
                       <label className="flex items-center gap-3 text-sm font-semibold">
@@ -520,6 +570,9 @@ export default async function StudioTeamPage({
           </p>
           <form action={createStudio} className="mt-6 grid gap-4 md:grid-cols-2">
             <label className="text-sm font-semibold">Studio name<input name="name" required className={fieldClass} /></label>
+            <label className="text-sm font-semibold">Profile headline<input name="profile_headline" maxLength={140} className={fieldClass} /></label>
+            <label className="text-sm font-semibold">Studio logo<input name="profile_logo" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} /></label>
+            <label className="text-sm font-semibold">Studio banner<input name="profile_banner" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} /></label>
             <label className="text-sm font-semibold">Location<input name="location" className={fieldClass} /></label>
             <label className="text-sm font-semibold md:col-span-2">Specialties<input name="specialties" placeholder="residential, hospitality, renovations" className={fieldClass} /></label>
             <fieldset className="md:col-span-2">
@@ -537,21 +590,19 @@ export default async function StudioTeamPage({
             <label className="text-sm font-semibold">Website<input name="website" placeholder="https://" className={fieldClass} /></label>
             <label className="text-sm font-semibold">Public email<input name="email" type="email" defaultValue={user.email ?? ""} className={fieldClass} /></label>
             <label className="text-sm font-semibold">Phone<input name="phone" className={fieldClass} /></label>
-            <label className="text-sm font-semibold">Hourly rate, PLN<input name="hourly_rate" inputMode="numeric" className={fieldClass} /></label>
             <label className="text-sm font-semibold">Years of experience<input name="years_experience" inputMode="numeric" className={fieldClass} /></label>
             <label className="text-sm font-semibold">Pricing model<select name="pricing_model" defaultValue="Custom quote" className={fieldClass}>{pricingModels.map((model) => <option key={model} value={model}>{model}</option>)}</select></label>
             <label className="text-sm font-semibold">Availability<select name="availability_status" defaultValue="Waitlist / ask" className={fieldClass}>{availabilityStatuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></label>
-            <label className="text-sm font-semibold">Design fee from, PLN<input name="price_from" inputMode="numeric" className={fieldClass} /></label>
-            <label className="text-sm font-semibold">Design fee to, PLN<input name="price_to" inputMode="numeric" className={fieldClass} /></label>
+            <label className="text-sm font-semibold">Price from, PLN per selected model<input name="price_from" inputMode="numeric" className={fieldClass} /></label>
+            <label className="text-sm font-semibold">Price to, PLN per selected model<input name="price_to" inputMode="numeric" className={fieldClass} /></label>
             <label className="text-sm font-semibold md:col-span-2">Minimum project budget, PLN<input name="minimum_project_budget" inputMode="numeric" className={fieldClass} /></label>
             <fieldset className="md:col-span-2"><legend className="text-sm font-semibold">Work formats</legend><div className="mt-3 flex flex-wrap gap-2">{workModes.map((mode) => <label key={mode} className="flex items-center gap-2 rounded-xl border border-line bg-background px-3 py-2 text-sm font-semibold"><input type="checkbox" name="work_modes" value={mode} className="h-4 w-4 accent-primary" />{mode}</label>)}</div></fieldset>
             <label className="text-sm font-semibold md:col-span-2">Cooperation terms<textarea name="cooperation_terms" rows={4} className={fieldClass} /></label>
             <div className="rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-4 md:col-span-2">
               <div className="font-bold">Google Business rating</div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <label className="text-sm font-semibold sm:col-span-2">Google profile URL<input name="google_business_url" type="url" placeholder="https://g.page/..." className={fieldClass} /></label>
-                <label className="text-sm font-semibold">Rating<input name="google_rating" type="number" min="1" max="5" step="0.1" className={fieldClass} /></label>
-                <label className="text-sm font-semibold">Review count<input name="google_review_count" type="number" min="0" step="1" className={fieldClass} /></label>
+                <label className="text-sm font-semibold sm:col-span-2">Google Place ID<input name="google_place_id" placeholder="ChIJ..." className={fieldClass} /></label>
+                <p className="text-sm text-muted sm:col-span-2">Rating and review count are verified automatically.</p>
               </div>
             </div>
             <label className="flex items-center gap-3 text-sm font-semibold md:col-span-2">

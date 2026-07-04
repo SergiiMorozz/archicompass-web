@@ -125,7 +125,7 @@ function hydrateProjectImages(supabase: SupabaseServerClient, project: Project) 
 
 function projectGallery(project: Project) {
   const urls = project.image_urls?.filter(Boolean) ?? [];
-  if (urls.length) return urls.slice(0, 12);
+  if (urls.length) return urls.slice(0, 30);
   if (project.image_url) return [project.image_url];
   return [fallbackProjectImages[0]];
 }

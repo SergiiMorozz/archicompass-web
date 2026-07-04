@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import FavoriteButton from "@/components/FavoriteButton";
@@ -23,6 +24,9 @@ export const revalidate = 0;
 type Profile = {
   id: string;
   full_name: string | null;
+  profile_headline: string | null;
+  profile_logo_path: string | null;
+  profile_banner_path: string | null;
   bio: string | null;
   location: string | null;
   profession_type: string | null;
@@ -71,6 +75,7 @@ type StudioLink = {
 type SupabaseServerClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
 const projectImagesBucket = "project-images";
+const profileMediaBucket = "profile-media";
 
 const fallbackHeroImages = [
   "https://images.unsplash.com/photo-1600210491369-e753d80a41f3?auto=format&fit=crop&w=1800&q=80",
@@ -106,7 +111,7 @@ export async function generateMetadata({
   const [{ data: profile }, { data: projects }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("full_name, bio, location, profession_type")
+      .select("full_name, profile_headline, profile_banner_path, bio, location, profession_type")
       .eq("id", id)
       .eq("user_type", "professional")
       .maybeSingle(),
@@ -123,7 +128,10 @@ export async function generateMetadata({
   const name = profile.full_name || "ArchiCompass professional";
   const profession = profile.profession_type || "Interior designer";
   const location = profile.location ? ` in ${profile.location}` : "";
-  const image = projects?.[0]?.image_url || projects?.[0]?.image_urls?.[0] || null;
+  const banner = profile.profile_banner_path
+    ? supabase.storage.from(profileMediaBucket).getPublicUrl(profile.profile_banner_path).data.publicUrl
+    : null;
+  const image = banner || projects?.[0]?.image_url || projects?.[0]?.image_urls?.[0] || null;
   return pageMetadata({
     title: `${name} – ${profession}${location}`,
     description: profile.bio || `View ${name}'s interior design profile, portfolio, specialties, services, availability, and project fit on ArchiCompass.`,
@@ -164,14 +172,15 @@ function hashIndex(value: string, length: number) {
   return total % length;
 }
 
-function heroImage(profileId: string, projects: Project[]) {
+function heroImage(profileId: string, projects: Project[], bannerUrl: string | null) {
+  if (bannerUrl) return bannerUrl;
   const projectImage = projects.find((project) => project.image_url)?.image_url;
   return projectImage || fallbackHeroImages[hashIndex(profileId, fallbackHeroImages.length)];
 }
 
 function projectGallery(project: Project, index: number) {
   const urls = project.image_urls?.filter(Boolean) ?? [];
-  if (urls.length) return urls.slice(0, 12);
+  if (urls.length) return urls.slice(0, 30);
   if (project.image_url) return [project.image_url];
   return [fallbackProjectImages[index % fallbackProjectImages.length]];
 }
@@ -180,6 +189,11 @@ function publicImageUrl(supabase: SupabaseServerClient, imagePath: string | null
   if (!imagePath) return null;
   const { data } = supabase.storage.from(projectImagesBucket).getPublicUrl(imagePath);
   return data.publicUrl;
+}
+
+function profileMediaUrl(supabase: SupabaseServerClient, imagePath: string | null) {
+  if (!imagePath) return null;
+  return supabase.storage.from(profileMediaBucket).getPublicUrl(imagePath).data.publicUrl;
 }
 
 function experienceLabel(value: number | null) {
@@ -273,7 +287,7 @@ export default async function DesignerProfilePage({
   const { data: profileData, error: pErr } = await supabase
     .from("profiles")
     .select(
-      "id, full_name, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count"
+      "id, full_name, profile_headline, profile_logo_path, profile_banner_path, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count"
     )
     .eq("id", id)
     .single();
@@ -353,7 +367,11 @@ export default async function DesignerProfilePage({
   const specialties = profile.specialties?.filter(Boolean).slice(0, 10) ?? [];
   const serviceCapabilities = profile.service_capabilities?.filter(Boolean) ?? [];
   const webHref = websiteHref(profile.website);
-  const profileHero = heroImage(profile.id, projects);
+  const logoUrl = profileMediaUrl(supabase, profile.profile_logo_path);
+  const bannerUrl = profileMediaUrl(supabase, profile.profile_banner_path);
+  const profileHero = heroImage(profile.id, projects, bannerUrl);
+  const heroHeadline =
+    profile.profile_headline || `${type}${profile.location ? ` in ${profile.location}` : ""}`;
   const categoryFilters = Array.from(
     new Set(projects.map((project) => project.category).filter(Boolean))
   ) as string[];
@@ -425,19 +443,20 @@ export default async function DesignerProfilePage({
                 {title}
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-white/85">
-                {profile.bio ||
-                  "A public professional profile for clients looking for interior design and architecture support."}
+                {heroHeadline}
               </p>
             </div>
           </div>
         </div>
 
-        <section className="-mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="mt-4 grid gap-6 lg:-mt-10 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="rounded-2xl border border-line bg-card p-5 shadow-sm sm:p-6">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex gap-4">
-                <div className="relative grid h-20 w-20 shrink-0 place-items-center rounded-2xl border-4 border-white bg-primary text-2xl font-bold text-white shadow">
-                  {initials(title)}
+                <div className="relative grid h-20 w-20 shrink-0 place-items-center overflow-visible rounded-2xl border-4 border-white bg-primary text-2xl font-bold text-white shadow">
+                  {logoUrl ? (
+                    <Image src={logoUrl} alt={`${title} logo`} width={72} height={72} unoptimized className="h-full w-full rounded-xl object-cover" />
+                  ) : initials(title)}
                   <span className="absolute -right-3 -top-3 rounded-full border-2 border-white bg-[#fff3df] px-2 py-1 text-xs font-bold text-[#b56b08]">
                     New
                   </span>
@@ -560,8 +579,8 @@ export default async function DesignerProfilePage({
 
             <div className="mt-5 grid gap-3 text-sm">
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
-                <span className="text-muted">Response</span>
-                <span className="font-semibold">Not yet measured</span>
+                <span className="text-muted">Platform replies</span>
+                <span className="text-right font-semibold">Measured after first in-app reply</span>
               </div>
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
                 <span className="text-muted">Contact</span>
@@ -962,7 +981,7 @@ export default async function DesignerProfilePage({
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="truncate text-sm font-bold">{title}</div>
-            <div className="truncate text-xs text-muted">Response time not yet measured</div>
+            <div className="truncate text-xs text-muted">Direct phone or email replies are not measured</div>
           </div>
           {isOwner ? (
             <Link

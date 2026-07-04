@@ -72,7 +72,7 @@ export default function ProjectGallery({
       </div>
 
       <div className="grid grid-cols-3 gap-2 p-5 pb-0">
-        {safeImages.slice(0, 12).map((url, imageIndex) => (
+        {safeImages.slice(0, 30).map((url, imageIndex) => (
           <button
             key={`${url}-${imageIndex}`}
             type="button"

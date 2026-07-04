@@ -15,6 +15,7 @@ import { requiredServiceCapabilities } from "@/lib/service-capabilities";
 import { pricingLabel } from "@/lib/profile-pricing";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { locationPath, seoLocations } from "@/lib/seo-locations";
+import { distanceBetweenLocations } from "@/lib/location-distance";
 import {
   applyDemoProfilePresentation,
   getDemoProfilePresentation,
@@ -94,6 +95,7 @@ type SP = {
   specialty?: string;
   minRate?: string;
   maxRate?: string;
+  pricingModel?: string;
   sort?: "recommended" | "newest" | "rate";
   view?: "grid" | "list";
 };
@@ -122,6 +124,12 @@ const styleFilters = [
   "Industrial",
   "Contemporary",
   "Traditional",
+  "Japandi",
+  "Mid-century",
+  "Art Deco",
+  "Mediterranean",
+  "Bohemian",
+  "Eclectic",
 ];
 
 const coverImages = [
@@ -644,6 +652,7 @@ export default async function DesignersPage({
   const maxRateRaw = first(sp.maxRate).trim();
   const minRate = minRateRaw ? Number(minRateRaw) : NaN;
   const maxRate = maxRateRaw ? Number(maxRateRaw) : NaN;
+  const pricingModel = first(sp.pricingModel).trim();
 
   const supabase = await createSupabaseServerClient();
 
@@ -689,6 +698,19 @@ export default async function DesignersPage({
   const normalizedLocation = normalizeSearchText(location);
   const normalizedSpecialty = normalizeSearchText(specialty)
     .replace(/(istic|ist|ism)$/, "");
+  const exactLocationExists = !normalizedLocation || [
+    ...((data ?? []) as Profile[]).map((profile) => profile.location),
+    ...((studioData ?? []) as Studio[]).map((studio) => studio.location),
+  ].some((candidate) => normalizeSearchText(candidate ?? "").includes(normalizedLocation));
+  const nearbyFallback = Boolean(normalizedLocation && !exactLocationExists);
+
+  const locationMatches = (candidate: string | null) => {
+    if (matchingMode || !normalizedLocation) return true;
+    if (normalizeSearchText(candidate ?? "").includes(normalizedLocation)) return true;
+    if (!nearbyFallback || !candidate) return false;
+    const distance = distanceBetweenLocations(location, candidate);
+    return distance !== null && distance <= 250;
+  };
 
   let profiles = ((data ?? []) as Profile[])
     .map(applyDemoProfilePresentation)
@@ -706,12 +728,10 @@ export default async function DesignersPage({
       );
       const specialtyText = normalizeSearchText((profile.specialties ?? []).join(" "));
       const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
-      const matchesLocation =
-        matchingMode ||
-        !normalizedLocation ||
-        normalizeSearchText(profile.location ?? "").includes(normalizedLocation);
+      const matchesLocation = locationMatches(profile.location);
       const matchesSpecialty =
         matchingMode || !normalizedSpecialty || specialtyText.includes(normalizedSpecialty);
+      const matchesPricingModel = !pricingModel || profile.pricing_model === pricingModel;
       const matchesMinimum =
         Number.isNaN(minRate) ||
         ((profile.price_from ?? profile.hourly_rate) !== null &&
@@ -725,6 +745,7 @@ export default async function DesignersPage({
         matchesQuery &&
         matchesLocation &&
         matchesSpecialty &&
+        matchesPricingModel &&
         matchesMinimum &&
         matchesMaximum
       );
@@ -738,12 +759,10 @@ export default async function DesignersPage({
     );
     const specialtyText = normalizeSearchText((studio.specialties ?? []).join(" "));
     const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
-    const matchesLocation =
-      matchingMode ||
-      !normalizedLocation ||
-      normalizeSearchText(studio.location ?? "").includes(normalizedLocation);
+    const matchesLocation = locationMatches(studio.location);
     const matchesSpecialty =
       matchingMode || !normalizedSpecialty || specialtyText.includes(normalizedSpecialty);
+    const matchesPricingModel = !pricingModel || studio.pricing_model === pricingModel;
     const matchesMinimum =
       Number.isNaN(minRate) ||
       ((studio.price_from ?? studio.hourly_rate) !== null &&
@@ -752,7 +771,7 @@ export default async function DesignersPage({
       Number.isNaN(maxRate) ||
       ((studio.price_from ?? studio.hourly_rate) !== null &&
         (studio.price_from ?? studio.hourly_rate)! <= maxRate);
-    return matchesQuery && matchesLocation && matchesSpecialty && matchesMinimum && matchesMaximum;
+    return matchesQuery && matchesLocation && matchesSpecialty && matchesPricingModel && matchesMinimum && matchesMaximum;
   });
   const studioIds = studios.map((studio) => studio.id);
   const { data: studioMemberData } = studioIds.length
@@ -830,8 +849,13 @@ export default async function DesignersPage({
     profiles = profiles.sort(
       (a, b) =>
         (a.price_from ?? a.hourly_rate ?? Number.MAX_SAFE_INTEGER) -
-        (b.price_from ?? b.hourly_rate ?? Number.MAX_SAFE_INTEGER)
+      (b.price_from ?? b.hourly_rate ?? Number.MAX_SAFE_INTEGER)
     );
+  } else if (nearbyFallback && location) {
+    const distance = (candidate: string | null) =>
+      candidate ? distanceBetweenLocations(location, candidate) ?? Number.MAX_SAFE_INTEGER : Number.MAX_SAFE_INTEGER;
+    profiles = profiles.sort((a, b) => distance(a.location) - distance(b.location));
+    studios = studios.sort((a, b) => distance(a.location) - distance(b.location));
   }
 
   const base = {
@@ -855,12 +879,13 @@ export default async function DesignersPage({
     specialty,
     minRate: Number.isNaN(minRate) ? "" : String(minRate),
     maxRate: Number.isNaN(maxRate) ? "" : String(maxRate),
+    pricingModel,
     sort,
   };
 
   const gridHref = "/designers" + qs({ ...base, view: "grid" });
   const listHref = "/designers" + qs({ ...base, view: "list" });
-  const hasFilters = Boolean(q || location || specialty || minRateRaw || maxRateRaw);
+  const hasFilters = Boolean(q || location || specialty || minRateRaw || maxRateRaw || pricingModel);
   const matchingQueryEntries = briefContext
     ? [
         ["match", "brief"],
@@ -1043,7 +1068,19 @@ export default async function DesignersPage({
             </label>
 
             <div>
-              <div className="text-sm font-semibold">Budget Range</div>
+              <div className="text-sm font-semibold">Published design price</div>
+              <p className="mt-1 text-xs leading-5 text-muted">PLN per the selected pricing model, not the total renovation budget.</p>
+              <select
+                name="pricingModel"
+                defaultValue={pricingModel}
+                className="mt-3 w-full rounded-xl border border-line bg-background px-3 py-3 text-sm outline-none focus:border-primary"
+              >
+                <option value="">Any pricing model</option>
+                <option value="Hourly">Per hour</option>
+                <option value="Per m2">Per m2</option>
+                <option value="Fixed package">Fixed package</option>
+                <option value="Custom quote">Custom quote</option>
+              </select>
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <input
                   name="minRate"
@@ -1089,6 +1126,11 @@ export default async function DesignersPage({
         </aside>
 
         <div>
+          {nearbyFallback && (profiles.length || studios.length) ? (
+            <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+              No exact profiles were found in <strong>{location}</strong>. Showing professionals in the nearest recognised Polish cities, up to 250 km away.
+            </div>
+          ) : null}
           {studios.length ? (
             <section className="mb-9">
               <div>

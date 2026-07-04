@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -24,6 +25,23 @@ type Article = {
   author_name: string | null;
   featured: boolean;
   published_at: string | null;
+};
+
+type NewDesigner = {
+  id: string;
+  full_name: string | null;
+  location: string | null;
+  profession_type: string | null;
+  google_rating: number | null;
+  google_review_count: number | null;
+};
+
+type RecentProject = {
+  id: string;
+  title: string | null;
+  category: string | null;
+  image_url: string | null;
+  image_urls: string[] | null;
 };
 
 function first(value: string | string[] | undefined) {
@@ -58,6 +76,21 @@ export default async function InspirationPage({
     .order("featured", { ascending: false })
     .order("published_at", { ascending: false });
   const allArticles = (data ?? []) as Article[];
+  const [{ data: newDesignerData }, { data: recentProjectData }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, full_name, location, profession_type, google_rating, google_review_count")
+      .eq("user_type", "professional")
+      .order("created_at", { ascending: false })
+      .limit(4),
+    supabase
+      .from("projects")
+      .select("id, title, category, image_url, image_urls")
+      .order("created_at", { ascending: false })
+      .limit(6),
+  ]);
+  const newDesigners = (newDesignerData ?? []) as NewDesigner[];
+  const recentProjects = (recentProjectData ?? []) as RecentProject[];
   const normalizedQuery = normalize(q);
   const articles = allArticles.filter((article) => {
     const categoryMatch = selectedCategory === "All" || article.category === selectedCategory;
@@ -69,11 +102,11 @@ export default async function InspirationPage({
   const { data: favoriteData } = userData.user
     ? await supabase
         .from("favorites")
-        .select("entity_key")
+        .select("entity_type, entity_key")
         .eq("user_id", userData.user.id)
-        .eq("entity_type", "article")
+        .in("entity_type", ["article", "designer", "project"])
     : { data: [] };
-  const savedArticleIds = new Set((favoriteData ?? []).map((favorite) => favorite.entity_key));
+  const savedKeys = new Set((favoriteData ?? []).map((favorite) => `${favorite.entity_type}:${favorite.entity_key}`));
 
   return (
     <main>
@@ -134,6 +167,67 @@ export default async function InspirationPage({
         </div>
       </section>
 
+      {newDesigners.length || recentProjects.length ? (
+        <section className="border-b border-line bg-primary-soft px-4 py-14 sm:px-6">
+          <div className="mx-auto max-w-7xl">
+            {newDesigners.length ? (
+              <div>
+                <div className="flex items-end justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-semibold text-primary">New on ArchiCompass</div>
+                    <h2 className="mt-1 text-3xl font-bold">Recently joined designers</h2>
+                  </div>
+                  <Link href="/designers?sort=newest" className="text-sm font-semibold text-primary">View all</Link>
+                </div>
+                <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {newDesigners.map((designer) => (
+                    <article key={designer.id} className="rounded-lg border border-line bg-card p-5 shadow-sm">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="grid h-12 w-12 place-items-center rounded-lg bg-primary text-sm font-bold text-white">
+                          {(designer.full_name || "AC").split(" ").map((part) => part[0]).slice(0, 2).join("").toUpperCase()}
+                        </div>
+                        <FavoriteButton compact entityType="designer" entityKey={designer.id} initialSaved={savedKeys.has(`designer:${designer.id}`)} />
+                      </div>
+                      <Link href={`/designers/${designer.id}`} className="mt-4 block text-lg font-bold hover:text-primary">{designer.full_name || "Design professional"}</Link>
+                      <p className="mt-1 text-sm text-muted">{designer.profession_type || "Interior designer"}{designer.location ? ` · ${designer.location}` : ""}</p>
+                      {designer.google_rating ? <p className="mt-3 text-sm font-semibold text-primary">Google {designer.google_rating.toFixed(1)} · {designer.google_review_count ?? 0} reviews</p> : null}
+                    </article>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {recentProjects.length ? (
+              <div className={newDesigners.length ? "mt-12" : ""}>
+                <div>
+                  <div className="text-sm font-semibold text-primary">Fresh portfolio work</div>
+                  <h2 className="mt-1 text-3xl font-bold">New projects from designers</h2>
+                </div>
+                <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {recentProjects.map((project) => {
+                    const image = project.image_urls?.[0] || project.image_url;
+                    return (
+                      <article key={project.id} className="overflow-hidden rounded-lg border border-line bg-card shadow-sm">
+                        <Link href={`/projects/${project.id}`} className="block h-52 bg-card">
+                          {image ? <Image src={image} alt={project.title || "Interior design project"} width={900} height={600} unoptimized className="h-full w-full object-cover" /> : null}
+                        </Link>
+                        <div className="flex items-start justify-between gap-3 p-5">
+                          <div>
+                            <div className="text-xs font-semibold uppercase text-primary">{project.category || "Portfolio"}</div>
+                            <Link href={`/projects/${project.id}`} className="mt-1 block text-lg font-bold hover:text-primary">{project.title || "Untitled project"}</Link>
+                          </div>
+                          <FavoriteButton compact entityType="project" entityKey={project.id} initialSaved={savedKeys.has(`project:${project.id}`)} />
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -177,7 +271,7 @@ export default async function InspirationPage({
                     <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
                       {article.category}
                     </span>
-                    <FavoriteButton compact entityType="article" entityKey={article.id} initialSaved={savedArticleIds.has(article.id)} />
+                    <FavoriteButton compact entityType="article" entityKey={article.id} initialSaved={savedKeys.has(`article:${article.id}`)} />
                   </div>
                   <Link href={`/inspiration/${article.slug}`} className="mt-4 block text-xl font-bold hover:text-primary">
                     {article.title}

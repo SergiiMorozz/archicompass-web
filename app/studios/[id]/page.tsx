@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import FavoriteButton from "@/components/FavoriteButton";
 import GoogleRating from "@/components/GoogleRating";
@@ -18,6 +19,9 @@ type Studio = {
   id: string;
   owner_id: string;
   name: string;
+  profile_headline: string | null;
+  profile_logo_path: string | null;
+  profile_banner_path: string | null;
   bio: string | null;
   location: string | null;
   specialties: string[] | null;
@@ -133,7 +137,7 @@ export default async function PublicStudioPage({
 
   const { data: studioData } = await supabase
     .from("studios")
-    .select("id, owner_id, name, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count, published")
+    .select("id, owner_id, name, profile_headline, profile_logo_path, profile_banner_path, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count, published")
     .eq("id", id)
     .maybeSingle();
   if (!studioData) notFound();
@@ -201,7 +205,11 @@ export default async function PublicStudioPage({
     (favoriteData ?? []).map((favorite) => `${favorite.entity_type}:${favorite.entity_key}`)
   );
   const website = websiteHref(studio.website);
-  const hero = projects[0]?.image_url || fallbackImage;
+  const profileMediaUrl = (path: string | null) => path
+    ? supabase.storage.from("profile-media").getPublicUrl(path).data.publicUrl
+    : null;
+  const logo = profileMediaUrl(studio.profile_logo_path);
+  const hero = profileMediaUrl(studio.profile_banner_path) || projects[0]?.image_url || fallbackImage;
   const totalExperience = profiles.reduce(
     (maximum, profile) => Math.max(maximum, profile.years_experience ?? 0),
     studio.years_experience ?? 0
@@ -254,7 +262,7 @@ export default async function PublicStudioPage({
               <span className="inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-semibold backdrop-blur">Design studio</span>
               <h1 className="mt-5 text-4xl font-bold sm:text-6xl">{studio.name}</h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-white/85">
-                {studio.bio || "A collaborative ArchiCompass studio profile bringing together designers, shared projects, and one client conversation space."}
+                {studio.profile_headline || `Interior design studio${studio.location ? ` in ${studio.location}` : ""}`}
               </p>
             </div>
           </div>
@@ -263,10 +271,15 @@ export default async function PublicStudioPage({
         <section className="-mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="rounded-lg border border-line bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-              <div>
+              <div className="flex gap-4">
+                {logo ? (
+                  <Image src={logo} alt={`${studio.name} logo`} width={72} height={72} unoptimized className="h-18 w-18 rounded-xl border border-line object-cover" />
+                ) : null}
+                <div>
                 <div className="text-sm font-semibold text-primary">Verified structure</div>
                 <h2 className="mt-1 text-3xl font-bold">One studio, {countLabel(visibleMembers.length, "designer")}</h2>
                 <p className="mt-3 text-muted">{studio.location || "Remote / location on request"}</p>
+                </div>
               </div>
               {isMember ? (
                 <Link href="/studio/team" className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white">Manage studio</Link>
@@ -322,6 +335,13 @@ export default async function PublicStudioPage({
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6">
+        {studio.bio ? (
+          <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
+            <div className="text-sm font-semibold text-primary">About the studio</div>
+            <h2 className="mt-1 text-3xl font-bold">Design approach</h2>
+            <p className="mt-5 max-w-4xl whitespace-pre-line text-base leading-8 text-muted">{studio.bio}</p>
+          </section>
+        ) : null}
         <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
           <div className="text-sm font-semibold text-primary">Studio team</div>
           <h2 className="mt-1 text-3xl font-bold">Connected designers</h2>

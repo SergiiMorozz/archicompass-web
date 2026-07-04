@@ -27,6 +27,7 @@ INQUIRY_EMAIL_FROM="ArchiCompass <briefs@your-domain.com>"
 INQUIRY_EMAIL_REPLY_TO=
 NEXT_PUBLIC_SITE_URL=
 GOOGLE_SITE_VERIFICATION=
+GOOGLE_PLACES_API_KEY=
 ```
 
 `NEXT_PUBLIC_SITE_URL` must contain the canonical production origin without a
@@ -52,8 +53,9 @@ sitemap all move together.
   `https://YOUR-DOMAIN/sitemap.xml`. Monitor Pages, Core Web Vitals, Enhancements,
   and Manual Actions before expanding city or language directories.
 
-When `RESEND_API_KEY` and `INQUIRY_EMAIL_FROM` are missing, requests are still saved
-in `/account/inquiries`; the email notification is marked as `not_configured`.
+When `RESEND_API_KEY` and `INQUIRY_EMAIL_FROM` are missing, requests and messages are
+still saved in the workspaces; immediate email delivery is marked as `not_configured`.
+Once configured, every new conversation message triggers an immediate email.
 
 Unread-message reminders are called every hour by Supabase Cron and email the
 recipient after 24 hours. They require server-only credentials in Vercel:
@@ -67,6 +69,10 @@ Never expose these two values through `NEXT_PUBLIC_*` variables. The reminder jo
 is limited to three delivery attempts and records its result on the request or message.
 Run `supabase/schedule-unread-message-reminders.sql` after both values are configured;
 use the same random `CRON_SECRET` in Vercel and Supabase Vault.
+
+`GOOGLE_PLACES_API_KEY` is server-only. Designers and studios provide a Google Place
+ID; ArchiCompass then imports the current rating, review count, and Maps URL from the
+Places API. Rating values are never accepted from profile forms.
 
 Optional AI photo style analysis in Project Compass:
 
@@ -105,6 +111,8 @@ supabase/profile-auth-emails.sql
 supabase/google-business-ratings.sql
 supabase/unread-message-reminders.sql
 supabase/schedule-unread-message-reminders.sql
+supabase/message-attachments.sql
+supabase/profile-media-and-verified-ratings.sql
 ```
 
 The Studio schema requires `designer_inquiries`, enables RLS, keeps inquiry messages
@@ -114,8 +122,8 @@ profile owner.
 The Client Workspace schema adds owner-only favorites for designers, projects,
 and future Inspiration HUB content, plus a preferred timeline on saved briefs.
 
-Google Business ratings store only a professional-supplied public profile link,
-rating summary, and review count. Review text remains on Google.
+Google Business ratings store only a Google-verified public profile link, rating
+summary, and review count. Review text remains on Google.
 
 ## Checks
 

@@ -12,6 +12,7 @@ export const revalidate = 0;
 
 type Profile = {
   full_name: string | null;
+  profile_headline: string | null;
   location: string | null;
   profession_type: string | null;
   user_type: string | null;
@@ -20,7 +21,6 @@ type Profile = {
   email: string | null;
   phone: string | null;
   service_capabilities: string[] | null;
-  hourly_rate: number | null;
   pricing_model: string | null;
   price_from: number | null;
   price_to: number | null;
@@ -53,9 +53,9 @@ function profileScore(profile: Partial<Profile>, isProfessional: boolean) {
         profile.profession_type,
         profile.email,
         profile.bio,
+        profile.profile_headline,
         profile.specialties?.length ? "specialties" : null,
         profile.service_capabilities?.length ? "services" : null,
-        profile.hourly_rate,
         profile.pricing_model,
         profile.price_from || profile.price_to,
         profile.work_modes?.length ? "work modes" : null,
@@ -82,7 +82,7 @@ export default async function AccountPage({
 
   const { data: profileData } = await supabase
     .from("profiles")
-    .select("full_name, location, profession_type, user_type, specialties, bio, email, phone, service_capabilities, hourly_rate, pricing_model, price_from, price_to, work_modes, availability_status, years_experience")
+    .select("full_name, profile_headline, location, profession_type, user_type, specialties, bio, email, phone, service_capabilities, pricing_model, price_from, price_to, work_modes, availability_status, years_experience")
     .eq("id", user.id)
     .maybeSingle();
 

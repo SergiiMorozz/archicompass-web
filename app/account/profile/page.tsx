@@ -13,11 +13,16 @@ import {
   workModeValues,
 } from "@/lib/profile-pricing";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { publicTextError } from "@/lib/content-moderation";
+import { fetchGooglePlaceSummary } from "@/lib/google-places";
 
 export const revalidate = 0;
 
 type Profile = {
   full_name: string | null;
+  profile_headline: string | null;
+  profile_logo_path: string | null;
+  profile_banner_path: string | null;
   bio: string | null;
   location: string | null;
   profession_type: string | null;
@@ -37,8 +42,10 @@ type Profile = {
   cooperation_terms: string | null;
   years_experience: number | null;
   google_business_url: string | null;
+  google_place_id: string | null;
   google_rating: number | null;
   google_review_count: number | null;
+  google_rating_updated_at: string | null;
 };
 
 type ProjectImagePaths = {
@@ -47,11 +54,16 @@ type ProjectImagePaths = {
 };
 
 const projectImagesBucket = "project-images";
+const profileMediaBucket = "profile-media";
+const maxProfileMediaSize = 5 * 1024 * 1024;
+const allowedProfileMediaTypes = ["image/jpeg", "image/png", "image/webp"];
 
 const fieldClass =
   "mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal text-foreground outline-none transition focus:border-primary";
 const areaClass =
   "mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal text-foreground outline-none transition focus:border-primary";
+const fileClass =
+  "mt-2 w-full rounded-xl border border-dashed border-line bg-background px-4 py-4 text-sm font-normal text-muted file:mr-4 file:rounded-xl file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white";
 
 function textValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -63,16 +75,6 @@ function numberValue(formData: FormData, key: string) {
   if (typeof value !== "string" || !value.trim()) return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
-}
-
-function googleRatingValue(formData: FormData) {
-  const value = numberValue(formData, "google_rating");
-  return value !== null && value >= 1 && value <= 5 ? Math.round(value * 10) / 10 : null;
-}
-
-function nonNegativeIntegerValue(formData: FormData, key: string) {
-  const value = numberValue(formData, key);
-  return value !== null && value >= 0 ? Math.floor(value) : null;
 }
 
 function specialtiesValue(formData: FormData) {
@@ -92,9 +94,9 @@ function completionScore(profile: Partial<Profile>, isProfessional: boolean) {
         profile.profession_type,
         profile.email,
         profile.bio,
+        profile.profile_headline,
         profile.specialties?.length ? "specialties" : null,
         profile.service_capabilities?.length ? "services" : null,
-        profile.hourly_rate,
         profile.pricing_model,
         profile.price_from || profile.price_to,
         profile.work_modes?.length ? "work modes" : null,
@@ -103,6 +105,39 @@ function completionScore(profile: Partial<Profile>, isProfessional: boolean) {
       ]
     : [profile.full_name, profile.location, profile.email, profile.phone];
   return Math.round((fields.filter(Boolean).length / fields.length) * 100);
+}
+
+function fileValue(formData: FormData, key: string) {
+  const value = formData.get(key);
+  return value instanceof File && value.size > 0 ? value : null;
+}
+
+function mediaExtension(file: File) {
+  if (file.type === "image/png") return "png";
+  if (file.type === "image/webp") return "webp";
+  return "jpg";
+}
+
+async function uploadProfileMedia(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  userId: string,
+  kind: "logo" | "banner",
+  file: File | null
+) {
+  if (!file) return { path: null, error: null };
+  if (!allowedProfileMediaTypes.includes(file.type)) {
+    return { path: null, error: `${kind === "logo" ? "Logo" : "Banner"} must be a JPEG, PNG, or WebP image.` };
+  }
+  if (file.size > maxProfileMediaSize) {
+    return { path: null, error: `${kind === "logo" ? "Logo" : "Banner"} must be smaller than 5 MB.` };
+  }
+
+  const path = `${userId}/${kind}-${crypto.randomUUID()}.${mediaExtension(file)}`;
+  const { error } = await supabase.storage.from(profileMediaBucket).upload(path, file, {
+    contentType: file.type,
+    upsert: false,
+  });
+  return { path: error ? null : path, error: error?.message ?? null };
 }
 
 function Field({
@@ -136,6 +171,35 @@ async function updateProfile(formData: FormData) {
   if (!accountRole) redirect("/onboarding?next=%2Faccount%2Fprofile");
   const isProfessional = accountRole === "designer";
 
+  const { data: currentProfile } = await supabase
+    .from("profiles")
+    .select("profile_logo_path, profile_banner_path")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const headline = textValue(formData, "profile_headline");
+  const bio = textValue(formData, "bio");
+  const cooperationTerms = textValue(formData, "cooperation_terms");
+  const specialties = specialtiesValue(formData);
+  const moderationError = isProfessional
+    ? publicTextError([headline, bio, cooperationTerms, ...specialties])
+    : null;
+  if (moderationError) {
+    redirect(`/account/profile?error=${encodeURIComponent(moderationError)}`);
+  }
+
+  const logoUpload = isProfessional
+    ? await uploadProfileMedia(supabase, user.id, "logo", fileValue(formData, "profile_logo"))
+    : { path: null, error: null };
+  if (logoUpload.error) redirect(`/account/profile?error=${encodeURIComponent(logoUpload.error)}`);
+  const bannerUpload = isProfessional
+    ? await uploadProfileMedia(supabase, user.id, "banner", fileValue(formData, "profile_banner"))
+    : { path: null, error: null };
+  if (bannerUpload.error) redirect(`/account/profile?error=${encodeURIComponent(bannerUpload.error)}`);
+
+  const placeId = isProfessional ? textValue(formData, "google_place_id") : null;
+  const google = placeId ? await fetchGooglePlaceSummary(placeId) : { data: null, error: null };
+
   const commonProfile = {
     id: user.id,
     full_name: textValue(formData, "full_name"),
@@ -146,25 +210,29 @@ async function updateProfile(formData: FormData) {
   const payload = isProfessional
     ? {
         ...commonProfile,
-        bio: textValue(formData, "bio"),
+        profile_headline: headline,
+        profile_logo_path: logoUpload.path ?? currentProfile?.profile_logo_path ?? null,
+        profile_banner_path: bannerUpload.path ?? currentProfile?.profile_banner_path ?? null,
+        bio,
         profession_type: textValue(formData, "profession_type"),
         user_type: "professional",
-        specialties: specialtiesValue(formData),
+        specialties,
         service_capabilities: serviceCapabilityValues(formData),
         website: textValue(formData, "website"),
-        hourly_rate: numberValue(formData, "hourly_rate"),
+        hourly_rate: null,
         pricing_model: textValue(formData, "pricing_model"),
         price_from: numberValue(formData, "price_from"),
         price_to: numberValue(formData, "price_to"),
         minimum_project_budget: numberValue(formData, "minimum_project_budget"),
         work_modes: workModeValues(formData),
         availability_status: textValue(formData, "availability_status"),
-        cooperation_terms: textValue(formData, "cooperation_terms"),
+        cooperation_terms: cooperationTerms,
         years_experience: numberValue(formData, "years_experience"),
-        google_business_url: textValue(formData, "google_business_url"),
-        google_rating: googleRatingValue(formData),
-        google_review_count: nonNegativeIntegerValue(formData, "google_review_count"),
-        google_rating_updated_at: new Date().toISOString(),
+        google_place_id: placeId,
+        google_business_url: google.data?.businessUrl ?? null,
+        google_rating: google.data?.rating ?? null,
+        google_review_count: google.data?.reviewCount ?? null,
+        google_rating_updated_at: google.data ? new Date().toISOString() : null,
       }
     : { ...commonProfile, user_type: "client" };
 
@@ -176,6 +244,9 @@ async function updateProfile(formData: FormData) {
   revalidatePath("/client");
   revalidatePath("/designers");
   revalidatePath(`/designers/${user.id}`);
+  if (isProfessional && google.error) {
+    redirect(`/account/profile?notice=${encodeURIComponent(google.error)}`);
+  }
   redirect(isProfessional ? `/designers/${user.id}` : "/client?profileUpdated=1");
 }
 
@@ -195,6 +266,11 @@ async function deleteProfessionalProfile(formData: FormData) {
     .from("projects")
     .select("image_path, image_paths")
     .eq("profile_id", user.id);
+  const { data: profileMedia } = await supabase
+    .from("profiles")
+    .select("profile_logo_path, profile_banner_path")
+    .eq("id", user.id)
+    .maybeSingle();
   const paths = Array.from(
     new Set(
       ((projectData ?? []) as ProjectImagePaths[]).flatMap((project) =>
@@ -213,6 +289,12 @@ async function deleteProfessionalProfile(formData: FormData) {
   if (paths.length) {
     await supabase.storage.from(projectImagesBucket).remove(paths);
   }
+  const mediaPaths = [profileMedia?.profile_logo_path, profileMedia?.profile_banner_path].filter(
+    (path): path is string => Boolean(path)
+  );
+  if (mediaPaths.length) {
+    await supabase.storage.from(profileMediaBucket).remove(mediaPaths);
+  }
 
   revalidatePath("/account");
   revalidatePath("/account/profile");
@@ -225,7 +307,7 @@ async function deleteProfessionalProfile(formData: FormData) {
 export default async function EditProfilePage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string }>;
+  searchParams?: Promise<{ error?: string; notice?: string }>;
 }) {
   const sp = (await searchParams) ?? {};
   const supabase = await createSupabaseServerClient();
@@ -237,7 +319,7 @@ export default async function EditProfilePage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "full_name, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count"
+      "full_name, profile_headline, profile_logo_path, profile_banner_path, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_place_id, google_rating, google_review_count, google_rating_updated_at"
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -304,6 +386,10 @@ export default async function EditProfilePage({
             <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
               {sp.error}
             </div>
+          ) : sp.notice ? (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+              {sp.notice}
+            </div>
           ) : null}
 
           <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
@@ -332,14 +418,24 @@ export default async function EditProfilePage({
               </Field>
 
               {isProfessional ? (
-                <Field label="Profession type">
-                  <input
-                    name="profession_type"
-                    defaultValue={p.profession_type ?? ""}
-                    placeholder="Interior designer / architect"
-                    className={fieldClass}
-                  />
-                </Field>
+                <>
+                  <Field label="Profession type">
+                    <input
+                      name="profession_type"
+                      defaultValue={p.profession_type ?? ""}
+                      placeholder="Interior designer / architect"
+                      className={fieldClass}
+                    />
+                  </Field>
+                  <div className="sm:col-span-2 grid gap-5 sm:grid-cols-2">
+                    <Field label="Profile logo" hint="square image, max 5 MB">
+                      <input name="profile_logo" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} />
+                    </Field>
+                    <Field label="Profile banner" hint="wide image, max 5 MB">
+                      <input name="profile_banner" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} />
+                    </Field>
+                  </div>
+                </>
               ) : (
                 <>
                   <Field label="Email">
@@ -365,16 +461,6 @@ export default async function EditProfilePage({
             </div>
 
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
-              <Field label="Hourly rate" hint="PLN">
-                <input
-                  name="hourly_rate"
-                  defaultValue={p.hourly_rate ?? ""}
-                  inputMode="numeric"
-                  placeholder="150"
-                  className={fieldClass}
-                />
-              </Field>
-
               <Field label="Years of experience">
                 <input
                   name="years_experience"
@@ -397,11 +483,11 @@ export default async function EditProfilePage({
                 </select>
               </Field>
 
-              <Field label="Typical design fee from" hint="PLN">
+              <Field label="Price from" hint="PLN per selected pricing model">
                 <input name="price_from" defaultValue={p.price_from ?? ""} inputMode="numeric" placeholder="5000" className={fieldClass} />
               </Field>
 
-              <Field label="Typical design fee to" hint="PLN">
+              <Field label="Price to" hint="PLN per selected pricing model">
                 <input name="price_to" defaultValue={p.price_to ?? ""} inputMode="numeric" placeholder="15000" className={fieldClass} />
               </Field>
 
@@ -436,43 +522,26 @@ export default async function EditProfilePage({
               <div className="sm:col-span-2 rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-5">
                 <div className="text-sm font-bold text-foreground">Google Business rating</div>
                 <p className="mt-1 text-sm leading-6 text-muted">
-                  Link your public Google profile and show its current rating on your ArchiCompass profile.
+                  Add the Place ID from your Google Business profile. ArchiCompass verifies the rating directly through Google; ratings cannot be entered manually.
                 </p>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <div className="sm:col-span-2">
-                    <Field label="Google Business profile URL">
+                    <Field label="Google Place ID">
                       <input
-                        name="google_business_url"
-                        type="url"
-                        defaultValue={p.google_business_url ?? ""}
-                        placeholder="https://g.page/..."
+                        name="google_place_id"
+                        defaultValue={p.google_place_id ?? ""}
+                        placeholder="ChIJ..."
                         className={fieldClass}
                       />
                     </Field>
                   </div>
-                  <Field label="Google rating" hint="1.0-5.0">
-                    <input
-                      name="google_rating"
-                      type="number"
-                      min="1"
-                      max="5"
-                      step="0.1"
-                      defaultValue={p.google_rating ?? ""}
-                      placeholder="4.8"
-                      className={fieldClass}
-                    />
-                  </Field>
-                  <Field label="Number of Google reviews">
-                    <input
-                      name="google_review_count"
-                      type="number"
-                      min="0"
-                      step="1"
-                      defaultValue={p.google_review_count ?? ""}
-                      placeholder="24"
-                      className={fieldClass}
-                    />
-                  </Field>
+                  <div className="sm:col-span-2 rounded-xl border border-line bg-card p-4 text-sm text-muted">
+                    {p.google_rating !== null && p.google_rating !== undefined
+                      ? `Verified: ${p.google_rating.toFixed(1)} from ${p.google_review_count ?? 0} Google reviews.`
+                      : p.google_place_id
+                        ? "Place ID saved. Verification will run when Google Places is connected."
+                        : "No verified Google rating yet."}
+                  </div>
                 </div>
               </div>
 
@@ -509,6 +578,16 @@ export default async function EditProfilePage({
             </div>
 
             <div className="mt-6 grid gap-5">
+              <Field label="Profile headline" hint="short text shown on the banner, max 140 characters">
+                <input
+                  name="profile_headline"
+                  maxLength={140}
+                  defaultValue={p.profile_headline ?? ""}
+                  placeholder="Warm, functional interiors for modern city living"
+                  className={fieldClass}
+                />
+              </Field>
+
               <Field label="Specialties" hint="separate with commas">
                 <input
                   name="specialties"
@@ -542,7 +621,7 @@ export default async function EditProfilePage({
                 </div>
               </fieldset>
 
-              <Field label="Bio">
+              <Field label="About / design approach">
                 <textarea
                   name="bio"
                   defaultValue={p.bio ?? ""}
