@@ -4,7 +4,14 @@ import { notFound, redirect } from "next/navigation";
 import ConversationAutoRefresh from "@/components/ConversationAutoRefresh";
 import PendingSubmitButton from "@/components/PendingSubmitButton";
 import ReferencePhotoGrid from "@/components/ReferencePhotoGrid";
+import MessageAttachments from "@/components/MessageAttachments";
 import { sendConversationNotificationEmail } from "@/lib/email/conversation-notification";
+import {
+  attachmentFiles,
+  messageAttachmentPreviews,
+  uploadMessageAttachments,
+  type MessageAttachment,
+} from "@/lib/message-attachments";
 import { referencePhotoPreviews } from "@/lib/reference-photos";
 import { getStudioMemberships } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -32,12 +39,16 @@ type Message = {
   body: string;
   read_at: string | null;
   created_at: string;
+  attachment_names: string[] | null;
+  attachment_paths: string[] | null;
+  attachment_types: string[] | null;
 };
 
 type ClientProfile = {
   full_name: string | null;
   email: string | null;
   location: string | null;
+  phone: string | null;
 };
 
 type TeamProfile = { id: string; full_name: string | null; email: string | null };
@@ -63,8 +74,9 @@ async function sendMessage(formData: FormData) {
   const inquiryId = textValue(formData, "inquiry_id");
   const body = textValue(formData, "body");
   if (!inquiryId || !isUuid(inquiryId)) redirect("/studio/inbox");
-  if (!body) actionError(inquiryId, "Write a message before sending.");
-  if (body.length > 4000) actionError(inquiryId, "Messages can be up to 4,000 characters.");
+  const files = attachmentFiles(formData);
+  if (!body && !files.length) actionError(inquiryId, "Write a message or attach a file before sending.");
+  if ((body?.length ?? 0) > 4000) actionError(inquiryId, "Messages can be up to 4,000 characters.");
 
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -83,12 +95,21 @@ async function sendMessage(formData: FormData) {
     .maybeSingle();
   if (!inquiry) actionError(inquiryId, "This conversation is not available.");
 
-  const { error } = await supabase.from("inquiry_messages").insert({
+  const upload = await uploadMessageAttachments({ files, inquiryId, supabase, userId: user.id });
+  if (upload.error) actionError(inquiryId, upload.error);
+
+  const { data: insertedMessage, error } = await supabase.from("inquiry_messages").insert({
     inquiry_id: inquiryId,
     sender_id: user.id,
-    body,
-  });
-  if (error) actionError(inquiryId, error.message);
+    body: body || "Shared attachments",
+    attachment_names: upload.names,
+    attachment_paths: upload.paths,
+    attachment_types: upload.types,
+  }).select("id").single();
+  if (error) {
+    if (upload.paths.length) await supabase.storage.from("message-attachments").remove(upload.paths);
+    actionError(inquiryId, error.message);
+  }
 
   if (inquiry.status === "sent") {
     await supabase
@@ -106,7 +127,7 @@ async function sendMessage(formData: FormData) {
     supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
   ]);
   const notification = await sendConversationNotificationEmail({
-    body,
+    body: body || `Shared ${upload.names.join(", ")}`,
     inquiryId,
     recipient: {
       email: clientProfile?.email || null,
@@ -118,6 +139,13 @@ async function sendMessage(formData: FormData) {
   });
   if (notification.error) {
     console.error("Conversation email notification failed", notification.error);
+  }
+  if (insertedMessage?.id) {
+    await supabase.from("inquiry_messages").update({
+      immediate_email_status: notification.status,
+      immediate_email_sent_at: notification.status === "sent" ? new Date().toISOString() : null,
+      immediate_email_error: notification.error,
+    }).eq("id", insertedMessage.id);
   }
 
   revalidatePath("/studio");
@@ -275,12 +303,12 @@ export default async function StudioConversationPage({
   const [{ data: messageData }, { data: clientData }, photos] = await Promise.all([
     supabase
       .from("inquiry_messages")
-      .select("id, sender_id, body, read_at, created_at")
+      .select("id, sender_id, body, read_at, created_at, attachment_names, attachment_paths, attachment_types")
       .eq("inquiry_id", inquiry.id)
       .order("created_at", { ascending: true }),
     supabase
       .from("profiles")
-      .select("full_name, email, location")
+      .select("full_name, email, phone, location")
       .eq("id", inquiry.client_id)
       .maybeSingle(),
     referencePhotoPreviews(
@@ -290,6 +318,11 @@ export default async function StudioConversationPage({
     ),
   ]);
   const messages = (messageData ?? []) as Message[];
+  const messageAttachmentEntries = await Promise.all(messages.map(async (message): Promise<[string, MessageAttachment[]]> => [
+    message.id,
+    await messageAttachmentPreviews(supabase, message.attachment_names, message.attachment_paths, message.attachment_types),
+  ]));
+  const attachmentsByMessage = new Map(messageAttachmentEntries);
   const client = clientData as ClientProfile | null;
   const clientName = client?.full_name || client?.email || "Client";
   const { data: teamMemberships } = inquiry.studio_id
@@ -419,6 +452,7 @@ export default async function StudioConversationPage({
                       {senderLabel} · {formatDate(message.created_at)}
                     </div>
                     <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{message.body}</p>
+                    <MessageAttachments attachments={attachmentsByMessage.get(message.id) ?? []} inverted={fromTeam} />
                     {fromTeam ? (
                       <div className="mt-2 text-right text-[11px] font-semibold opacity-70">
                         {message.read_at ? "Read by client" : "Sent"}
@@ -442,12 +476,15 @@ export default async function StudioConversationPage({
                 Reply to {clientName}
                 <textarea
                   name="body"
-                  required
                   maxLength={4000}
                   rows={5}
                   placeholder="Ask a question, confirm fit, or suggest the next step..."
                   className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary"
                 />
+              </label>
+              <label className="mt-3 block text-sm font-semibold">
+                Attach plans or documents <span className="font-normal text-muted">up to 5 files, 20 MB each</span>
+                <input name="attachments" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.dwg,.dxf,.zip,.txt" className="mt-2 block w-full rounded-xl border border-dashed border-line bg-background px-4 py-3 text-sm font-normal text-muted" />
               </label>
               <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs leading-5 text-muted">
@@ -486,6 +523,14 @@ export default async function StudioConversationPage({
                   <span className="text-right font-semibold">{value}</span>
                 </div>
               ))}
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-line bg-card p-5 shadow-sm">
+            <div className="text-sm font-semibold text-primary">Client contact</div>
+            <div className="mt-3 grid gap-2 text-sm">
+              <div><span className="text-muted">Email: </span><span className="font-semibold">{client?.email || "Not provided"}</span></div>
+              <div><span className="text-muted">Phone: </span><span className="font-semibold">{client?.phone || "Not provided"}</span></div>
             </div>
           </section>
 

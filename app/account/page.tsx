@@ -17,6 +17,16 @@ type Profile = {
   user_type: string | null;
   specialties: string[] | null;
   bio: string | null;
+  email: string | null;
+  phone: string | null;
+  service_capabilities: string[] | null;
+  hourly_rate: number | null;
+  pricing_model: string | null;
+  price_from: number | null;
+  price_to: number | null;
+  work_modes: string[] | null;
+  availability_status: string | null;
+  years_experience: number | null;
 };
 
 type Project = {
@@ -35,14 +45,24 @@ function profileName(profile: Partial<Profile>, email?: string) {
   return profile.full_name || email || "Your ArchiCompass account";
 }
 
-function profileScore(profile: Partial<Profile>) {
-  const fields = [
-    profile.full_name,
-    profile.location,
-    profile.profession_type,
-    profile.bio,
-    profile.specialties?.length ? "specialties" : null,
-  ];
+function profileScore(profile: Partial<Profile>, isProfessional: boolean) {
+  const fields = isProfessional
+    ? [
+        profile.full_name,
+        profile.location,
+        profile.profession_type,
+        profile.email,
+        profile.bio,
+        profile.specialties?.length ? "specialties" : null,
+        profile.service_capabilities?.length ? "services" : null,
+        profile.hourly_rate,
+        profile.pricing_model,
+        profile.price_from || profile.price_to,
+        profile.work_modes?.length ? "work modes" : null,
+        profile.availability_status,
+        profile.years_experience,
+      ]
+    : [profile.full_name, profile.location, profile.email, profile.phone];
   return Math.round((fields.filter(Boolean).length / fields.length) * 100);
 }
 
@@ -62,7 +82,7 @@ export default async function AccountPage({
 
   const { data: profileData } = await supabase
     .from("profiles")
-    .select("full_name, location, profession_type, user_type, specialties, bio")
+    .select("full_name, location, profession_type, user_type, specialties, bio, email, phone, service_capabilities, hourly_rate, pricing_model, price_from, price_to, work_modes, availability_status, years_experience")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -99,8 +119,8 @@ export default async function AccountPage({
   const briefs = (briefsData ?? []) as ProjectBrief[];
   const sentInquiries = (sentInquiriesData ?? []) as DesignerInquiry[];
   const incomingInquiries = (incomingInquiriesData ?? []) as DesignerInquiry[];
-  const score = profileScore(profile);
   const isProfessional = accountRole === "designer";
+  const score = profileScore(profile, isProfessional);
   const hasPublicProfile = isProfessional && Boolean(profileData);
 
   return (

@@ -86,7 +86,7 @@ export default function Header() {
   const isGetStartedActive = pathname === "/get-started";
   const [isOpen, setIsOpen] = useState(false);
   const [account, setAccount] = useState<
-    { id: string; isAdmin: boolean; isProfessional: boolean } | null
+    { id: string; isAdmin: boolean; isProfessional: boolean; unreadCount: number } | null
   >(null);
 
   useEffect(() => {
@@ -119,13 +119,56 @@ export default function Header() {
           .maybeSingle(),
       ]);
 
+      const isProfessional =
+        accountRole?.role === "designer" ||
+        (!accountRole && isProfessionalProfile(profile));
+      let unreadCount = 0;
+      if (isProfessional) {
+        const { data: membershipData } = await supabase
+          .from("studio_members")
+          .select("studio_id")
+          .eq("user_id", userId)
+          .eq("status", "active");
+        const studioIds = (membershipData ?? []).map((membership) => membership.studio_id);
+        let inquiryQuery = supabase.from("designer_inquiries").select("id, client_id");
+        inquiryQuery = studioIds.length
+          ? inquiryQuery.or(`designer_id.eq.${userId},studio_id.in.(${studioIds.join(",")})`)
+          : inquiryQuery.eq("designer_id", userId);
+        const { data: inquiryData } = await inquiryQuery;
+        const inquiryIds = (inquiryData ?? []).map((inquiry) => inquiry.id);
+        const clientIds = Array.from(new Set((inquiryData ?? []).map((inquiry) => inquiry.client_id)));
+        if (inquiryIds.length && clientIds.length) {
+          const { count } = await supabase
+            .from("inquiry_messages")
+            .select("id", { count: "exact", head: true })
+            .in("inquiry_id", inquiryIds)
+            .in("sender_id", clientIds)
+            .is("read_at", null);
+          unreadCount = count ?? 0;
+        }
+      } else {
+        const { data: inquiryData } = await supabase
+          .from("designer_inquiries")
+          .select("id")
+          .eq("client_id", userId);
+        const inquiryIds = (inquiryData ?? []).map((inquiry) => inquiry.id);
+        if (inquiryIds.length) {
+          const { count } = await supabase
+            .from("inquiry_messages")
+            .select("id", { count: "exact", head: true })
+            .in("inquiry_id", inquiryIds)
+            .neq("sender_id", userId)
+            .is("read_at", null);
+          unreadCount = count ?? 0;
+        }
+      }
+
       if (active) {
         setAccount({
           id: userId,
           isAdmin: Boolean(adminRole),
-          isProfessional:
-            accountRole?.role === "designer" ||
-            (!accountRole && isProfessionalProfile(profile)),
+          isProfessional,
+          unreadCount,
         });
       }
     }
@@ -171,6 +214,17 @@ export default function Header() {
           </button>
           {account ? (
             <div className="flex items-center gap-1 rounded-xl border border-line bg-card p-1 shadow-sm">
+              <Link
+                href={account.isProfessional ? "/studio/inbox" : "/client/messages"}
+                className="relative rounded-lg px-3 py-2 text-sm font-semibold text-muted transition hover:bg-primary-soft hover:text-primary"
+              >
+                Messages
+                {account.unreadCount ? (
+                  <span className="ml-1.5 inline-flex min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                    {account.unreadCount > 99 ? "99+" : account.unreadCount}
+                  </span>
+                ) : null}
+              </Link>
               {workspaceItems.map((item) => (
                 <WorkspaceLink key={item.href} href={item.href}>
                   {item.label}
@@ -237,6 +291,9 @@ export default function Header() {
             {account ? (
               <div className="mt-2 grid gap-2 border-t border-line pt-3">
                 <div className="px-3 text-xs font-semibold uppercase text-muted">Workspace</div>
+                <NavLink href={account.isProfessional ? "/studio/inbox" : "/client/messages"} onClick={() => setIsOpen(false)}>
+                  Messages{account.unreadCount ? ` (${account.unreadCount})` : ""}
+                </NavLink>
                 {workspaceItems.map((item) => (
                   <NavLink key={item.href} href={item.href} onClick={() => setIsOpen(false)}>
                     {item.label}

@@ -193,9 +193,14 @@ export default async function ClientMessagesPage({
                         <div className="mt-2 text-xs">{formatDate(latest?.created_at || inquiry.created_at)}</div>
                       </div>
                     </div>
-                    <Link href={`/account/inquiries/${inquiry.id}`} className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white">
-                      {unread ? "Read message" : "Open conversation"}
-                    </Link>
+                    <div className="grid gap-2">
+                      <Link href={`/account/inquiries/${inquiry.id}`} className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white">
+                        {unread ? "Read message" : "Open conversation"}
+                      </Link>
+                      <Link href={studio ? `/studios/${studio.id}` : `/designers/${inquiry.designer_id}`} className="rounded-xl border border-line bg-background px-5 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">
+                        Review {studio ? "studio" : "designer"} profile
+                      </Link>
+                    </div>
                   </div>
                 </article>
               );

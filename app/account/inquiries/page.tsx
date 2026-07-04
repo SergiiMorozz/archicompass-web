@@ -7,6 +7,7 @@ import {
   type ReferencePhotoPreview,
 } from "@/lib/reference-photos";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getExplicitAccountRole } from "@/lib/studios";
 
 export const revalidate = 0;
 
@@ -309,24 +310,27 @@ export default async function InquiriesPage({
   const user = userData.user;
 
   if (!user) redirect("/login");
+  const accountRole = await getExplicitAccountRole(supabase, user.id);
+  if (!accountRole) redirect("/onboarding?next=%2Faccount%2Finquiries");
+  const isDesigner = accountRole === "designer";
 
-  const { data: sentData, error: sentError } = await supabase
+  const { data: sentData, error: sentError } = !isDesigner ? await supabase
     .from("designer_inquiries")
     .select(
       "id, client_id, designer_id, brief_id, subject, message, status, brief_snapshot, brief_text, reference_photo_names, reference_photo_paths, created_at"
     )
     .eq("client_id", user.id)
     .order("created_at", { ascending: false })
-    .limit(24);
+    .limit(24) : { data: [], error: null };
 
-  const { data: incomingData, error: incomingError } = await supabase
+  const { data: incomingData, error: incomingError } = isDesigner ? await supabase
     .from("designer_inquiries")
     .select(
       "id, client_id, designer_id, brief_id, subject, message, status, brief_snapshot, brief_text, reference_photo_names, reference_photo_paths, created_at"
     )
     .eq("designer_id", user.id)
     .order("created_at", { ascending: false })
-    .limit(24);
+    .limit(24) : { data: [], error: null };
 
   const sent = (sentData ?? []) as Inquiry[];
   const incoming = (incomingData ?? []) as Inquiry[];
@@ -380,34 +384,31 @@ export default async function InquiriesPage({
                 Brief requests
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-                Track saved briefs you sent to designers and incoming requests sent to
-                your own profile.
+                {isDesigner
+                  ? "Review project briefs and messages sent to your professional profile."
+                  : "Track the project briefs and conversations you started with designers."}
               </p>
             </div>
 
             <div className="rounded-2xl border border-line bg-background p-5 shadow-sm">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-3">
                 <div className="rounded-xl border border-line bg-card p-4">
-                  <div className="text-sm text-muted">Sent</div>
-                  <div className="mt-1 text-2xl font-bold">{sent.length}</div>
-                </div>
-                <div className="rounded-xl border border-line bg-card p-4">
-                  <div className="text-sm text-muted">Incoming</div>
-                  <div className="mt-1 text-2xl font-bold">{incoming.length}</div>
+                  <div className="text-sm text-muted">{isDesigner ? "Incoming" : "Sent"}</div>
+                  <div className="mt-1 text-2xl font-bold">{isDesigner ? incoming.length : sent.length}</div>
                 </div>
               </div>
-              <Link
+              {!isDesigner ? <Link
                 href="/account/briefs"
                 className="mt-4 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
               >
                 <span className="w-full">Send a saved brief</span>
-              </Link>
+              </Link> : null}
             </div>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-2">
+      <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6">
         <div className="rounded-2xl border border-line bg-card p-5 text-sm leading-6 text-muted lg:col-span-2">
           <div className="font-semibold text-foreground">Request status guide</div>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -451,7 +452,7 @@ export default async function InquiriesPage({
           </div>
         ) : null}
 
-        <div>
+        {!isDesigner ? <div>
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="text-2xl font-bold">Sent requests</h2>
             <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
@@ -490,9 +491,9 @@ export default async function InquiriesPage({
               </Link>
             </div>
           )}
-        </div>
+        </div> : null}
 
-        <div>
+        {isDesigner ? <div>
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="text-2xl font-bold">Incoming requests</h2>
             <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
@@ -539,7 +540,7 @@ export default async function InquiriesPage({
               </div>
             </div>
           )}
-        </div>
+        </div> : null}
       </section>
     </main>
   );

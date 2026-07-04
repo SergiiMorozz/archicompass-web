@@ -4,7 +4,14 @@ import { notFound, redirect } from "next/navigation";
 import ConversationAutoRefresh from "@/components/ConversationAutoRefresh";
 import PendingSubmitButton from "@/components/PendingSubmitButton";
 import ReferencePhotoGrid from "@/components/ReferencePhotoGrid";
+import MessageAttachments from "@/components/MessageAttachments";
 import { sendConversationNotificationEmail } from "@/lib/email/conversation-notification";
+import {
+  attachmentFiles,
+  messageAttachmentPreviews,
+  uploadMessageAttachments,
+  type MessageAttachment,
+} from "@/lib/message-attachments";
 import { referencePhotoPreviews } from "@/lib/reference-photos";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -31,6 +38,9 @@ type Message = {
   body: string;
   read_at: string | null;
   created_at: string;
+  attachment_names: string[] | null;
+  attachment_paths: string[] | null;
+  attachment_types: string[] | null;
 };
 
 type Profile = {
@@ -60,8 +70,9 @@ async function sendParticipantMessage(formData: FormData) {
   const inquiryId = textValue(formData, "inquiry_id");
   const body = textValue(formData, "body");
   if (!inquiryId || !isUuid(inquiryId)) redirect("/account/inquiries");
-  if (!body) redirect(`/account/inquiries/${inquiryId}?error=Write%20a%20message%20before%20sending`);
-  if (body.length > 4000) redirect(`/account/inquiries/${inquiryId}?error=Message%20is%20too%20long`);
+  const files = attachmentFiles(formData);
+  if (!body && !files.length) redirect(`/account/inquiries/${inquiryId}?error=Write%20a%20message%20or%20attach%20a%20file`);
+  if ((body?.length ?? 0) > 4000) redirect(`/account/inquiries/${inquiryId}?error=Message%20is%20too%20long`);
 
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -76,12 +87,19 @@ async function sendParticipantMessage(formData: FormData) {
   if (!inquiry) redirect("/client/messages");
   if (inquiry.client_id !== user.id) redirect(`/studio/inbox/${inquiryId}`);
 
-  const { error } = await supabase.from("inquiry_messages").insert({
+  const upload = await uploadMessageAttachments({ files, inquiryId, supabase, userId: user.id });
+  if (upload.error) redirect(`/account/inquiries/${inquiryId}?error=${encodeURIComponent(upload.error)}`);
+
+  const { data: insertedMessage, error } = await supabase.from("inquiry_messages").insert({
     inquiry_id: inquiryId,
     sender_id: user.id,
-    body,
-  });
+    body: body || "Shared attachments",
+    attachment_names: upload.names,
+    attachment_paths: upload.paths,
+    attachment_types: upload.types,
+  }).select("id").single();
   if (error) {
+    if (upload.paths.length) await supabase.storage.from("message-attachments").remove(upload.paths);
     redirect(`/account/inquiries/${inquiryId}?error=${encodeURIComponent(error.message)}`);
   }
 
@@ -102,7 +120,7 @@ async function sendParticipantMessage(formData: FormData) {
         : Promise.resolve({ data: null }),
     ]);
   const notification = await sendConversationNotificationEmail({
-    body,
+    body: body || `Shared ${upload.names.join(", ")}`,
     inquiryId,
     recipient: {
       email: studio?.email || designerProfile?.email || null,
@@ -114,6 +132,13 @@ async function sendParticipantMessage(formData: FormData) {
   });
   if (notification.error) {
     console.error("Conversation email notification failed", notification.error);
+  }
+  if (insertedMessage?.id) {
+    await supabase.from("inquiry_messages").update({
+      immediate_email_status: notification.status,
+      immediate_email_sent_at: notification.status === "sent" ? new Date().toISOString() : null,
+      immediate_email_error: notification.error,
+    }).eq("id", insertedMessage.id);
   }
 
   revalidatePath("/account/inquiries");
@@ -177,7 +202,7 @@ export default async function AccountConversationPage({
   const [{ data: messageData }, { data: profileData }, { data: studioData }, photos] = await Promise.all([
     supabase
       .from("inquiry_messages")
-      .select("id, sender_id, body, read_at, created_at")
+      .select("id, sender_id, body, read_at, created_at, attachment_names, attachment_paths, attachment_types")
       .eq("inquiry_id", inquiry.id)
       .order("created_at", { ascending: true }),
     supabase.from("profiles").select("id, full_name, email").eq("id", inquiry.designer_id).maybeSingle(),
@@ -187,6 +212,11 @@ export default async function AccountConversationPage({
     referencePhotoPreviews(supabase, inquiry.reference_photo_names, inquiry.reference_photo_paths),
   ]);
   const messages = (messageData ?? []) as Message[];
+  const messageAttachmentEntries = await Promise.all(messages.map(async (message): Promise<[string, MessageAttachment[]]> => [
+    message.id,
+    await messageAttachmentPreviews(supabase, message.attachment_names, message.attachment_paths, message.attachment_types),
+  ]));
+  const attachmentsByMessage = new Map(messageAttachmentEntries);
   const other = profileData as Profile | null;
   const studio = studioData as Studio | null;
   const otherName = studio?.name || other?.full_name || studio?.email || other?.email || "Design professional";
@@ -203,6 +233,9 @@ export default async function AccountConversationPage({
             <div>
               <div className="text-sm font-semibold text-primary">Conversation with {otherName}</div>
               <h1 className="mt-2 text-4xl font-bold">{inquiry.subject}</h1>
+              <Link href={studio ? `/studios/${studio.id}` : `/designers/${inquiry.designer_id}`} className="mt-3 inline-flex text-sm font-bold text-primary hover:underline">
+                Open {studio ? "studio" : "designer"} profile
+              </Link>
             </div>
             <span className={`w-fit rounded-full px-3 py-1 text-sm font-semibold capitalize ${statusClass(inquiry.status)}`}>
               {inquiry.status}
@@ -256,6 +289,7 @@ export default async function AccountConversationPage({
                     {mine ? "You" : otherName} · {formatDate(message.created_at)}
                   </div>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{message.body}</p>
+                  <MessageAttachments attachments={attachmentsByMessage.get(message.id) ?? []} inverted={mine} />
                   {mine ? (
                     <div className="mt-2 text-right text-[11px] font-semibold opacity-70">
                       {message.read_at ? "Read" : "Sent"}
@@ -270,7 +304,11 @@ export default async function AccountConversationPage({
             <input type="hidden" name="inquiry_id" value={inquiry.id} />
             <label className="block text-sm font-semibold">
               Reply
-              <textarea name="body" required maxLength={4000} rows={5} placeholder="Write your message..." className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
+              <textarea name="body" maxLength={4000} rows={5} placeholder="Write your message..." className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
+            </label>
+            <label className="mt-3 block text-sm font-semibold">
+              Attach plans or documents <span className="font-normal text-muted">up to 5 files, 20 MB each</span>
+              <input name="attachments" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.dwg,.dxf,.zip,.txt" className="mt-2 block w-full rounded-xl border border-dashed border-line bg-background px-4 py-3 text-sm font-normal text-muted" />
             </label>
             <PendingSubmitButton
               className="mt-3 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"

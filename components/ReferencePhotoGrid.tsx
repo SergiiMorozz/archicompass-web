@@ -26,13 +26,15 @@ export default function ReferencePhotoGrid({
             key={photo.path}
             className="overflow-hidden rounded-xl border border-line bg-card"
           >
-            <img
-              alt={`${title} ${index + 1}: ${photo.name}`}
-              className="aspect-[4/3] w-full object-cover"
-              src={photo.url}
-            />
+            <a href={photo.url} target="_blank" rel="noreferrer" className="group block" title={`Open ${photo.name} full size`}>
+              <img
+                alt={`${title} ${index + 1}: ${photo.name}`}
+                className="aspect-[4/3] w-full object-cover transition group-hover:scale-[1.02]"
+                src={photo.url}
+              />
+            </a>
             <figcaption className="truncate px-3 py-2 text-xs font-semibold text-muted">
-              {photo.name}
+              <a href={photo.url} target="_blank" rel="noreferrer" className="hover:text-primary">{photo.name} - open full size</a>
             </figcaption>
           </figure>
         ))}
