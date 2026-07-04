@@ -15,7 +15,7 @@ const sections = [
   },
   {
     title: "2. Eligibility and accounts",
-    body: "You must be at least 18 years old and able to agree to these terms. Use an email address you control, keep magic links private, and provide accurate information. You are responsible for activity performed through your account.",
+    body: "You must be at least 18 years old and able to agree to these terms. Use an email address you control, keep your password and account recovery links private, and provide accurate information. You are responsible for activity performed through your account.",
   },
   {
     title: "3. Client and professional roles",

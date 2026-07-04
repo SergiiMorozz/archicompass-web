@@ -5,188 +5,193 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
+type Mode = "signin" | "signup";
+type Intent = "client" | "designer";
+type Status =
+  | { type: "idle" }
+  | { type: "loading" }
+  | { type: "success"; message: string }
+  | { type: "error"; message: string };
+
+function intentFromNext(next: string): Intent {
+  if (next.includes("intent=designer") || next.startsWith("/studio")) return "designer";
+  return "client";
+}
+
 function LoginContent() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const searchParams = useSearchParams();
-
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<
-    | { type: "idle" }
-    | { type: "loading" }
-    | { type: "success"; message: string }
-    | { type: "error"; message: string }
-  >({ type: "idle" });
-
   const requestedValue = searchParams.get("next") || "/account";
   const requestedNext = requestedValue.startsWith("/") && !requestedValue.startsWith("//")
     ? requestedValue
     : "/account";
+  const initialMode: Mode = searchParams.get("mode") === "signup" ? "signup" : "signin";
+  const [mode, setMode] = useState<Mode>(initialMode);
+  const [intent, setIntent] = useState<Intent>(() => intentFromNext(requestedNext));
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [status, setStatus] = useState<Status>({ type: "idle" });
 
-  const context = requestedNext.startsWith("/account/briefs")
-    ? {
-        title: "Sign in to send your project brief",
-        copy: "Your selected professional and saved briefs will be waiting after the magic link opens.",
-      }
-    : requestedNext.startsWith("/studio") || requestedNext.startsWith("/account/profile")
-      ? {
-          title: "Sign in to your designer workspace",
-          copy: "Manage your professional profile, studio team, portfolio, and incoming project requests.",
-        }
-      : requestedNext.startsWith("/client")
-        ? {
-            title: "Sign in to your client workspace",
-            copy: "Return to saved briefs, favorite professionals, and active conversations.",
-          }
-        : {
-            title: "Sign in to ArchiCompass",
-            copy: "Use one secure magic link to open the workspace connected to your account role.",
-          };
+  async function destinationAfterSignIn() {
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData.user?.id;
+    if (!userId) return "/login";
+    const { data: roleData } = await supabase
+      .from("account_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (!roleData?.role) {
+      const metadataIntent = userData.user?.user_metadata?.account_intent;
+      const onboardingIntent = metadataIntent === "designer" || metadataIntent === "client"
+        ? metadataIntent
+        : intent;
+      return `/onboarding?intent=${onboardingIntent}`;
+    }
+    if (requestedNext.startsWith("/onboarding") || requestedNext === "/account") {
+      return roleData.role === "designer" ? "/studio" : "/client";
+    }
+    return requestedNext;
+  }
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    const clean = email.trim().toLowerCase();
-    if (!clean) {
-      setStatus({ type: "error", message: "Please enter your email." });
+  async function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) {
+      setStatus({ type: "error", message: "Enter your email address." });
+      return;
+    }
+    if (password.length < 8) {
+      setStatus({ type: "error", message: "Use at least 8 characters for the password." });
       return;
     }
 
     setStatus({ type: "loading" });
+    if (mode === "signin") {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password,
+      });
+      if (error) {
+        setStatus({
+          type: "error",
+          message: error.message === "Invalid login credentials"
+            ? "Email or password is incorrect. You can reset the password below."
+            : error.message,
+        });
+        return;
+      }
+      window.location.assign(await destinationAfterSignIn());
+      return;
+    }
 
-    const origin = window.location.origin;
-    const safeNext = requestedNext;
-    const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email: clean,
-      options: { emailRedirectTo: redirectTo },
+    const next = `/onboarding?intent=${intent}`;
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+    const { data, error } = await supabase.auth.signUp({
+      email: cleanEmail,
+      password,
+      options: {
+        emailRedirectTo: redirectTo,
+        data: { account_intent: intent },
+      },
     });
-
     if (error) {
       setStatus({ type: "error", message: error.message });
       return;
     }
-
+    if (data.session) {
+      window.location.assign(next);
+      return;
+    }
     setStatus({
       type: "success",
-      message:
-        "Magic link sent! Check your email inbox (and spam). Open the link to sign in.",
+      message: "Account created. Open the confirmation email once, then sign in with this email and password.",
     });
   }
 
+  function switchMode(nextMode: Mode) {
+    setMode(nextMode);
+    setStatus({ type: "idle" });
+  }
+
   return (
-    <main className="min-h-screen bg-white text-black">
-      <div className="mx-auto max-w-6xl px-6 py-10">
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-          {/* LEFT */}
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-zinc-700">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              Secure sign-in via magic link
+    <main className="min-h-screen bg-background px-4 py-12 sm:px-6">
+      <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1fr_480px] lg:items-center">
+        <section>
+          <div className="inline-flex items-center gap-2 rounded-full border border-line bg-card px-3 py-1 text-xs font-semibold text-muted">
+            <span className="h-2 w-2 rounded-full bg-accent" />
+            Secure email and password
+          </div>
+          <h1 className="mt-5 text-4xl font-bold leading-tight sm:text-6xl">
+            {mode === "signup" ? "Create your ArchiCompass account" : "Welcome back to ArchiCompass"}
+          </h1>
+          <p className="mt-5 max-w-xl text-lg leading-8 text-muted">
+            {mode === "signup"
+              ? "Choose one account role now. Client and Designer workspaces stay separate after registration."
+              : "Sign in directly with the password you created. No new email link is required."}
+          </p>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-lg border border-line bg-card p-5">
+              <div className="font-bold">For clients</div>
+              <p className="mt-2 text-sm leading-6 text-muted">Save briefs, compare designers, and manage conversations.</p>
             </div>
-
-            <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
-              {context.title}
-            </h1>
-
-            <p className="mt-4 max-w-xl text-zinc-600">
-              {context.copy}
-            </p>
-
-            <Link href="/" className="mt-6 inline-flex text-sm font-medium underline">
-              Explore before signing in
-            </Link>
-
-            <div className="mt-10 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border p-5">
-                <div className="text-sm font-medium">For Clients</div>
-                <p className="mt-2 text-sm text-zinc-600">
-                  Save favorites, contact professionals, and track your project.
-                </p>
-              </div>
-              <div className="rounded-2xl border p-5">
-                <div className="text-sm font-medium">For Professionals</div>
-                <p className="mt-2 text-sm text-zinc-600">
-                  Claim your profile and showcase your work to new clients.
-                </p>
-              </div>
+            <div className="rounded-lg border border-line bg-card p-5">
+              <div className="font-bold">For designers</div>
+              <p className="mt-2 text-sm leading-6 text-muted">Publish a portfolio and receive client project requests.</p>
             </div>
           </div>
+          <Link href="/" className="mt-7 inline-flex text-sm font-bold text-primary hover:underline">Explore the public site</Link>
+        </section>
 
-          {/* RIGHT */}
-          <div className="lg:justify-self-end">
-            <div className="w-full max-w-md rounded-3xl border bg-white p-6 shadow-sm">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-semibold">Magic link sign-in</h2>
-                  <p className="mt-1 text-sm text-zinc-600">
-                    Enter your email — we’ll send you a secure login link.
-                  </p>
-                </div>
-                <div className="rounded-2xl border px-3 py-2 text-xs text-zinc-600">
-                  No password
-                </div>
-              </div>
-
-              <form onSubmit={onSubmit} className="mt-6 space-y-4">
-                <div>
-                  <label className="text-xs text-zinc-600">Email</label>
-                  <input
-                    type="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@company.com"
-                    className="mt-1 w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-black/10"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={status.type === "loading"}
-                  className="w-full rounded-xl bg-black px-4 py-2 text-sm text-white hover:opacity-90 disabled:opacity-50"
-                >
-                  {status.type === "loading" ? "Sending..." : "Send magic link"}
-                </button>
-
-                {status.type === "success" ? (
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-                    {status.message}
-                  </div>
-                ) : status.type === "error" ? (
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    {status.message}
-                  </div>
-                ) : (
-                  <div className="text-xs text-zinc-500">
-                    By continuing you agree to our{" "}
-                    <Link href="/terms" className="underline">Terms</Link> and{" "}
-                    <Link href="/privacy" className="underline">Privacy Policy</Link>.
-                  </div>
-                )}
-              </form>
-
-              <div className="mt-6 text-xs text-zinc-600">
-                <Link href="/" className="underline">
-                  ← Back home
-                </Link>
-              </div>
-            </div>
-
-            <p className="mt-3 max-w-md text-xs text-zinc-500">
-              Tip: If you don’t receive the email, check “Spam / Promotions”.
-            </p>
+        <section className="rounded-lg border border-line bg-card p-6 shadow-[0_18px_50px_rgba(54,31,73,0.10)] sm:p-8">
+          <div className="grid grid-cols-2 rounded-lg bg-background p-1">
+            <button type="button" onClick={() => switchMode("signin")} className={`rounded-md px-4 py-3 text-sm font-bold ${mode === "signin" ? "bg-primary text-white" : "text-muted"}`}>Sign in</button>
+            <button type="button" onClick={() => switchMode("signup")} className={`rounded-md px-4 py-3 text-sm font-bold ${mode === "signup" ? "bg-primary text-white" : "text-muted"}`}>Create account</button>
           </div>
-        </div>
+
+          <form onSubmit={onSubmit} className="mt-6 grid gap-5">
+            {mode === "signup" ? (
+              <fieldset>
+                <legend className="text-sm font-bold">I am joining as</legend>
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  {(["client", "designer"] as Intent[]).map((role) => (
+                    <button key={role} type="button" aria-pressed={intent === role} onClick={() => setIntent(role)} className={`rounded-lg border px-4 py-4 text-left text-sm font-bold capitalize ${intent === role ? "border-primary bg-primary-soft text-primary" : "border-line bg-background"}`}>
+                      {role}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs leading-5 text-muted">One email has one role. Designer accounts receive briefs; client accounts send them.</p>
+              </fieldset>
+            ) : null}
+
+            <label className="text-sm font-bold">
+              Email
+              <input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
+            </label>
+            <label className="text-sm font-bold">
+              Password
+              <input type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 8 characters" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
+            </label>
+
+            <button type="submit" disabled={status.type === "loading"} className="rounded-xl bg-primary px-5 py-3.5 text-sm font-bold text-white disabled:opacity-60">
+              {status.type === "loading" ? "Please wait..." : mode === "signup" ? `Create ${intent} account` : "Sign in"}
+            </button>
+
+            {status.type === "success" ? <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">{status.message}</div> : null}
+            {status.type === "error" ? <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">{status.message}</div> : null}
+          </form>
+
+          {mode === "signin" ? (
+            <Link href="/forgot-password" className="mt-5 inline-flex text-sm font-semibold text-primary hover:underline">Forgot password?</Link>
+          ) : (
+            <p className="mt-5 text-xs leading-5 text-muted">By creating an account you agree to the <Link href="/terms" className="underline">Terms</Link> and <Link href="/privacy" className="underline">Privacy Policy</Link>.</p>
+          )}
+        </section>
       </div>
     </main>
   );
 }
 
 export default function LoginPage() {
-  return (
-    <Suspense fallback={<main className="min-h-screen bg-white" />}>
-      <LoginContent />
-    </Suspense>
-  );
+  return <Suspense fallback={<main className="min-h-screen bg-background" />}><LoginContent /></Suspense>;
 }
