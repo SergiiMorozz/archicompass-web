@@ -6,7 +6,7 @@ Last checkpoint: 2026-07-01
 
 - Supabase restore is working with the new project.
 - Production is deployed through Vercel at
-  `https://archicompass-web-cqyf.vercel.app` from GitHub `main`.
+  `https://archicompass.pl` from GitHub `main`.
 - Vercel production has the Supabase and Gemini environment variables.
 - Supabase Auth uses the Vercel URL as its Site URL and allows callbacks from
   the production site plus local ports 3001 and 3002.

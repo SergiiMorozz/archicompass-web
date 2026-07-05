@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const SITE_NAME = "ArchiCompass";
-export const DEFAULT_SITE_URL = "https://archicompass-web-cqyf.vercel.app";
+export const DEFAULT_SITE_URL = "https://archicompass.pl";
 
 export function siteUrl() {
   return (process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_SITE_URL).replace(/\/$/, "");

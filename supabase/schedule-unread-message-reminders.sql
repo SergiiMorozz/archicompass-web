@@ -24,7 +24,7 @@ select cron.schedule(
   '0 * * * *',
   $job$
     select net.http_get(
-      url := 'https://archicompass-web-cqyf.vercel.app/api/cron/unread-message-reminders',
+      url := 'https://archicompass.pl/api/cron/unread-message-reminders',
       headers := jsonb_build_object(
         'Authorization',
         'Bearer ' || (

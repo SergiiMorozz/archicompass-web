@@ -13,7 +13,7 @@ select cron.schedule(
   '15 3 * * *',
   $job$
     select net.http_get(
-      url := 'https://archicompass-web-cqyf.vercel.app/api/cron/google-rating-sync',
+      url := 'https://archicompass.pl/api/cron/google-rating-sync',
       headers := jsonb_build_object(
         'Authorization',
         'Bearer ' || (
