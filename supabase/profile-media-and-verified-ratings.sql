@@ -10,6 +10,21 @@ alter table public.studios
   add column if not exists profile_logo_path text,
   add column if not exists profile_banner_path text;
 
+-- Remove legacy values that were typed manually before Google verification existed.
+update public.profiles
+set google_business_url = null,
+    google_rating = null,
+    google_review_count = null,
+    google_rating_updated_at = null
+where google_place_id is null;
+
+update public.studios
+set google_business_url = null,
+    google_rating = null,
+    google_review_count = null,
+    google_rating_updated_at = null
+where google_place_id is null;
+
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
   'profile-media',

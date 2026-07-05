@@ -73,6 +73,9 @@ use the same random `CRON_SECRET` in Vercel and Supabase Vault.
 `GOOGLE_PLACES_API_KEY` is server-only. Designers and studios provide a Google Place
 ID; ArchiCompass then imports the current rating, review count, and Maps URL from the
 Places API. Rating values are never accepted from profile forms.
+Run `supabase/schedule-google-rating-sync.sql` to refresh every linked profile once
+per day. Google review text remains on Google; ArchiCompass shows the verified rating,
+review count, and source link.
 
 Optional AI photo style analysis in Project Compass:
 
@@ -113,6 +116,7 @@ supabase/unread-message-reminders.sql
 supabase/schedule-unread-message-reminders.sql
 supabase/message-attachments.sql
 supabase/profile-media-and-verified-ratings.sql
+supabase/schedule-google-rating-sync.sql
 ```
 
 The Studio schema requires `designer_inquiries`, enables RLS, keeps inquiry messages
