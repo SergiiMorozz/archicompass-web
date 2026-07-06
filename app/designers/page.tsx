@@ -411,7 +411,7 @@ function DesignerCard({
               {initials(title)}
             </div>
             <div className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-sm font-semibold text-foreground shadow-sm">
-              {demo ? "Demo profile" : "Beta profile"}
+              Professional profile
             </div>
           </Link>
 
@@ -428,7 +428,7 @@ function DesignerCard({
                     </span>
                   ) : null}
                   <span className="rounded-full bg-[#fff3df] px-3 py-1 text-xs font-semibold text-[#b56b08]">
-                    {demo ? "Example profile" : "Early professional"}
+                    Professional
                   </span>
                   <span className="rounded-full bg-[#eaf2ff] px-3 py-1 text-xs font-semibold text-[#2563eb]">
                     Portfolio
@@ -449,7 +449,7 @@ function DesignerCard({
             </div>
 
             <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">
-              {profile.bio || "This beta profile has not added a public introduction yet."}
+              {profile.bio || "This professional has not added a public introduction yet."}
             </p>
 
             <div className="mt-4 flex flex-wrap gap-2">
@@ -481,7 +481,7 @@ function DesignerCard({
             <div className="mt-5 flex flex-col gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="text-xl font-bold text-primary">{pricingLabel(profile)}</div>
-                <div className="text-sm text-muted">{demo?.budgetFit || "Beta portfolio profile"}</div>
+                <div className="text-sm text-muted">{demo?.budgetFit || "Portfolio profile"}</div>
               </div>
               <div className="flex gap-3">
                 <Link
@@ -515,7 +515,7 @@ function DesignerCard({
       >
         <div className="absolute inset-0 bg-gradient-to-t from-[#1f172a]/78 via-[#1f172a]/20 to-transparent" />
         <div className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-sm font-semibold text-foreground shadow-sm">
-          {demo ? "Demo" : "Beta"}
+          Professional
         </div>
         <div className="absolute bottom-4 left-4 grid h-14 w-14 place-items-center rounded-2xl border-2 border-white bg-primary text-xl font-bold text-white shadow">
           {initials(title)}
@@ -540,7 +540,7 @@ function DesignerCard({
             </span>
           ) : null}
           <span className="rounded-full bg-[#fff3df] px-3 py-1 text-xs font-semibold text-[#b56b08]">
-            {demo ? "Example profile" : "Early professional"}
+            Professional profile
           </span>
         </div>
 
@@ -555,7 +555,7 @@ function DesignerCard({
         </div>
 
         <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">
-          {profile.bio || "This beta profile has not added a public introduction yet."}
+          {profile.bio || "This professional has not added a public introduction yet."}
         </p>
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -581,7 +581,7 @@ function DesignerCard({
         <div className="mt-5 flex items-center justify-between gap-3 border-t border-line pt-5">
           <div>
             <div className="font-bold text-primary">{pricingLabel(profile)}</div>
-            <div className="text-xs text-muted">{demo?.budgetFit || "Beta portfolio profile"}</div>
+            <div className="text-xs text-muted">{demo?.budgetFit || "Portfolio profile"}</div>
           </div>
           <Link
             href={profileHref}
@@ -949,7 +949,7 @@ export default async function DesignersPage({
             </span>
             <h1 className="mt-3 text-5xl font-bold tracking-tight">Find Interior Designers and Studios</h1>
             <p className="mt-4 text-lg leading-8 text-muted">
-              Browse beta designer and architect profiles by style, location, and
+              Browse designer, architect, and studio profiles by style, location, and
               project fit.
             </p>
           </div>
@@ -1165,7 +1165,7 @@ export default async function DesignersPage({
                 {countLabel(profiles.length, "designer")} found
               </p>
               <h2 className="mt-1 text-2xl font-bold">
-                {briefContext ? "Recommended for your brief" : "Recommended beta professionals"}
+                {briefContext ? "Recommended for your brief" : "Recommended professionals"}
               </h2>
             </div>
 
@@ -1219,7 +1219,7 @@ export default async function DesignersPage({
               <div className="text-xl font-bold">No designers match these filters</div>
               <p className="mt-2 text-muted">
                 {briefContext
-                  ? "No exact matches yet. Try widening location or style, or save the brief and revisit as the beta network grows."
+                  ? "No exact matches yet. Try widening the location or style, or save the brief and revisit as more professionals join."
                   : "Try removing a filter or searching a different city."}
               </p>
               <Link

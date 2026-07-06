@@ -1,3 +1,5 @@
+import { sendTransactionalEmail } from "@/lib/email/send-transactional-email";
+
 type BriefForEmail = {
   title: string | null;
   project_type: string | null;
@@ -48,10 +50,6 @@ function escapeHtml(value: string) {
 
 function briefLine(label: string, value: string | null | undefined) {
   return `${label}: ${value?.trim() || "Not specified"}`;
-}
-
-function shortError(value: string) {
-  return value.replace(/\s+/g, " ").trim().slice(0, 500);
 }
 
 function emailSubject(brief: BriefForEmail) {
@@ -199,9 +197,6 @@ export async function sendInquiryNotificationEmail({
   inquiryId: string;
   message: string | null;
 }): Promise<NotificationResult> {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.INQUIRY_EMAIL_FROM;
-
   if (!designer.email) {
     return {
       error: "Designer profile has no email address.",
@@ -210,50 +205,17 @@ export async function sendInquiryNotificationEmail({
     };
   }
 
-  if (!apiKey || !from) {
-    return {
-      error: null,
-      sentAt: null,
-      status: "not_configured",
-    };
-  }
+  const result = await sendTransactionalEmail({
+    html: emailHtml({ brief, clientEmail, designer, inquiryId, message }),
+    replyTo: clientEmail,
+    subject: emailSubject(brief),
+    text: emailText({ brief, clientEmail, inquiryId, message }),
+    to: designer.email,
+  });
 
-  try {
-    const response = await fetch("https://api.resend.com/emails", {
-      body: JSON.stringify({
-        from,
-        html: emailHtml({ brief, clientEmail, designer, inquiryId, message }),
-        reply_to: process.env.INQUIRY_EMAIL_REPLY_TO || clientEmail || undefined,
-        subject: emailSubject(brief),
-        text: emailText({ brief, clientEmail, inquiryId, message }),
-        to: designer.email,
-      }),
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    });
-
-    if (!response.ok) {
-      const body = await response.text();
-      return {
-        error: `Resend ${response.status}: ${shortError(body)}`,
-        sentAt: null,
-        status: "failed",
-      };
-    }
-
-    return {
-      error: null,
-      sentAt: new Date().toISOString(),
-      status: "sent",
-    };
-  } catch (error) {
-    return {
-      error: error instanceof Error ? shortError(error.message) : "Email request failed.",
-      sentAt: null,
-      status: "failed",
-    };
-  }
+  return {
+    error: result.error,
+    sentAt: result.status === "sent" ? new Date().toISOString() : null,
+    status: result.status,
+  };
 }

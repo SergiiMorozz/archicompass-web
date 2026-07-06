@@ -4,72 +4,87 @@ import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
   title: "Privacy Policy",
-  description: "How ArchiCompass processes account, profile, project, message, photo, and AI analysis data.",
+  description: "How ArchiCompass processes account, profile, project, message, photo, analytics, and AI data.",
   path: "/privacy",
 });
 
 const sections = [
   {
-    title: "Who this notice covers",
+    title: "1. Controller and contact",
     body: [
-      "ArchiCompass is an early-stage product operated from Poland and currently used for closed beta testing. This notice explains how the beta handles personal data for clients, designers, and invited testers.",
-      "A dedicated public privacy contact and full business registration details will be added before a wider public launch. During the closed beta, privacy requests should be sent through the email or communication channel used for your invitation.",
+      "ArchiCompass is an online platform operated by Sergii Moroz in Poland (\"ArchiCompass\", \"we\", \"us\"). ArchiCompass is the controller of personal data processed to operate the platform unless a different controller is identified for a specific service.",
+      "Privacy and data-rights requests can be sent to contact@archicompass.pl. Security-related reports can be sent to admin@archicompass.pl.",
     ],
   },
   {
-    title: "Data we process",
+    title: "2. Data we process",
     body: [
-      "We may process your email address and authentication data, profile and portfolio details, project briefs, favorites, messages and inquiry status, uploaded project images, reference photos, and technical security logs such as timestamps, browser information, and IP address.",
-      "Please do not upload identity documents, financial information, private addresses, photos of people, or other sensitive or confidential material.",
+      "We process information you provide, including email and authentication data, account role, profile and portfolio details, business contact information, project briefs, favorites, messages, inquiry status, uploaded project images, reference photos, and support requests.",
+      "We also process technical information needed to operate and protect the service, such as timestamps, IP address, browser and device information, authentication events, error logs, and limited usage analytics. Public professional information may include Google Business profile links, ratings, and review counts.",
+      "Do not upload identity documents, payment-card data, private addresses, confidential plans, images of people without permission, or special-category personal data unless the feature clearly requires it and you have a lawful basis to share it.",
     ],
   },
   {
-    title: "Why we use it",
+    title: "3. Purposes and legal bases",
     body: [
-      "We use data to provide sign-in, profiles, portfolios, saved briefs, designer matching, project inquiries, support, security, and beta product improvement.",
-      "Depending on the activity, processing is necessary to provide the requested beta service, based on your choice to use an optional feature, or based on the legitimate interest in keeping the service secure and understanding whether it works.",
+      "We process data to create and secure accounts, publish professional profiles and portfolios, save client briefs, provide designer matching, support project inquiries and conversations, deliver notifications, provide customer support, prevent misuse, maintain the service, and comply with legal obligations.",
+      "The legal basis depends on the activity: performance of the service you request, steps taken before entering a contract, compliance with law, your consent for optional processing, or our legitimate interests in operating, securing, improving, and measuring the platform. You may withdraw consent at any time where processing relies on consent.",
     ],
   },
   {
-    title: "Reference photos and AI analysis",
+    title: "4. Public profiles and private workspaces",
     body: [
-      "Photo previews remain in your browser until you choose an action. When you select Analyze photos, up to six reference images and the related project context are sent to the configured AI provider to produce style guidance. The current closed beta provider is Google Gemini.",
-      "When you select Save brief, reference photos are uploaded to private Supabase Storage. They are not placed in the public portfolio. They may be shown through time-limited signed links to you and to professionals who receive the related brief.",
-      "AI output can be incomplete or incorrect. It is guidance for preparing a brief, not a professional design, construction, legal, or financial decision.",
+      "Professional profile details, studio information, portfolio projects, public ratings, and public project links are intended to be visible on the internet and may be indexed by search engines.",
+      "Saved briefs, private reference photos, favorites, account details, and conversations are private unless you choose to send or share them. A professional who receives your brief can access the brief, your message, provided contact details, and signed links to related reference photos.",
+      "Messages are available to the client and the professional or studio participating in the inquiry. Authorised studio members may access inquiries addressed to their studio.",
     ],
   },
   {
-    title: "Public and private content",
+    title: "5. Photos and AI analysis",
     body: [
-      "Designer profile details and portfolio projects are intended to be public. Saved project briefs and their reference photos are private account content unless you choose to send a brief to a designer.",
-      "A designer who receives a brief can see the brief information, your message, and available signed reference-photo links. Do not send a brief to someone who should not receive that information.",
-      "Messages inside a request are visible only to the client and designer participating in that request. They are stored with the inquiry so both participants can keep the project context together.",
+      "Reference-photo previews stay in your browser until you save a brief or request analysis. When you choose AI analysis, selected images and related project context are sent to the configured AI provider to identify visual patterns and produce style guidance.",
+      "Saved reference photos are stored privately in Supabase Storage and may be shown through time-limited signed links to you and to professionals who receive the related brief. Portfolio images uploaded by professionals are public.",
+      "AI output can be incomplete or incorrect. It is informational guidance and is not a substitute for professional design, construction, safety, legal, or financial advice.",
     ],
   },
   {
-    title: "Designer profile analytics",
+    title: "6. Analytics and communications",
     body: [
-      "ArchiCompass records a privacy-light profile view when a visitor opens a designer page. The analytics record contains the designer profile ID, page path, date, and a random browser-tab identifier used to avoid counting repeated refreshes on the same day. The analytics table does not store the visitor's name or email.",
-      "Only the owner of the designer profile can read their view records through Designer Studio. A profile owner viewing their own page is not counted.",
+      "ArchiCompass records limited profile-view analytics using a random browser-tab identifier to reduce duplicate counts. The profile-view record does not contain the visitor's name or email. Professional profile owners can view aggregated activity in Designer Studio.",
+      "We send service emails about account activity, new briefs, messages, unread-message reminders, security, and material service changes. These operational emails are necessary to provide the platform and are not marketing communications.",
     ],
   },
   {
-    title: "Service providers",
+    title: "7. Service providers and transfers",
     body: [
-      "The beta uses Supabase for authentication, database, and file storage; Vercel for hosting; Google Gemini for optional photo analysis; and Resend when email notifications are enabled. These providers process data under their own terms and privacy documentation and may process data outside Poland or the European Economic Area using their applicable safeguards.",
+      "We use Supabase for authentication, database, and file storage; Vercel for hosting and delivery; home.pl for domain email; and configured AI providers such as Google Gemini or OpenAI for optional image analysis. Google services may be used to display or synchronise public business ratings.",
+      "These providers process data under their own contractual terms and safeguards. Where data is transferred outside the European Economic Area, we rely on an applicable adequacy decision, standard contractual clauses, or another lawful transfer mechanism.",
     ],
   },
   {
-    title: "Retention and deletion",
+    title: "8. Cookies and local storage",
     body: [
-      "Account, profile, project, brief, and inquiry data is kept while it is needed for the closed beta or while you keep it in the product. Available account tools let you delete portfolio projects, individual project images, unsent briefs, and related private reference photos. Sent requests can be cancelled while the original brief remains under your control.",
-      "Some security logs and backups may remain for a limited operational period before they are overwritten or deleted. You can request access, correction, export, restriction, or deletion through your beta contact channel.",
+      "The platform uses cookies and browser storage that are necessary for authentication, security, language and interface preferences, and saved workflow state. We do not currently use advertising cookies. Details are available in the Cookie Policy.",
     ],
   },
   {
-    title: "Your rights",
+    title: "9. Retention and deletion",
     body: [
-      "Subject to applicable law, you may have rights to be informed, access your data, correct it, request deletion or restriction, receive portable data, object to certain processing, withdraw consent where consent applies, and complain to a data protection authority. ArchiCompass does not currently make decisions that produce legal or similarly significant effects solely through automated processing.",
+      "Account, profile, project, brief, favorite, and inquiry data is retained while your account is active or while it is needed to provide the requested feature. You can delete supported projects, images, unsent briefs, and accounts using the available controls or by contacting us.",
+      "We may keep limited records for security, fraud prevention, dispute handling, legal compliance, and backup recovery. Backups and logs are deleted or overwritten according to operational retention schedules. Public search-engine copies may remain temporarily after content is removed from ArchiCompass.",
+    ],
+  },
+  {
+    title: "10. Your rights",
+    body: [
+      "Subject to applicable law, you may request access, correction, deletion, restriction, portability, or information about your data; object to processing based on legitimate interests; and withdraw consent where consent applies. We may need to verify your identity before completing a request.",
+      "You may lodge a complaint with the President of the Personal Data Protection Office (UODO) in Poland or another competent supervisory authority. ArchiCompass does not make decisions producing legal or similarly significant effects solely through automated processing.",
+    ],
+  },
+  {
+    title: "11. Children and changes",
+    body: [
+      "ArchiCompass accounts are intended for people aged 18 or older. We may update this policy when the service, providers, or legal requirements change. The current version and its effective date will remain available on this page.",
     ],
   },
 ];
@@ -77,13 +92,13 @@ const sections = [
 export default function PrivacyPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-      <p className="text-sm font-semibold uppercase text-primary">Closed beta</p>
+      <p className="text-sm font-semibold uppercase text-primary">Legal</p>
       <h1 className="mt-3 text-4xl font-bold">Privacy Policy</h1>
-      <p className="mt-3 text-sm text-muted">Last updated: June 29, 2026</p>
+      <p className="mt-3 text-sm text-muted">Effective: July 6, 2026</p>
       <p className="mt-6 max-w-3xl text-lg leading-8 text-muted">
-        This is the working privacy notice for the invited ArchiCompass beta. It is
-        written to explain the product as it operates today, including photo storage
-        and AI analysis.
+        This policy explains how ArchiCompass handles personal data across client
+        accounts, professional profiles, Project Compass, inquiries, messages, and
+        related platform services.
       </p>
 
       <div className="mt-10 grid gap-9">
@@ -91,30 +106,22 @@ export default function PrivacyPage() {
           <section key={section.title}>
             <h2 className="text-2xl font-bold">{section.title}</h2>
             <div className="mt-3 grid gap-3 text-base leading-8 text-muted">
-              {section.body.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
+              {section.body.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             </div>
           </section>
         ))}
       </div>
 
       <div className="mt-12 rounded-lg border border-line bg-card p-6">
-        <h2 className="text-xl font-bold">Before wider launch</h2>
+        <h2 className="text-xl font-bold">Contact and further information</h2>
         <p className="mt-2 leading-7 text-muted">
-          This notice will be reviewed with complete operator and contact details before
-          ArchiCompass accepts users outside the invited beta.
+          Contact <a href="mailto:contact@archicompass.pl" className="font-semibold text-primary hover:underline">contact@archicompass.pl</a> for privacy requests.
+          We normally respond to verified data-rights requests within the period required by applicable law.
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm font-semibold text-primary">
           <Link href="/terms" className="hover:underline">Terms of Service</Link>
-          <a
-            href="https://commission.europa.eu/law/law-topic/data-protection/information-individuals_en"
-            target="_blank"
-            rel="noreferrer"
-            className="hover:underline"
-          >
-            EU data protection rights
-          </a>
+          <Link href="/cookies" className="hover:underline">Cookie Policy</Link>
+          <a href="https://uodo.gov.pl/" target="_blank" rel="noreferrer" className="hover:underline">Polish supervisory authority</a>
         </div>
       </div>
     </main>

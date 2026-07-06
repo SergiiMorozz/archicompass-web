@@ -6,7 +6,7 @@ const navigation = [
   { href: "/project-compass", label: "Project Compass" },
   { href: "/designers", label: "Find Designer" },
   { href: "/inspiration", label: "Inspiration Hub" },
-  { href: "/get-started", label: "Join the Beta" },
+  { href: "/get-started", label: "Join ArchiCompass" },
 ];
 
 const popularLocations = [
@@ -67,6 +67,12 @@ export default function Footer() {
             <Link href="/terms" className="hover:text-white">
               Terms of Service
             </Link>
+            <Link href="/cookies" className="hover:text-white">
+              Cookie Policy
+            </Link>
+            <a href="mailto:contact@archicompass.pl" className="hover:text-white">
+              Contact
+            </a>
           </div>
         </div>
       </div>

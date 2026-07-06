@@ -1,3 +1,5 @@
+import { sendTransactionalEmail } from "@/lib/email/send-transactional-email";
+
 type ConversationRecipient = {
   email: string | null;
   name: string | null;
@@ -50,14 +52,8 @@ export async function sendConversationNotificationEmail({
   senderName: string;
   subject: string;
 }): Promise<ConversationNotificationResult> {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.INQUIRY_EMAIL_FROM;
-
   if (!recipient.email) {
     return { error: "Recipient has no email address.", status: "skipped" };
-  }
-  if (!apiKey || !from) {
-    return { error: null, status: "not_configured" };
   }
 
   const url = conversationUrl(inquiryId, recipient.role);
@@ -103,34 +99,10 @@ export async function sendConversationNotificationEmail({
   </body>
 </html>`;
 
-  try {
-    const response = await fetch("https://api.resend.com/emails", {
-      body: JSON.stringify({
-        from,
-        html,
-        reply_to: process.env.INQUIRY_EMAIL_REPLY_TO || undefined,
-        subject: title,
-        text,
-        to: recipient.email,
-      }),
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    });
-
-    if (!response.ok) {
-      return {
-        error: `Resend ${response.status}: ${short(await response.text())}`,
-        status: "failed",
-      };
-    }
-    return { error: null, status: "sent" };
-  } catch (error) {
-    return {
-      error: error instanceof Error ? short(error.message) : "Email request failed.",
-      status: "failed",
-    };
-  }
+  return sendTransactionalEmail({
+    html,
+    subject: title,
+    text,
+    to: recipient.email,
+  });
 }

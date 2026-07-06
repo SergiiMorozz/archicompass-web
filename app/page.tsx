@@ -140,13 +140,13 @@ export default async function Home() {
             </div>
 
             <Link href="/get-started" className="mt-5 inline-flex text-sm font-semibold text-white/80 hover:text-white">
-              Are you a designer or architect? Join the beta &#8594;
+              Are you a designer or architect? Create your profile &#8594;
             </Link>
 
             <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/78">
               <span><b className="text-[#5de1d1]">&#10003;</b> Real portfolios</span>
               <span><b className="text-[#5de1d1]">&#10003;</b> Direct conversations</span>
-              <span><b className="text-[#5de1d1]">&#10003;</b> Free during beta</span>
+              <span><b className="text-[#5de1d1]">&#10003;</b> Free to get started</span>
             </div>
           </div>
         </div>

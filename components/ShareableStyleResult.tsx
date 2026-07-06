@@ -331,7 +331,7 @@ async function createResultPng({
   context.fillStyle = "#592d86";
   context.textAlign = "right";
   context.font = "600 19px Outfit, Arial, sans-serif";
-  context.fillText("ArchiCompass beta", 1020, 1280);
+  context.fillText("ArchiCompass", 1020, 1280);
 
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -543,7 +543,7 @@ export default function ShareableStyleResult({
             <div className="text-sm font-semibold text-primary">
               Upload 4 photos. Get your designer-ready brief.
             </div>
-            <div className="mt-1 text-xs font-semibold text-muted">Made with ArchiCompass beta</div>
+            <div className="mt-1 text-xs font-semibold text-muted">Made with ArchiCompass</div>
           </div>
         </div>
       </div>

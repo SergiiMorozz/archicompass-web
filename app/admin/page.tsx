@@ -79,7 +79,7 @@ export default async function AdminOverviewPage() {
     ["Clients", numberValue(stats.clients), `${numberValue(stats.active_30)} active accounts`],
     ["Portfolio projects", numberValue(stats.projects), "Public work"],
     ["Saved briefs", briefCount, "Project Compass output"],
-    ["Designer requests", inquiryCount, "Across the closed beta"],
+    ["Designer requests", inquiryCount, "Across the platform"],
     ["Inspiration articles", contentRows.length, `${publishedArticles} published`],
     ["Hidden content", numberValue(stats.hidden_profiles) + numberValue(stats.hidden_projects), `${numberValue(stats.hidden_profiles)} profiles, ${numberValue(stats.hidden_projects)} projects`],
     ["Profile views", numberValue(stats.profile_views_30), "Last 30 days"],
@@ -93,7 +93,7 @@ export default async function AdminOverviewPage() {
             <div className="text-sm font-semibold text-primary">Platform operations</div>
             <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Admin overview</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-              Monitor the closed beta, review accounts, and understand how users move
+              Monitor the platform, review accounts, and understand how users move
               from inspiration to a designer conversation.
             </p>
           </div>

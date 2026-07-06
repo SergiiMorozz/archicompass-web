@@ -15,7 +15,6 @@ import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import {
   applyDemoProfilePresentation,
-  getDemoProfilePresentation,
   getDemoProjectPresentation,
 } from "@/lib/public-demo-profiles";
 
@@ -297,7 +296,6 @@ export default async function DesignerProfilePage({
   }
 
   const profile = applyDemoProfilePresentation(profileData as Profile);
-  const demo = getDemoProfilePresentation(profile.id);
 
   const { data: projectsData, error: prErr } = await supabase
     .from("projects")
@@ -437,7 +435,7 @@ export default async function DesignerProfilePage({
           <div className="flex min-h-[360px] items-end px-5 py-7 sm:px-8 lg:px-10">
             <div className="max-w-3xl text-white">
               <div className="inline-flex rounded-full bg-white/16 px-4 py-2 text-sm font-semibold backdrop-blur">
-                {demo ? "Example ArchiCompass profile" : "ArchiCompass beta profile"}
+                ArchiCompass professional profile
               </div>
               <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-6xl">
                 {title}
@@ -466,7 +464,7 @@ export default async function DesignerProfilePage({
                   <p className="mt-1 text-muted">{type}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span className="rounded-full bg-[#fff3df] px-3 py-1 text-xs font-semibold text-[#b56b08]">
-                      {demo ? "Demo profile" : "Early professional"}
+                      Professional profile
                     </span>
                     {projects.length ? (
                       <span className="rounded-full bg-[#eaf2ff] px-3 py-1 text-xs font-semibold text-[#2563eb]">
