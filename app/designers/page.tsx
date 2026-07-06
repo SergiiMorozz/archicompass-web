@@ -1127,7 +1127,7 @@ export default async function DesignersPage({
       ) : null}
 
       <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-[290px_1fr]">
-        <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
+        <aside className="h-fit max-h-[72vh] overflow-y-auto rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)]">
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-bold">Filters</h2>
@@ -1330,7 +1330,7 @@ export default async function DesignersPage({
               </label>
             </div>
 
-            <button className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
+            <button className="sticky bottom-0 z-10 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-lg">
               Apply Filters
             </button>
           </form>

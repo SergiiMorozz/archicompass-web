@@ -9,6 +9,60 @@ alter table public.profiles
 alter table public.studios
   add column if not exists is_demo boolean not null default false;
 
+-- Demo rows do not have auth accounts, so public catalogue policies need an
+-- explicit, tightly scoped read path for records marked as demo.
+drop policy if exists "profiles_select_visible_or_authorized" on public.profiles;
+create policy "profiles_select_visible_or_authorized"
+on public.profiles
+for select
+to public
+using (
+  id = auth.uid()
+  or public.is_admin()
+  or (
+    (is_demo or public.is_designer_account(id))
+    and public.is_content_visible('profile', id)
+  )
+  or exists (
+    select 1
+    from public.designer_inquiries inquiry_record
+    where (
+      inquiry_record.client_id = auth.uid()
+      and inquiry_record.designer_id = profiles.id
+    ) or (
+      inquiry_record.designer_id = auth.uid()
+      and inquiry_record.client_id = profiles.id
+    ) or (
+      inquiry_record.studio_id is not null
+      and inquiry_record.client_id = profiles.id
+      and public.is_active_studio_member(inquiry_record.studio_id)
+    )
+  )
+);
+
+drop policy if exists "projects_select_visible_or_authorized" on public.projects;
+create policy "projects_select_visible_or_authorized"
+on public.projects
+for select
+to public
+using (
+  profile_id = auth.uid()
+  or public.is_admin()
+  or (
+    (
+      public.is_designer_account(profile_id)
+      or exists (
+        select 1
+        from public.profiles profile_record
+        where profile_record.id = projects.profile_id
+          and profile_record.is_demo
+      )
+    )
+    and public.is_content_visible('profile', profile_id)
+    and public.is_content_visible('project', id)
+  )
+);
+
 create temporary table old_professional_ids on commit drop as
 select id
 from public.profiles
