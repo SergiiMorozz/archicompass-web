@@ -11,7 +11,7 @@ export const metadata: Metadata = pageMetadata({
 const sections = [
   {
     title: "1. Service and acceptance",
-    body: "ArchiCompass is an online platform for preparing interior-project briefs, discovering designers and studios, publishing professional portfolios, and managing project inquiries. By creating an account or using the platform, you agree to these Terms and the Privacy Policy.",
+    body: "ArchiCompass is an online platform operated by SM Advisory, Sergii Moroz, ul. Grzybowska 2, lok. 31, 00-131 Warszawa, Poland, NIP 5252995634, REGON 528006413. The platform supports interior-project briefs, designer and studio discovery, professional portfolios, and project inquiries. By creating an account or using the platform, you agree to these Terms and the Privacy Policy.",
   },
   {
     title: "2. Eligibility and accounts",
@@ -95,6 +95,9 @@ export default function TermsPage() {
         <h2 className="text-xl font-bold">Questions or reports</h2>
         <p className="mt-2 leading-7 text-muted">
           Email <a href="mailto:contact@archicompass.pl" className="font-semibold text-primary hover:underline">contact@archicompass.pl</a> for general questions or <a href="mailto:admin@archicompass.pl" className="font-semibold text-primary hover:underline">admin@archicompass.pl</a> for security and abuse reports.
+        </p>
+        <p className="mt-3 text-sm leading-6 text-muted">
+          SM Advisory, Sergii Moroz · NIP 5252995634 · REGON 528006413 · ul. Grzybowska 2, lok. 31, 00-131 Warszawa, Poland
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm font-semibold text-primary">
           <Link href="/privacy" className="hover:underline">Privacy Policy</Link>

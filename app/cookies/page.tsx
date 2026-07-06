@@ -53,6 +53,9 @@ export default function CookiePolicyPage() {
         <Link href="/terms" className="hover:underline">Terms of Service</Link>
         <a href="mailto:contact@archicompass.pl" className="hover:underline">Contact ArchiCompass</a>
       </div>
+      <p className="mt-6 text-sm leading-6 text-muted">
+        ArchiCompass is operated by SM Advisory, Sergii Moroz · NIP 5252995634 · REGON 528006413 · ul. Grzybowska 2, lok. 31, 00-131 Warszawa, Poland.
+      </p>
     </main>
   );
 }

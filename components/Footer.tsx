@@ -77,7 +77,10 @@ export default function Footer() {
         </div>
       </div>
       <div className="border-t border-white/10 px-4 py-5 text-center text-xs text-white/50">
-        &copy; 2026 ArchiCompass. All rights reserved.
+        <div>&copy; 2026 ArchiCompass. All rights reserved.</div>
+        <div className="mt-2">
+          Operated by SM Advisory, Sergii Moroz · NIP 5252995634 · REGON 528006413 · ul. Grzybowska 2, lok. 31, 00-131 Warszawa, Poland
+        </div>
       </div>
     </footer>
   );

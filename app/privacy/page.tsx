@@ -12,7 +12,7 @@ const sections = [
   {
     title: "1. Controller and contact",
     body: [
-      "ArchiCompass is an online platform operated by Sergii Moroz in Poland (\"ArchiCompass\", \"we\", \"us\"). ArchiCompass is the controller of personal data processed to operate the platform unless a different controller is identified for a specific service.",
+      "ArchiCompass is an online platform operated by SM Advisory, Sergii Moroz, with its business address at ul. Grzybowska 2, lok. 31, 00-131 Warszawa, Poland, NIP 5252995634, REGON 528006413 (\"ArchiCompass\", \"we\", \"us\"). SM Advisory is the controller of personal data processed to operate the platform unless a different controller is identified for a specific service.",
       "Privacy and data-rights requests can be sent to contact@archicompass.pl. Security-related reports can be sent to admin@archicompass.pl.",
     ],
   },
@@ -117,6 +117,9 @@ export default function PrivacyPage() {
         <p className="mt-2 leading-7 text-muted">
           Contact <a href="mailto:contact@archicompass.pl" className="font-semibold text-primary hover:underline">contact@archicompass.pl</a> for privacy requests.
           We normally respond to verified data-rights requests within the period required by applicable law.
+        </p>
+        <p className="mt-3 text-sm leading-6 text-muted">
+          SM Advisory, Sergii Moroz · NIP 5252995634 · REGON 528006413 · ul. Grzybowska 2, lok. 31, 00-131 Warszawa, Poland
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm font-semibold text-primary">
           <Link href="/terms" className="hover:underline">Terms of Service</Link>
