@@ -22,6 +22,7 @@ export const revalidate = 0;
 
 type Profile = {
   id: string;
+  avatar_url: string | null;
   full_name: string | null;
   profile_headline: string | null;
   profile_logo_path: string | null;
@@ -31,6 +32,7 @@ type Profile = {
   profession_type: string | null;
   user_type: string | null;
   specialties: string[] | null;
+  languages: string[] | null;
   service_capabilities: string[] | null;
   website: string | null;
   phone: string | null;
@@ -47,6 +49,7 @@ type Profile = {
   google_business_url: string | null;
   google_rating: number | null;
   google_review_count: number | null;
+  is_demo: boolean;
 };
 
 type Project = {
@@ -110,7 +113,7 @@ export async function generateMetadata({
   const [{ data: profile }, { data: projects }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("full_name, profile_headline, profile_banner_path, bio, location, profession_type")
+      .select("full_name, profile_headline, profile_banner_path, bio, location, profession_type, is_demo")
       .eq("id", id)
       .eq("user_type", "professional")
       .maybeSingle(),
@@ -137,6 +140,7 @@ export async function generateMetadata({
     path: `/designers/${id}`,
     image,
     type: "profile",
+    noIndex: profile.is_demo,
   });
 }
 
@@ -276,23 +280,23 @@ export default async function DesignerProfilePage({
     : "client";
   const canSendBrief = !userData.user || viewerRole === "client";
 
-  const { data: isDesignerAccount } = await supabase.rpc("is_designer_account", {
-    target_user_id: id,
-  });
-  if (!isDesignerAccount) {
-    notFound();
-  }
-
   const { data: profileData, error: pErr } = await supabase
     .from("profiles")
     .select(
-      "id, full_name, profile_headline, profile_logo_path, profile_banner_path, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count"
+      "id, avatar_url, full_name, profile_headline, profile_logo_path, profile_banner_path, bio, location, profession_type, user_type, specialties, languages, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count, is_demo"
     )
     .eq("id", id)
     .single();
 
   if (pErr || !profileData) {
     notFound();
+  }
+
+  if (!profileData.is_demo) {
+    const { data: isDesignerAccount } = await supabase.rpc("is_designer_account", {
+      target_user_id: id,
+    });
+    if (!isDesignerAccount) notFound();
   }
 
   const profile = applyDemoProfilePresentation(profileData as Profile);
@@ -417,7 +421,7 @@ export default async function DesignerProfilePage({
           },
         ]}
       />
-      <ProfileViewTracker disabled={isOwner} profileId={profile.id} />
+      <ProfileViewTracker disabled={isOwner || profile.is_demo} profileId={profile.id} />
       <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
         <Link
           href="/designers"
@@ -435,7 +439,7 @@ export default async function DesignerProfilePage({
           <div className="flex min-h-[360px] items-end px-5 py-7 sm:px-8 lg:px-10">
             <div className="max-w-3xl text-white">
               <div className="inline-flex rounded-full bg-white/16 px-4 py-2 text-sm font-semibold backdrop-blur">
-                ArchiCompass professional profile
+                {profile.is_demo ? "ArchiCompass demo profile" : "ArchiCompass professional profile"}
               </div>
               <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-6xl">
                 {title}
@@ -452,11 +456,11 @@ export default async function DesignerProfilePage({
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex gap-4">
                 <div className="relative grid h-20 w-20 shrink-0 place-items-center overflow-visible rounded-2xl border-4 border-white bg-primary text-2xl font-bold text-white shadow">
-                  {logoUrl ? (
-                    <Image src={logoUrl} alt={`${title} logo`} width={72} height={72} unoptimized className="h-full w-full rounded-xl object-cover" />
+                  {logoUrl || profile.avatar_url ? (
+                    <Image src={logoUrl || profile.avatar_url!} alt={`${title} logo`} width={72} height={72} unoptimized className="h-full w-full rounded-xl object-cover" />
                   ) : initials(title)}
                   <span className="absolute -right-3 -top-3 rounded-full border-2 border-white bg-[#fff3df] px-2 py-1 text-xs font-bold text-[#b56b08]">
-                    New
+                    {profile.is_demo ? "Demo" : "New"}
                   </span>
                 </div>
                 <div className="min-w-0">
@@ -464,7 +468,7 @@ export default async function DesignerProfilePage({
                   <p className="mt-1 text-muted">{type}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span className="rounded-full bg-[#fff3df] px-3 py-1 text-xs font-semibold text-[#b56b08]">
-                      Professional profile
+                      {profile.is_demo ? "Demo profile" : "Professional profile"}
                     </span>
                     {projects.length ? (
                       <span className="rounded-full bg-[#eaf2ff] px-3 py-1 text-xs font-semibold text-[#2563eb]">
@@ -503,13 +507,17 @@ export default async function DesignerProfilePage({
                   >
                     View Portfolio
                   </a>
-                  {canSendBrief ? (
+                  {canSendBrief && !profile.is_demo ? (
                     <Link
                       href={briefRequestHref(profile.id, selectedBriefId)}
                       className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                     >
                       Send Brief
                     </Link>
+                  ) : profile.is_demo ? (
+                    <span className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold text-muted">
+                      Demo profile
+                    </span>
                   ) : (
                     <span className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold text-muted">
                       Designer account
@@ -582,7 +590,7 @@ export default async function DesignerProfilePage({
               </div>
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
                 <span className="text-muted">Contact</span>
-                <span className="truncate text-right font-semibold">{contactLabel(profile)}</span>
+                <span className="truncate text-right font-semibold">{profile.is_demo ? "Not available for demo profiles" : contactLabel(profile)}</span>
               </div>
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
                 <span className="text-muted">Availability</span>
@@ -598,7 +606,7 @@ export default async function DesignerProfilePage({
               </div>
               <div className="flex items-center justify-between gap-4">
                 <span className="text-muted">Languages</span>
-                <span className="font-semibold">EN / PL</span>
+                <span className="font-semibold">{profile.languages?.join(" / ") || "EN / PL"}</span>
               </div>
             </div>
 
@@ -617,13 +625,17 @@ export default async function DesignerProfilePage({
                   Add portfolio project
                 </Link>
               </div>
-            ) : canSendBrief ? (
+            ) : canSendBrief && !profile.is_demo ? (
               <Link
                 href={briefRequestHref(profile.id, selectedBriefId)}
                 className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
               >
                 <span className="w-full">Send Project Brief</span>
               </Link>
+            ) : profile.is_demo ? (
+              <div className="mt-6 rounded-lg border border-primary/20 bg-primary-soft p-4 text-sm leading-6 text-muted">
+                This illustrative profile shows how a completed ArchiCompass portfolio can look. It cannot receive project briefs.
+              </div>
             ) : (
               <div className="mt-6 rounded-lg border border-line bg-background p-4 text-sm leading-6 text-muted">
                 Designer accounts receive project requests and cannot send client briefs.
@@ -988,13 +1000,17 @@ export default async function DesignerProfilePage({
             >
               Manage
             </Link>
-          ) : (
+          ) : canSendBrief && !profile.is_demo ? (
             <Link
               href={briefRequestHref(profile.id, selectedBriefId)}
               className="shrink-0 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
             >
               Send brief
             </Link>
+          ) : (
+            <span className="shrink-0 rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold text-muted">
+              {profile.is_demo ? "Demo profile" : "Designer account"}
+            </span>
           )}
         </div>
       </div>
