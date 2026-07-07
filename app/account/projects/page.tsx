@@ -103,10 +103,10 @@ function publicImageUrl(supabase: SupabaseServerClient, imagePath: string | null
 }
 
 function projectStatus(projects: Project[]) {
-  if (projects.length >= 6) return "Strong portfolio base";
-  if (projects.length >= 3) return "Good start";
-  if (projects.length >= 1) return "First project live";
-  return "Portfolio not started";
+  if (projects.length >= 6) return "Rozbudowane portfolio";
+  if (projects.length >= 3) return "Dobry początek";
+  if (projects.length >= 1) return "Pierwszy projekt opublikowany";
+  return "Portfolio nie zostało rozpoczęte";
 }
 
 function Field({
@@ -529,33 +529,33 @@ export default async function ManageProjectsPage({
             href="/account"
             className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
           >
-            Back to account
+            Wróć do konta
           </Link>
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
-              <div className="text-sm font-semibold text-primary">Portfolio Manager</div>
+              <div className="text-sm font-semibold text-primary">Zarządzanie portfolio</div>
               <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
-                Manage projects
+                Zarządzaj projektami
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-                Add portfolio examples that make your public designer profile feel real,
-                specific, and easy to trust.
+                Dodaj realizacje, które pokażą charakter Twojej pracy i pomogą klientom
+                zaufać profilowi.
               </p>
             </div>
 
             <div className="rounded-2xl border border-line bg-background p-5 shadow-sm">
-              <div className="text-sm font-semibold text-muted">Portfolio status</div>
+              <div className="text-sm font-semibold text-muted">Status portfolio</div>
               <div className="mt-2 text-2xl font-bold text-primary">
                 {projectStatus(projects)}
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-xl border border-line bg-card p-3">
-                  <div className="text-muted">Projects</div>
+                  <div className="text-muted">Projekty</div>
                   <div className="mt-1 text-xl font-bold">{projects.length}</div>
                 </div>
                 <div className="rounded-xl border border-line bg-card p-3">
-                  <div className="text-muted">Categories</div>
+                  <div className="text-muted">Kategorie</div>
                   <div className="mt-1 text-xl font-bold">{categories.length}</div>
                 </div>
               </div>
@@ -572,33 +572,33 @@ export default async function ManageProjectsPage({
             </div>
           ) : sp.created ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
-              Project added. It now appears on your public profile.
+              Projekt został dodany i jest widoczny w profilu publicznym.
             </div>
           ) : sp.updated ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
-              Project updated. Public profile gallery has been refreshed.
+              Projekt został zaktualizowany. Galeria profilu publicznego jest już odświeżona.
             </div>
           ) : sp.imageDeleted ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
-              Image removed from the project gallery.
+              Zdjęcie zostało usunięte z galerii projektu.
             </div>
           ) : sp.deleted ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
-              Project deleted from your public portfolio.
+              Projekt został usunięty z publicznego portfolio.
             </div>
           ) : null}
 
           <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-sm font-semibold text-primary">Your portfolio</div>
-                <h2 className="mt-1 text-3xl font-bold">Public projects</h2>
+                <div className="text-sm font-semibold text-primary">Twoje portfolio</div>
+                <h2 className="mt-1 text-3xl font-bold">Projekty publiczne</h2>
               </div>
               <Link
                 href={`/designers/${user.id}#portfolio`}
                 className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
               >
-                View public portfolio
+                Zobacz publiczne portfolio
               </Link>
             </div>
 
@@ -615,10 +615,10 @@ export default async function ManageProjectsPage({
                   }}
                 >
                   <div className="flex min-h-[260px] max-w-xl flex-col justify-end p-6 text-white">
-                    <h3 className="text-3xl font-bold">Start with one strong project</h3>
+                    <h3 className="text-3xl font-bold">Zacznij od jednego mocnego projektu</h3>
                     <p className="mt-3 text-sm leading-6 text-white/80">
-                      Add a title, category, image, and short story. This is enough to make
-                      the public profile feel alive.
+                      Dodaj tytuł, kategorię, zdjęcie i krótki opis. To wystarczy, aby
+                      publiczny profil zaczął pracować na Twoją wiarygodność.
                     </p>
                   </div>
                 </div>
@@ -631,10 +631,10 @@ export default async function ManageProjectsPage({
                     className="overflow-hidden rounded-2xl border border-line bg-background"
                   >
                     <ProjectGallery
-                      category={project.category || "Uncategorized"}
+                      category={project.category || "Bez kategorii"}
                       description={project.description}
                       images={galleryFor(project, index)}
-                      title={project.title || "Untitled project"}
+                      title={project.title || "Projekt bez tytułu"}
                     />
                     <div className="p-5">
                       {project.description ? (
@@ -643,7 +643,7 @@ export default async function ManageProjectsPage({
                         </p>
                       ) : (
                         <p className="text-sm leading-6 text-muted">
-                          Add a description to explain the brief, style, and result.
+                          Dodaj opis briefu, kierunku stylistycznego i rezultatu.
                         </p>
                       )}
                       <div className="mt-4 flex flex-wrap gap-3">
@@ -651,7 +651,7 @@ export default async function ManageProjectsPage({
                           href={`/projects/${project.id}`}
                           className="inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
                         >
-                          View project page
+                          Zobacz stronę projektu
                         </Link>
                         {project.project_url ? (
                           <a
@@ -660,14 +660,14 @@ export default async function ManageProjectsPage({
                             rel="noreferrer"
                             className="inline-flex rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
                           >
-                            Open external page
+                            Otwórz stronę zewnętrzną
                           </a>
                         ) : null}
                       </div>
                       {actualImageItems(project).length ? (
                         <details className="mt-3 overflow-hidden rounded-xl border border-line bg-card">
                           <summary className="block cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-primary">
-                            Manage images
+                            Zarządzaj zdjęciami
                           </summary>
                           <div className="grid grid-cols-2 gap-3 border-t border-line p-3">
                             {actualImageItems(project).map((image) => (
@@ -694,7 +694,7 @@ export default async function ManageProjectsPage({
                                     type="submit"
                                     className="w-full rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100"
                                   >
-                                    Remove image
+                                    Usuń zdjęcie
                                   </button>
                                 </form>
                               </div>
@@ -704,12 +704,12 @@ export default async function ManageProjectsPage({
                       ) : null}
                       <details className="mt-3 overflow-hidden rounded-xl border border-line bg-card">
                         <summary className="block cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-primary">
-                          Edit project
+                          Edytuj projekt
                         </summary>
                         <form action={updateProject} className="grid gap-4 border-t border-line p-4">
                           <input type="hidden" name="project_id" value={project.id} />
 
-                          <Field label="Title">
+                          <Field label="Tytuł">
                             <input
                               name="title"
                               defaultValue={project.title ?? ""}
@@ -717,16 +717,16 @@ export default async function ManageProjectsPage({
                             />
                           </Field>
 
-                          <Field label="Category">
+                          <Field label="Kategoria">
                             <input
                               name="category"
                               defaultValue={project.category ?? ""}
-                              placeholder="Apartment, house, office..."
+                              placeholder="Mieszkanie, dom, biuro..."
                               className={fieldClass}
                             />
                           </Field>
 
-                          <Field label="Description">
+                          <Field label="Opis">
                             <textarea
                               name="description"
                               defaultValue={project.description ?? ""}
@@ -736,8 +736,8 @@ export default async function ManageProjectsPage({
                           </Field>
 
                           <Field
-                            label="Add images"
-                            hint={`${galleryFor(project, index).length}/${maxProjectImages} used`}
+                            label="Dodaj zdjęcia"
+                            hint={`${galleryFor(project, index).length}/${maxProjectImages} wykorzystano`}
                           >
                             <input
                               name="image_files"
@@ -748,7 +748,7 @@ export default async function ManageProjectsPage({
                             />
                           </Field>
 
-                          <Field label="Project link" hint="optional external page">
+                          <Field label="Link do projektu" hint="opcjonalna strona zewnętrzna">
                             <input
                               name="project_url"
                               defaultValue={project.project_url ?? ""}
@@ -764,9 +764,9 @@ export default async function ManageProjectsPage({
                               className="mt-1 h-4 w-4 accent-primary"
                             />
                             <span>
-                              <span className="font-semibold">Replace current gallery</span>
+                              <span className="font-semibold">Zastąp obecną galerię</span>
                               <span className="mt-1 block text-muted">
-                                Leave unchecked to append selected images to this project.
+                                Pozostaw odznaczone, aby dodać wybrane zdjęcia do projektu.
                               </span>
                             </span>
                           </label>
@@ -775,18 +775,18 @@ export default async function ManageProjectsPage({
                             type="submit"
                             className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90"
                           >
-                            Save project changes
+                            Zapisz zmiany projektu
                           </button>
                         </form>
                       </details>
                       <details className="mt-3 overflow-hidden rounded-xl border border-red-200 bg-red-50">
                         <summary className="block cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-red-700">
-                          Delete project
+                          Usuń projekt
                         </summary>
                         <div className="border-t border-red-200 p-4">
                           <p className="text-sm leading-6 text-red-700">
-                            This removes the project from your public portfolio and deletes its
-                            uploaded images from storage.
+                            Ta operacja usuwa projekt z publicznego portfolio oraz kasuje
+                            przesłane zdjęcia z pamięci.
                           </p>
                           <form action={deleteProject} className="mt-4">
                             <input type="hidden" name="project_id" value={project.id} />
@@ -794,7 +794,7 @@ export default async function ManageProjectsPage({
                               type="submit"
                               className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white hover:bg-red-700"
                             >
-                              Delete this project
+                              Usuń ten projekt
                             </button>
                           </form>
                         </div>
@@ -808,18 +808,17 @@ export default async function ManageProjectsPage({
         </div>
 
         <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
-          <div className="text-sm font-semibold text-primary">Add Project</div>
-          <h2 className="mt-1 text-2xl font-bold">Create portfolio card</h2>
+          <div className="text-sm font-semibold text-primary">Dodaj projekt</div>
+          <h2 className="mt-1 text-2xl font-bold">Utwórz kartę portfolio</h2>
           <p className="mt-3 text-sm leading-6 text-muted">
-            Keep the first version simple. A clear title and one strong image are enough
-            for now.
+            Pierwsza wersja może być prosta. Na początek wystarczą jasny tytuł i jedno dobre zdjęcie.
           </p>
 
           <ProjectCreateForm />
 
           <div className="mt-6 rounded-2xl border border-line bg-background p-4 text-sm leading-6 text-muted">
-            Images stay embedded in the project card as a gallery preview. The project link is
-            for a separate page you want to share outside ArchiCompass.
+            Zdjęcia tworzą galerię w karcie projektu. Link do projektu służy do wskazania
+            osobnej strony, którą chcesz udostępniać poza ArchiCompass.
           </div>
         </aside>
       </section>

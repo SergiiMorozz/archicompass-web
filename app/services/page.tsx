@@ -3,8 +3,8 @@ import Link from "next/link";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Home Improvement Services",
-  description: "The ArchiCompass implementation services directory is being prepared.",
+  title: "Usługi remontowe i wykończeniowe",
+  description: "Katalog usług wykonawczych ArchiCompass.",
   path: "/services",
   noIndex: true,
 });
@@ -13,14 +13,14 @@ const heroImage =
   "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1800&q=80";
 
 const services = [
-  "Plumbing",
-  "Electrical",
-  "Painting",
-  "Flooring",
-  "Carpentry",
+  "Hydraulika",
+  "Instalacje elektryczne",
+  "Malowanie",
+  "Podłogi",
+  "Stolarstwo",
   "HVAC",
-  "Kitchen Remodeling",
-  "Bathroom Remodeling",
+  "Remont kuchni",
+  "Remont łazienki",
 ];
 
 export default function ServicesPage() {
@@ -36,7 +36,7 @@ export default function ServicesPage() {
       >
         <div className="absolute inset-0 bg-[#1f172a]/72" />
         <div className="relative mx-auto max-w-7xl">
-          <h1 className="text-5xl font-bold tracking-tight">Services</h1>
+          <h1 className="text-5xl font-bold tracking-tight">Usługi</h1>
           <p className="mt-4 max-w-2xl text-lg text-white/75">
             Explore trusted professionals for home improvement and implementation needs.
           </p>
@@ -53,9 +53,9 @@ export default function ServicesPage() {
 
       <section className="mx-auto grid max-w-7xl gap-6 px-4 py-14 sm:px-6 lg:grid-cols-[280px_1fr]">
         <aside className="rounded-2xl border border-line bg-card p-6 shadow-sm">
-          <h2 className="text-xl font-bold">Filters</h2>
+          <h2 className="text-xl font-bold">Filtry</h2>
           <div className="mt-6">
-            <div className="text-sm font-semibold">Service Type</div>
+            <div className="text-sm font-semibold">Rodzaj usługi</div>
             <div className="mt-3 grid gap-3">
               {services.map((service) => (
                 <label key={service} className="flex items-center gap-3 text-sm text-muted">
@@ -70,8 +70,8 @@ export default function ServicesPage() {
         <div>
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-bold">Home Improvement Services</h2>
-              <p className="mt-1 text-muted">Service marketplace will come after designer profiles.</p>
+              <h2 className="text-3xl font-bold">Usługi remontowe i wykończeniowe</h2>
+              <p className="mt-1 text-muted">Katalog wykonawców jest przygotowywany.</p>
             </div>
           </div>
 
@@ -81,10 +81,10 @@ export default function ServicesPage() {
             </div>
             <div className="p-5">
               <div className="flex items-center justify-between gap-4">
-                <h3 className="text-xl font-bold">Service Provider</h3>
+                <h3 className="text-xl font-bold">Wykonawca</h3>
                 <span className="text-sm font-semibold text-primary">4.5</span>
               </div>
-              <p className="mt-2 text-sm text-muted">Electrical, lighting, and smart home support.</p>
+              <p className="mt-2 text-sm text-muted">Instalacje elektryczne, oświetlenie i systemy smart home.</p>
               <Link href="/services" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white">
                 View Profile
               </Link>

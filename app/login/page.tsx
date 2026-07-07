@@ -18,6 +18,13 @@ function intentFromNext(next: string): Intent {
   return "client";
 }
 
+function authErrorMessage(message: string) {
+  if (message === "Invalid login credentials") return "Nieprawidłowy adres e-mail lub hasło. Poniżej możesz zresetować hasło.";
+  if (message.toLowerCase().includes("email rate limit")) return "Wysłano zbyt wiele wiadomości. Odczekaj kilka minut i spróbuj ponownie.";
+  if (message.toLowerCase().includes("already registered")) return "Konto z tym adresem e-mail już istnieje. Zaloguj się lub zresetuj hasło.";
+  return message;
+}
+
 function LoginContent() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const searchParams = useSearchParams();
@@ -58,11 +65,11 @@ function LoginContent() {
     event.preventDefault();
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail) {
-      setStatus({ type: "error", message: "Enter your email address." });
+      setStatus({ type: "error", message: "Wpisz adres e-mail." });
       return;
     }
     if (password.length < 8) {
-      setStatus({ type: "error", message: "Use at least 8 characters for the password." });
+      setStatus({ type: "error", message: "Hasło musi mieć co najmniej 8 znaków." });
       return;
     }
 
@@ -75,9 +82,7 @@ function LoginContent() {
       if (error) {
         setStatus({
           type: "error",
-          message: error.message === "Invalid login credentials"
-            ? "Email or password is incorrect. You can reset the password below."
-            : error.message,
+          message: authErrorMessage(error.message),
         });
         return;
       }
@@ -96,7 +101,7 @@ function LoginContent() {
       },
     });
     if (error) {
-      setStatus({ type: "error", message: error.message });
+      setStatus({ type: "error", message: authErrorMessage(error.message) });
       return;
     }
     if (data.session) {
@@ -105,7 +110,7 @@ function LoginContent() {
     }
     setStatus({
       type: "success",
-      message: "Account created. Open the confirmation email once, then sign in with this email and password.",
+      message: "Konto zostało utworzone. Otwórz wiadomość potwierdzającą, a następnie zaloguj się tym adresem e-mail i hasłem.",
     });
   }
 
@@ -120,47 +125,47 @@ function LoginContent() {
         <section>
           <div className="inline-flex items-center gap-2 rounded-full border border-line bg-card px-3 py-1 text-xs font-semibold text-muted">
             <span className="h-2 w-2 rounded-full bg-accent" />
-            Secure email and password
+            Bezpieczne logowanie e-mailem i hasłem
           </div>
           <h1 className="mt-5 text-4xl font-bold leading-tight sm:text-6xl">
-            {mode === "signup" ? "Create your ArchiCompass account" : "Welcome back to ArchiCompass"}
+            {mode === "signup" ? "Utwórz konto ArchiCompass" : "Witaj ponownie w ArchiCompass"}
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-8 text-muted">
             {mode === "signup"
-              ? "Choose one account role now. Client and Designer workspaces stay separate after registration."
-              : "Sign in directly with the password you created. No new email link is required."}
+              ? "Wybierz jedną rolę konta. Po rejestracji strefa klienta i studio projektanta pozostają oddzielne."
+              : "Zaloguj się adresem e-mail i ustalonym hasłem. Nie potrzebujesz linku do logowania."}
           </p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             <div className="rounded-lg border border-line bg-card p-5">
-              <div className="font-bold">For clients</div>
-              <p className="mt-2 text-sm leading-6 text-muted">Save briefs, compare designers, and manage conversations.</p>
+              <div className="font-bold">Dla klientów</div>
+              <p className="mt-2 text-sm leading-6 text-muted">Zapisuj briefy, porównuj projektantów i prowadź rozmowy.</p>
             </div>
             <div className="rounded-lg border border-line bg-card p-5">
-              <div className="font-bold">For designers</div>
-              <p className="mt-2 text-sm leading-6 text-muted">Publish a portfolio and receive client project requests.</p>
+              <div className="font-bold">Dla projektantów</div>
+              <p className="mt-2 text-sm leading-6 text-muted">Publikuj portfolio i otrzymuj zapytania od klientów.</p>
             </div>
           </div>
-          <Link href="/" className="mt-7 inline-flex text-sm font-bold text-primary hover:underline">Explore the public site</Link>
+          <Link href="/" className="mt-7 inline-flex text-sm font-bold text-primary hover:underline">Przejdź do strony głównej</Link>
         </section>
 
         <section className="rounded-lg border border-line bg-card p-6 shadow-[0_18px_50px_rgba(54,31,73,0.10)] sm:p-8">
           <div className="grid grid-cols-2 rounded-lg bg-background p-1">
-            <button type="button" onClick={() => switchMode("signin")} className={`rounded-md px-4 py-3 text-sm font-bold ${mode === "signin" ? "bg-primary text-white" : "text-muted"}`}>Sign in</button>
-            <button type="button" onClick={() => switchMode("signup")} className={`rounded-md px-4 py-3 text-sm font-bold ${mode === "signup" ? "bg-primary text-white" : "text-muted"}`}>Create account</button>
+            <button type="button" onClick={() => switchMode("signin")} className={`rounded-md px-4 py-3 text-sm font-bold ${mode === "signin" ? "bg-primary text-white" : "text-muted"}`}>Zaloguj się</button>
+            <button type="button" onClick={() => switchMode("signup")} className={`rounded-md px-4 py-3 text-sm font-bold ${mode === "signup" ? "bg-primary text-white" : "text-muted"}`}>Utwórz konto</button>
           </div>
 
           <form onSubmit={onSubmit} className="mt-6 grid gap-5">
             {mode === "signup" ? (
               <fieldset>
-                <legend className="text-sm font-bold">I am joining as</legend>
+                <legend className="text-sm font-bold">Dołączam jako</legend>
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   {(["client", "designer"] as Intent[]).map((role) => (
                     <button key={role} type="button" aria-pressed={intent === role} onClick={() => setIntent(role)} className={`rounded-lg border px-4 py-4 text-left text-sm font-bold capitalize ${intent === role ? "border-primary bg-primary-soft text-primary" : "border-line bg-background"}`}>
-                      {role}
+                      {role === "client" ? "Klient" : "Projektant"}
                     </button>
                   ))}
                 </div>
-                <p className="mt-2 text-xs leading-5 text-muted">One email has one role. Designer accounts receive briefs; client accounts send them.</p>
+                <p className="mt-2 text-xs leading-5 text-muted">Jeden adres e-mail ma jedną rolę. Projektanci otrzymują briefy, a klienci je wysyłają.</p>
               </fieldset>
             ) : null}
 
@@ -169,12 +174,12 @@ function LoginContent() {
               <input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
             <label className="text-sm font-bold">
-              Password
-              <input type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 8 characters" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
+              Hasło
+              <input type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Co najmniej 8 znaków" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
 
             <button type="submit" disabled={status.type === "loading"} className="rounded-xl bg-primary px-5 py-3.5 text-sm font-bold text-white disabled:opacity-60">
-              {status.type === "loading" ? "Please wait..." : mode === "signup" ? `Create ${intent} account` : "Sign in"}
+              {status.type === "loading" ? "Proszę czekać..." : mode === "signup" ? `Utwórz konto: ${intent === "client" ? "klient" : "projektant"}` : "Zaloguj się"}
             </button>
 
             {status.type === "success" ? <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">{status.message}</div> : null}
@@ -182,9 +187,9 @@ function LoginContent() {
           </form>
 
           {mode === "signin" ? (
-            <Link href="/forgot-password" className="mt-5 inline-flex text-sm font-semibold text-primary hover:underline">Forgot password?</Link>
+            <Link href="/forgot-password" className="mt-5 inline-flex text-sm font-semibold text-primary hover:underline">Nie pamiętasz hasła?</Link>
           ) : (
-            <p className="mt-5 text-xs leading-5 text-muted">By creating an account you agree to the <Link href="/terms" className="underline">Terms</Link> and <Link href="/privacy" className="underline">Privacy Policy</Link>.</p>
+            <p className="mt-5 text-xs leading-5 text-muted">Tworząc konto, akceptujesz <Link href="/terms" className="underline">Regulamin</Link> i <Link href="/privacy" className="underline">Politykę prywatności</Link>.</p>
           )}
         </section>
       </div>

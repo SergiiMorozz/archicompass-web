@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const clientLinks = [
-  { href: "/client", label: "Overview" },
-  { href: "/client/messages", label: "Messages" },
-  { href: "/client/briefs", label: "Saved briefs" },
-  { href: "/client/favorites", label: "Favorites" },
-  { href: "/account/profile", label: "Settings" },
+  { href: "/client", label: "Pulpit" },
+  { href: "/client/messages", label: "Wiadomości" },
+  { href: "/client/briefs", label: "Zapisane briefy" },
+  { href: "/client/favorites", label: "Ulubione" },
+  { href: "/account/profile", label: "Ustawienia" },
 ];
 
 export default function ClientNav({
@@ -25,10 +25,10 @@ export default function ClientNav({
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <div className="text-xs font-semibold uppercase text-primary">Client Workspace</div>
+            <div className="text-xs font-semibold uppercase text-primary">Strefa klienta</div>
             <div className="mt-1 text-xl font-bold">{accountName}</div>
           </div>
-          <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Client Workspace">
+          <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Strefa klienta">
             {clientLinks.map((item) => {
               const active =
                 pathname === item.href ||
@@ -49,7 +49,7 @@ export default function ClientNav({
                   {item.label}
                   {messageCount ? (
                     <span
-                      aria-label={`${messageCount} unread messages`}
+                      aria-label={`${messageCount} nieprzeczytanych wiadomości`}
                       className={[
                         "ml-2 rounded-full px-2 py-0.5 text-xs",
                         active ? "bg-white/20" : "bg-foreground text-white",

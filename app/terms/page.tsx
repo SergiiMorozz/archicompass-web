@@ -3,83 +3,83 @@ import Link from "next/link";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Terms of Service",
-  description: "Terms governing ArchiCompass accounts, briefs, profiles, portfolios, messages, matching, and AI features.",
+  title: "Regulamin",
+  description: "Zasady korzystania z kont, briefów, profili, portfolio, wiadomości, dopasowań i funkcji AI w ArchiCompass.",
   path: "/terms",
 });
 
 const sections = [
   {
-    title: "1. Service and acceptance",
-    body: "ArchiCompass is an online platform operated by SM Advisory, Sergii Moroz, ul. Grzybowska 2, lok. 31, 00-131 Warszawa, Poland, NIP 5252995634, REGON 528006413. The platform supports interior-project briefs, designer and studio discovery, professional portfolios, and project inquiries. By creating an account or using the platform, you agree to these Terms and the Privacy Policy.",
+    title: "1. Usługa i akceptacja regulaminu",
+    body: "ArchiCompass jest platformą internetową prowadzoną przez SM Advisory, Sergii Moroz, ul. Grzybowska 2, lok. 31, 00-131 Warszawa, NIP 5252995634, REGON 528006413. Platforma umożliwia tworzenie briefów wnętrzarskich, wyszukiwanie projektantów i pracowni, publikację portfolio oraz obsługę zapytań projektowych. Tworząc konto lub korzystając z platformy, akceptujesz niniejszy Regulamin i Politykę prywatności.",
   },
   {
-    title: "2. Eligibility and accounts",
-    body: "You must be at least 18 years old and legally able to accept these Terms. Use an email address you control, provide accurate information, protect your password, and promptly update material account details. One account must use one primary role: client or professional. You are responsible for activity performed through your account.",
+    title: "2. Warunki korzystania i konta",
+    body: "Musisz mieć co najmniej 18 lat i zdolność do zaakceptowania Regulaminu. Używaj własnego adresu e-mail, podawaj prawdziwe dane, chroń hasło i aktualizuj istotne informacje. Jedno konto może mieć jedną główną rolę: klienta albo profesjonalisty. Odpowiadasz za działania wykonywane za pomocą swojego konta.",
   },
   {
-    title: "3. Clients, professionals, and studios",
-    body: "Clients decide which professionals to contact and hire. Designers, architects, and studios are independent service providers, not employees or agents of ArchiCompass. They are responsible for their qualifications, licences, statements, pricing, availability, services, contracts, taxes, insurance, and compliance with professional and consumer law. Studio owners are responsible for member access to shared inquiries and content.",
+    title: "3. Klienci, profesjonaliści i pracownie",
+    body: "Klient sam decyduje, z którymi specjalistami się kontaktuje i komu zleca usługę. Projektanci, architekci i pracownie są niezależnymi usługodawcami, a nie pracownikami ani przedstawicielami ArchiCompass. Odpowiadają za kwalifikacje, uprawnienia, oświadczenia, ceny, dostępność, zakres usług, umowy, podatki, ubezpieczenie oraz zgodność z prawem zawodowym i konsumenckim. Właściciel pracowni odpowiada za dostęp członków zespołu do wspólnych zapytań i treści.",
   },
   {
-    title: "4. Marketplace relationship",
-    body: "ArchiCompass helps users discover and communicate with each other but is not a party to design, architecture, construction, payment, or other contracts concluded between users. A profile, match score, rating, badge, or search position is not an endorsement, certification, or guarantee of quality, availability, price, or outcome. Verify a professional's identity, qualifications, insurance, scope, and contract before engaging them.",
+    title: "4. Rola platformy",
+    body: "ArchiCompass ułatwia użytkownikom wyszukiwanie i komunikację, ale nie jest stroną umów dotyczących projektowania, architektury, robót budowlanych, płatności ani innych umów zawieranych między użytkownikami. Profil, wynik dopasowania, ocena, oznaczenie lub pozycja w wynikach nie stanowią rekomendacji, certyfikacji ani gwarancji jakości, dostępności, ceny lub rezultatu. Przed zleceniem usługi zweryfikuj tożsamość, kwalifikacje, ubezpieczenie, zakres i umowę specjalisty.",
   },
   {
-    title: "5. Your content",
-    body: "You retain ownership of content you upload. You grant ArchiCompass a non-exclusive, worldwide, royalty-free licence to host, store, process, resize, reproduce, display, and transmit that content only as needed to operate, secure, promote, and improve the platform and the features you choose. Public professional profiles and portfolio content may be displayed in search results and promotional platform surfaces. You confirm that you have all rights and permissions required for the content you submit.",
+    title: "5. Treści użytkownika",
+    body: "Zachowujesz prawa do przesłanych treści. Udzielasz ArchiCompass niewyłącznej, ogólnoświatowej i nieodpłatnej licencji na hosting, przechowywanie, przetwarzanie, zmianę rozmiaru, powielanie, wyświetlanie i przesyłanie tych treści wyłącznie w zakresie koniecznym do działania, zabezpieczenia, promocji i rozwoju platformy oraz wybranych funkcji. Publiczne profile i portfolio mogą być prezentowane w wynikach wyszukiwania i materiałach promujących platformę. Potwierdzasz posiadanie wszystkich praw i zgód wymaganych do publikacji przekazanych treści.",
   },
   {
-    title: "6. AI and matching features",
-    body: "AI photo analysis and matching results are informational tools based on the information available to the platform. Results may be inaccurate, incomplete, or unsuitable for a specific project. They do not replace professional design, architecture, engineering, construction, safety, legal, tax, or financial advice. Users remain responsible for decisions made using these features.",
+    title: "6. Funkcje AI i dopasowanie",
+    body: "Analiza zdjęć AI i wyniki dopasowania są narzędziami informacyjnymi opartymi na danych dostępnych platformie. Wyniki mogą być niedokładne, niepełne lub nieodpowiednie dla konkretnej inwestycji. Nie zastępują profesjonalnej porady projektowej, architektonicznej, inżynieryjnej, budowlanej, technicznej, prawnej, podatkowej ani finansowej. Użytkownik odpowiada za decyzje podjęte na ich podstawie.",
   },
   {
-    title: "7. Ratings and external information",
-    body: "Public ratings, review counts, business details, and external project links may come from users or third-party services such as Google. Availability and accuracy can change. Do not manipulate ratings, publish fabricated claims, or misrepresent another person or business.",
+    title: "7. Oceny i informacje zewnętrzne",
+    body: "Publiczne oceny, liczby opinii, dane firmowe i linki zewnętrzne mogą pochodzić od użytkowników lub usług podmiotów trzecich, takich jak Google. Ich dostępność i dokładność mogą się zmieniać. Zabronione jest manipulowanie ocenami, publikowanie fałszywych informacji oraz podszywanie się pod inną osobę lub firmę.",
   },
   {
-    title: "8. Acceptable use",
-    body: "Do not attempt unauthorised access, upload malware or unlawful material, infringe intellectual-property or privacy rights, impersonate others, scrape or resell platform data, circumvent security, send spam, harass users, publish discriminatory or deceptive content, or use ArchiCompass in violation of applicable law. Contact details obtained through the platform may be used only for legitimate project communication.",
+    title: "8. Dozwolone korzystanie",
+    body: "Nie wolno podejmować prób nieuprawnionego dostępu, przesyłać złośliwego oprogramowania lub treści niezgodnych z prawem, naruszać praw własności intelektualnej lub prywatności, podszywać się pod innych, automatycznie pobierać lub odsprzedawać danych platformy, omijać zabezpieczeń, wysyłać spamu, nękać użytkowników, publikować treści dyskryminujących lub wprowadzających w błąd ani korzystać z ArchiCompass niezgodnie z prawem. Dane kontaktowe uzyskane przez platformę mogą być używane wyłącznie do uzasadnionej komunikacji projektowej.",
   },
   {
-    title: "9. Fees",
-    body: "ArchiCompass currently provides the available account and matching features without a platform fee or commission. Paid subscriptions, promoted placement, commissions, or other services may be introduced in the future. Any applicable price, billing period, and additional terms will be shown before a user purchases or activates a paid service.",
+    title: "9. Opłaty",
+    body: "Obecnie dostępne funkcje kont i dopasowania są oferowane bez opłaty platformowej i prowizji. W przyszłości mogą zostać wprowadzone płatne subskrypcje, promowane pozycje, prowizje lub inne usługi. Cena, okres rozliczeniowy i dodatkowe warunki zostaną przedstawione przed zakupem lub aktywacją płatnej usługi.",
   },
   {
-    title: "10. Availability and changes",
-    body: "We work to keep ArchiCompass available and secure, but uninterrupted access, error-free operation, permanent storage, a particular match, a professional response, or a successful project cannot be guaranteed. Features may be updated, replaced, or discontinued for operational, security, legal, or product reasons. Keep independent copies of important briefs, plans, images, contracts, and messages.",
+    title: "10. Dostępność i zmiany",
+    body: "Dążymy do zapewnienia dostępności i bezpieczeństwa ArchiCompass, ale nie gwarantujemy nieprzerwanego dostępu, działania bez błędów, trwałego przechowywania, konkretnego dopasowania, odpowiedzi profesjonalisty ani powodzenia projektu. Funkcje mogą być aktualizowane, zastępowane lub wycofywane z powodów operacyjnych, bezpieczeństwa, prawnych lub produktowych. Zachowuj własne kopie ważnych briefów, planów, zdjęć, umów i wiadomości.",
   },
   {
-    title: "11. Suspension and deletion",
-    body: "We may restrict or suspend access to protect users or the platform, investigate misuse, comply with law, or enforce these Terms. You may delete supported content and accounts using available controls. Some records may be retained where required for security, disputes, legal obligations, or backup recovery, as described in the Privacy Policy.",
+    title: "11. Ograniczenie dostępu i usuwanie",
+    body: "Możemy ograniczyć lub zawiesić dostęp w celu ochrony użytkowników lub platformy, zbadania nadużycia, wykonania obowiązków prawnych albo egzekwowania Regulaminu. Obsługiwane treści i konto można usuwać za pomocą dostępnych funkcji. Niektóre dane mogą być zachowane ze względów bezpieczeństwa, obsługi sporów, obowiązków prawnych lub odtwarzania kopii zapasowych, zgodnie z Polityką prywatności.",
   },
   {
-    title: "12. Intellectual property",
-    body: "The ArchiCompass name, branding, interface, software, original platform content, and related intellectual property belong to ArchiCompass or its licensors. These Terms do not grant permission to copy, reverse engineer, reproduce, or commercially exploit them except as allowed by law or written permission.",
+    title: "12. Własność intelektualna",
+    body: "Nazwa ArchiCompass, identyfikacja wizualna, interfejs, oprogramowanie, oryginalne treści platformy i powiązane prawa własności intelektualnej należą do ArchiCompass lub jego licencjodawców. Regulamin nie zezwala na ich kopiowanie, analizę wsteczną, powielanie ani komercyjne wykorzystywanie, z wyjątkiem przypadków dozwolonych prawem lub pisemną zgodą.",
   },
   {
-    title: "13. Liability",
-    body: "To the maximum extent permitted by law, ArchiCompass is not liable for user content, professional services, third-party conduct, external websites, or indirect losses arising from user-to-user projects. Nothing in these Terms excludes liability or consumer rights that cannot legally be excluded or limited.",
+    title: "13. Odpowiedzialność",
+    body: "W maksymalnym zakresie dozwolonym przez prawo ArchiCompass nie odpowiada za treści użytkowników, usługi profesjonalistów, działania podmiotów trzecich, strony zewnętrzne ani pośrednie szkody wynikające z projektów realizowanych między użytkownikami. Regulamin nie wyłącza odpowiedzialności ani praw konsumenta, których zgodnie z prawem nie można wyłączyć lub ograniczyć.",
   },
   {
-    title: "14. Law and disputes",
-    body: "These Terms are governed by Polish law, without depriving consumers of mandatory protections available under the law of their habitual residence. Please contact us first so we can try to resolve a concern. Users may also use any competent consumer-protection body, supervisory authority, or court available under applicable law.",
+    title: "14. Prawo właściwe i spory",
+    body: "Regulamin podlega prawu polskiemu, bez pozbawiania konsumentów bezwzględnie obowiązującej ochrony wynikającej z prawa ich miejsca zwykłego pobytu. W pierwszej kolejności prosimy o kontakt w celu polubownego rozwiązania problemu. Użytkownik może również skorzystać z właściwego organu ochrony konsumentów, organu nadzorczego lub sądu dostępnego na podstawie obowiązującego prawa.",
   },
   {
-    title: "15. Changes and contact",
-    body: "We may update these Terms to reflect service, legal, or security changes. Material changes will be communicated through the platform or by email where appropriate. Questions about these Terms can be sent to contact@archicompass.pl; security and abuse reports can be sent to admin@archicompass.pl.",
+    title: "15. Zmiany i kontakt",
+    body: "Możemy aktualizować Regulamin w związku ze zmianami usługi, prawa lub bezpieczeństwa. O istotnych zmianach poinformujemy przez platformę lub e-mail, gdy będzie to właściwe. Pytania dotyczące Regulaminu można wysyłać na contact@archicompass.pl, a zgłoszenia dotyczące bezpieczeństwa i nadużyć na admin@archicompass.pl.",
   },
 ];
 
 export default function TermsPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-      <p className="text-sm font-semibold uppercase text-primary">Legal</p>
-      <h1 className="mt-3 text-4xl font-bold">Terms of Service</h1>
-      <p className="mt-3 text-sm text-muted">Effective: July 6, 2026</p>
+      <p className="text-sm font-semibold uppercase text-primary">Informacje prawne</p>
+      <h1 className="mt-3 text-4xl font-bold">Regulamin</h1>
+      <p className="mt-3 text-sm text-muted">Obowiązuje od: 6 lipca 2026 r.</p>
       <p className="mt-6 max-w-3xl text-lg leading-8 text-muted">
-        These Terms define the rules for using ArchiCompass as a client, independent
-        professional, studio member, or visitor.
+        Regulamin określa zasady korzystania z ArchiCompass przez klientów, niezależnych
+        profesjonalistów, członków pracowni i odwiedzających.
       </p>
 
       <div className="mt-10 grid gap-9">
@@ -92,16 +92,16 @@ export default function TermsPage() {
       </div>
 
       <div className="mt-12 rounded-lg border border-line bg-card p-6">
-        <h2 className="text-xl font-bold">Questions or reports</h2>
+        <h2 className="text-xl font-bold">Pytania i zgłoszenia</h2>
         <p className="mt-2 leading-7 text-muted">
-          Email <a href="mailto:contact@archicompass.pl" className="font-semibold text-primary hover:underline">contact@archicompass.pl</a> for general questions or <a href="mailto:admin@archicompass.pl" className="font-semibold text-primary hover:underline">admin@archicompass.pl</a> for security and abuse reports.
+          Pytania ogólne kieruj na <a href="mailto:contact@archicompass.pl" className="font-semibold text-primary hover:underline">contact@archicompass.pl</a>, a zgłoszenia dotyczące bezpieczeństwa i nadużyć na <a href="mailto:admin@archicompass.pl" className="font-semibold text-primary hover:underline">admin@archicompass.pl</a>.
         </p>
         <p className="mt-3 text-sm leading-6 text-muted">
-          SM Advisory, Sergii Moroz · NIP 5252995634 · REGON 528006413 · ul. Grzybowska 2, lok. 31, 00-131 Warszawa, Poland
+          SM Advisory, Sergii Moroz · NIP 5252995634 · REGON 528006413 · ul. Grzybowska 2, lok. 31, 00-131 Warszawa, Polska
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm font-semibold text-primary">
-          <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
-          <Link href="/cookies" className="hover:underline">Cookie Policy</Link>
+          <Link href="/privacy" className="hover:underline">Polityka prywatności</Link>
+          <Link href="/cookies" className="hover:underline">Polityka cookies</Link>
         </div>
       </div>
     </main>

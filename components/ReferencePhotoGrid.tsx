@@ -5,7 +5,7 @@ import { countLabel } from "@/lib/count-label";
 
 export default function ReferencePhotoGrid({
   photos,
-  title = "Reference photos",
+  title = "Zdjęcia referencyjne",
 }: {
   photos: ReferencePhotoPreview[];
   title?: string;
@@ -26,7 +26,7 @@ export default function ReferencePhotoGrid({
             key={photo.path}
             className="overflow-hidden rounded-xl border border-line bg-card"
           >
-            <a href={photo.url} target="_blank" rel="noreferrer" className="group block" title={`Open ${photo.name} full size`}>
+            <a href={photo.url} target="_blank" rel="noreferrer" className="group block" title={`Otwórz ${photo.name} w pełnym rozmiarze`}>
               <img
                 alt={`${title} ${index + 1}: ${photo.name}`}
                 className="aspect-[4/3] w-full object-cover transition group-hover:scale-[1.02]"

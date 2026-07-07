@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import GoogleRating from "@/components/GoogleRating";
 import JsonLd from "@/components/JsonLd";
-import { countLabel } from "@/lib/count-label";
+import { polishCountLabel } from "@/lib/count-label";
+import { professionalOptionLabel } from "@/lib/professional-options";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import {
@@ -78,12 +79,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { country, city } = await params;
   const location = getSeoLocation(country, city);
-  if (!location) return pageMetadata({ title: "Location not found", description: "This location is not available.", path: `/interior-designers/${country}/${city}`, noIndex: true });
+  if (!location) return pageMetadata({ title: "Nie znaleziono lokalizacji", description: "Ta lokalizacja nie jest dostępna.", path: `/interior-designers/${country}/${city}`, noIndex: true });
   const { designers, studios } = await professionalsForLocation(location);
   const count = designers.length + studios.length;
   return pageMetadata({
-    title: `Interior Designers in ${location.city}, ${location.country}`,
-    description: `Find and compare interior designers and design studios in ${location.city}. Browse portfolios, specialties, services, Google ratings, and send a structured project brief.`,
+    title: `Projektanci wnętrz ${location.city} | Portfolio i opinie`,
+    description: `Znajdź i porównaj projektantów wnętrz oraz pracownie w mieście ${location.city}. Zobacz portfolio, usługi, oceny Google i wyślij konkretny brief.`,
     path: locationPath(location),
     noIndex: count === 0,
   });
@@ -100,7 +101,7 @@ export default async function InteriorDesignersLocationPage({
   const { designers, studios } = await professionalsForLocation(location);
   const professionals = [
     ...studios.map((studio) => ({
-      type: "Design studio",
+      type: "Pracownia projektowa",
       id: studio.id,
       name: studio.name,
       bio: studio.bio,
@@ -112,9 +113,9 @@ export default async function InteriorDesignersLocationPage({
       href: `/studios/${studio.id}`,
     })),
     ...designers.map((designer) => ({
-      type: designer.profession_type || "Interior designer",
+      type: designer.profession_type === "Studio" ? "Pracownia projektowa" : "Projektant wnętrz",
       id: designer.id,
-      name: designer.full_name || "ArchiCompass professional",
+      name: designer.full_name || "Projektant ArchiCompass",
       bio: designer.bio,
       location: designer.location,
       specialties: designer.specialties,
@@ -134,18 +135,18 @@ export default async function InteriorDesignersLocationPage({
       <JsonLd
         data={[
           breadcrumbJsonLd([
-            { name: "Home", path: "/" },
-            { name: "Find designers", path: "/designers" },
+            { name: "Strona główna", path: "/" },
+            { name: "Znajdź projektanta", path: "/designers" },
             { name: location.country, path: `/interior-designers/${location.countrySlug}/${location.citySlug}` },
             { name: location.city, path },
           ]),
           {
             "@context": "https://schema.org",
             "@type": "CollectionPage",
-            name: `Interior designers in ${location.city}`,
-            description: `Interior designers and design studios serving ${location.city}, ${location.country}.`,
+            name: `Projektanci wnętrz w mieście ${location.city}`,
+            description: `Projektanci wnętrz i pracownie projektowe działające w mieście ${location.city}, ${location.country}.`,
             url: absoluteUrl(path),
-            inLanguage: "en",
+            inLanguage: "pl",
             about: {
               "@type": "City",
               name: location.city,
@@ -170,8 +171,8 @@ export default async function InteriorDesignersLocationPage({
 
       <section className="border-b border-primary/15 bg-primary-soft px-4 py-14 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <nav aria-label="Breadcrumb" className="text-sm font-semibold text-primary">
-            <Link href="/designers" className="hover:underline">Find designers</Link>
+          <nav aria-label="Okruszki" className="text-sm font-semibold text-primary">
+            <Link href="/designers" className="hover:underline">Znajdź projektantów</Link>
             <span aria-hidden="true" className="mx-2">/</span>
             <span>{location.country}</span>
             <span aria-hidden="true" className="mx-2">/</span>
@@ -179,21 +180,21 @@ export default async function InteriorDesignersLocationPage({
           </nav>
           <div className="mt-7 max-w-4xl">
             <span className="inline-flex rounded-full bg-accent px-3 py-1 text-xs font-bold text-white">
-              {location.city} design directory
+              Katalog projektantów · {location.city}
             </span>
             <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-6xl">
-              Interior designers in {location.city}
+              Projektanci wnętrz w mieście {location.city}
             </h1>
             <p className="mt-5 max-w-3xl text-lg leading-8 text-muted">
-              Compare interior designers and design studios serving {location.city}, {location.country}.
-              Review real project experience, services, specialties, and availability before sending one clear brief.
+              Porównaj projektantów wnętrz i pracownie działające w mieście {location.city}.
+              Sprawdź portfolio, usługi, specjalizacje i dostępność, zanim wyślesz jeden konkretny brief.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link href={`/designers?location=${encodeURIComponent(location.city)}`} className="rounded-lg bg-primary px-5 py-3 font-bold text-white">
-                Browse {location.city} professionals
+                Zobacz projektantów z miasta {location.city}
               </Link>
               <Link href="/project-compass" className="rounded-lg border border-primary/25 bg-card px-5 py-3 font-bold text-primary">
-                Build an AI project brief
+                Utwórz brief z pomocą AI
               </Link>
             </div>
           </div>
@@ -203,10 +204,10 @@ export default async function InteriorDesignersLocationPage({
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase text-accent">Local directory</p>
-            <h2 className="mt-2 text-3xl font-bold">Professionals serving {location.city}</h2>
+            <p className="text-sm font-bold uppercase text-accent">Lokalny katalog</p>
+            <h2 className="mt-2 text-3xl font-bold">Specjaliści działający w mieście {location.city}</h2>
           </div>
-          <p className="font-semibold text-muted">{countLabel(professionals.length, "professional")}</p>
+          <p className="font-semibold text-muted">{polishCountLabel(professionals.length, "specjalista", "specjaliści", "specjalistów")}</p>
         </div>
 
         {professionals.length ? (
@@ -222,28 +223,28 @@ export default async function InteriorDesignersLocationPage({
                   <GoogleRating compact rating={professional.rating} count={professional.reviewCount} url={professional.googleUrl} />
                 </div>
                 <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">
-                  {professional.bio || `View this professional's interior design profile and portfolio for projects in ${location.city}.`}
+                  {professional.bio || `Zobacz profil, portfolio i realizacje tego projektanta w mieście ${location.city}.`}
                 </p>
                 {professional.specialties?.length ? (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {professional.specialties.slice(0, 3).map((specialty) => (
-                      <span key={specialty} className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">{specialty}</span>
+                      <span key={specialty} className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">{professionalOptionLabel(specialty)}</span>
                     ))}
                   </div>
                 ) : null}
                 <Link href={professional.href} className="mt-6 inline-flex rounded-lg bg-primary px-4 py-3 text-sm font-bold text-white">
-                  View profile and portfolio
+                  Zobacz profil i portfolio
                 </Link>
               </article>
             ))}
           </div>
         ) : (
           <div className="mt-7 rounded-lg border border-dashed border-line bg-card p-8">
-            <h3 className="text-2xl font-bold">The {location.city} directory is opening soon.</h3>
+            <h3 className="text-2xl font-bold">Katalog dla miasta {location.city} już wkrótce.</h3>
             <p className="mt-3 max-w-2xl leading-7 text-muted">
-              Professionals can already create a profile for this city. This page will enter the public search index automatically when the first local profile is published.
+              Projektanci mogą już tworzyć profile dla tej lokalizacji. Strona pojawi się w publicznym indeksie wyszukiwania po opublikowaniu pierwszego lokalnego profilu.
             </p>
-            <Link href="/get-started" className="mt-5 inline-flex font-bold text-primary hover:underline">Join as a designer or studio</Link>
+            <Link href="/get-started" className="mt-5 inline-flex font-bold text-primary hover:underline">Dołącz jako projektant lub pracownia</Link>
           </div>
         )}
       </section>
@@ -251,38 +252,38 @@ export default async function InteriorDesignersLocationPage({
       <section className="border-y border-line bg-card">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-3">
           <article>
-            <h2 className="text-2xl font-bold">The {location.city} design market</h2>
+            <h2 className="text-2xl font-bold">Rynek projektowania wnętrz · {location.city}</h2>
             <p className="mt-3 leading-7 text-muted">{location.marketNote}</p>
           </article>
           <article>
-            <h2 className="text-2xl font-bold">What to compare</h2>
+            <h2 className="text-2xl font-bold">Co warto porównać</h2>
             <p className="mt-3 leading-7 text-muted">{location.planningNote}</p>
           </article>
           <article>
-            <h2 className="text-2xl font-bold">Styles and portfolio fit</h2>
+            <h2 className="text-2xl font-bold">Styl i dopasowanie portfolio</h2>
             <p className="mt-3 leading-7 text-muted">{location.styleNote}</p>
           </article>
         </div>
       </section>
 
       <section className="mx-auto max-w-4xl px-4 py-14 sm:px-6">
-        <p className="text-sm font-bold uppercase text-warm">Before you contact a designer</p>
-        <h2 className="mt-2 text-3xl font-bold">A useful brief produces more useful replies.</h2>
+        <p className="text-sm font-bold uppercase text-warm">Zanim skontaktujesz się z projektantem</p>
+        <h2 className="mt-2 text-3xl font-bold">Dobry brief pozwala otrzymać lepsze odpowiedzi.</h2>
         <div className="mt-6 grid gap-5 text-base leading-8 text-muted sm:grid-cols-2">
-          <p>Include the property type and status, area, rooms, location, budget range, preferred timing, and whether you need 3D visualisation or site supervision.</p>
-          <p>Add several inspiration photos and explain what you like about them. ArchiCompass can analyse recurring visual signals and keep the result with the same project brief.</p>
+          <p>Podaj typ i status nieruchomości, powierzchnię, pomieszczenia, lokalizację, budżet, termin oraz informację o wizualizacjach 3D i nadzorze.</p>
+          <p>Dodaj kilka zdjęć inspiracji i wyjaśnij, co Ci się w nich podoba. ArchiCompass rozpozna powtarzające się cechy i zapisze wynik w tym samym briefie.</p>
         </div>
-        <Link href="/project-compass" className="mt-7 inline-flex rounded-lg bg-accent px-5 py-3 font-bold text-white">Start Project Compass</Link>
+        <Link href="/project-compass" className="mt-7 inline-flex rounded-lg bg-accent px-5 py-3 font-bold text-white">Uruchom Project Compass</Link>
       </section>
 
       {relatedLocations.length ? (
         <section className="border-t border-line bg-background px-4 py-10 sm:px-6">
           <div className="mx-auto max-w-7xl">
-            <h2 className="text-2xl font-bold">More designers in {location.country}</h2>
+            <h2 className="text-2xl font-bold">Więcej projektantów w kraju: {location.country}</h2>
             <div className="mt-5 flex flex-wrap gap-3">
               {relatedLocations.map((item) => (
                 <Link key={item.citySlug} href={locationPath(item)} className="rounded-full border border-line bg-card px-4 py-2 text-sm font-semibold hover:border-primary hover:text-primary">
-                  Interior designers in {item.city}
+                  Projektanci wnętrz · {item.city}
                 </Link>
               ))}
             </div>

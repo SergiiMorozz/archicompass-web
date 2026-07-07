@@ -13,6 +13,7 @@ import {
 } from "@/lib/public-demo-profiles";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import { professionalOptionLabel } from "@/lib/professional-options";
 
 export const revalidate = 0;
 
@@ -62,7 +63,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   if (!isUuid(id)) {
-    return pageMetadata({ title: "Project not found", description: "This interior design project is not available.", path: `/projects/${id}`, noIndex: true });
+    return pageMetadata({ title: "Nie znaleziono projektu", description: "Ten projekt wnętrza nie jest dostępny.", path: `/projects/${id}`, noIndex: true });
   }
   const supabase = createPublicSupabaseClient();
   const { data: project } = await supabase
@@ -71,19 +72,19 @@ export async function generateMetadata({
     .eq("id", id)
     .maybeSingle();
   if (!project) {
-    return pageMetadata({ title: "Project not found", description: "This interior design project is not available.", path: `/projects/${id}`, noIndex: true });
+    return pageMetadata({ title: "Nie znaleziono projektu", description: "Ten projekt wnętrza nie jest dostępny.", path: `/projects/${id}`, noIndex: true });
   }
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name, location")
     .eq("id", project.profile_id)
     .maybeSingle();
-  const title = project.title || "Interior design project";
-  const byline = profile?.full_name ? ` by ${profile.full_name}` : "";
-  const location = profile?.location ? ` in ${profile.location}` : "";
+  const title = project.title || "Projekt wnętrza";
+  const byline = profile?.full_name ? ` · ${profile.full_name}` : "";
+  const location = profile?.location ? ` · ${profile.location}` : "";
   return pageMetadata({
     title: `${title}${byline}${location}`,
-    description: project.description || `Explore this ${project.category || "interior design"} project, gallery, and designer profile on ArchiCompass.`,
+    description: project.description || `Zobacz projekt, galerię i profil autora w ArchiCompass. Kategoria: ${project.category ? professionalOptionLabel(project.category) : "projektowanie wnętrz"}.`,
     path: `/projects/${id}`,
     image: project.image_url || project.image_urls?.[0] || null,
     type: "article",
@@ -131,11 +132,11 @@ function projectGallery(project: Project) {
 }
 
 function profileTitle(profile: Profile | null) {
-  return profile?.full_name || "ArchiCompass professional";
+  return profile?.full_name || "Projektant ArchiCompass";
 }
 
 function profileType(profile: Profile | null) {
-  return profile?.profession_type || profile?.user_type || "Professional";
+  return profile?.profession_type === "Studio" ? "Pracownia projektowa" : "Projektant wnętrz";
 }
 
 function websiteHref(value: string | null | undefined) {
@@ -200,7 +201,7 @@ export default async function ProjectDetailPage({
         .eq("entity_key", project.id)
         .maybeSingle()
     : { data: null };
-  const title = project.title || "Untitled project";
+  const title = project.title || "Projekt bez tytułu";
   const designerName = profileTitle(profile);
   const designerWebsite = websiteHref(profile?.website);
   const gallery = projectGallery(project);
@@ -210,8 +211,8 @@ export default async function ProjectDetailPage({
       <JsonLd
         data={[
           breadcrumbJsonLd([
-            { name: "Home", path: "/" },
-            { name: "Find designers", path: "/designers" },
+            { name: "Strona główna", path: "/" },
+            { name: "Znajdź projektanta", path: "/designers" },
             { name: designerName, path: `/designers/${project.profile_id}` },
             { name: title, path: `/projects/${project.id}` },
           ]),
@@ -223,7 +224,7 @@ export default async function ProjectDetailPage({
             url: absoluteUrl(`/projects/${project.id}`),
             description: project.description || undefined,
             image: gallery,
-            genre: project.category || "Interior design",
+            genre: project.category ? professionalOptionLabel(project.category) : "Projektowanie wnętrz",
             dateCreated: project.created_at,
             creator: {
               "@type": "Person",
@@ -240,14 +241,14 @@ export default async function ProjectDetailPage({
               href={`/designers/${project.profile_id}#portfolio`}
               className="rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
             >
-              Back to designer portfolio
+              Wróć do portfolio projektanta
             </Link>
             {isOwner ? (
               <Link
                 href="/account/projects"
                 className="rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
               >
-                Manage this project
+                Zarządzaj tym projektem
               </Link>
             ) : null}
           </div>
@@ -255,11 +256,11 @@ export default async function ProjectDetailPage({
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
               <div className="text-sm font-semibold text-primary">
-                {project.category || "Portfolio project"}
+                {project.category ? professionalOptionLabel(project.category) : "Projekt portfolio"}
               </div>
               {demo ? (
                 <div className="mt-3 inline-flex rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-                  Example portfolio project
+                  Przykładowy projekt portfolio
                 </div>
               ) : null}
               <h1 className="mt-2 max-w-4xl text-4xl font-bold tracking-tight sm:text-6xl">
@@ -267,21 +268,21 @@ export default async function ProjectDetailPage({
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
                 {project.description ||
-                  "A public ArchiCompass project page with gallery, designer details, and sharing-ready project context."}
+                  "Publiczna strona projektu w ArchiCompass z galerią, informacjami o autorze i kontekstem realizacji."}
               </p>
             </div>
 
             <div className="rounded-2xl border border-line bg-background p-5 shadow-sm">
-              <div className="text-sm font-semibold text-muted">Project snapshot</div>
+              <div className="text-sm font-semibold text-muted">Informacje o projekcie</div>
               <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-xl border border-line bg-card p-3">
-                  <div className="text-muted">Photos</div>
+                  <div className="text-muted">Zdjęcia</div>
                   <div className="mt-1 text-xl font-bold">{gallery.length}</div>
                 </div>
                 <div className="rounded-xl border border-line bg-card p-3">
-                  <div className="text-muted">Category</div>
+                  <div className="text-muted">Kategoria</div>
                   <div className="mt-1 truncate font-bold">
-                    {project.category || "Portfolio"}
+                    {project.category ? professionalOptionLabel(project.category) : "Portfolio"}
                   </div>
                 </div>
               </div>
@@ -294,7 +295,7 @@ export default async function ProjectDetailPage({
         <div className="grid gap-7">
           <section className="overflow-hidden rounded-2xl border border-line bg-card shadow-sm">
             <ProjectGallery
-              category={project.category || "Portfolio"}
+              category={project.category ? professionalOptionLabel(project.category) : "Portfolio"}
               description={project.description}
               images={gallery}
               title={title}
@@ -302,11 +303,11 @@ export default async function ProjectDetailPage({
           </section>
 
           <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
-            <div className="text-sm font-semibold text-primary">Project story</div>
-            <h2 className="mt-1 text-3xl font-bold">Details</h2>
+            <div className="text-sm font-semibold text-primary">Historia projektu</div>
+            <h2 className="mt-1 text-3xl font-bold">Szczegóły</h2>
             <p className="mt-5 max-w-3xl text-base leading-8 text-muted">
               {project.description ||
-                "This project is ready for more context: brief, goals, materials, room type, scope, and what changed for the client."}
+                "Ten projekt może zostać uzupełniony o brief, cele, materiały, rodzaj pomieszczeń, zakres i opis efektu dla klienta."}
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -317,14 +318,14 @@ export default async function ProjectDetailPage({
                   rel="noreferrer"
                   className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90"
                 >
-                  Open external project page
+                  Otwórz zewnętrzną stronę projektu
                 </a>
               ) : null}
               <Link
                 href={`/designers/${project.profile_id}#portfolio`}
                 className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
               >
-                View designer portfolio
+                Zobacz portfolio projektanta
               </Link>
             </div>
           </section>
@@ -334,26 +335,26 @@ export default async function ProjectDetailPage({
           id="designer"
           className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24"
         >
-          <div className="text-sm font-semibold text-primary">Designer</div>
+          <div className="text-sm font-semibold text-primary">Projektant</div>
           <h2 className="mt-2 text-2xl font-bold">{designerName}</h2>
           <p className="mt-1 text-muted">{profileType(profile)}</p>
 
           <div className="mt-5 grid gap-3 text-sm">
             <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
-              <span className="text-muted">Location</span>
+              <span className="text-muted">Lokalizacja</span>
               <span className="truncate text-right font-semibold">
-                {profile?.location || "Remote / location on request"}
+                {profile?.location || "Zdalnie / lokalizacja do ustalenia"}
               </span>
             </div>
             <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
-              <span className="text-muted">Project</span>
+              <span className="text-muted">Projekt</span>
               <span className="truncate text-right font-semibold">
-                {project.category || "Portfolio"}
+                {project.category ? professionalOptionLabel(project.category) : "Portfolio"}
               </span>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <span className="text-muted">Share</span>
-              <span className="font-semibold">Use this page URL</span>
+              <span className="text-muted">Udostępnianie</span>
+              <span className="font-semibold">Skopiuj adres tej strony</span>
             </div>
           </div>
 
@@ -362,14 +363,14 @@ export default async function ProjectDetailPage({
               href={`/designers/${project.profile_id}`}
               className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
             >
-              Open designer profile
+              Otwórz profil projektanta
             </Link>
             {isOwner ? (
               <Link
                 href="/account/projects"
                 className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
               >
-                Edit in account
+                Edytuj w swoim koncie
               </Link>
             ) : (
               <>
@@ -383,11 +384,11 @@ export default async function ProjectDetailPage({
                     href={`/account/briefs?designer=${project.profile_id}`}
                     className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
                   >
-                    Send brief to designer
+                    Wyślij brief projektantowi
                   </Link>
                 ) : (
                   <div className="rounded-lg border border-line bg-background p-4 text-sm leading-6 text-muted">
-                    Designer accounts receive briefs and cannot send client requests.
+                    Konta projektantów otrzymują briefy i nie mogą wysyłać zapytań klientów.
                   </div>
                 )}
               </>
@@ -399,7 +400,7 @@ export default async function ProjectDetailPage({
                 rel="noreferrer"
                 className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
               >
-                Open website
+                Otwórz stronę internetową
               </a>
             ) : null}
           </div>

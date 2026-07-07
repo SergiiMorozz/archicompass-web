@@ -7,6 +7,19 @@ export const serviceCapabilities = [
   "Sourcing and procurement",
 ] as const;
 
+const polishServiceLabels: Record<string, string> = {
+  "3D visualization": "wizualizacje 3D",
+  "Site consultations": "konsultacje na miejscu",
+  "Author's supervision": "nadzór autorski",
+  "Full project coordination": "pełna koordynacja realizacji",
+  "Technical documentation": "dokumentacja techniczna",
+  "Sourcing and procurement": "dobór i zamawianie wyposażenia",
+};
+
+export function serviceCapabilityLabel(value: string) {
+  return polishServiceLabels[value] || value;
+}
+
 export function serviceCapabilityValues(formData: FormData) {
   const allowed = new Set<string>(serviceCapabilities);
   return formData

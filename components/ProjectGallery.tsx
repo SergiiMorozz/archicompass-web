@@ -50,7 +50,7 @@ export default function ProjectGallery({
           type="button"
           onClick={() => setActiveIndex(0)}
           className="group block h-full w-full text-left"
-          aria-label={`Open ${title} gallery`}
+          aria-label={`Otwórz galerię: ${title}`}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -78,7 +78,7 @@ export default function ProjectGallery({
             type="button"
             onClick={() => setActiveIndex(imageIndex)}
             className="aspect-square overflow-hidden rounded-xl bg-primary-soft"
-            aria-label={`Open ${title} photo ${imageIndex + 1}`}
+            aria-label={`Otwórz zdjęcie ${imageIndex + 1}: ${title}`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img

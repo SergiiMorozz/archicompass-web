@@ -43,13 +43,13 @@ export default function FavoriteButton({
         return;
       }
       if (!response.ok || typeof payload.saved !== "boolean") {
-        throw new Error(payload.error || "Favorite could not be updated.");
+        throw new Error(payload.error || "Nie udało się zaktualizować ulubionych.");
       }
 
       setSaved(payload.saved);
       if (refreshOnChange) router.refresh();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Favorite could not be updated.");
+      setError(caught instanceof Error ? caught.message : "Nie udało się zaktualizować ulubionych.");
     } finally {
       setIsBusy(false);
     }
@@ -62,7 +62,7 @@ export default function FavoriteButton({
         onClick={toggleFavorite}
         disabled={isBusy}
         aria-pressed={saved}
-        title={saved ? "Remove from favorites" : "Add to favorites"}
+        title={saved ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
         className={[
           "rounded-xl border text-sm font-semibold transition disabled:cursor-wait disabled:opacity-60",
           compact ? "h-10 px-3" : "px-4 py-3",
@@ -71,7 +71,7 @@ export default function FavoriteButton({
             : "border-line bg-background text-foreground hover:border-primary hover:text-primary",
         ].join(" ")}
       >
-        {isBusy ? "Saving..." : saved ? "Saved" : "Save"}
+        {isBusy ? "Zapisywanie..." : saved ? "Zapisano" : "Zapisz"}
       </button>
       {error ? <div className="mt-1 max-w-48 text-xs text-red-700">{error}</div> : null}
     </div>

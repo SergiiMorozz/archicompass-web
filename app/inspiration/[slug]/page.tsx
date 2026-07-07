@@ -22,6 +22,15 @@ type Article = {
   updated_at: string;
 };
 
+const categoryLabels: Record<string, string> = {
+  Inspiration: "Inspiracje",
+  Trends: "Trendy",
+  Guides: "Poradniki",
+  Materials: "Materiały",
+  Rooms: "Pomieszczenia",
+  Sustainability: "Zrównoważone wnętrza",
+};
+
 export async function generateMetadata({
   params,
 }: {
@@ -36,7 +45,7 @@ export async function generateMetadata({
     .eq("status", "published")
     .maybeSingle();
   if (!article) {
-    return pageMetadata({ title: "Article not found", description: "This inspiration article is not available.", path: `/inspiration/${slug}`, noIndex: true });
+    return pageMetadata({ title: "Nie znaleziono artykułu", description: "Ten artykuł nie jest dostępny.", path: `/inspiration/${slug}`, noIndex: true });
   }
   return pageMetadata({
     title: article.title,
@@ -49,7 +58,7 @@ export async function generateMetadata({
 
 function formatDate(value: string | null) {
   if (!value) return "";
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("pl-PL", {
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -84,7 +93,7 @@ export default async function InspirationArticlePage({ params }: { params: Promi
       <JsonLd
         data={[
           breadcrumbJsonLd([
-            { name: "Home", path: "/" },
+            { name: "Strona główna", path: "/" },
             { name: "Inspiration Hub", path: "/inspiration" },
             { name: article.title, path: `/inspiration/${article.slug}` },
           ]),
@@ -97,11 +106,11 @@ export default async function InspirationArticlePage({ params }: { params: Promi
             image: article.image_url || undefined,
             datePublished: article.published_at || undefined,
             dateModified: article.updated_at,
-            inLanguage: "en",
+            inLanguage: "pl",
             mainEntityOfPage: absoluteUrl(`/inspiration/${article.slug}`),
             author: {
               "@type": "Organization",
-              name: article.author_name || "ArchiCompass Editorial",
+              name: article.author_name || "Redakcja ArchiCompass",
             },
             publisher: { "@id": absoluteUrl("/#organization") },
           },
@@ -110,16 +119,16 @@ export default async function InspirationArticlePage({ params }: { params: Promi
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-4xl">
           <Link href="/inspiration" className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted">
-            Back to Inspiration Hub
+            Wróć do Inspiration Hub
           </Link>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">{article.category}</span>
+            <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">{categoryLabels[article.category] || article.category}</span>
             <span className="text-sm text-muted">{formatDate(article.published_at)}</span>
           </div>
           <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-6xl">{article.title}</h1>
           <p className="mt-5 max-w-3xl text-xl leading-9 text-muted">{article.excerpt}</p>
           <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-            <span className="text-sm font-semibold">{article.author_name || "ArchiCompass Editorial"}</span>
+            <span className="text-sm font-semibold">{article.author_name || "Redakcja ArchiCompass"}</span>
             <FavoriteButton entityType="article" entityKey={article.id} initialSaved={Boolean(favorite)} />
           </div>
         </div>
@@ -142,11 +151,11 @@ export default async function InspirationArticlePage({ params }: { params: Promi
           {paragraphs.map((paragraph, index) => <p key={`${article.id}-${index}`}>{paragraph}</p>)}
         </div>
         <section className="mt-12 rounded-lg border border-line bg-primary-soft p-6">
-          <div className="text-sm font-semibold text-primary">Turn ideas into a project</div>
-          <h2 className="mt-1 text-2xl font-bold">Build a brief from your inspiration</h2>
+          <div className="text-sm font-semibold text-primary">Zamień pomysły w projekt</div>
+          <h2 className="mt-1 text-2xl font-bold">Utwórz brief na podstawie swoich inspiracji</h2>
           <div className="mt-5 flex flex-wrap gap-3">
-            <Link href="/project-compass" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">Open Project Compass</Link>
-            <Link href="/designers" className="rounded-xl border border-line bg-card px-5 py-3 text-sm font-semibold">Find designers</Link>
+            <Link href="/project-compass" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">Otwórz Project Compass</Link>
+            <Link href="/designers" className="rounded-xl border border-line bg-card px-5 py-3 text-sm font-semibold">Znajdź projektantów</Link>
           </div>
         </section>
       </article>

@@ -8,49 +8,51 @@ import { absoluteUrl, siteUrl } from "@/lib/seo";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: "Find Interior Designers with AI | ArchiCompass",
+    default: "Znajdź projektanta wnętrz z pomocą AI | ArchiCompass",
     template: "%s | ArchiCompass",
   },
   description:
-    "Find interior designers and design studios by location, style, services, and portfolio. Use AI to turn inspiration photos into a clear project brief.",
+    "Znajdź projektantów wnętrz i pracownie projektowe według lokalizacji, stylu, usług i portfolio. Zamień zdjęcia inspiracji w precyzyjny brief z pomocą AI.",
   applicationName: "ArchiCompass",
   authors: [{ name: "ArchiCompass", url: siteUrl() }],
   creator: "ArchiCompass",
   publisher: "ArchiCompass",
-  category: "Interior design marketplace",
+  category: "Platforma projektowania wnętrz",
   keywords: [
-    "interior designer",
-    "find interior designer",
-    "interior designer Poland",
+    "projektant wnętrz",
+    "znajdź projektanta wnętrz",
+    "projektant wnętrz Polska",
+    "architekt wnętrz Warszawa",
+    "projektowanie wnętrz",
     "projektant wnętrz",
     "architekt wnętrz",
-    "design studio",
-    "interior design portfolio",
-    "AI interior style finder",
+    "pracownia projektowania wnętrz",
+    "portfolio projektanta wnętrz",
+    "AI rozpoznawanie stylu wnętrza",
   ],
   alternates: { canonical: siteUrl() },
   openGraph: {
     type: "website",
-    locale: "en_US",
+    locale: "pl_PL",
     siteName: "ArchiCompass",
     url: siteUrl(),
-    title: "Find Interior Designers with AI | ArchiCompass",
+    title: "Znajdź projektanta wnętrz z pomocą AI | ArchiCompass",
     description:
-      "Build a clear interior design brief from inspiration photos and find professionals who fit your project.",
+      "Stwórz precyzyjny brief na podstawie zdjęć inspiracji i znajdź specjalistów dopasowanych do Twojego projektu.",
     images: [
       {
         url: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=85",
         width: 1600,
         height: 900,
-        alt: "Contemporary interior design featured by ArchiCompass",
+        alt: "Współczesne wnętrze prezentowane przez ArchiCompass",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Find Interior Designers with AI | ArchiCompass",
+    title: "Znajdź projektanta wnętrz z pomocą AI | ArchiCompass",
     description:
-      "Build a clear interior design brief and discover professionals who fit your project.",
+      "Stwórz precyzyjny brief i poznaj specjalistów dopasowanych do Twojego projektu.",
     images: [
       "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=85",
     ],
@@ -81,7 +83,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pl">
       <body className="antialiased">
         <JsonLd
           data={[
@@ -93,7 +95,7 @@ export default function RootLayout({
               url: siteUrl(),
               logo: absoluteUrl("/brand/archicompass-logo-purple.png"),
               description:
-                "An AI-assisted marketplace for finding interior designers and design studios.",
+                "Platforma wspierana przez AI, która pomaga znaleźć projektantów wnętrz i pracownie projektowe.",
             },
             {
               "@context": "https://schema.org",

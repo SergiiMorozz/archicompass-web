@@ -5,13 +5,15 @@ import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import { polishCountLabel } from "@/lib/count-label";
+import { professionalOptionLabel } from "@/lib/professional-options";
 
 export const revalidate = 0;
 
 export const metadata: Metadata = pageMetadata({
-  title: "Interior Design Inspiration and Practical Guides",
+  title: "Inspiracje wnętrzarskie i praktyczne poradniki",
   description:
-    "Explore interior design ideas, room guides, materials, sustainable architecture, and practical advice. Save inspiration and turn it into an actionable project brief.",
+    "Poznaj inspiracje wnętrzarskie, poradniki, materiały i praktyczne wskazówki. Zapisuj pomysły i zamieniaj je w konkretny brief projektowy.",
   path: "/inspiration",
 });
 
@@ -58,6 +60,20 @@ function normalize(value: string) {
 
 function categoryHref(category: string) {
   return category === "All" ? "/inspiration" : `/inspiration?category=${encodeURIComponent(category)}`;
+}
+
+const categoryLabels: Record<string, string> = {
+  All: "Wszystkie",
+  Inspiration: "Inspiracje",
+  Trends: "Trendy",
+  Guides: "Poradniki",
+  Materials: "Materiały",
+  Rooms: "Pomieszczenia",
+  Sustainability: "Zrównoważone wnętrza",
+};
+
+function categoryLabel(value: string) {
+  return categoryLabels[value] || value;
 }
 
 export default async function InspirationPage({
@@ -113,7 +129,7 @@ export default async function InspirationPage({
       <JsonLd
         data={[
           breadcrumbJsonLd([
-            { name: "Home", path: "/" },
+            { name: "Strona główna", path: "/" },
             { name: "Inspiration Hub", path: "/inspiration" },
           ]),
           {
@@ -139,12 +155,12 @@ export default async function InspirationPage({
           Inspiration <span className="text-primary">Hub</span>
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-muted">
-          Explore practical design guidance, materials, spaces, and ideas curated by ArchiCompass.
+          Odkrywaj praktyczne porady, materiały, wnętrza i pomysły wybrane przez redakcję ArchiCompass.
         </p>
         <form action="/inspiration" className="mx-auto mt-8 flex max-w-2xl flex-col gap-3 rounded-2xl border border-line bg-card p-3 shadow-sm sm:flex-row">
           {selectedCategory !== "All" ? <input type="hidden" name="category" value={selectedCategory} /> : null}
-          <input name="q" defaultValue={q} placeholder="Search articles and ideas..." className="min-h-12 flex-1 rounded-xl bg-background px-4 outline-none" />
-          <button className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white">Search</button>
+          <input name="q" defaultValue={q} placeholder="Szukaj artykułów i inspiracji..." className="min-h-12 flex-1 rounded-xl bg-background px-4 outline-none" />
+          <button className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white">Szukaj</button>
         </form>
       </section>
 
@@ -161,7 +177,7 @@ export default async function InspirationPage({
                   : "border border-line bg-background text-muted",
               ].join(" ")}
             >
-              {category}
+              {categoryLabel(category)}
             </Link>
           ))}
         </div>
@@ -174,10 +190,10 @@ export default async function InspirationPage({
               <div>
                 <div className="flex items-end justify-between gap-4">
                   <div>
-                    <div className="text-sm font-semibold text-primary">New on ArchiCompass</div>
-                    <h2 className="mt-1 text-3xl font-bold">Recently joined designers</h2>
+                    <div className="text-sm font-semibold text-primary">Nowości w ArchiCompass</div>
+                    <h2 className="mt-1 text-3xl font-bold">Projektanci, którzy niedawno dołączyli</h2>
                   </div>
-                  <Link href="/designers?sort=newest" className="text-sm font-semibold text-primary">View all</Link>
+                  <Link href="/designers?sort=newest" className="text-sm font-semibold text-primary">Zobacz wszystkich</Link>
                 </div>
                 <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {newDesigners.map((designer) => (
@@ -188,9 +204,9 @@ export default async function InspirationPage({
                         </div>
                         <FavoriteButton compact entityType="designer" entityKey={designer.id} initialSaved={savedKeys.has(`designer:${designer.id}`)} />
                       </div>
-                      <Link href={`/designers/${designer.id}`} className="mt-4 block text-lg font-bold hover:text-primary">{designer.full_name || "Design professional"}</Link>
-                      <p className="mt-1 text-sm text-muted">{designer.profession_type || "Interior designer"}{designer.location ? ` · ${designer.location}` : ""}</p>
-                      {designer.google_rating ? <p className="mt-3 text-sm font-semibold text-primary">Google {designer.google_rating.toFixed(1)} · {designer.google_review_count ?? 0} reviews</p> : null}
+                      <Link href={`/designers/${designer.id}`} className="mt-4 block text-lg font-bold hover:text-primary">{designer.full_name || "Projektant wnętrz"}</Link>
+                      <p className="mt-1 text-sm text-muted">{designer.profession_type === "Studio" ? "Pracownia projektowa" : "Projektant wnętrz"}{designer.location ? ` · ${designer.location}` : ""}</p>
+                      {designer.google_rating ? <p className="mt-3 text-sm font-semibold text-primary">Google {designer.google_rating.toFixed(1)} · {polishCountLabel(designer.google_review_count ?? 0, "opinia", "opinie", "opinii")}</p> : null}
                     </article>
                   ))}
                 </div>
@@ -200,8 +216,8 @@ export default async function InspirationPage({
             {recentProjects.length ? (
               <div className={newDesigners.length ? "mt-12" : ""}>
                 <div>
-                  <div className="text-sm font-semibold text-primary">Fresh portfolio work</div>
-                  <h2 className="mt-1 text-3xl font-bold">New projects from designers</h2>
+                  <div className="text-sm font-semibold text-primary">Najnowsze realizacje</div>
+                  <h2 className="mt-1 text-3xl font-bold">Nowe projekty od projektantów</h2>
                 </div>
                 <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {recentProjects.map((project) => {
@@ -209,12 +225,12 @@ export default async function InspirationPage({
                     return (
                       <article key={project.id} className="overflow-hidden rounded-lg border border-line bg-card shadow-sm">
                         <Link href={`/projects/${project.id}`} className="block h-52 bg-card">
-                          {image ? <Image src={image} alt={project.title || "Interior design project"} width={900} height={600} unoptimized className="h-full w-full object-cover" /> : null}
+                          {image ? <Image src={image} alt={project.title || "Projekt wnętrza"} width={900} height={600} unoptimized className="h-full w-full object-cover" /> : null}
                         </Link>
                         <div className="flex items-start justify-between gap-3 p-5">
                           <div>
-                            <div className="text-xs font-semibold uppercase text-primary">{project.category || "Portfolio"}</div>
-                            <Link href={`/projects/${project.id}`} className="mt-1 block text-lg font-bold hover:text-primary">{project.title || "Untitled project"}</Link>
+                            <div className="text-xs font-semibold uppercase text-primary">{project.category ? professionalOptionLabel(project.category) : "Portfolio"}</div>
+                            <Link href={`/projects/${project.id}`} className="mt-1 block text-lg font-bold hover:text-primary">{project.title || "Projekt bez tytułu"}</Link>
                           </div>
                           <FavoriteButton compact entityType="project" entityKey={project.id} initialSaved={savedKeys.has(`project:${project.id}`)} />
                         </div>
@@ -231,19 +247,19 @@ export default async function InspirationPage({
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-3xl font-bold">{selectedCategory === "All" ? "Featured ideas" : selectedCategory}</h2>
+            <h2 className="text-3xl font-bold">{selectedCategory === "All" ? "Polecane inspiracje" : categoryLabel(selectedCategory)}</h2>
             <p className="mt-2 text-muted">
-              {articles.length} {articles.length === 1 ? "article" : "articles"}{q ? ` matching “${q}”` : ""}
+              {polishCountLabel(articles.length, "artykuł", "artykuły", "artykułów")}{q ? ` dla zapytania „${q}”` : ""}
             </p>
           </div>
           <Link href="/designers" className="text-sm font-semibold text-primary hover:underline">
-            Find a Designer
+            Znajdź projektanta
           </Link>
         </div>
 
         {error ? (
           <div className="mt-8 rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">
-            Inspiration content is temporarily unavailable.
+            Treści inspiracyjne są chwilowo niedostępne.
           </div>
         ) : articles.length ? (
           <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -252,7 +268,7 @@ export default async function InspirationPage({
                 <Link
                   href={`/inspiration/${article.slug}`}
                   className="block h-60 overflow-hidden bg-primary-soft"
-                  aria-label={`Open ${article.title}`}
+                  aria-label={`Otwórz artykuł: ${article.title}`}
                 >
                   {article.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -269,7 +285,7 @@ export default async function InspirationPage({
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-3">
                     <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-                      {article.category}
+                      {categoryLabel(article.category)}
                     </span>
                     <FavoriteButton compact entityType="article" entityKey={article.id} initialSaved={savedKeys.has(`article:${article.id}`)} />
                   </div>
@@ -278,8 +294,8 @@ export default async function InspirationPage({
                   </Link>
                   <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">{article.excerpt}</p>
                   <div className="mt-5 flex items-center justify-between gap-3 text-xs text-muted">
-                    <span>{article.author_name || "ArchiCompass Editorial"}</span>
-                    <Link href={`/inspiration/${article.slug}`} className="font-semibold text-primary">Read article</Link>
+                    <span>{article.author_name || "Redakcja ArchiCompass"}</span>
+                    <Link href={`/inspiration/${article.slug}`} className="font-semibold text-primary">Czytaj artykuł</Link>
                   </div>
                 </div>
               </article>
@@ -287,9 +303,9 @@ export default async function InspirationPage({
           </div>
         ) : (
           <div className="mt-8 rounded-lg border border-dashed border-line bg-card p-8">
-            <h3 className="text-2xl font-bold">No articles found</h3>
-            <p className="mt-2 text-muted">Try another search or return to all inspiration.</p>
-            <Link href="/inspiration" className="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">View all articles</Link>
+            <h3 className="text-2xl font-bold">Nie znaleziono artykułów</h3>
+            <p className="mt-2 text-muted">Spróbuj innego wyszukiwania lub wróć do wszystkich inspiracji.</p>
+            <Link href="/inspiration" className="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">Zobacz wszystkie artykuły</Link>
           </div>
         )}
       </section>

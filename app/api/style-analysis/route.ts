@@ -199,7 +199,7 @@ function cleanAnalysis(value: unknown): StyleAnalysis {
     summary:
       typeof data.summary === "string" && data.summary.trim()
         ? data.summary.trim()
-        : "The images suggest a coherent interior direction, but the style needs a little more context.",
+        : "Zdjęcia wskazują na spójny kierunek wnętrza, ale do precyzyjnego określenia stylu potrzeba nieco więcej kontekstu.",
     colorPalette: arrayOfStrings(data.colorPalette).slice(0, 6),
     materials: arrayOfStrings(data.materials).slice(0, 6),
     styleClues: arrayOfStrings(data.styleClues).slice(0, 6),
@@ -209,7 +209,7 @@ function cleanAnalysis(value: unknown): StyleAnalysis {
     designerPrompt:
       typeof data.designerPrompt === "string" && data.designerPrompt.trim()
         ? data.designerPrompt.trim()
-        : "Look for designers with similar mood, materials, and lighting in their portfolio.",
+        : "Szukaj projektantów, których portfolio pokazuje podobny nastrój, materiały i sposób pracy ze światłem.",
     watchOuts: arrayOfStrings(data.watchOuts).slice(0, 4),
   };
 }
@@ -242,14 +242,14 @@ function userFacingOpenAiError(message: string) {
     normalized.includes("billing") ||
     normalized.includes("plan")
   ) {
-    return "AI is connected, but the OpenAI API account has no available quota. Add billing or credits in OpenAI Platform, then try Analyze photos again.";
+    return "Usługa AI jest połączona, ale konto OpenAI nie ma obecnie dostępnego limitu. Spróbuj ponownie później.";
   }
 
   if (normalized.includes("api key") || normalized.includes("unauthorized")) {
-    return "AI is connected, but the OpenAI API key is invalid or inactive. Create a new key in OpenAI Platform and update OPENAI_API_KEY.";
+    return "Usługa AI jest chwilowo niedostępna z powodu błędu konfiguracji. Spróbuj ponownie później.";
   }
 
-  return message || "AI analysis failed.";
+  return message || "Nie udało się przeprowadzić analizy AI.";
 }
 
 function userFacingGeminiError(message: string) {
@@ -261,7 +261,7 @@ function userFacingGeminiError(message: string) {
     normalized.includes("unauthenticated") ||
     normalized.includes("forbidden")
   ) {
-    return "Gemini is selected, but the Google API key is invalid or not enabled for Gemini API. Create a Gemini API key in Google AI Studio and update GEMINI_API_KEY.";
+    return "Usługa AI jest chwilowo niedostępna z powodu błędu konfiguracji. Spróbuj ponownie później.";
   }
 
   if (
@@ -269,10 +269,10 @@ function userFacingGeminiError(message: string) {
     normalized.includes("billing") ||
     normalized.includes("rate")
   ) {
-    return "Gemini is selected, but the Google API key has no available quota or is rate limited. Check Google AI Studio quota and try again later.";
+    return "Dzienny limit analizy AI został chwilowo wyczerpany. Spróbuj ponownie później.";
   }
 
-  return message || "Gemini analysis failed.";
+  return message || "Nie udało się przeprowadzić analizy AI.";
 }
 
 async function fileToImageInput(file: File): Promise<ImageInput> {
@@ -289,12 +289,13 @@ function analysisPrompt({
   projectType,
 }: Pick<AnalysisInput, "currentCues" | "currentStyle" | "projectType">) {
   return [
-    "Analyze these interior reference photos for ArchiCompass.",
-    "Return practical interior-design style guidance for a client who is trying to find the right designer.",
+    "Przeanalizuj te zdjęcia referencyjne wnętrz dla ArchiCompass.",
+    "Przygotuj praktyczne wskazówki stylistyczne dla klienta, który chce znaleźć właściwego projektanta wnętrz.",
     `Project type: ${projectType}.`,
     `Client-selected style before analysis: ${currentStyle}.`,
     `Client-selected visual cues before analysis: ${currentCues}.`,
-    "Use plain English. Be specific, but avoid pretending certainty if photos conflict.",
+    "Wszystkie treści przeznaczone dla użytkownika zwróć po polsku: primaryStyle, summary, colorPalette, materials, styleClues, designerPrompt i watchOuts.",
+    "Pisz naturalnym, profesjonalnym językiem polskim. Bądź konkretny, ale nie sugeruj pewności, jeśli zdjęcia są niespójne.",
     `styleDirection must be one of: ${allowedStyles.join(", ")}.`,
     `visualCues must only use these values: ${allowedVisualCues.join(", ")}.`,
     "searchSpecialty should be one short marketplace keyword such as minimalist, scandinavian, modern, industrial, luxury, eco-friendly, smart home, or an empty string.",
@@ -307,7 +308,7 @@ async function analyzeWithOpenAi(input: AnalysisInput) {
     return NextResponse.json(
       {
         code: "AI_NOT_CONFIGURED",
-        error: "AI photo analysis is not configured yet. Add OPENAI_API_KEY to enable it.",
+        error: "Analiza zdjęć AI jest chwilowo niedostępna.",
       },
       { status: 501 }
     );
@@ -365,7 +366,7 @@ async function analyzeWithOpenAi(input: AnalysisInput) {
   const text = responseText(payload);
   if (!text) {
     return NextResponse.json(
-      { error: "AI analysis returned no readable style result." },
+      { error: "Usługa AI nie zwróciła czytelnego wyniku analizy." },
       { status: 502 }
     );
   }
@@ -374,7 +375,7 @@ async function analyzeWithOpenAi(input: AnalysisInput) {
     return NextResponse.json({ analysis: cleanAnalysis(JSON.parse(text)) });
   } catch {
     return NextResponse.json(
-      { error: "AI analysis returned an unreadable style result." },
+      { error: "Usługa AI zwróciła nieczytelny wynik analizy." },
       { status: 502 }
     );
   }
@@ -408,7 +409,7 @@ async function analyzeWithGemini(input: AnalysisInput) {
     return NextResponse.json(
       {
         code: "AI_NOT_CONFIGURED",
-        error: "Gemini photo analysis is not configured yet. Add GEMINI_API_KEY to enable it.",
+        error: "Analiza zdjęć AI jest chwilowo niedostępna.",
       },
       { status: 501 }
     );
@@ -466,7 +467,7 @@ async function analyzeWithGemini(input: AnalysisInput) {
   const text = geminiText(payload);
   if (!text) {
     return NextResponse.json(
-      { error: "Gemini returned no readable style result." },
+      { error: "Usługa AI nie zwróciła czytelnego wyniku analizy." },
       { status: 502 }
     );
   }
@@ -475,7 +476,7 @@ async function analyzeWithGemini(input: AnalysisInput) {
     return NextResponse.json({ analysis: cleanAnalysis(JSON.parse(text)) });
   } catch {
     return NextResponse.json(
-      { error: "Gemini returned an unreadable style result." },
+      { error: "Usługa AI zwróciła nieczytelny wynik analizy." },
       { status: 502 }
     );
   }
@@ -487,7 +488,7 @@ export async function POST(request: Request) {
     formData = await request.formData();
   } catch {
     return NextResponse.json(
-      { error: "Send reference photos as a multipart form before running AI analysis." },
+      { error: "Przed uruchomieniem analizy dodaj zdjęcia referencyjne." },
       { status: 400 }
     );
   }
@@ -495,14 +496,14 @@ export async function POST(request: Request) {
 
   if (!photos.length) {
     return NextResponse.json(
-      { error: "Add at least one reference photo before running AI analysis." },
+      { error: "Dodaj co najmniej jedno zdjęcie referencyjne przed uruchomieniem analizy AI." },
       { status: 400 }
     );
   }
 
   if (photos.length > maxAnalysisPhotos) {
     return NextResponse.json(
-      { error: `Analyze up to ${maxAnalysisPhotos} photos at once.` },
+      { error: `Jednocześnie możesz przeanalizować maksymalnie ${maxAnalysisPhotos} zdjęć.` },
       { status: 400 }
     );
   }
@@ -510,14 +511,14 @@ export async function POST(request: Request) {
   for (const photo of photos) {
     if (!allowedImageTypes.includes(photo.type)) {
       return NextResponse.json(
-        { error: "AI analysis supports JPEG, PNG, and WebP images." },
+        { error: "Analiza AI obsługuje pliki JPEG, PNG i WebP." },
         { status: 400 }
       );
     }
 
     if (photo.size > maxImageSize) {
       return NextResponse.json(
-        { error: "Each photo for AI analysis must be smaller than 8 MB." },
+        { error: "Każde zdjęcie do analizy AI musi mieć mniej niż 8 MB." },
         { status: 400 }
       );
     }
@@ -527,7 +528,7 @@ export async function POST(request: Request) {
   if (quotaError || !quota) {
     console.error("Style analysis quota check failed", quotaError);
     return NextResponse.json(
-      { error: "AI analysis is temporarily unavailable. Please try again shortly." },
+      { error: "Analiza AI jest chwilowo niedostępna. Spróbuj ponownie za moment." },
       { status: 503 }
     );
   }
@@ -535,7 +536,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         code: "AI_DAILY_LIMIT_REACHED",
-        error: "The daily AI photo-analysis limit has been reached. Try again tomorrow.",
+        error: "Dzienny limit analizy zdjęć AI został wyczerpany. Spróbuj ponownie jutro.",
         resetAt: quota.reset_at,
       },
       {

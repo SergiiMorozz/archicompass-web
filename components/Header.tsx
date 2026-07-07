@@ -8,9 +8,9 @@ import { isProfessionalProfile } from "@/lib/professional";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const navItems = [
-  { href: "/", label: "Home" },
+  { href: "/", label: "Strona główna" },
   { href: "/project-compass", label: "Project Compass", featured: true },
-  { href: "/designers", label: "Find Designer" },
+  { href: "/designers", label: "Znajdź projektanta" },
   { href: "/inspiration", label: "Inspiration Hub" },
 ];
 
@@ -188,11 +188,11 @@ export default function Header() {
     ? [
         ...(account.isProfessional
           ? []
-          : [{ href: "/client", label: "Client Workspace" }]),
+          : [{ href: "/client", label: "Strefa klienta" }]),
         ...(account.isProfessional
-          ? [{ href: "/studio", label: "Designer Studio" }]
+          ? [{ href: "/studio", label: "Studio projektanta" }]
           : []),
-        ...(account.isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
+        ...(account.isAdmin ? [{ href: "/admin", label: "Administracja" }] : []),
       ]
     : [];
   return (
@@ -210,7 +210,7 @@ export default function Header() {
 
         <div className="hidden items-center gap-2 xl:flex">
           <button className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium text-foreground">
-            EN
+            PL
           </button>
           {account ? (
             <div className="flex items-center gap-1 rounded-xl border border-line bg-card p-1 shadow-sm">
@@ -218,7 +218,7 @@ export default function Header() {
                 href={account.isProfessional ? "/studio/inbox" : "/client/messages"}
                 className="relative rounded-lg px-3 py-2 text-sm font-semibold text-muted transition hover:bg-primary-soft hover:text-primary"
               >
-                Messages
+                Wiadomości
                 {account.unreadCount ? (
                   <span className="ml-1.5 inline-flex min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
                     {account.unreadCount > 99 ? "99+" : account.unreadCount}
@@ -235,7 +235,7 @@ export default function Header() {
                 href="/account"
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
               >
-                Account
+                Konto
               </Link>
             </div>
           ) : (
@@ -244,7 +244,7 @@ export default function Header() {
                 href="/login"
                 className="rounded-xl px-4 py-2 text-sm font-medium text-foreground transition hover:bg-primary-soft hover:text-primary"
               >
-                Sign In
+                Zaloguj się
               </Link>
 
               <Link
@@ -254,7 +254,7 @@ export default function Header() {
                   isGetStartedActive ? "bg-foreground" : "bg-primary hover:opacity-90",
                 ].join(" ")}
               >
-                Get Started
+                Dołącz
               </Link>
             </>
           )}
@@ -262,11 +262,11 @@ export default function Header() {
 
         <div className="flex items-center gap-2 xl:hidden">
           <button className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium">
-            EN
+            PL
           </button>
           <button
             type="button"
-            aria-label="Toggle menu"
+            aria-label="Otwórz lub zamknij menu"
             aria-expanded={isOpen}
             onClick={() => setIsOpen((value) => !value)}
             className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-card"
@@ -290,9 +290,9 @@ export default function Header() {
             ))}
             {account ? (
               <div className="mt-2 grid gap-2 border-t border-line pt-3">
-                <div className="px-3 text-xs font-semibold uppercase text-muted">Workspace</div>
+                <div className="px-3 text-xs font-semibold uppercase text-muted">Panel użytkownika</div>
                 <NavLink href={account.isProfessional ? "/studio/inbox" : "/client/messages"} onClick={() => setIsOpen(false)}>
-                  Messages{account.unreadCount ? ` (${account.unreadCount})` : ""}
+                  Wiadomości{account.unreadCount ? ` (${account.unreadCount})` : ""}
                 </NavLink>
                 {workspaceItems.map((item) => (
                   <NavLink key={item.href} href={item.href} onClick={() => setIsOpen(false)}>
@@ -304,7 +304,7 @@ export default function Header() {
                   onClick={() => setIsOpen(false)}
                   className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white"
                 >
-                  Account
+                  Konto
                 </Link>
               </div>
             ) : (
@@ -314,14 +314,14 @@ export default function Header() {
                   onClick={() => setIsOpen(false)}
                   className="rounded-xl border border-line bg-card px-4 py-3 text-center text-sm font-medium"
                 >
-                  Sign In
+                  Zaloguj się
                 </Link>
                 <Link
                   href="/get-started"
                   onClick={() => setIsOpen(false)}
                   className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white"
                 >
-                  Get Started
+                  Dołącz
                 </Link>
               </div>
             )}

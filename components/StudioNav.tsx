@@ -4,12 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const studioLinks = [
-  { href: "/studio", label: "Overview" },
-  { href: "/studio/inbox", label: "Inbox" },
-  { href: "/studio/analytics", label: "Analytics" },
-  { href: "/studio/team", label: "Studio & team" },
-  { href: "/account/profile", label: "Edit profile" },
-  { href: "/account/projects", label: "Projects" },
+  { href: "/studio", label: "Pulpit" },
+  { href: "/studio/inbox", label: "Zapytania" },
+  { href: "/studio/analytics", label: "Statystyki" },
+  { href: "/studio/team", label: "Pracownia i zespół" },
+  { href: "/account/profile", label: "Edytuj profil" },
+  { href: "/account/projects", label: "Projekty" },
 ];
 
 export default function StudioNav({
@@ -28,10 +28,10 @@ export default function StudioNav({
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <div className="text-xs font-semibold uppercase text-primary">Designer Studio</div>
+            <div className="text-xs font-semibold uppercase text-primary">Studio projektanta</div>
             <div className="mt-1 text-xl font-bold">{profileName}</div>
           </div>
-          <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Designer Studio">
+          <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Studio projektanta">
             {studioLinks.map((item) => {
               const active =
                 pathname === item.href ||
@@ -52,7 +52,7 @@ export default function StudioNav({
                   {item.label}
                   {messageCount ? (
                     <span
-                      aria-label={`${messageCount} unread inbox items`}
+                      aria-label={`${messageCount} nieprzeczytanych zapytań`}
                       className={[
                         "ml-2 rounded-full px-2 py-0.5 text-xs",
                         active ? "bg-white/20" : "bg-foreground text-white",
@@ -69,7 +69,7 @@ export default function StudioNav({
                 href={`/designers/${profileId}`}
                 className="shrink-0 rounded-xl border border-line bg-background px-4 py-2.5 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
               >
-                Public page
+                Profil publiczny
               </Link>
             ) : null}
           </nav>

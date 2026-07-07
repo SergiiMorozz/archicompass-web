@@ -38,10 +38,10 @@ async function completeOnboarding(formData: FormData) {
   const next = safePath(formValue(formData, "next"));
 
   if (role !== "client" && role !== "designer") {
-    redirect("/onboarding?error=Choose%20an%20account%20type");
+    redirect("/onboarding?error=Wybierz%20typ%20konta");
   }
   if (role === "designer" && !["independent", "studio"].includes(designerMode)) {
-    redirect("/onboarding?intent=designer&error=Choose%20how%20you%20will%20work");
+    redirect("/onboarding?intent=designer&error=Wybierz%20sposób%20pracy");
   }
 
   const { error } = await supabase.rpc("set_my_account_role", { new_role: role });
@@ -97,17 +97,17 @@ export default async function OnboardingPage({
     <main className="min-h-[calc(100vh-80px)] bg-background px-4 py-12 sm:px-6">
       <section className="mx-auto max-w-5xl">
         <div className="text-center">
-          <div className="text-sm font-semibold text-primary">Welcome to ArchiCompass</div>
+          <div className="text-sm font-semibold text-primary">Witamy w ArchiCompass</div>
           <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
             {intent === "designer"
-              ? "How will you work?"
+              ? "W jaki sposób pracujesz?"
               : intent === "client"
-                ? "Set up your client workspace"
-                : "Choose your account type"}
+                ? "Skonfiguruj strefę klienta"
+                : "Wybierz typ konta"}
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-muted">
-            One account has one role, so briefs and professional requests always stay in
-            the correct workspace.
+            Jedno konto ma jedną rolę, dzięki czemu briefy i zapytania zawsze trafiają
+            do właściwej strefy.
           </p>
         </div>
 
@@ -120,38 +120,38 @@ export default async function OnboardingPage({
         {!intent ? (
           <div className="mt-10 grid gap-5 md:grid-cols-2">
             <Link href={stepHref("client", next)} className="rounded-2xl border border-line bg-card p-7 shadow-sm transition hover:border-primary">
-              <div className="text-sm font-semibold text-primary">Client</div>
-              <h2 className="mt-2 text-3xl font-bold">I am planning a project</h2>
+              <div className="text-sm font-semibold text-primary">Klient</div>
+              <h2 className="mt-2 text-3xl font-bold">Planuję projekt wnętrza</h2>
               <p className="mt-3 leading-7 text-muted">
-                Build briefs, save designers and projects, and manage conversations.
+                Twórz briefy, zapisuj projektantów i realizacje oraz prowadź rozmowy.
               </p>
-              <div className="mt-8 text-sm font-semibold text-primary">Choose Client</div>
+              <div className="mt-8 text-sm font-semibold text-primary">Wybierz konto klienta</div>
             </Link>
             <Link href={stepHref("designer", next)} className="rounded-2xl border border-primary bg-primary-soft p-7 shadow-sm transition hover:bg-card">
-              <div className="text-sm font-semibold text-primary">Designer</div>
-              <h2 className="mt-2 text-3xl font-bold">I provide design services</h2>
+              <div className="text-sm font-semibold text-primary">Projektant</div>
+              <h2 className="mt-2 text-3xl font-bold">Świadczę usługi projektowe</h2>
               <p className="mt-3 leading-7 text-muted">
-                Publish a profile, manage a portfolio, and receive qualified requests.
+                Opublikuj profil, zarządzaj portfolio i otrzymuj dopasowane zapytania.
               </p>
-              <div className="mt-8 text-sm font-semibold text-primary">Choose Designer</div>
+              <div className="mt-8 text-sm font-semibold text-primary">Wybierz konto projektanta</div>
             </Link>
           </div>
         ) : intent === "client" ? (
           <form action={completeOnboarding} className="mx-auto mt-10 max-w-2xl rounded-2xl border border-line bg-card p-7 shadow-sm">
             <input type="hidden" name="role" value="client" />
             <input type="hidden" name="next" value={next} />
-            <div className="text-sm font-semibold text-primary">Client Workspace</div>
-            <h2 className="mt-2 text-3xl font-bold">Everything for your project search</h2>
+            <div className="text-sm font-semibold text-primary">Strefa klienta</div>
+            <h2 className="mt-2 text-3xl font-bold">Wszystko, czego potrzebujesz do wyboru projektanta</h2>
             <p className="mt-3 leading-7 text-muted">
-              Your workspace will contain saved briefs, favorite professionals, projects,
-              and conversations. It will not receive designer inquiries.
+              W tej strefie znajdziesz zapisane briefy, ulubionych projektantów, projekty
+              i rozmowy. Konto klienta nie otrzymuje zapytań przeznaczonych dla projektantów.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <button type="submit" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-                Create Client Workspace
+                Utwórz strefę klienta
               </button>
               <Link href={stepHref("designer", next)} className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold">
-                Choose Designer instead
+                Zamiast tego wybierz projektanta
               </Link>
             </div>
           </form>
@@ -161,25 +161,25 @@ export default async function OnboardingPage({
             <input type="hidden" name="next" value={next} />
             <div className="grid gap-5 md:grid-cols-2">
               <button name="designer_mode" value="independent" className="rounded-2xl border border-line bg-card p-7 text-left shadow-sm transition hover:border-primary">
-                <span className="text-sm font-semibold text-primary">Independent</span>
-                <span className="mt-2 block text-3xl font-bold">My own profile</span>
+                <span className="text-sm font-semibold text-primary">Niezależny projektant</span>
+                <span className="mt-2 block text-3xl font-bold">Mój własny profil</span>
                 <span className="mt-3 block leading-7 text-muted">
-                  Create a personal professional page, portfolio, pricing, and inbox.
+                  Utwórz publiczny profil, portfolio, cennik i skrzynkę zapytań.
                 </span>
-                <span className="mt-8 block text-sm font-semibold text-primary">Build my profile</span>
+                <span className="mt-8 block text-sm font-semibold text-primary">Utwórz mój profil</span>
               </button>
               <button name="designer_mode" value="studio" className="rounded-2xl border border-primary bg-primary-soft p-7 text-left shadow-sm transition hover:bg-card">
-                <span className="text-sm font-semibold text-primary">Design Studio</span>
-                <span className="mt-2 block text-3xl font-bold">Create or join a team</span>
+                <span className="text-sm font-semibold text-primary">Pracownia projektowa</span>
+                <span className="mt-2 block text-3xl font-bold">Utwórz zespół lub dołącz do niego</span>
                 <span className="mt-3 block leading-7 text-muted">
-                  Set up a shared studio profile or continue to an existing team invitation.
+                  Skonfiguruj wspólny profil pracowni albo przyjmij istniejące zaproszenie do zespołu.
                 </span>
-                <span className="mt-8 block text-sm font-semibold text-primary">Continue with Studio</span>
+                <span className="mt-8 block text-sm font-semibold text-primary">Kontynuuj jako pracownia</span>
               </button>
             </div>
             <div className="mt-6 text-center">
               <Link href={stepHref("client", next)} className="text-sm font-semibold text-muted underline">
-                Choose Client instead
+                Zamiast tego wybierz klienta
               </Link>
             </div>
           </form>

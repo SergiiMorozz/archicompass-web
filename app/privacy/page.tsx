@@ -3,88 +3,88 @@ import Link from "next/link";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Privacy Policy",
-  description: "How ArchiCompass processes account, profile, project, message, photo, analytics, and AI data.",
+  title: "Polityka prywatności",
+  description: "Jak ArchiCompass przetwarza dane kont, profili, projektów, wiadomości, zdjęć, statystyk i funkcji AI.",
   path: "/privacy",
 });
 
 const sections = [
   {
-    title: "1. Controller and contact",
+    title: "1. Administrator danych i kontakt",
     body: [
-      "ArchiCompass is an online platform operated by SM Advisory, Sergii Moroz, with its business address at ul. Grzybowska 2, lok. 31, 00-131 Warszawa, Poland, NIP 5252995634, REGON 528006413 (\"ArchiCompass\", \"we\", \"us\"). SM Advisory is the controller of personal data processed to operate the platform unless a different controller is identified for a specific service.",
-      "Privacy and data-rights requests can be sent to contact@archicompass.pl. Security-related reports can be sent to admin@archicompass.pl.",
+      "ArchiCompass jest platformą internetową prowadzoną przez SM Advisory, Sergii Moroz, ul. Grzybowska 2, lok. 31, 00-131 Warszawa, NIP 5252995634, REGON 528006413 (dalej: „ArchiCompass”, „my”). SM Advisory jest administratorem danych osobowych przetwarzanych w związku z działaniem platformy, o ile przy konkretnej usłudze nie wskazano innego administratora.",
+      "Wnioski dotyczące prywatności i realizacji praw można wysyłać na contact@archicompass.pl. Zgłoszenia dotyczące bezpieczeństwa należy kierować na admin@archicompass.pl.",
     ],
   },
   {
-    title: "2. Data we process",
+    title: "2. Jakie dane przetwarzamy",
     body: [
-      "We process information you provide, including email and authentication data, account role, profile and portfolio details, business contact information, project briefs, favorites, messages, inquiry status, uploaded project images, reference photos, and support requests.",
-      "We also process technical information needed to operate and protect the service, such as timestamps, IP address, browser and device information, authentication events, error logs, and limited usage analytics. Public professional information may include Google Business profile links, ratings, and review counts.",
-      "Do not upload identity documents, payment-card data, private addresses, confidential plans, images of people without permission, or special-category personal data unless the feature clearly requires it and you have a lawful basis to share it.",
+      "Przetwarzamy dane przekazywane przez użytkownika, w tym adres e-mail i dane uwierzytelniające, rolę konta, informacje profilowe i portfolio, firmowe dane kontaktowe, briefy projektowe, ulubione elementy, wiadomości, statusy zapytań, zdjęcia projektów, zdjęcia referencyjne i zgłoszenia do obsługi.",
+      "Przetwarzamy również dane techniczne niezbędne do działania i ochrony usługi, takie jak znaczniki czasu, adres IP, informacje o przeglądarce i urządzeniu, zdarzenia logowania, rejestry błędów oraz ograniczone statystyki użycia. Publiczne dane profesjonalistów mogą obejmować link do profilu Google Business, ocenę i liczbę opinii.",
+      "Nie przesyłaj dokumentów tożsamości, danych kart płatniczych, prywatnych adresów, poufnych planów, zdjęć osób bez ich zgody ani danych szczególnych kategorii, chyba że dana funkcja wyraźnie tego wymaga i masz podstawę prawną do ich udostępnienia.",
     ],
   },
   {
-    title: "3. Purposes and legal bases",
+    title: "3. Cele i podstawy prawne",
     body: [
-      "We process data to create and secure accounts, publish professional profiles and portfolios, save client briefs, provide designer matching, support project inquiries and conversations, deliver notifications, provide customer support, prevent misuse, maintain the service, and comply with legal obligations.",
-      "The legal basis depends on the activity: performance of the service you request, steps taken before entering a contract, compliance with law, your consent for optional processing, or our legitimate interests in operating, securing, improving, and measuring the platform. You may withdraw consent at any time where processing relies on consent.",
+      "Przetwarzamy dane w celu tworzenia i zabezpieczania kont, publikowania profili i portfolio, zapisywania briefów, dopasowywania projektantów, obsługi zapytań i rozmów, wysyłania powiadomień, świadczenia pomocy, zapobiegania nadużyciom, utrzymania usługi oraz wykonania obowiązków prawnych.",
+      "Podstawa prawna zależy od rodzaju działania: wykonanie żądanej usługi lub podjęcie działań przed zawarciem umowy, obowiązek prawny, zgoda przy funkcjach opcjonalnych albo nasz prawnie uzasadniony interes polegający na prowadzeniu, zabezpieczaniu, rozwijaniu i mierzeniu platformy. Jeżeli przetwarzanie opiera się na zgodzie, można ją wycofać w dowolnym momencie.",
     ],
   },
   {
-    title: "4. Public profiles and private workspaces",
+    title: "4. Profile publiczne i prywatne strefy",
     body: [
-      "Professional profile details, studio information, portfolio projects, public ratings, and public project links are intended to be visible on the internet and may be indexed by search engines.",
-      "Saved briefs, private reference photos, favorites, account details, and conversations are private unless you choose to send or share them. A professional who receives your brief can access the brief, your message, provided contact details, and signed links to related reference photos.",
-      "Messages are available to the client and the professional or studio participating in the inquiry. Authorised studio members may access inquiries addressed to their studio.",
+      "Dane profilu projektanta, informacje o pracowni, projekty portfolio, publiczne oceny i publiczne linki do realizacji są przeznaczone do publikacji w internecie i mogą być indeksowane przez wyszukiwarki.",
+      "Zapisane briefy, prywatne zdjęcia referencyjne, ulubione elementy, dane konta i rozmowy pozostają prywatne, dopóki użytkownik nie zdecyduje się ich wysłać lub udostępnić. Projektant, który otrzyma brief, może zobaczyć jego treść, wiadomość, przekazane dane kontaktowe i czasowe linki do zdjęć referencyjnych.",
+      "Wiadomości są dostępne dla klienta oraz projektanta lub pracowni uczestniczącej w zapytaniu. Upoważnieni członkowie pracowni mogą uzyskać dostęp do zapytań skierowanych do tej pracowni.",
     ],
   },
   {
-    title: "5. Photos and AI analysis",
+    title: "5. Zdjęcia i analiza AI",
     body: [
-      "Reference-photo previews stay in your browser until you save a brief or request analysis. When you choose AI analysis, selected images and related project context are sent to the configured AI provider to identify visual patterns and produce style guidance.",
-      "Saved reference photos are stored privately in Supabase Storage and may be shown through time-limited signed links to you and to professionals who receive the related brief. Portfolio images uploaded by professionals are public.",
-      "AI output can be incomplete or incorrect. It is informational guidance and is not a substitute for professional design, construction, safety, legal, or financial advice.",
+      "Podgląd zdjęć referencyjnych pozostaje w przeglądarce do czasu zapisania briefu lub uruchomienia analizy. Po wybraniu analizy AI wskazane obrazy i powiązany kontekst projektu są przekazywane skonfigurowanemu dostawcy AI w celu rozpoznania cech wizualnych i przygotowania wskazówek stylistycznych.",
+      "Zapisane zdjęcia referencyjne są przechowywane prywatnie w Supabase Storage. Użytkownik i projektanci, którzy otrzymają powiązany brief, mogą je otwierać poprzez czasowe, podpisane linki. Zdjęcia portfolio przesłane przez profesjonalistów są publiczne.",
+      "Wynik AI może być niepełny lub błędny. Ma charakter informacyjny i nie zastępuje profesjonalnej porady projektowej, budowlanej, technicznej, prawnej ani finansowej.",
     ],
   },
   {
-    title: "6. Analytics and communications",
+    title: "6. Statystyki i komunikacja",
     body: [
-      "ArchiCompass records limited profile-view analytics using a random browser-tab identifier to reduce duplicate counts. The profile-view record does not contain the visitor's name or email. Professional profile owners can view aggregated activity in Designer Studio.",
-      "We send service emails about account activity, new briefs, messages, unread-message reminders, security, and material service changes. These operational emails are necessary to provide the platform and are not marketing communications.",
+      "ArchiCompass zapisuje ograniczone statystyki wyświetleń profilu z użyciem losowego identyfikatora karty przeglądarki, aby ograniczyć podwójne zliczanie. Rekord wyświetlenia nie zawiera imienia ani adresu e-mail odwiedzającego. Właściciele profili mogą zobaczyć zbiorcze statystyki w Studio projektanta.",
+      "Wysyłamy wiadomości usługowe dotyczące aktywności konta, nowych briefów, wiadomości, przypomnień o nieprzeczytanych wiadomościach, bezpieczeństwa i istotnych zmian usługi. Są one niezbędne do świadczenia platformy i nie stanowią komunikacji marketingowej.",
     ],
   },
   {
-    title: "7. Service providers and transfers",
+    title: "7. Dostawcy usług i transfer danych",
     body: [
-      "We use Supabase for authentication, database, and file storage; Vercel for hosting and delivery; home.pl for domain email; and configured AI providers such as Google Gemini or OpenAI for optional image analysis. Google services may be used to display or synchronise public business ratings.",
-      "These providers process data under their own contractual terms and safeguards. Where data is transferred outside the European Economic Area, we rely on an applicable adequacy decision, standard contractual clauses, or another lawful transfer mechanism.",
+      "Korzystamy z Supabase do uwierzytelniania, bazy danych i przechowywania plików; z Vercel do hostingu i dostarczania serwisu; z home.pl do obsługi poczty domenowej; oraz ze skonfigurowanych dostawców AI, takich jak Google Gemini lub OpenAI, do opcjonalnej analizy obrazów. Usługi Google mogą służyć do wyświetlania lub synchronizacji publicznych ocen firm.",
+      "Dostawcy przetwarzają dane na podstawie własnych warunków umownych i zabezpieczeń. Jeżeli dane są przekazywane poza Europejski Obszar Gospodarczy, stosujemy odpowiednią decyzję stwierdzającą adekwatność, standardowe klauzule umowne lub inny zgodny z prawem mechanizm transferu.",
     ],
   },
   {
-    title: "8. Cookies and local storage",
+    title: "8. Pliki cookies i pamięć przeglądarki",
     body: [
-      "The platform uses cookies and browser storage that are necessary for authentication, security, language and interface preferences, and saved workflow state. We do not currently use advertising cookies. Details are available in the Cookie Policy.",
+      "Platforma wykorzystuje pliki cookies i pamięć przeglądarki niezbędne do logowania, bezpieczeństwa, ustawień języka i interfejsu oraz zapisywania stanu formularzy. Obecnie nie używamy reklamowych plików cookies. Szczegóły opisuje Polityka cookies.",
     ],
   },
   {
-    title: "9. Retention and deletion",
+    title: "9. Okres przechowywania i usuwanie",
     body: [
-      "Account, profile, project, brief, favorite, and inquiry data is retained while your account is active or while it is needed to provide the requested feature. You can delete supported projects, images, unsent briefs, and accounts using the available controls or by contacting us.",
-      "We may keep limited records for security, fraud prevention, dispute handling, legal compliance, and backup recovery. Backups and logs are deleted or overwritten according to operational retention schedules. Public search-engine copies may remain temporarily after content is removed from ArchiCompass.",
+      "Dane konta, profilu, projektów, briefów, ulubionych elementów i zapytań przechowujemy przez okres aktywności konta lub tak długo, jak jest to potrzebne do realizacji wybranej funkcji. Obsługiwane projekty, zdjęcia, niewysłane briefy i konto można usunąć za pomocą dostępnych opcji albo kontaktując się z nami.",
+      "Możemy zachować ograniczone dane dla celów bezpieczeństwa, przeciwdziałania nadużyciom, obsługi sporów, wykonania obowiązków prawnych i odtwarzania kopii zapasowych. Kopie i logi są usuwane lub nadpisywane zgodnie z harmonogramami retencji. Kopie w wyszukiwarkach mogą być widoczne jeszcze przez pewien czas po usunięciu treści z ArchiCompass.",
     ],
   },
   {
-    title: "10. Your rights",
+    title: "10. Prawa użytkownika",
     body: [
-      "Subject to applicable law, you may request access, correction, deletion, restriction, portability, or information about your data; object to processing based on legitimate interests; and withdraw consent where consent applies. We may need to verify your identity before completing a request.",
-      "You may lodge a complaint with the President of the Personal Data Protection Office (UODO) in Poland or another competent supervisory authority. ArchiCompass does not make decisions producing legal or similarly significant effects solely through automated processing.",
+      "Na zasadach określonych w obowiązującym prawie możesz żądać dostępu do danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przeniesienia lub informacji o przetwarzaniu; wnieść sprzeciw wobec przetwarzania opartego na prawnie uzasadnionym interesie; oraz wycofać zgodę, gdy jest ona podstawą przetwarzania. Przed realizacją wniosku możemy zweryfikować tożsamość.",
+      "Możesz wnieść skargę do Prezesa Urzędu Ochrony Danych Osobowych (UODO) w Polsce lub innego właściwego organu nadzorczego. ArchiCompass nie podejmuje decyzji wywołujących skutki prawne lub podobnie istotne wyłącznie w sposób zautomatyzowany.",
     ],
   },
   {
-    title: "11. Children and changes",
+    title: "11. Osoby małoletnie i zmiany polityki",
     body: [
-      "ArchiCompass accounts are intended for people aged 18 or older. We may update this policy when the service, providers, or legal requirements change. The current version and its effective date will remain available on this page.",
+      "Konta ArchiCompass są przeznaczone dla osób, które ukończyły 18 lat. Możemy aktualizować tę politykę wraz ze zmianami usługi, dostawców lub wymogów prawnych. Aktualna wersja i data jej obowiązywania będą dostępne na tej stronie.",
     ],
   },
 ];
@@ -92,13 +92,13 @@ const sections = [
 export default function PrivacyPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-      <p className="text-sm font-semibold uppercase text-primary">Legal</p>
-      <h1 className="mt-3 text-4xl font-bold">Privacy Policy</h1>
-      <p className="mt-3 text-sm text-muted">Effective: July 6, 2026</p>
+      <p className="text-sm font-semibold uppercase text-primary">Informacje prawne</p>
+      <h1 className="mt-3 text-4xl font-bold">Polityka prywatności</h1>
+      <p className="mt-3 text-sm text-muted">Obowiązuje od: 6 lipca 2026 r.</p>
       <p className="mt-6 max-w-3xl text-lg leading-8 text-muted">
-        This policy explains how ArchiCompass handles personal data across client
-        accounts, professional profiles, Project Compass, inquiries, messages, and
-        related platform services.
+        Niniejsza polityka wyjaśnia, jak ArchiCompass przetwarza dane osobowe w kontach
+        klientów, profilach profesjonalistów, Project Compass, zapytaniach, wiadomościach
+        i pozostałych usługach platformy.
       </p>
 
       <div className="mt-10 grid gap-9">
@@ -113,18 +113,18 @@ export default function PrivacyPage() {
       </div>
 
       <div className="mt-12 rounded-lg border border-line bg-card p-6">
-        <h2 className="text-xl font-bold">Contact and further information</h2>
+        <h2 className="text-xl font-bold">Kontakt i dodatkowe informacje</h2>
         <p className="mt-2 leading-7 text-muted">
-          Contact <a href="mailto:contact@archicompass.pl" className="font-semibold text-primary hover:underline">contact@archicompass.pl</a> for privacy requests.
-          We normally respond to verified data-rights requests within the period required by applicable law.
+          W sprawach dotyczących prywatności napisz na <a href="mailto:contact@archicompass.pl" className="font-semibold text-primary hover:underline">contact@archicompass.pl</a>.
+          Na zweryfikowane wnioski odpowiadamy w terminie wymaganym przez obowiązujące prawo.
         </p>
         <p className="mt-3 text-sm leading-6 text-muted">
-          SM Advisory, Sergii Moroz · NIP 5252995634 · REGON 528006413 · ul. Grzybowska 2, lok. 31, 00-131 Warszawa, Poland
+          SM Advisory, Sergii Moroz · NIP 5252995634 · REGON 528006413 · ul. Grzybowska 2, lok. 31, 00-131 Warszawa, Polska
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm font-semibold text-primary">
-          <Link href="/terms" className="hover:underline">Terms of Service</Link>
-          <Link href="/cookies" className="hover:underline">Cookie Policy</Link>
-          <a href="https://uodo.gov.pl/" target="_blank" rel="noreferrer" className="hover:underline">Polish supervisory authority</a>
+          <Link href="/terms" className="hover:underline">Regulamin</Link>
+          <Link href="/cookies" className="hover:underline">Polityka cookies</Link>
+          <a href="https://uodo.gov.pl/" target="_blank" rel="noreferrer" className="hover:underline">Urząd Ochrony Danych Osobowych</a>
         </div>
       </div>
     </main>

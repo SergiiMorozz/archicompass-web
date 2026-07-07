@@ -120,11 +120,11 @@ export default async function ClientMessagesPage({
 
   return (
     <main>
-      <UnreadPageTitle count={totalUnread} label="Messages" />
+      <UnreadPageTitle count={totalUnread} label="Wiadomości" />
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="text-sm font-semibold text-primary">Client communication</div>
-          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Messages</h1>
+          <div className="text-sm font-semibold text-primary">Komunikacja z projektantami</div>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Wiadomości</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
             Continue every designer conversation beside the exact brief and references you sent.
           </p>
@@ -162,7 +162,7 @@ export default async function ClientMessagesPage({
             {visibleInquiries.map((inquiry) => {
               const profile = profilesById.get(inquiry.designer_id);
               const studio = inquiry.studio_id ? studiosById.get(inquiry.studio_id) : null;
-              const recipientName = studio?.name || profile?.full_name || "Design professional";
+              const recipientName = studio?.name || profile?.full_name || "Projektant wnętrz";
               const latest = latestByInquiry.get(inquiry.id);
               const unread = unreadByInquiry.get(inquiry.id) ?? 0;
               return (
@@ -187,15 +187,15 @@ export default async function ClientMessagesPage({
                             ? latest.sender_id === user.id
                               ? "You"
                               : recipientName
-                            : "Your introduction"}
+                            : "Twoja wiadomość wprowadzająca"}
                         </div>
-                        <p className="mt-1 line-clamp-2">{latest?.body || inquiry.message || "Open the conversation to review the full brief."}</p>
+                        <p className="mt-1 line-clamp-2">{latest?.body || inquiry.message || "Otwórz rozmowę, aby zobaczyć cały brief."}</p>
                         <div className="mt-2 text-xs">{formatDate(latest?.created_at || inquiry.created_at)}</div>
                       </div>
                     </div>
                     <div className="grid gap-2">
                       <Link href={`/account/inquiries/${inquiry.id}`} className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white">
-                        {unread ? "Read message" : "Open conversation"}
+                        {unread ? "Przeczytaj wiadomość" : "Otwórz rozmowę"}
                       </Link>
                       <Link href={studio ? `/studios/${studio.id}` : `/designers/${inquiry.designer_id}`} className="rounded-xl border border-line bg-background px-5 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">
                         Review {studio ? "studio" : "designer"} profile
@@ -208,14 +208,14 @@ export default async function ClientMessagesPage({
           </div>
         ) : (
           <div className="rounded-lg border border-dashed border-line bg-card p-8">
-            <h2 className="text-2xl font-bold">{selectedView === "unread" ? "You are all caught up" : "No messages yet"}</h2>
+            <h2 className="text-2xl font-bold">{selectedView === "unread" ? "Wszystko przeczytane" : "Nie masz jeszcze wiadomości"}</h2>
             <p className="mt-2 max-w-xl leading-7 text-muted">
               {selectedView === "unread"
-                ? "New replies will appear here and in the Messages counter."
-                : "Send a saved brief to a designer and the conversation will appear here."}
+                ? "Nowe odpowiedzi pojawią się tutaj oraz w liczniku Wiadomości."
+                : "Wyślij zapisany brief projektantowi, a rozmowa pojawi się w tym miejscu."}
             </p>
             <Link href={selectedView === "unread" ? "/client/messages" : "/designers"} className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
-              {selectedView === "unread" ? "View all conversations" : "Browse designers"}
+              {selectedView === "unread" ? "Zobacz wszystkie rozmowy" : "Przeglądaj projektantów"}
             </Link>
           </div>
         )}

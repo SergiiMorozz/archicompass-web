@@ -21,7 +21,7 @@ export default function GoogleRating({ compact = false, count, rating, url }: Go
       <span aria-hidden="true" className="text-sun">&#9733;</span>
       {rating ? <span className="font-bold text-foreground">{rating.toFixed(1)}</span> : null}
       <span className="text-muted">
-        {count ? `${count} Google ${count === 1 ? "review" : "reviews"}` : "Google profile"}
+        {count ? `${count} ${count === 1 ? "opinia" : count < 5 ? "opinie" : "opinii"} Google` : "Profil Google"}
       </span>
     </>
   );

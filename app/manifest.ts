@@ -2,10 +2,11 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "ArchiCompass – Find Interior Designers",
+    name: "ArchiCompass – znajdź projektanta wnętrz",
     short_name: "ArchiCompass",
     description:
-      "Find interior designers and turn inspiration photos into a clear project brief.",
+      "Znajdź projektanta wnętrz i zamień zdjęcia inspiracji w precyzyjny brief projektowy.",
+    lang: "pl",
     start_url: "/",
     display: "standalone",
     background_color: "#fbf9fd",

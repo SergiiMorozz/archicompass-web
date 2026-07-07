@@ -53,6 +53,7 @@ export function pageMetadata({
       type,
       url: canonical,
       siteName: SITE_NAME,
+      locale: "pl_PL",
       title: brandedTitle,
       description: cleanDescription,
       images: [{ url: socialImage, width: 1600, height: 900, alt: brandedTitle }],

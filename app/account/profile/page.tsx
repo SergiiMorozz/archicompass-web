@@ -4,11 +4,15 @@ import { revalidatePath } from "next/cache";
 import { getExplicitAccountRole } from "@/lib/studios";
 import {
   serviceCapabilities,
+  serviceCapabilityLabel,
   serviceCapabilityValues,
 } from "@/lib/service-capabilities";
 import {
+  availabilityLabel,
   availabilityStatuses,
+  pricingModelLabel,
   pricingModels,
+  workModeLabel,
   workModes,
   workModeValues,
 } from "@/lib/profile-pricing";
@@ -126,10 +130,10 @@ async function uploadProfileMedia(
 ) {
   if (!file) return { path: null, error: null };
   if (!allowedProfileMediaTypes.includes(file.type)) {
-    return { path: null, error: `${kind === "logo" ? "Logo" : "Banner"} must be a JPEG, PNG, or WebP image.` };
+    return { path: null, error: `${kind === "logo" ? "Logo" : "Baner"} musi być plikiem JPEG, PNG lub WebP.` };
   }
   if (file.size > maxProfileMediaSize) {
-    return { path: null, error: `${kind === "logo" ? "Logo" : "Banner"} must be smaller than 5 MB.` };
+    return { path: null, error: `${kind === "logo" ? "Logo" : "Baner"} musi mieć mniej niż 5 MB.` };
   }
 
   const path = `${userId}/${kind}-${crypto.randomUUID()}.${mediaExtension(file)}`;
@@ -341,26 +345,26 @@ export default async function EditProfilePage({
             href={backHref}
             className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
           >
-            {isProfessional ? "Back to account" : "Back to client workspace"}
+            {isProfessional ? "Wróć do konta" : "Wróć do strefy klienta"}
           </Link>
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
-              <div className="text-sm font-semibold text-primary">Profile Builder</div>
+              <div className="text-sm font-semibold text-primary">Edycja profilu</div>
               <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
-                {isProfessional ? "Edit public profile" : "Account settings"}
+                {isProfessional ? "Edytuj profil publiczny" : "Ustawienia konta"}
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
                 {isProfessional
-                  ? "Shape the information clients see before they decide to contact you. These details power your marketplace profile."
-                  : "Keep your personal and contact details current for briefs and conversations."}
+                  ? "Uzupełnij informacje, które klienci widzą przed kontaktem. Na ich podstawie powstaje Twój profil w katalogu."
+                  : "Dbaj o aktualność danych osobowych i kontaktowych używanych w briefach i rozmowach."}
               </p>
             </div>
 
             <div className="rounded-2xl border border-line bg-background p-5 shadow-sm">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <div className="text-sm font-semibold text-muted">Profile readiness</div>
+                  <div className="text-sm font-semibold text-muted">Kompletność profilu</div>
                   <div className="mt-1 text-3xl font-bold text-primary">{score}%</div>
                 </div>
                 {isProfessional && hasProfile ? (
@@ -394,44 +398,44 @@ export default async function EditProfilePage({
 
           <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div>
-              <div className="text-sm font-semibold text-primary">Identity</div>
-              <h2 className="mt-1 text-2xl font-bold">Who clients are meeting</h2>
+              <div className="text-sm font-semibold text-primary">Tożsamość</div>
+              <h2 className="mt-1 text-2xl font-bold">Kogo poznają klienci</h2>
               <p className="mt-2 text-sm leading-6 text-muted">
                 {isProfessional
-                  ? "Personal designer profiles and studio profiles are separate. Create a studio from Designer Studio when several people should work together."
-                  : "These details identify you in saved briefs and conversations with professionals."}
+                  ? "Profil projektanta i profil pracowni są oddzielne. Jeżeli kilka osób pracuje razem, utwórz pracownię w Studio projektanta."
+                  : "Te dane identyfikują Cię w zapisanych briefach i rozmowach z profesjonalistami."}
               </p>
             </div>
 
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
-              <Field label={isProfessional ? "Full name" : "Your name"}>
+              <Field label={isProfessional ? "Imię i nazwisko / nazwa" : "Imię i nazwisko"}>
                 <input name="full_name" defaultValue={p.full_name ?? ""} className={fieldClass} />
               </Field>
 
-              <Field label="Location" hint="city or service area">
+              <Field label="Lokalizacja" hint="miasto lub obszar działania">
                 <input
                   name="location"
                   defaultValue={p.location ?? ""}
-                  placeholder="Warsaw"
+                  placeholder="Warszawa"
                   className={fieldClass}
                 />
               </Field>
 
               {isProfessional ? (
                 <>
-                  <Field label="Profession type">
+                  <Field label="Specjalizacja zawodowa">
                     <input
                       name="profession_type"
                       defaultValue={p.profession_type ?? ""}
-                      placeholder="Interior designer / architect"
+                      placeholder="Projektant wnętrz / architekt"
                       className={fieldClass}
                     />
                   </Field>
                   <div className="sm:col-span-2 grid gap-5 sm:grid-cols-2">
-                    <Field label="Profile logo" hint="square image, max 5 MB">
+                    <Field label="Logo profilu" hint="kwadratowy obraz, maks. 5 MB">
                       <input name="profile_logo" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} />
                     </Field>
-                    <Field label="Profile banner" hint="wide image, max 5 MB">
+                    <Field label="Baner profilu" hint="szeroki obraz, maks. 5 MB">
                       <input name="profile_banner" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} />
                     </Field>
                   </div>
@@ -446,7 +450,7 @@ export default async function EditProfilePage({
                       className={fieldClass}
                     />
                   </Field>
-                  <Field label="Phone" hint="optional">
+                  <Field label="Telefon" hint="opcjonalnie">
                     <input name="phone" defaultValue={p.phone ?? ""} className={fieldClass} />
                   </Field>
                 </>
@@ -456,12 +460,12 @@ export default async function EditProfilePage({
 
           {isProfessional ? <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div>
-              <div className="text-sm font-semibold text-primary">Marketplace Details</div>
-              <h2 className="mt-1 text-2xl font-bold">Pricing, experience, and contact</h2>
+              <div className="text-sm font-semibold text-primary">Informacje w katalogu</div>
+              <h2 className="mt-1 text-2xl font-bold">Ceny, doświadczenie i kontakt</h2>
             </div>
 
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
-              <Field label="Years of experience">
+              <Field label="Lata doświadczenia">
                 <input
                   name="years_experience"
                   defaultValue={p.years_experience ?? ""}
@@ -471,27 +475,27 @@ export default async function EditProfilePage({
                 />
               </Field>
 
-              <Field label="Pricing model">
+              <Field label="Model rozliczenia">
                 <select name="pricing_model" defaultValue={p.pricing_model ?? "Custom quote"} className={fieldClass}>
-                  {pricingModels.map((model) => <option key={model} value={model}>{model}</option>)}
+                  {pricingModels.map((model) => <option key={model} value={model}>{pricingModelLabel(model)}</option>)}
                 </select>
               </Field>
 
-              <Field label="Availability">
+              <Field label="Dostępność">
                 <select name="availability_status" defaultValue={p.availability_status ?? "Waitlist / ask"} className={fieldClass}>
-                  {availabilityStatuses.map((status) => <option key={status} value={status}>{status}</option>)}
+                  {availabilityStatuses.map((status) => <option key={status} value={status}>{availabilityLabel(status)}</option>)}
                 </select>
               </Field>
 
-              <Field label="Price from" hint="PLN per selected pricing model">
+              <Field label="Cena od" hint="PLN w wybranym modelu rozliczenia">
                 <input name="price_from" defaultValue={p.price_from ?? ""} inputMode="numeric" placeholder="5000" className={fieldClass} />
               </Field>
 
-              <Field label="Price to" hint="PLN per selected pricing model">
+              <Field label="Cena do" hint="PLN w wybranym modelu rozliczenia">
                 <input name="price_to" defaultValue={p.price_to ?? ""} inputMode="numeric" placeholder="15000" className={fieldClass} />
               </Field>
 
-              <Field label="Minimum project budget" hint="PLN, optional">
+              <Field label="Minimalny budżet inwestycji" hint="PLN, opcjonalnie">
                 <input name="minimum_project_budget" defaultValue={p.minimum_project_budget ?? ""} inputMode="numeric" placeholder="30000" className={fieldClass} />
               </Field>
 
@@ -504,12 +508,12 @@ export default async function EditProfilePage({
                 />
               </Field>
 
-              <Field label="Phone">
+              <Field label="Telefon">
                 <input name="phone" defaultValue={p.phone ?? ""} className={fieldClass} />
               </Field>
 
               <div className="sm:col-span-2">
-                <Field label="Website">
+                <Field label="Strona internetowa">
                   <input
                     name="website"
                     defaultValue={p.website ?? ""}
@@ -520,9 +524,9 @@ export default async function EditProfilePage({
               </div>
 
               <div className="sm:col-span-2 rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-5">
-                <div className="text-sm font-bold text-foreground">Google Business rating</div>
+                <div className="text-sm font-bold text-foreground">Ocena Google Business</div>
                 <p className="mt-1 text-sm leading-6 text-muted">
-                  Add the Place ID from your Google Business profile. ArchiCompass verifies the rating directly through Google; ratings cannot be entered manually.
+                  Dodaj identyfikator miejsca z profilu Google Business. ArchiCompass weryfikuje ocenę bezpośrednio w Google; nie można wpisać jej ręcznie.
                 </p>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <div className="sm:col-span-2">
@@ -537,33 +541,33 @@ export default async function EditProfilePage({
                   </div>
                   <div className="sm:col-span-2 rounded-xl border border-line bg-card p-4 text-sm text-muted">
                     {p.google_rating !== null && p.google_rating !== undefined
-                      ? `Verified: ${p.google_rating.toFixed(1)} from ${p.google_review_count ?? 0} Google reviews.`
+                      ? `Zweryfikowano: ${p.google_rating.toFixed(1)} na podstawie ${p.google_review_count ?? 0} opinii Google.`
                       : p.google_place_id
-                        ? "Place ID saved. Verification will run when Google Places is connected."
-                        : "No verified Google rating yet."}
+                        ? "Place ID zapisano. Weryfikacja uruchomi się po połączeniu Google Places."
+                        : "Brak zweryfikowanej oceny Google."}
                   </div>
                 </div>
               </div>
 
               <fieldset className="sm:col-span-2">
-                <legend className="text-sm font-semibold">Work formats</legend>
+                <legend className="text-sm font-semibold">Formy współpracy</legend>
                 <div className="mt-3 flex flex-wrap gap-3">
                   {workModes.map((mode) => (
                     <label key={mode} className="flex items-center gap-3 rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold">
                       <input type="checkbox" name="work_modes" value={mode} defaultChecked={p.work_modes?.includes(mode)} className="h-4 w-4 accent-primary" />
-                      {mode}
+                      {workModeLabel(mode)}
                     </label>
                   ))}
                 </div>
               </fieldset>
 
               <div className="sm:col-span-2">
-                <Field label="Cooperation terms" hint="short public summary">
+                <Field label="Warunki współpracy" hint="krótkie podsumowanie publiczne">
                   <textarea
                     name="cooperation_terms"
                     defaultValue={p.cooperation_terms ?? ""}
                     rows={4}
-                    placeholder="For example: what the first call includes, payment stages, revision rounds, and what is quoted separately."
+                    placeholder="Np. zakres pierwszej konsultacji, etapy płatności, liczba poprawek i elementy wyceniane osobno."
                     className={areaClass}
                   />
                 </Field>
@@ -573,22 +577,22 @@ export default async function EditProfilePage({
 
           {isProfessional ? <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div>
-              <div className="text-sm font-semibold text-primary">Positioning</div>
-              <h2 className="mt-1 text-2xl font-bold">Style, specialties, and story</h2>
+              <div className="text-sm font-semibold text-primary">Pozycjonowanie profilu</div>
+              <h2 className="mt-1 text-2xl font-bold">Styl, specjalizacje i historia</h2>
             </div>
 
             <div className="mt-6 grid gap-5">
-              <Field label="Profile headline" hint="short text shown on the banner, max 140 characters">
+              <Field label="Nagłówek profilu" hint="krótki tekst na banerze, maks. 140 znaków">
                 <input
                   name="profile_headline"
                   maxLength={140}
                   defaultValue={p.profile_headline ?? ""}
-                  placeholder="Warm, functional interiors for modern city living"
+                  placeholder="Ciepłe, funkcjonalne wnętrza do współczesnego życia w mieście"
                   className={fieldClass}
                 />
               </Field>
 
-              <Field label="Specialties" hint="separate with commas">
+              <Field label="Specjalizacje" hint="oddziel przecinkami">
                 <input
                   name="specialties"
                   defaultValue={p.specialties?.join(", ") ?? ""}
@@ -598,7 +602,7 @@ export default async function EditProfilePage({
               </Field>
 
               <fieldset>
-                <legend className="text-sm font-semibold">Services available</legend>
+                <legend className="text-sm font-semibold">Dostępne usługi</legend>
                 <p className="mt-1 text-sm leading-6 text-muted">
                   These are used when Project Compass explains why a brief may fit.
                 </p>
@@ -615,18 +619,18 @@ export default async function EditProfilePage({
                         defaultChecked={p.service_capabilities?.includes(capability)}
                         className="h-4 w-4 accent-primary"
                       />
-                      {capability}
+                      {serviceCapabilityLabel(capability)}
                     </label>
                   ))}
                 </div>
               </fieldset>
 
-              <Field label="About / design approach">
+              <Field label="O mnie / podejście projektowe">
                 <textarea
                   name="bio"
                   defaultValue={p.bio ?? ""}
                   rows={7}
-                  placeholder="Describe your approach, typical projects, and what makes working with you clear and easy."
+                  placeholder="Opisz swoje podejście, typowe projekty i sposób prowadzenia współpracy."
                   className={areaClass}
                 />
               </Field>
@@ -638,7 +642,7 @@ export default async function EditProfilePage({
               type="submit"
               className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white hover:opacity-90"
             >
-              {isProfessional ? "Save profile" : "Save account details"}
+              {isProfessional ? "Zapisz profil" : "Zapisz dane konta"}
             </button>
             <Link
               href={hasProfile && isProfessional ? `/designers/${user.id}` : backHref}
@@ -651,34 +655,34 @@ export default async function EditProfilePage({
 
         <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
           <div className="text-sm font-semibold text-primary">
-            {isProfessional ? "Profile preview notes" : "Client account"}
+            {isProfessional ? "Podgląd profilu" : "Konto klienta"}
           </div>
           <h2 className="mt-2 text-2xl font-bold">
-            {isProfessional ? "What this affects" : "Where details appear"}
+            {isProfessional ? "Gdzie pojawią się te dane" : "Gdzie pojawią się dane"}
           </h2>
           <div className="mt-5 grid gap-4 text-sm">
             <div className="rounded-2xl border border-line bg-background p-4">
-              <div className="font-semibold">{isProfessional ? "Catalog card" : "Project briefs"}</div>
+              <div className="font-semibold">{isProfessional ? "Karta w katalogu" : "Briefy projektowe"}</div>
               <p className="mt-2 leading-6 text-muted">
                 {isProfessional
-                  ? "Name, location, specialties, rate, and bio shape how you appear in Find Designer."
-                  : "Your name and location help professionals understand who is sending a project brief."}
+                  ? "Nazwa, lokalizacja, specjalizacje, ceny i opis decydują o prezentacji w katalogu."
+                  : "Imię i lokalizacja pomagają projektantom zrozumieć, kto wysyła brief."}
               </p>
             </div>
             <div className="rounded-2xl border border-line bg-background p-4">
-              <div className="font-semibold">{isProfessional ? "Public profile" : "Conversations"}</div>
+              <div className="font-semibold">{isProfessional ? "Profil publiczny" : "Rozmowy"}</div>
               <p className="mt-2 leading-6 text-muted">
                 {isProfessional
-                  ? "Contact details and experience feed the profile header and contact panel."
-                  : "Contact details stay inside your account and support active designer conversations."}
+                  ? "Dane kontaktowe i doświadczenie pojawiają się w nagłówku oraz panelu kontaktowym."
+                  : "Dane kontaktowe pozostają w koncie i wspierają aktywne rozmowy z projektantami."}
               </p>
             </div>
             {isProfessional ? <div className="rounded-2xl border border-line bg-background p-4">
-              <div className="font-semibold">Specialties</div>
+              <div className="font-semibold">Specjalizacje</div>
               <p className="mt-2 leading-6 text-muted">
                 {specialtyCount
                   ? `${specialtyCount} specialties are ready to show.`
-                  : "Add a few specialties so clients can understand your fit quickly."}
+                  : "Dodaj kilka specjalizacji, aby klienci szybko ocenili dopasowanie."}
               </p>
             </div> : null}
           </div>
@@ -687,7 +691,7 @@ export default async function EditProfilePage({
             href="/account/projects"
             className="mt-6 flex rounded-xl bg-primary-soft px-4 py-3 text-center text-sm font-semibold text-primary hover:bg-primary hover:text-white"
           >
-            <span className="w-full">Manage portfolio projects</span>
+            <span className="w-full">Zarządzaj projektami portfolio</span>
           </Link> : null}
 
           {isProfessional && hasProfile ? (

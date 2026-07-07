@@ -86,10 +86,10 @@ export default async function ClientOverviewPage({
   const designersById = new Map(designers.map((profile) => [profile.id, profile]));
 
   const stats = [
-    ["Saved briefs", String(briefs.length), "/client/briefs"],
-    ["Favorite items", String(favorites.length), "/client/favorites"],
-    ["Designer requests", String(inquiries.length), "/client/messages"],
-    ["Unread messages", String(unreadMessages ?? 0), "/client/messages"],
+    ["Zapisane briefy", String(briefs.length), "/client/briefs"],
+    ["Ulubione", String(favorites.length), "/client/favorites"],
+    ["Zapytania do projektantów", String(inquiries.length), "/client/messages"],
+    ["Nieprzeczytane wiadomości", String(unreadMessages ?? 0), "/client/messages"],
   ];
 
   return (
@@ -97,8 +97,8 @@ export default async function ClientOverviewPage({
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="text-sm font-semibold text-primary">Your interior project</div>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Client dashboard</h1>
+            <div className="text-sm font-semibold text-primary">Twój projekt wnętrza</div>
+            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Pulpit klienta</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
               Keep inspiration, project briefs, favorite professionals, and every
               conversation together from first idea to designer selection.
@@ -134,10 +134,10 @@ export default async function ClientOverviewPage({
           <section>
             <div className="flex items-end justify-between gap-4">
               <div>
-                <div className="text-sm font-semibold text-primary">Recent activity</div>
-                <h2 className="mt-1 text-3xl font-bold">Designer conversations</h2>
+                <div className="text-sm font-semibold text-primary">Ostatnia aktywność</div>
+                <h2 className="mt-1 text-3xl font-bold">Rozmowy z projektantami</h2>
               </div>
-              <Link href="/client/messages" className="text-sm font-semibold text-primary hover:underline">View all</Link>
+              <Link href="/client/messages" className="text-sm font-semibold text-primary hover:underline">Zobacz wszystkie</Link>
             </div>
 
             {inquiries.length ? (
@@ -149,11 +149,11 @@ export default async function ClientOverviewPage({
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <div className="text-sm font-semibold text-primary">
-                            {designer?.full_name || "Design professional"}
+                            {designer?.full_name || "Projektant wnętrz"}
                           </div>
                           <h3 className="mt-1 text-xl font-bold">{inquiry.subject}</h3>
                           <div className="mt-2 text-sm text-muted">
-                            {designer?.profession_type || "Professional"} · {formatDate(inquiry.created_at)}
+                            {designer?.profession_type === "Studio" ? "Pracownia projektowa" : "Projektant wnętrz"} · {formatDate(inquiry.created_at)}
                           </div>
                         </div>
                         <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusClass(inquiry.status)}`}>
@@ -166,7 +166,7 @@ export default async function ClientOverviewPage({
               </div>
             ) : (
               <div className="mt-5 rounded-lg border border-dashed border-line bg-card p-8">
-                <h3 className="text-xl font-bold">No designer conversations yet</h3>
+                <h3 className="text-xl font-bold">Nie masz jeszcze rozmów z projektantami</h3>
                 <p className="mt-2 max-w-xl leading-7 text-muted">
                   Create a Project Compass brief, save it, and send it to a designer whose work fits the project.
                 </p>
@@ -178,18 +178,18 @@ export default async function ClientOverviewPage({
           </section>
 
           <aside className="h-fit rounded-lg border border-line bg-card p-6 shadow-sm lg:sticky lg:top-40">
-            <div className="text-sm font-semibold text-primary">Your next step</div>
+            <div className="text-sm font-semibold text-primary">Twój następny krok</div>
             <h2 className="mt-2 text-2xl font-bold">
-              {briefs.length ? "Compare the right fit" : "Turn inspiration into a brief"}
+              {briefs.length ? "Porównaj najlepiej dopasowanych" : "Zamień inspiracje w brief"}
             </h2>
             <p className="mt-3 text-sm leading-6 text-muted">
               {briefs.length
-                ? "Keep promising designers and projects in Favorites, then send one clear brief to start a focused conversation."
-                : "Add references, scope, budget, and timing so professionals can understand the real project before replying."}
+                ? "Zapisuj interesujących projektantów i realizacje w Ulubionych, a potem wyślij jeden konkretny brief."
+                : "Dodaj inspiracje, zakres, budżet i termin, aby projektanci mogli dobrze zrozumieć inwestycję przed odpowiedzią."}
             </p>
             <div className="mt-6 grid gap-3">
-              <Link href="/client/briefs" className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white">Open saved briefs</Link>
-              <Link href="/client/favorites" className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">Review favorites</Link>
+              <Link href="/client/briefs" className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white">Otwórz zapisane briefy</Link>
+              <Link href="/client/favorites" className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">Przejrzyj ulubione</Link>
             </div>
           </aside>
         </div>

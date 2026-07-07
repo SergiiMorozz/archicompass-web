@@ -4,9 +4,9 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Find Interior Designers with AI",
+  title: "Znajdź projektanta wnętrz z pomocą AI",
   description:
-    "Find interior designers and design studios by location, style, services, and portfolio. Turn inspiration photos into a clear AI-assisted project brief.",
+    "Znajdź projektantów wnętrz i pracownie projektowe według lokalizacji, stylu, usług i portfolio. Stwórz precyzyjny brief na podstawie zdjęć inspiracji.",
   path: "/",
 });
 
@@ -39,7 +39,26 @@ type FeaturedArticle = {
 };
 
 function metricValue(value: number) {
-  return new Intl.NumberFormat("en-US").format(value);
+  return new Intl.NumberFormat("pl-PL").format(value);
+}
+
+const projectCategoryLabels: Record<string, string> = {
+  Apartment: "Mieszkanie",
+  House: "Dom",
+  Loft: "Loft",
+  Hospitality: "Hotelarstwo i gastronomia",
+  "Rental property": "Nieruchomość na wynajem",
+  Kitchen: "Kuchnia",
+  "Dining room": "Jadalnia",
+  "Home office": "Gabinet domowy",
+  Bedroom: "Sypialnia",
+  Penthouse: "Penthouse",
+  Office: "Biuro",
+};
+
+function projectCategoryLabel(value: string | null) {
+  if (!value) return "Projekt wnętrza";
+  return projectCategoryLabels[value] || value;
 }
 
 async function homeData() {
@@ -82,9 +101,9 @@ async function homeData() {
 
   return {
     metrics: [
-      [metricValue((designers.count ?? 0) + (studios.count ?? 0)), "Designers & studios"],
-      [metricValue(projects.count ?? 0), "Published projects"],
-      [metricValue(reviewCount), "Linked Google reviews"],
+      [metricValue((designers.count ?? 0) + (studios.count ?? 0)), "Projektanci i pracownie"],
+      [metricValue(projects.count ?? 0), "Opublikowane projekty"],
+      [metricValue(reviewCount), "Połączone opinie Google"],
     ],
     featuredProjects,
     featuredArticles: (articles.data ?? []) as FeaturedArticle[],
@@ -100,7 +119,7 @@ export default async function Home() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={heroImage}
-          alt="Contemporary living room by an interior design professional"
+          alt="Współczesny salon zaprojektowany przez specjalistę wnętrz"
           width="1800"
           height="1200"
           loading="eager"
@@ -112,14 +131,14 @@ export default async function Home() {
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/12 px-4 py-2 text-sm font-semibold backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-[#48d9c7]" />
-              AI-assisted interior designer matching
+              Dopasowanie projektanta wnętrz wspierane przez AI
             </div>
             <h1 className="mt-6 text-5xl font-bold leading-[1.03] sm:text-7xl">
-              Find the right interior designer for your project.
+              Znajdź właściwego projektanta wnętrz dla swojego projektu.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/82 sm:text-xl">
-              Turn inspiration photos into a clear project brief, understand your style,
-              and compare professionals who fit the real scope of your space.
+              Zamień zdjęcia inspiracji w precyzyjny brief, poznaj swój styl
+              i porównaj specjalistów dopasowanych do rzeczywistego zakresu prac.
             </p>
 
             <div className="mt-9 grid max-w-2xl gap-3 sm:grid-cols-[1.25fr_0.75fr]">
@@ -128,25 +147,25 @@ export default async function Home() {
                 className="group rounded-lg border border-[#a57aff] bg-[#7c3aed] px-6 py-5 text-center font-bold text-white shadow-[0_18px_45px_rgba(86,35,168,0.38)] transition hover:bg-[#8b4cf0]"
               >
                 <span className="mr-2 rounded-full bg-white px-2 py-1 text-xs font-bold text-primary">AI</span>
-                Discover Your Style & Build a Brief
+                Poznaj swój styl i stwórz brief
                 <span className="ml-2 transition group-hover:translate-x-1">&#8594;</span>
               </Link>
               <Link
                 href="/designers"
                 className="rounded-lg border border-white/55 bg-white/12 px-6 py-5 text-center font-semibold text-white backdrop-blur transition hover:bg-white/20"
               >
-                Find a Designer
+                Znajdź projektanta
               </Link>
             </div>
 
             <Link href="/get-started" className="mt-5 inline-flex text-sm font-semibold text-white/80 hover:text-white">
-              Are you a designer or architect? Create your profile &#8594;
+              Jesteś projektantem lub architektem? Utwórz swój profil &#8594;
             </Link>
 
             <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/78">
-              <span><b className="text-[#5de1d1]">&#10003;</b> Real portfolios</span>
-              <span><b className="text-[#5de1d1]">&#10003;</b> Direct conversations</span>
-              <span><b className="text-[#5de1d1]">&#10003;</b> Free to get started</span>
+              <span><b className="text-[#5de1d1]">&#10003;</b> Prawdziwe portfolio</span>
+              <span><b className="text-[#5de1d1]">&#10003;</b> Bezpośredni kontakt</span>
+              <span><b className="text-[#5de1d1]">&#10003;</b> Bezpłatny start</span>
             </div>
           </div>
         </div>
@@ -161,7 +180,7 @@ export default async function Home() {
                 index === 0 ? "text-primary" : index === 1 ? "text-accent" : "text-warm",
               ].join(" ")}>{value}</div>
               <div className="mt-1 text-sm font-semibold text-muted">{label}</div>
-              <div className="mt-2 text-xs text-muted">Live platform count</div>
+              <div className="mt-2 text-xs text-muted">Aktualne dane platformy</div>
             </div>
           ))}
         </div>
@@ -169,19 +188,19 @@ export default async function Home() {
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <div className="max-w-3xl">
-          <p className="text-sm font-bold uppercase text-accent">How it works</p>
-          <h2 className="mt-3 text-4xl font-bold">From saved images to a useful first conversation.</h2>
+          <p className="text-sm font-bold uppercase text-accent">Jak to działa</p>
+          <h2 className="mt-3 text-4xl font-bold">Od zapisanych zdjęć do konkretnej pierwszej rozmowy.</h2>
           <p className="mt-4 text-lg leading-8 text-muted">
-            ArchiCompass connects visual taste with the information a professional needs:
-            scope, rooms, budget, timeline, services, and project status.
+            ArchiCompass łączy gust wizualny z informacjami potrzebnymi specjaliście:
+            zakresem, pomieszczeniami, budżetem, terminem, usługami i stanem inwestycji.
           </p>
         </div>
 
         <div className="mt-9 grid gap-5 lg:grid-cols-3">
           {[
-            ["01", "Add inspiration", "Upload rooms, details, and moods. AI reads recurring visual signals."],
-            ["02", "Shape the brief", "Add space, rooms, budget, timing, 3D, and supervision needs."],
-            ["03", "Meet the right pro", "Compare portfolio evidence and send a structured request."],
+            ["01", "Dodaj inspiracje", "Prześlij zdjęcia pomieszczeń, detali i nastrojów. AI rozpozna powtarzające się cechy."],
+            ["02", "Dopracuj brief", "Dodaj metraż, pomieszczenia, budżet, termin oraz potrzeby dotyczące wizualizacji 3D i nadzoru."],
+            ["03", "Poznaj właściwego specjalistę", "Porównaj portfolio i wyślij uporządkowane zapytanie projektowe."],
           ].map(([number, title, copy], index) => (
             <article key={title} className="rounded-lg border border-line bg-card p-6 shadow-[0_14px_40px_rgba(54,31,73,0.07)]">
               <div className={[
@@ -199,30 +218,30 @@ export default async function Home() {
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
             <span className="rounded-full bg-[#4fd8c7] px-3 py-1 text-xs font-bold text-[#173d39]">AI PROJECT COMPASS</span>
-            <h2 className="mt-5 text-4xl font-bold">Your photos become more than a moodboard.</h2>
+            <h2 className="mt-5 text-4xl font-bold">Twoje zdjęcia stają się czymś więcej niż moodboardem.</h2>
             <p className="mt-4 text-lg leading-8 text-white/72">
-              Get a style direction, palette, material clues, and matching signals. Then
-              keep building the same brief instead of starting over in another tool.
+              Otrzymaj kierunek stylistyczny, paletę kolorów, propozycje materiałów
+              i wskazówki dopasowania. Rozwijaj ten sam brief bez zaczynania od nowa.
             </p>
             <Link href="/project-compass" className="mt-7 inline-flex rounded-lg bg-[#7c3aed] px-6 py-4 font-bold text-white shadow-lg shadow-[#7c3aed]/25">
-              Analyze inspiration photos &#8594;
+              Przeanalizuj zdjęcia inspiracji &#8594;
             </Link>
           </div>
 
           <div className="rounded-lg border border-white/15 bg-white p-6 text-foreground shadow-2xl">
             <div className="flex items-start justify-between gap-4 border-b border-line pb-4">
               <div>
-                <div className="text-xs font-bold uppercase text-primary">Example AI direction</div>
-                <div className="mt-1 text-3xl font-bold">Warm Japandi</div>
+                <div className="text-xs font-bold uppercase text-primary">Przykładowy kierunek AI</div>
+                <div className="mt-1 text-3xl font-bold">Ciepłe japandi</div>
               </div>
-              <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-bold text-accent">Ready to brief</span>
+              <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-bold text-accent">Gotowe do briefu</span>
             </div>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               {[
-                ["Palette", "Cream, clay, warm oak"],
-                ["Materials", "Light wood, linen, stone"],
-                ["Mood", "Calm, tactile, uncluttered"],
-                ["Designer signals", "Residential, joinery, natural finishes"],
+                ["Paleta", "Krem, glina, ciepły dąb"],
+                ["Materiały", "Jasne drewno, len, kamień"],
+                ["Nastrój", "Spokojny, naturalny, uporządkowany"],
+                ["Profil projektanta", "Wnętrza mieszkalne, zabudowy, naturalne wykończenia"],
               ].map(([title, copy]) => (
                 <div key={title} className="rounded-lg border border-line bg-background p-4">
                   <div className="text-xs font-bold uppercase text-muted">{title}</div>
@@ -237,10 +256,10 @@ export default async function Home() {
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase text-warm">Fresh portfolio work</p>
-            <h2 className="mt-2 text-4xl font-bold">Projects on ArchiCompass</h2>
+            <p className="text-sm font-bold uppercase text-warm">Najnowsze realizacje</p>
+            <h2 className="mt-2 text-4xl font-bold">Projekty w ArchiCompass</h2>
           </div>
-          <Link href="/designers" className="font-bold text-primary hover:underline">Browse all professionals &#8594;</Link>
+          <Link href="/designers" className="font-bold text-primary hover:underline">Zobacz wszystkich specjalistów &#8594;</Link>
         </div>
 
         {featuredProjects.length ? (
@@ -251,15 +270,15 @@ export default async function Home() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={project.image}
-                    alt={`${project.title || "Interior design project"}${project.category ? ` - ${project.category}` : ""}`}
+                    alt={`${project.title || "Projekt wnętrza"}${project.category ? ` - ${projectCategoryLabel(project.category)}` : ""}`}
                     width="1000"
                     height="750"
                     loading="lazy"
                     className="aspect-[4/3] w-full object-cover"
                   />
                   <div className="p-5">
-                    <div className="text-xs font-bold uppercase text-accent">{project.category || "Interior project"}</div>
-                    <h3 className="mt-2 text-xl font-bold">{project.title || "Untitled project"}</h3>
+                    <div className="text-xs font-bold uppercase text-accent">{projectCategoryLabel(project.category)}</div>
+                    <h3 className="mt-2 text-xl font-bold">{project.title || "Projekt bez tytułu"}</h3>
                   </div>
                 </Link>
               </article>
@@ -267,8 +286,8 @@ export default async function Home() {
           </div>
         ) : (
           <div className="mt-8 rounded-lg border border-dashed border-line bg-card p-8 text-center">
-            <h3 className="text-xl font-bold">The first public projects will appear here.</h3>
-            <p className="mt-2 text-muted">Every published project will immediately update the live counter above.</p>
+            <h3 className="text-xl font-bold">Pierwsze publiczne projekty pojawią się tutaj.</h3>
+            <p className="mt-2 text-muted">Każdy opublikowany projekt automatycznie zaktualizuje licznik powyżej.</p>
           </div>
         )}
       </section>
@@ -278,14 +297,14 @@ export default async function Home() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-3xl">
               <p className="text-sm font-bold uppercase text-accent">Inspiration Hub</p>
-              <h2 className="mt-2 text-4xl font-bold">Ideas that help you make better project decisions.</h2>
+              <h2 className="mt-2 text-4xl font-bold">Inspiracje, które pomagają podejmować lepsze decyzje projektowe.</h2>
               <p className="mt-4 text-lg leading-8 text-muted">
-                Explore practical guides to styles, materials, rooms, renovation planning,
-                and sustainable interiors. Save useful articles to your client workspace.
+                Poznaj praktyczne poradniki o stylach, materiałach, pomieszczeniach,
+                planowaniu remontu i zrównoważonych wnętrzach. Zapisuj artykuły w strefie klienta.
               </p>
             </div>
             <Link href="/inspiration" className="font-bold text-primary hover:underline">
-              Explore Inspiration Hub &#8594;
+              Odkryj Inspiration Hub &#8594;
             </Link>
           </div>
 
@@ -311,7 +330,7 @@ export default async function Home() {
                       <div className="text-xs font-bold uppercase text-accent">{article.category}</div>
                       <h3 className="mt-2 text-xl font-bold hover:text-primary">{article.title}</h3>
                       <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted">{article.excerpt}</p>
-                      <div className="mt-5 text-sm font-bold text-primary">Read article &#8594;</div>
+                      <div className="mt-5 text-sm font-bold text-primary">Czytaj artykuł &#8594;</div>
                     </div>
                   </Link>
                 </article>
@@ -319,8 +338,8 @@ export default async function Home() {
             </div>
           ) : (
             <div className="mt-8 rounded-lg border border-dashed border-line bg-background p-7">
-              <h3 className="text-xl font-bold">The first inspiration guides are being prepared.</h3>
-              <Link href="/inspiration" className="mt-3 inline-flex font-bold text-primary hover:underline">Open the Hub</Link>
+              <h3 className="text-xl font-bold">Przygotowujemy pierwsze poradniki i inspiracje.</h3>
+              <Link href="/inspiration" className="mt-3 inline-flex font-bold text-primary hover:underline">Otwórz Inspiration Hub</Link>
             </div>
           )}
         </div>
@@ -329,11 +348,11 @@ export default async function Home() {
       <section className="bg-accent text-white">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
-            <p className="text-sm font-bold uppercase text-white/65">For designers and studios</p>
-            <h2 className="mt-2 text-4xl font-bold">Show strong work. Receive clearer client requests.</h2>
-            <p className="mt-4 max-w-2xl leading-7 text-white/80">Create a public portfolio, connect your Google rating, and manage structured briefs in one workspace.</p>
+            <p className="text-sm font-bold uppercase text-white/65">Dla projektantów i pracowni</p>
+            <h2 className="mt-2 text-4xl font-bold">Pokaż najlepsze realizacje. Otrzymuj precyzyjniejsze zapytania.</h2>
+            <p className="mt-4 max-w-2xl leading-7 text-white/80">Utwórz publiczne portfolio, połącz opinie Google i zarządzaj uporządkowanymi briefami w jednym miejscu.</p>
           </div>
-          <Link href="/get-started" className="rounded-lg bg-white px-6 py-4 text-center font-bold text-accent">Join as a Professional</Link>
+          <Link href="/get-started" className="rounded-lg bg-white px-6 py-4 text-center font-bold text-accent">Dołącz jako specjalista</Link>
         </div>
       </section>
     </main>

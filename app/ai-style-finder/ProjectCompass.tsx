@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ShareableStyleResult from "@/components/ShareableStyleResult";
-import { countLabel } from "@/lib/count-label";
+import { polishCountLabel } from "@/lib/count-label";
 import { copyText } from "@/lib/copy-text";
 
 type Option = {
@@ -41,292 +41,292 @@ const projectCompassDraftKey = "archicompass-project-compass-draft";
 
 const projectTypes: Option[] = [
   {
-    label: "Apartment",
+    label: "Mieszkanie",
     value: "Apartment",
-    description: "Flat, rental, or city home.",
+    description: "Mieszkanie własne, na wynajem lub apartament w mieście.",
   },
   {
-    label: "House",
+    label: "Dom",
     value: "House",
-    description: "Private home or larger renovation.",
+    description: "Dom prywatny, nowa inwestycja lub większy remont.",
   },
   {
-    label: "Single room",
+    label: "Jedno pomieszczenie",
     value: "Single room",
-    description: "Kitchen, bathroom, bedroom, or living room.",
+    description: "Kuchnia, łazienka, sypialnia, salon lub inne wnętrze.",
   },
   {
-    label: "Office",
+    label: "Biuro",
     value: "Office",
-    description: "Workspace, studio, or client-facing office.",
+    description: "Miejsce pracy, pracownia lub przestrzeń obsługi klientów.",
   },
 ];
 
 const goals: Option[] = [
   {
-    label: "Clarify direction",
+    label: "Określić kierunek",
     value: "Clarify direction",
-    description: "I need a concept before spending more money.",
+    description: "Potrzebuję koncepcji, zanim podejmę kosztowne decyzje.",
   },
   {
-    label: "Plan renovation",
+    label: "Zaplanować remont",
     value: "Plan renovation",
-    description: "I need layout, materials, and practical decisions.",
+    description: "Potrzebuję układu funkcjonalnego, materiałów i konkretnych decyzji.",
   },
   {
-    label: "Full design project",
+    label: "Kompleksowy projekt wnętrza",
     value: "Full design project",
-    description: "I want a designer to guide the whole process.",
+    description: "Chcę, aby projektant poprowadził cały proces.",
   },
   {
-    label: "Find the right pro",
+    label: "Znaleźć właściwego specjalistę",
     value: "Find the right pro",
-    description: "I know the need, but not who should help.",
+    description: "Wiem, czego potrzebuję, ale nie wiem, komu powierzyć projekt.",
   },
 ];
 
 const styles: Option[] = [
   {
-    label: "Warm minimalism",
+    label: "Ciepły minimalizm",
     value: "Warm minimalism",
-    description: "Calm, clean, natural, but not cold.",
+    description: "Spokojnie, czysto i naturalnie, ale bez chłodu.",
     specialty: "minimalist",
   },
   {
-    label: "Scandinavian",
+    label: "Skandynawski",
     value: "Scandinavian",
-    description: "Light, practical, soft textures, simple forms.",
+    description: "Jasne wnętrza, funkcjonalność, miękkie faktury i proste formy.",
     specialty: "scandinavian",
   },
   {
     label: "Modern classic",
     value: "Modern classic",
-    description: "Elegant, balanced, timeless details.",
+    description: "Elegancja, harmonia i ponadczasowe detale.",
     specialty: "modern",
   },
   {
-    label: "Industrial",
+    label: "Industrialny",
     value: "Industrial",
-    description: "Loft feeling, texture, metal, concrete, contrast.",
+    description: "Loftowy charakter, wyraziste faktury, metal, beton i kontrast.",
     specialty: "industrial",
   },
   {
     label: "Japandi",
     value: "Japandi",
-    description: "Japanese calm with Nordic warmth.",
+    description: "Japoński spokój połączony ze skandynawskim ciepłem.",
     specialty: "minimalist",
   },
   {
-    label: "Contemporary",
+    label: "Współczesny",
     value: "Contemporary",
-    description: "Current forms, tailored details, and a balanced material palette.",
+    description: "Aktualne formy, dopracowane detale i harmonijna paleta materiałów.",
     specialty: "contemporary",
   },
   {
     label: "Mid-century modern",
     value: "Mid-century modern",
-    description: "Clean lines, warm timber, vintage references, functional furniture.",
+    description: "Czyste linie, ciepłe drewno, inspiracje vintage i funkcjonalne meble.",
     specialty: "mid-century",
   },
   {
     label: "Art Deco",
     value: "Art Deco",
-    description: "Geometry, rich materials, symmetry, and elegant statement details.",
+    description: "Geometria, szlachetne materiały, symetria i eleganckie akcenty.",
     specialty: "art deco",
   },
   {
-    label: "Mediterranean",
+    label: "Śródziemnomorski",
     value: "Mediterranean",
-    description: "Sun-washed color, stone, plaster, timber, and relaxed texture.",
+    description: "Rozbielone słońcem kolory, kamień, tynk, drewno i swobodne faktury.",
     specialty: "mediterranean",
   },
   {
-    label: "Bohemian",
+    label: "Boho",
     value: "Bohemian",
-    description: "Layered textiles, collected objects, color, and personal expression.",
+    description: "Warstwowe tekstylia, pamiątki, kolor i indywidualny charakter.",
     specialty: "bohemian",
   },
   {
-    label: "Eclectic",
+    label: "Eklektyczny",
     value: "Eclectic",
-    description: "A deliberate mix of eras, colors, art, and custom pieces.",
+    description: "Świadome połączenie epok, kolorów, sztuki i elementów na zamówienie.",
     specialty: "eclectic",
   },
   {
-    label: "Rustic / organic",
+    label: "Rustykalny / organiczny",
     value: "Rustic / organic",
-    description: "Natural stone, aged timber, handmade texture, and earthy warmth.",
+    description: "Naturalny kamień, postarzane drewno, rękodzieło i ziemiste ciepło.",
     specialty: "rustic",
   },
   {
-    label: "Traditional",
+    label: "Tradycyjny",
     value: "Traditional",
-    description: "Classic proportions, detailed joinery, and familiar forms.",
+    description: "Klasyczne proporcje, dopracowana stolarka i znajome formy.",
     specialty: "traditional",
   },
   {
-    label: "Luxury contemporary",
+    label: "Współczesny luksus",
     value: "Luxury contemporary",
-    description: "Bespoke joinery, premium stone, lighting, and polished detailing.",
+    description: "Stolarka na wymiar, kamień premium, światło i perfekcyjne detale.",
     specialty: "luxury",
   },
   {
-    label: "Not sure yet",
+    label: "Jeszcze nie wiem",
     value: "Not sure yet",
-    description: "I want the system to help me name it.",
+    description: "Chcę, aby ArchiCompass pomógł mi nazwać ten kierunek.",
   },
 ];
 
 const scopes: Option[] = [
   {
-    label: "Consultation",
+    label: "Konsultacja",
     value: "Consultation",
-    description: "A short session to avoid wrong early decisions.",
+    description: "Krótkie spotkanie, które pomoże uniknąć nietrafionych decyzji.",
   },
   {
-    label: "Concept package",
+    label: "Projekt koncepcyjny",
     value: "Concept package",
-    description: "Moodboard, layout direction, materials, priorities.",
+    description: "Moodboard, układ funkcjonalny, materiały i priorytety.",
   },
   {
-    label: "Technical design",
+    label: "Projekt wykonawczy",
     value: "Technical design",
-    description: "Drawings, specifications, and contractor-ready details.",
+    description: "Rysunki, specyfikacje i detale gotowe dla wykonawców.",
   },
   {
-    label: "End-to-end support",
+    label: "Kompleksowa obsługa",
     value: "End-to-end support",
-    description: "Design, sourcing, coordination, and implementation help.",
+    description: "Projekt, zakupy, koordynacja i wsparcie podczas realizacji.",
   },
 ];
 
 const budgets: Option[] = [
   {
-    label: "Under 50k PLN",
+    label: "Do 50 tys. zł",
     value: "Under 50k PLN total project budget",
-    description: "One room, furnishing, or a focused light renovation.",
+    description: "Jedno pomieszczenie, wyposażenie lub niewielki, precyzyjnie określony remont.",
   },
   {
-    label: "50k-100k PLN",
+    label: "50-100 tys. zł",
     value: "50k-100k PLN total project budget",
-    description: "Several rooms or a compact apartment with controlled scope.",
+    description: "Kilka pomieszczeń lub niewielkie mieszkanie z kontrolowanym zakresem.",
   },
   {
-    label: "100k-200k PLN",
+    label: "100-200 tys. zł",
     value: "100k-200k PLN total project budget",
-    description: "A substantial apartment renovation or compact full interior.",
+    description: "Gruntowny remont mieszkania lub kompleksowe niewielkie wnętrze.",
   },
   {
-    label: "200k-400k PLN",
+    label: "200-400 tys. zł",
     value: "200k-400k PLN total project budget",
-    description: "A complete apartment or house interior with custom elements.",
+    description: "Kompleksowe wnętrze mieszkania lub domu z elementami na wymiar.",
   },
   {
-    label: "400k-800k PLN",
+    label: "400-800 tys. zł",
     value: "400k-800k PLN total project budget",
-    description: "Larger home, premium materials, and extensive implementation.",
+    description: "Większy dom, materiały premium i rozbudowany zakres realizacji.",
   },
   {
-    label: "800k+ PLN",
+    label: "Powyżej 800 tys. zł",
     value: "800k+ PLN total project budget",
-    description: "Large-scale or high-end design and construction scope.",
+    description: "Duża inwestycja lub projekt i realizacja w segmencie premium.",
   },
   {
-    label: "Not sure yet",
+    label: "Jeszcze nie wiem",
     value: "Total project budget not decided",
-    description: "I need a designer to help establish a realistic total budget.",
+    description: "Potrzebuję pomocy projektanta w ustaleniu realnego budżetu całości.",
   },
 ];
 
 const timelines: Option[] = [
   {
-    label: "As soon as possible",
+    label: "Jak najszybciej",
     value: "As soon as possible",
-    description: "I am ready to speak with available professionals now.",
+    description: "Mogę już teraz rozmawiać z dostępnymi projektantami.",
   },
   {
-    label: "In 1-3 months",
+    label: "Za 1-3 miesiące",
     value: "In 1-3 months",
-    description: "I am preparing decisions and want to shortlist soon.",
+    description: "Przygotowuję decyzje i chcę wkrótce wybrać krótką listę projektantów.",
   },
   {
-    label: "In 3-6 months",
+    label: "Za 3-6 miesięcy",
     value: "In 3-6 months",
-    description: "I am planning ahead before the project starts.",
+    description: "Planuję z wyprzedzeniem przed rozpoczęciem inwestycji.",
   },
   {
-    label: "Just exploring",
+    label: "Na razie się rozglądam",
     value: "Just exploring",
-    description: "I want clarity before choosing a start date.",
+    description: "Najpierw chcę uporządkować potrzeby i dopiero potem wybrać termin.",
   },
 ];
 
 const propertyStatuses: Option[] = [
   {
-    label: "New build",
+    label: "Nowe mieszkanie lub dom",
     value: "New build / developer condition",
-    description: "A new property before fit-out or handover.",
+    description: "Nowa nieruchomość przed odbiorem lub rozpoczęciem prac wykończeniowych.",
   },
   {
-    label: "Existing property",
+    label: "Istniejące wnętrze",
     value: "Existing property",
-    description: "A lived-in, furnished, or previously finished space.",
+    description: "Użytkowane, umeblowane lub wcześniej wykończone wnętrze.",
   },
   {
-    label: "Renovation in progress",
+    label: "Remont w toku",
     value: "Renovation in progress",
-    description: "Work has started and design decisions are still needed.",
+    description: "Prace już trwają, ale nadal trzeba podjąć decyzje projektowe.",
   },
   {
-    label: "Not purchased yet",
+    label: "Nieruchomość jeszcze niekupiona",
     value: "Not purchased yet",
-    description: "I am planning before choosing or receiving the property.",
+    description: "Planuję przed wyborem lub odbiorem nieruchomości.",
   },
 ];
 
 const visualizationNeeds: Option[] = [
   {
-    label: "Not needed",
+    label: "Nie potrzebuję",
     value: "Not needed",
-    description: "Plans, samples, or a moodboard are enough for me.",
+    description: "Wystarczą mi rzuty, próbki materiałów lub moodboard.",
   },
   {
-    label: "Selected rooms",
+    label: "Wybrane pomieszczenia",
     value: "Selected rooms",
-    description: "I want realistic views for the most important spaces.",
+    description: "Chcę realistycznych ujęć najważniejszych pomieszczeń.",
   },
   {
-    label: "Full project",
+    label: "Cały projekt",
     value: "Full project",
-    description: "I want 3D visualization across the complete project.",
+    description: "Potrzebuję wizualizacji 3D dla całego projektu.",
   },
   {
-    label: "Not sure yet",
+    label: "Jeszcze nie wiem",
     value: "Not sure yet",
-    description: "I want the designer to recommend the useful level.",
+    description: "Chcę, aby projektant doradził odpowiedni zakres.",
   },
 ];
 
 const supervisionNeeds: Option[] = [
   {
-    label: "Not needed",
+    label: "Nie potrzebuję",
     value: "Not needed",
-    description: "I only need the design package and documentation.",
+    description: "Potrzebuję tylko projektu i dokumentacji.",
   },
   {
-    label: "Consultations / site visits",
+    label: "Konsultacje / wizyty na budowie",
     value: "Consultations / site visits",
-    description: "Occasional checks and help with on-site decisions.",
+    description: "Okresowe kontrole i pomoc przy decyzjach na miejscu.",
   },
   {
-    label: "Author's supervision",
+    label: "Nadzór autorski",
     value: "Author's supervision",
-    description: "The designer should protect the design intent during works.",
+    description: "Projektant czuwa nad zgodnością realizacji z projektem.",
   },
   {
-    label: "Full project coordination",
+    label: "Pełna koordynacja realizacji",
     value: "Full project coordination",
-    description: "I need active coordination of contractors, orders, and delivery.",
+    description: "Potrzebuję aktywnej koordynacji wykonawców, zamówień i dostaw.",
   },
 ];
 
@@ -341,67 +341,90 @@ const roomTypes = [
   "Other",
 ];
 
+const roomTypeLabels: Record<string, string> = {
+  "Living room": "Salon",
+  Kitchen: "Kuchnia",
+  Bedroom: "Sypialnia",
+  Bathroom: "Łazienka",
+  "Home office": "Gabinet domowy",
+  "Children's room": "Pokój dziecięcy",
+  "Hall / storage": "Hol / przechowywanie",
+  Other: "Inne",
+};
+
 const visualCues: Option[] = [
   {
-    label: "Natural wood",
+    label: "Naturalne drewno",
     value: "Natural wood",
-    description: "Oak, veneer, visible texture, warm materials.",
+    description: "Dąb, fornir, widoczne usłojenie i ciepłe materiały.",
     specialty: "eco-friendly",
   },
   {
-    label: "Bright neutral palette",
+    label: "Jasna neutralna paleta",
     value: "Bright neutral palette",
-    description: "White, beige, greige, soft daylight.",
+    description: "Biel, beż, greige i miękkie światło dzienne.",
     specialty: "minimalist",
   },
   {
-    label: "Hidden storage",
+    label: "Ukryte przechowywanie",
     value: "Hidden storage",
-    description: "Built-ins, cleaner lines, less visual clutter.",
+    description: "Zabudowy, czyste linie i mniej wizualnego chaosu.",
   },
   {
-    label: "Bold color accents",
+    label: "Wyraziste akcenty kolorystyczne",
     value: "Bold color accents",
-    description: "Strong walls, art, textiles, expressive contrast.",
+    description: "Mocne kolory ścian, sztuka, tekstylia i zdecydowany kontrast.",
   },
   {
-    label: "Dark contrast",
+    label: "Ciemny kontrast",
     value: "Dark contrast",
-    description: "Black details, moody rooms, stronger geometry.",
+    description: "Czarne detale, nastrojowe wnętrza i wyrazista geometria.",
     specialty: "industrial",
   },
   {
-    label: "Luxury details",
+    label: "Luksusowe detale",
     value: "Luxury details",
-    description: "Stone, brass, custom joinery, premium finish.",
+    description: "Kamień, mosiądz, stolarka na wymiar i wykończenie premium.",
     specialty: "luxury",
   },
   {
-    label: "Eco materials",
+    label: "Materiały ekologiczne",
     value: "Eco materials",
-    description: "Natural, durable, lower-impact choices.",
+    description: "Naturalne, trwałe materiały o mniejszym wpływie na środowisko.",
     specialty: "eco-friendly",
   },
   {
     label: "Smart home",
     value: "Smart home",
-    description: "Lighting scenes, automation, integrated tech.",
+    description: "Sceny świetlne, automatyka i zintegrowane technologie.",
     specialty: "smart home",
   },
   {
-    label: "Compact solutions",
+    label: "Rozwiązania do małych przestrzeni",
     value: "Compact solutions",
-    description: "Small-space ideas, flexible furniture, storage.",
+    description: "Sprytne wykorzystanie miejsca, elastyczne meble i przechowywanie.",
   },
   {
-    label: "Soft curves",
+    label: "Miękkie linie",
     value: "Soft curves",
-    description: "Rounded furniture, calm shapes, gentle lines.",
+    description: "Zaokrąglone meble, spokojne formy i łagodne linie.",
   },
 ];
 
 function selectedOption(options: Option[], value: string) {
   return options.find((option) => option.value === value) ?? options[0];
+}
+
+function optionLabel(options: Option[], value: string) {
+  return options.find((option) => option.value === value)?.label || value;
+}
+
+function styleLabels(value: string) {
+  return value
+    .split(" | ")
+    .filter(Boolean)
+    .map((item) => optionLabel(styles, item))
+    .join(" / ");
 }
 
 function OptionGrid({
@@ -462,7 +485,7 @@ function MultiOptionGrid({
   return (
     <section>
       <h2 className="text-base font-bold">{label}</h2>
-      <p className="mt-1 text-sm leading-6 text-muted">Choose one or several directions. Mixed tastes are normal and useful for matching.</p>
+      <p className="mt-1 text-sm leading-6 text-muted">Wybierz jeden lub kilka kierunków. Łączenie stylów jest naturalne i pomaga w lepszym dopasowaniu projektanta.</p>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {options.map((option) => {
           const selected = values.includes(option.value);
@@ -509,7 +532,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   const [propertyStatus, setPropertyStatus] = useState(propertyStatuses[0].value);
   const [visualizationNeed, setVisualizationNeed] = useState(visualizationNeeds[3].value);
   const [supervisionNeed, setSupervisionNeed] = useState(supervisionNeeds[0].value);
-  const [location, setLocation] = useState("Warsaw");
+  const [location, setLocation] = useState("Warszawa");
   const [notes, setNotes] = useState("");
   const [referencePhotos, setReferencePhotos] = useState<ReferencePhoto[]>([]);
   const [selectedVisualCues, setSelectedVisualCues] = useState<string[]>([]);
@@ -537,7 +560,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
     styles.find((option) => selectedStyles.includes(option.value) && option.specialty)?.specialty ||
     selectedStyle.specialty;
   const visualCueLabel = selectedVisualCues.length
-    ? selectedVisualCues.slice(0, 3).join(", ")
+    ? selectedVisualCues.slice(0, 3).map((item) => optionLabel(visualCues, item)).join(", ")
     : selectedStyle.label;
 
   const designerParams = new URLSearchParams({
@@ -568,46 +591,46 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   const briefText = useMemo(
     () =>
       [
-        `Project type: ${projectType}`,
-        `Main goal: ${goal}`,
-        `Area: ${areaM2 ? `${areaM2} m2` : "Not specified"}`,
-        `Room count: ${roomCount || "Not specified"}`,
-        selectedRoomTypes.length ? `Rooms: ${selectedRoomTypes.join(", ")}` : null,
-        `Property status: ${propertyStatus}`,
-        `Style direction: ${style}`,
+        `Rodzaj inwestycji: ${optionLabel(projectTypes, projectType)}`,
+        `Główny cel: ${optionLabel(goals, goal)}`,
+        `Powierzchnia: ${areaM2 ? `${areaM2} m²` : "nie podano"}`,
+        `Liczba pomieszczeń: ${roomCount || "nie podano"}`,
+        selectedRoomTypes.length ? `Pomieszczenia: ${selectedRoomTypes.map((item) => roomTypeLabels[item] || item).join(", ")}` : null,
+        `Status nieruchomości: ${optionLabel(propertyStatuses, propertyStatus)}`,
+        `Kierunek stylistyczny: ${styleLabels(style)}`,
         referencePhotos.length
-          ? `Reference photos: ${referencePhotos.length} uploaded (${referencePhotos
+          ? `Zdjęcia referencyjne: przesłano ${referencePhotos.length} (${referencePhotos
               .map((photo) => photo.name)
               .slice(0, 5)
               .join(", ")}${referencePhotos.length > 5 ? ", ..." : ""})`
-          : "Reference photos: none yet",
+          : "Zdjęcia referencyjne: jeszcze nie dodano",
         styleAnalysis
           ? [
-              `AI style read: ${styleAnalysis.primaryStyle} (${styleAnalysis.confidence} confidence)`,
-              `AI summary: ${styleAnalysis.summary}`,
+              `Analiza stylu AI: ${styleAnalysis.primaryStyle} (pewność: ${styleAnalysis.confidence})`,
+              `Podsumowanie AI: ${styleAnalysis.summary}`,
               styleAnalysis.colorPalette.length
-                ? `AI color palette: ${styleAnalysis.colorPalette.join(", ")}`
+                ? `Paleta kolorów AI: ${styleAnalysis.colorPalette.join(", ")}`
                 : null,
               styleAnalysis.materials.length
-                ? `AI materials: ${styleAnalysis.materials.join(", ")}`
+                ? `Materiały AI: ${styleAnalysis.materials.join(", ")}`
                 : null,
               styleAnalysis.designerPrompt
-                ? `Designer search prompt: ${styleAnalysis.designerPrompt}`
+                ? `Wskazówki do wyboru projektanta: ${styleAnalysis.designerPrompt}`
                 : null,
             ]
               .filter(Boolean)
               .join("\n")
           : null,
         selectedVisualCues.length
-          ? `Visual cues: ${selectedVisualCues.join(", ")}`
+          ? `Cechy wizualne: ${selectedVisualCues.map((item) => optionLabel(visualCues, item)).join(", ")}`
           : null,
-        `Support needed: ${scope}`,
-        `Budget signal: ${budget}`,
-        `Preferred timeline: ${timeline}`,
-        `3D visualization: ${visualizationNeed}`,
-        `Supervision: ${supervisionNeed}`,
-        `Location: ${location.trim() || "Not specified"}`,
-        notes.trim() ? `Notes: ${notes.trim()}` : null,
+        `Potrzebny zakres wsparcia: ${optionLabel(scopes, scope)}`,
+        `Całkowity budżet inwestycji: ${optionLabel(budgets, budget)}`,
+        `Planowany termin: ${optionLabel(timelines, timeline)}`,
+        `Wizualizacje 3D: ${optionLabel(visualizationNeeds, visualizationNeed)}`,
+        `Nadzór: ${optionLabel(supervisionNeeds, supervisionNeed)}`,
+        `Lokalizacja: ${location.trim() || "nie podano"}`,
+        notes.trim() ? `Dodatkowe informacje: ${notes.trim()}` : null,
       ]
         .filter(Boolean)
         .join("\n"),
@@ -634,18 +657,18 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
   const nextStep = useMemo(() => {
     if (scope === "Consultation") {
-      return "Book one focused consultation and use the brief to avoid vague conversations.";
+      return "Umów jedną konkretną konsultację i wykorzystaj brief, aby od początku rozmawiać o realnych potrzebach.";
     }
 
     if (scope === "End-to-end support") {
-      return "Shortlist 2-3 designers with portfolio depth and ask about process, availability, and implementation support.";
+      return "Wybierz 2-3 projektantów z rozbudowanym portfolio i zapytaj o proces, dostępność oraz wsparcie podczas realizacji.";
     }
 
     if (goal === "Clarify direction") {
-      return "Start with a concept package before committing to drawings or renovation decisions.";
+      return "Zacznij od projektu koncepcyjnego, zanim zamówisz dokumentację lub podejmiesz decyzje remontowe.";
     }
 
-    return "Compare designers by similar projects, then send this brief as the first message.";
+    return "Porównaj projektantów na podstawie podobnych realizacji, a następnie wyślij ten brief jako pierwszą wiadomość.";
   }, [goal, scope]);
 
   async function copyBrief() {
@@ -654,7 +677,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
     } catch (error) {
-      setSaveError(error instanceof Error ? error.message : "Brief could not be copied.");
+      setSaveError(error instanceof Error ? error.message : "Nie udało się skopiować briefu.");
     }
   }
 
@@ -703,7 +726,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
   async function analyzeReferencePhotos() {
     if (!referencePhotos.length) {
-      setAnalysisError("Add at least one reference photo before running AI analysis.");
+      setAnalysisError("Dodaj co najmniej jedno zdjęcie referencyjne przed uruchomieniem analizy AI.");
       return;
     }
 
@@ -731,7 +754,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       };
 
       if (!response.ok || !payload.analysis) {
-        throw new Error(payload.error ?? "AI style analysis could not be completed.");
+        throw new Error(payload.error ?? "Nie udało się przeprowadzić analizy stylu AI.");
       }
 
       setStyleAnalysis(payload.analysis);
@@ -744,7 +767,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       );
     } catch (error) {
       setAnalysisError(
-        error instanceof Error ? error.message : "AI style analysis could not be completed."
+        error instanceof Error ? error.message : "Nie udało się przeprowadzić analizy stylu AI."
       );
     } finally {
       setIsAnalyzing(false);
@@ -832,7 +855,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       }
 
       if (!response.ok || !payload.id) {
-        throw new Error(payload.error ?? "Brief could not be saved.");
+        throw new Error(payload.error ?? "Nie udało się zapisać briefu.");
       }
 
       setSavedBriefId(payload.id);
@@ -846,7 +869,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
         window.location.href = `${matchesUrl.pathname}?${matchesUrl.searchParams.toString()}`;
       }
     } catch (error) {
-      setSaveError(error instanceof Error ? error.message : "Brief could not be saved.");
+      setSaveError(error instanceof Error ? error.message : "Nie udało się zapisać briefu.");
     } finally {
       setIsSaving(false);
     }
@@ -927,19 +950,19 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
               AI Project Compass
             </div>
             <h1 className="mt-2 max-w-4xl text-4xl font-bold tracking-tight sm:text-6xl">
-              Turn a vague idea into a usable project brief
+              Zamień niejasny pomysł w konkretny brief projektowy
             </h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-white/72">
-              Style matters, but the real match depends on scope, budget, room type,
-              reference images, timeline, and the kind of help you need.
+              Styl ma znaczenie, ale trafne dopasowanie zależy także od zakresu,
+              budżetu, rodzaju wnętrza, zdjęć referencyjnych, terminu i potrzebnego wsparcia.
             </p>
           </div>
 
           <div className="rounded-lg border border-white/15 bg-white/10 p-5 shadow-sm">
-            <div className="text-sm font-semibold text-[#64dfd0]">Why this is better</div>
+            <div className="text-sm font-semibold text-[#64dfd0]">Dlaczego to działa lepiej</div>
             <p className="mt-2 text-sm leading-6 text-white/70">
-              Instead of guessing a style name, ArchiCompass prepares the information a
-              designer needs to decide if the project is a good fit.
+              Zamiast zgadywać nazwę stylu ArchiCompass porządkuje informacje, których
+              projektant potrzebuje, aby ocenić, czy inwestycja pasuje do jego specjalizacji.
             </p>
           </div>
         </div>
@@ -948,21 +971,21 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_390px]">
         <div className="grid gap-7 rounded-lg border border-line bg-card p-5 shadow-[0_18px_50px_rgba(54,31,73,0.08)] sm:p-6">
           <OptionGrid
-            label="1. What are you planning?"
+            label="1. Co planujesz?"
             onChange={setProjectType}
             options={projectTypes}
             value={projectType}
           />
 
           <section>
-            <h2 className="text-base font-bold">2. Tell us about the space</h2>
+            <h2 className="text-base font-bold">2. Opowiedz o przestrzeni</h2>
             <p className="mt-1 text-sm leading-6 text-muted">
-              Approximate details are enough. They help professionals estimate workload
-              before the first conversation.
+              Wystarczą dane orientacyjne. Pomogą projektantom oszacować zakres pracy
+              jeszcze przed pierwszą rozmową.
             </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <label className="block text-sm font-semibold">
-                Area, m2
+                Powierzchnia, m²
                 <input
                   type="number"
                   min="1"
@@ -970,12 +993,12 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                   inputMode="decimal"
                   value={areaM2}
                   onChange={(event) => setAreaM2(event.target.value)}
-                  placeholder="e.g. 72"
+                  placeholder="np. 72"
                   className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary"
                 />
               </label>
               <label className="block text-sm font-semibold">
-                Number of rooms
+                Liczba pomieszczeń
                 <input
                   type="number"
                   min="1"
@@ -983,13 +1006,13 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                   inputMode="numeric"
                   value={roomCount}
                   onChange={(event) => setRoomCount(event.target.value)}
-                  placeholder="e.g. 3"
+                  placeholder="np. 3"
                   className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary"
                 />
               </label>
             </div>
             <div className="mt-4">
-              <div className="text-sm font-semibold">Rooms included</div>
+              <div className="text-sm font-semibold">Pomieszczenia objęte projektem</div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {roomTypes.map((room) => {
                   const isSelected = selectedRoomTypes.includes(room);
@@ -1006,7 +1029,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                           : "border-line bg-background text-muted hover:border-primary hover:text-primary",
                       ].join(" ")}
                     >
-                      {room}
+                      {roomTypeLabels[room] || room}
                     </button>
                   );
                 })}
@@ -1015,14 +1038,14 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
           </section>
 
           <OptionGrid
-            label="3. What is the property status?"
+            label="3. Jaki jest status nieruchomości?"
             onChange={setPropertyStatus}
             options={propertyStatuses}
             value={propertyStatus}
           />
 
           <OptionGrid
-            label="4. What do you need most?"
+            label="4. Czego potrzebujesz najbardziej?"
             onChange={setGoal}
             options={goals}
             value={goal}
@@ -1031,11 +1054,11 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
           <section>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-base font-bold">5. Add reference photos</h2>
+                <h2 className="text-base font-bold">5. Dodaj zdjęcia referencyjne</h2>
                 <p className="mt-1 text-sm leading-6 text-muted">
-                  Add 4-10 rooms, details, or moods you like. Previews stay in this
-                  browser until you choose analysis or save the brief. Saving uploads
-                  them to private brief storage.
+                  Dodaj 4-10 zdjęć wnętrz, detali lub nastrojów, które Ci się podobają.
+                  Podgląd pozostaje w tej przeglądarce do chwili uruchomienia analizy lub
+                  zapisania briefu. Zapisane pliki trafiają do prywatnego briefu.
                 </p>
               </div>
               <span className="rounded-full bg-background px-3 py-1 text-sm font-semibold text-muted">
@@ -1061,11 +1084,11 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
               />
               <span className="text-sm font-bold">
                 {referencePhotos.length >= maxReferencePhotos
-                  ? "Photo limit reached"
-                  : "Add reference photos"}
+                  ? "Osiągnięto limit zdjęć"
+                  : "Dodaj zdjęcia referencyjne"}
               </span>
               <span className="mt-1 text-sm text-muted">
-                JPEG, PNG, or WebP. Use several photos to spot patterns.
+                JPEG, PNG lub WebP. Dodaj kilka zdjęć, aby łatwiej rozpoznać wspólne cechy.
               </span>
             </label>
 
@@ -1091,7 +1114,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                         onClick={() => removeReferencePhoto(photo.id)}
                         className="rounded-lg border border-line bg-card px-3 py-2 text-xs font-semibold text-muted hover:border-primary hover:text-primary"
                       >
-                        Remove
+                        Usuń
                       </button>
                     </div>
                   </div>
@@ -1099,8 +1122,8 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
               </div>
             ) : (
               <div className="mt-4 rounded-2xl border border-line bg-background p-4 text-sm leading-6 text-muted">
-                No photos yet. Start with images that make you say: this is the
-                atmosphere, material, light, or detail I want.
+                Nie dodano jeszcze zdjęć. Zacznij od obrazów, które najlepiej oddają
+                oczekiwany nastrój, materiał, światło lub detal.
               </div>
             )}
 
@@ -1109,11 +1132,11 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-white">AI</span>
-                    <h3 className="text-sm font-bold text-primary">Photo style analysis</h3>
+                    <h3 className="text-sm font-bold text-primary">Analiza stylu ze zdjęć</h3>
                   </div>
                   <p className="mt-1 text-sm leading-6 text-muted">
-                    Let ArchiCompass read the reference photos and suggest a style name,
-                    materials, colors, and designer-search clues.
+                    ArchiCompass przeanalizuje zdjęcia i zaproponuje nazwę stylu, materiały,
+                    kolory oraz wskazówki pomocne przy wyborze projektanta.
                   </p>
                 </div>
                 <button
@@ -1122,20 +1145,20 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                   disabled={!referencePhotos.length || isAnalyzing}
                   className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isAnalyzing ? "Analyzing..." : "Analyze photos"}
+                  {isAnalyzing ? "Analizowanie..." : "Analizuj zdjęcia"}
                 </button>
               </div>
 
               <p className="mt-3 text-xs leading-5 text-muted">
-                Choosing Analyze sends up to {maxAnalysisPhotos} photos to the configured
-                AI provider. Do not submit photos containing people, addresses, or
-                confidential information. See the <Link href="/privacy" className="underline">Privacy Policy</Link>.
+                Uruchomienie analizy wysyła maksymalnie {maxAnalysisPhotos} zdjęć do dostawcy
+                usługi AI. Nie przesyłaj zdjęć osób, adresów ani informacji poufnych.
+                Szczegóły znajdziesz w <Link href="/privacy" className="underline">Polityce prywatności</Link>.
               </p>
 
               {referencePhotos.length > maxAnalysisPhotos ? (
                 <p className="mt-3 text-xs leading-5 text-muted">
-                  AI analysis uses the first {maxAnalysisPhotos} photos to keep the result
-                  fast and focused. All photos can still be saved in the brief.
+                  Analiza AI wykorzysta pierwsze {maxAnalysisPhotos} zdjęć, aby wynik był
+                  szybki i precyzyjny. Wszystkie zdjęcia nadal można zapisać w briefie.
                 </p>
               ) : null}
 
@@ -1144,14 +1167,14 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <div className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">
-                        Suggested style
+                        Sugerowany styl
                       </div>
                       <div className="mt-1 text-2xl font-bold">
                         {styleAnalysis.primaryStyle}
                       </div>
                     </div>
                     <span className="w-fit rounded-full bg-card px-3 py-1 text-xs font-semibold text-primary">
-                      {styleAnalysis.confidence} confidence
+                      pewność: {styleAnalysis.confidence === "high" ? "wysoka" : styleAnalysis.confidence === "medium" ? "średnia" : "niska"}
                     </span>
                   </div>
 
@@ -1159,24 +1182,24 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
                   <div className="grid gap-3 text-sm sm:grid-cols-2">
                     {[
-                      ["Closest option", styleAnalysis.styleDirection],
+                      ["Najbliższy kierunek", optionLabel(styles, styleAnalysis.styleDirection)],
                       [
-                        "Colors",
+                        "Kolory",
                         styleAnalysis.colorPalette.length
                           ? styleAnalysis.colorPalette.join(", ")
-                          : "Not enough signal",
+                          : "Za mało danych",
                       ],
                       [
-                        "Materials",
+                        "Materiały",
                         styleAnalysis.materials.length
                           ? styleAnalysis.materials.join(", ")
-                          : "Not enough signal",
+                          : "Za mało danych",
                       ],
                       [
-                        "Style clues",
+                        "Cechy stylu",
                         styleAnalysis.styleClues.length
                           ? styleAnalysis.styleClues.join(", ")
-                          : "Not enough signal",
+                          : "Za mało danych",
                       ],
                     ].map(([label, value]) => (
                       <div key={label} className="rounded-xl border border-line bg-card p-3">
@@ -1187,13 +1210,13 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                   </div>
 
                   <div className="rounded-xl border border-line bg-card p-3 text-sm leading-6">
-                    <div className="font-semibold">How to brief a designer</div>
+                    <div className="font-semibold">Jak opisać potrzeby projektantowi</div>
                     <p className="mt-1 text-muted">{styleAnalysis.designerPrompt}</p>
                   </div>
 
                   {styleAnalysis.watchOuts.length ? (
                     <div>
-                      <div className="text-sm font-semibold">Watch-outs</div>
+                      <div className="text-sm font-semibold">Na co uważać</div>
                       <ul className="mt-2 grid gap-2 text-sm leading-6 text-muted">
                         {styleAnalysis.watchOuts.map((item) => (
                           <li key={item}>- {item}</li>
@@ -1208,14 +1231,14 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
               {analysisError ? (
                 <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
-                  <div className="font-semibold">AI analysis unavailable</div>
+                  <div className="font-semibold">Analiza AI jest niedostępna</div>
                   <p className="mt-1">{analysisError}</p>
                 </div>
               ) : null}
             </div>
 
             <div className="mt-5">
-              <h3 className="text-sm font-bold">What do these photos have in common?</h3>
+              <h3 className="text-sm font-bold">Co łączy te zdjęcia?</h3>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 {visualCues.map((cue) => {
                   const isSelected = selectedVisualCues.includes(cue.value);
@@ -1245,42 +1268,42 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
           </section>
 
           <MultiOptionGrid
-            label="6. Which directions feel closest?"
+            label="6. Które kierunki są Ci najbliższe?"
             onChange={(values) => setStyle(values.length ? values.join(" | ") : "Not sure yet")}
             options={styles}
             values={selectedStyles}
           />
 
           <OptionGrid
-            label="7. What level of help do you want?"
+            label="7. Jakiego zakresu pomocy potrzebujesz?"
             onChange={setScope}
             options={scopes}
             value={scope}
           />
 
           <OptionGrid
-            label="8. Total project budget (designer fee + materials + construction)"
+            label="8. Całkowity budżet inwestycji (projektant + materiały + wykonanie)"
             onChange={setBudget}
             options={budgets}
             value={budget}
           />
 
           <OptionGrid
-            label="9. When do you want to start?"
+            label="9. Kiedy chcesz rozpocząć?"
             onChange={setTimeline}
             options={timelines}
             value={timeline}
           />
 
           <OptionGrid
-            label="10. Do you need 3D visualization?"
+            label="10. Czy potrzebujesz wizualizacji 3D?"
             onChange={setVisualizationNeed}
             options={visualizationNeeds}
             value={visualizationNeed}
           />
 
           <OptionGrid
-            label="11. What supervision do you need?"
+            label="11. Jakiego nadzoru potrzebujesz?"
             onChange={setSupervisionNeed}
             options={supervisionNeeds}
             value={supervisionNeed}
@@ -1288,21 +1311,21 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block text-sm font-semibold">
-              Location
+              Lokalizacja
               <input
                 value={location}
                 onChange={(event) => setLocation(event.target.value)}
-                placeholder="Warsaw, Krakow, Gdansk..."
+                placeholder="Warszawa, Kraków, Gdańsk..."
                 className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary"
               />
             </label>
 
             <label className="block text-sm font-semibold">
-              Extra context
+              Dodatkowe informacje
               <input
                 value={notes}
                 onChange={(event) => setNotes(event.target.value)}
-                placeholder="Kids, rental, deadline, contractor..."
+                placeholder="Dzieci, wynajem, termin, wykonawca..."
                 className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary"
               />
             </label>
@@ -1310,33 +1333,33 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
         </div>
 
         <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
-          <div className="text-sm font-semibold text-primary">Your brief</div>
-          <h2 className="mt-2 text-2xl font-bold">{projectType} in {location || "Poland"}</h2>
+          <div className="text-sm font-semibold text-primary">Twój brief</div>
+          <h2 className="mt-2 text-2xl font-bold">{optionLabel(projectTypes, projectType)} · {location || "Polska"}</h2>
 
           <div className="mt-5 grid gap-3 text-sm">
             {[
-              ["Goal", goal],
-              ["Area", areaM2 ? `${areaM2} m2` : "Not specified"],
-              ["Rooms", roomCount || selectedRoomTypes.slice(0, 2).join(", ") || "Not specified"],
-              ["Property", propertyStatus],
-              ["Style", style],
+              ["Cel", optionLabel(goals, goal)],
+              ["Powierzchnia", areaM2 ? `${areaM2} m²` : "Nie podano"],
+              ["Pomieszczenia", roomCount || selectedRoomTypes.slice(0, 2).map((item) => roomTypeLabels[item] || item).join(", ") || "Nie podano"],
+              ["Nieruchomość", optionLabel(propertyStatuses, propertyStatus)],
+              ["Styl", styleLabels(style)],
               [
-                "Photos",
+                "Zdjęcia",
                 referencePhotos.length
                   ? `${referencePhotos.length}/${maxReferencePhotos}`
-                  : "None yet",
+                  : "Brak",
               ],
               [
-                "Visual cues",
+                "Cechy wizualne",
                 selectedVisualCues.length
-                  ? selectedVisualCues.slice(0, 2).join(", ")
-                  : "Not tagged",
+                  ? selectedVisualCues.slice(0, 2).map((item) => optionLabel(visualCues, item)).join(", ")
+                  : "Nie oznaczono",
               ],
-              ["Support", scope],
-              ["Budget", budget],
-              ["Timeline", timeline],
-              ["3D", visualizationNeed],
-              ["Supervision", supervisionNeed],
+              ["Wsparcie", optionLabel(scopes, scope)],
+              ["Budżet", optionLabel(budgets, budget)],
+              ["Termin", optionLabel(timelines, timeline)],
+              ["3D", optionLabel(visualizationNeeds, visualizationNeed)],
+              ["Nadzór", optionLabel(supervisionNeeds, supervisionNeed)],
             ].map(([label, value]) => (
               <div
                 key={label}
@@ -1349,27 +1372,27 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
           </div>
 
           <div className="mt-6 rounded-2xl border border-line bg-background p-4">
-            <div className="text-sm font-semibold">Recommended next step</div>
+            <div className="text-sm font-semibold">Rekomendowany następny krok</div>
             <p className="mt-2 text-sm leading-6 text-muted">{nextStep}</p>
           </div>
 
           <div className="mt-5 rounded-2xl border border-line bg-background p-4">
-            <div className="text-sm font-semibold">Designer fit signal</div>
+            <div className="text-sm font-semibold">Wskazówka do wyboru projektanta</div>
             <p className="mt-2 text-sm leading-6 text-muted">
               {styleAnalysis
                 ? styleAnalysis.designerPrompt
-                : `Look for portfolios with ${visualCueLabel.toLowerCase()} and ask whether
-              the designer offers ${selectedScope.label.toLowerCase()}.`}
+                : `Szukaj portfolio z cechami takimi jak ${visualCueLabel.toLowerCase()} i zapytaj,
+              czy projektant oferuje zakres: ${selectedScope.label.toLowerCase()}.`}
             </p>
           </div>
 
           <div className="mt-6 grid gap-3">
             {isDesigner ? (
               <div className="rounded-xl border border-primary/30 bg-primary-soft p-4 text-sm leading-6 text-foreground">
-                <div className="font-semibold text-primary">You are signed in as a designer</div>
+                <div className="font-semibold text-primary">Jesteś zalogowany jako projektant</div>
                 <p className="mt-1 text-muted">
-                  AI photo analysis, style guidance, copying, and match previews remain
-                  available. Designer accounts cannot save or send client briefs.
+                  Analiza zdjęć AI, wskazówki stylistyczne, kopiowanie i podgląd dopasowań
+                  pozostają dostępne. Konto projektanta nie może zapisywać ani wysyłać briefów klienta.
                 </p>
               </div>
             ) : null}
@@ -1379,7 +1402,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
               disabled={isSaving || isDesigner}
               className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSaving ? "Saving brief..." : "Save brief & find designers"}
+              {isSaving ? "Zapisywanie briefu..." : "Zapisz brief i znajdź projektantów"}
             </button>
             <button
               type="button"
@@ -1387,38 +1410,38 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
               disabled={isSaving || isDesigner}
               className="rounded-xl border border-primary bg-primary-soft px-5 py-3 text-sm font-semibold text-primary hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSaving ? "Saving brief..." : "Save for later"}
+              {isSaving ? "Zapisywanie briefu..." : "Zapisz na później"}
             </button>
             <Link
               href={designerHref}
               className="rounded-xl border border-line bg-background px-5 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
             >
-              Preview matches without saving
+              Zobacz dopasowania bez zapisywania
             </Link>
             <button
               type="button"
               onClick={copyBrief}
               className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
             >
-              {copied ? "Brief copied" : "Copy brief"}
+              {copied ? "Brief skopiowany" : "Kopiuj brief"}
             </button>
           </div>
 
           {savedBriefId ? (
             <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
-              <div className="font-semibold">Brief saved</div>
+              <div className="font-semibold">Brief zapisany</div>
               <p className="mt-1">
-                Saved with {countLabel(savedReferenceCount ?? 0, "reference photo")}. It is ready to send to a designer.
+                Zapisano {polishCountLabel(savedReferenceCount ?? 0, "zdjęcie referencyjne", "zdjęcia referencyjne", "zdjęć referencyjnych")}. Brief jest gotowy do wysłania projektantowi.
               </p>
               <Link href="/client/briefs" className="mt-3 inline-flex font-semibold underline">
-                Open saved briefs
+                Otwórz zapisane briefy
               </Link>
             </div>
           ) : null}
 
           {saveError ? (
             <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
-              <div className="font-semibold">Brief was not saved</div>
+              <div className="font-semibold">Nie udało się zapisać briefu</div>
               <p className="mt-1">{saveError}</p>
             </div>
           ) : null}
@@ -1432,15 +1455,15 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
         <div className="mx-auto flex max-w-7xl gap-3">
           {isDesigner ? (
             <Link href={designerHref} className="flex-1 rounded-xl bg-primary px-4 py-3 text-center text-sm font-bold text-white">
-              Preview designer matches
+              Zobacz dopasowanych projektantów
             </Link>
           ) : (
             <button type="button" onClick={() => saveBrief(true)} disabled={isSaving} className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white disabled:opacity-60">
-              {isSaving ? "Saving..." : "Save & find designers"}
+              {isSaving ? "Zapisywanie..." : "Zapisz i znajdź projektantów"}
             </button>
           )}
           <button type="button" onClick={copyBrief} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-bold">
-            {copied ? "Copied" : "Copy"}
+            {copied ? "Skopiowano" : "Kopiuj"}
           </button>
         </div>
       </div>

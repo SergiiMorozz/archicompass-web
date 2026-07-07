@@ -25,17 +25,17 @@ const logoCrop = { x: 0, y: 793, width: 3371, height: 798 };
 
 function paletteColor(label: string, index: number) {
   const value = label.toLowerCase();
-  if (value.includes("cream") || value.includes("ivory")) return "#f2eadc";
-  if (value.includes("beige") || value.includes("sand")) return "#d8c3a7";
+  if (value.includes("cream") || value.includes("ivory") || value.includes("krem") || value.includes("kość słoniowa")) return "#f2eadc";
+  if (value.includes("beige") || value.includes("sand") || value.includes("beż") || value.includes("piask")) return "#d8c3a7";
   if (value.includes("greige") || value.includes("taupe")) return "#b9ab9f";
-  if (value.includes("oak") || value.includes("wood")) return "#b98255";
-  if (value.includes("brown") || value.includes("walnut")) return "#73513b";
+  if (value.includes("oak") || value.includes("wood") || value.includes("dąb") || value.includes("drewn")) return "#b98255";
+  if (value.includes("brown") || value.includes("walnut") || value.includes("brąz") || value.includes("orzech")) return "#73513b";
   if (value.includes("terracotta") || value.includes("rust")) return "#b86649";
-  if (value.includes("green") || value.includes("olive")) return "#778068";
-  if (value.includes("blue")) return "#71889f";
-  if (value.includes("black") || value.includes("charcoal")) return "#3e3a40";
-  if (value.includes("white")) return "#f7f5f0";
-  if (value.includes("grey") || value.includes("gray")) return "#aaa7a5";
+  if (value.includes("green") || value.includes("olive") || value.includes("ziele") || value.includes("oliwk")) return "#778068";
+  if (value.includes("blue") || value.includes("niebies") || value.includes("błękit")) return "#71889f";
+  if (value.includes("black") || value.includes("charcoal") || value.includes("czar") || value.includes("grafit")) return "#3e3a40";
+  if (value.includes("white") || value.includes("biel") || value.includes("biały")) return "#f7f5f0";
+  if (value.includes("grey") || value.includes("gray") || value.includes("szar")) return "#aaa7a5";
 
   const hue = (index * 47 + label.length * 19) % 360;
   return `hsl(${hue} 24% 67%)`;
@@ -77,7 +77,7 @@ function loadImage(url: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image();
     image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("A reference photo could not be prepared."));
+    image.onerror = () => reject(new Error("Nie udało się przygotować zdjęcia referencyjnego."));
     image.src = url;
   });
 }
@@ -147,7 +147,7 @@ function wrappedLines(
 
 function conciseSentence(text: string, maxCharacters = 180) {
   const clean = text.replace(/\s+/g, " ").trim();
-  if (!clean) return "A coherent interior direction translated from your reference photos.";
+  if (!clean) return "Spójny kierunek wnętrza odczytany z Twoich zdjęć referencyjnych.";
 
   const firstSentence = clean.split(/(?<=[.!?])\s+/)[0];
   if (firstSentence.length <= maxCharacters) {
@@ -165,7 +165,7 @@ function conciseSentence(text: string, maxCharacters = 180) {
 }
 
 function confidenceLabel(confidence: ShareableStyleAnalysis["confidence"]) {
-  return `${confidence.charAt(0).toUpperCase()}${confidence.slice(1)} confidence`;
+  return confidence === "high" ? "Wysoka pewność" : confidence === "medium" ? "Średnia pewność" : "Niska pewność";
 }
 
 function drawPhotoGrid(
@@ -223,7 +223,7 @@ async function createResultPng({
   canvas.width = canvasWidth;
   canvas.height = canvasHeight;
   const context = canvas.getContext("2d");
-  if (!context) throw new Error("This browser cannot create the result image.");
+  if (!context) throw new Error("Ta przeglądarka nie może utworzyć obrazu z wynikiem.");
 
   context.fillStyle = "#faf9fb";
   context.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -244,7 +244,7 @@ async function createResultPng({
   context.fillStyle = "#706284";
   context.font = "600 22px Outfit, Arial, sans-serif";
   context.textAlign = "right";
-  context.fillText("AI INTERIOR STYLE CHECK", 1020, 91);
+  context.fillText("ANALIZA STYLU WNĘTRZA AI", 1020, 91);
   context.textAlign = "left";
 
   const images = await Promise.all(photos.slice(0, 4).map((photo) => loadImage(photo.url)));
@@ -252,7 +252,7 @@ async function createResultPng({
 
   context.fillStyle = "#592d86";
   context.font = "700 22px Outfit, Arial, sans-serif";
-  context.fillText("YOUR INTERIOR STYLE", 60, 596);
+  context.fillText("TWÓJ STYL WNĘTRZA", 60, 596);
 
   context.fillStyle = "#251d30";
   context.font = "700 66px Outfit, Arial, sans-serif";
@@ -276,7 +276,7 @@ async function createResultPng({
   const paletteY = Math.max(830, titleBottom + 48 + summaryLines.length * 35 + 28);
   context.fillStyle = "#251d30";
   context.font = "700 23px Outfit, Arial, sans-serif";
-  context.fillText("PALETTE", 60, paletteY);
+  context.fillText("PALETA", 60, paletteY);
   const paletteItems = analysis.colorPalette.slice(0, 4);
   const paletteWidth = (960 - 18 * 3) / 4;
   paletteItems.forEach((item, index) => {
@@ -294,7 +294,7 @@ async function createResultPng({
   const materialsY = paletteY + 116;
   context.fillStyle = "#251d30";
   context.font = "700 23px Outfit, Arial, sans-serif";
-  context.fillText("MATERIALS", 60, materialsY);
+  context.fillText("MATERIAŁY", 60, materialsY);
   let pillX = 60;
   let pillY = materialsY + 24;
   context.font = "600 20px Outfit, Arial, sans-serif";
@@ -313,7 +313,7 @@ async function createResultPng({
   const designerFitY = Math.max(materialsY + 98, pillY + 72);
   context.fillStyle = "#251d30";
   context.font = "700 23px Outfit, Arial, sans-serif";
-  context.fillText("DESIGNER FIT", 60, designerFitY);
+  context.fillText("DOPASOWANIE PROJEKTANTA", 60, designerFitY);
   context.fillStyle = "#706284";
   context.font = "500 21px Outfit, Arial, sans-serif";
   const fitLines = wrappedLines(
@@ -327,7 +327,7 @@ async function createResultPng({
   context.fillStyle = "#592d86";
   context.textAlign = "left";
   context.font = "700 21px Outfit, Arial, sans-serif";
-  context.fillText("Upload 4 photos. Get your designer-ready brief.", 60, 1280);
+  context.fillText("Dodaj 4 zdjęcia. Otrzymaj brief gotowy dla projektanta.", 60, 1280);
   context.fillStyle = "#592d86";
   context.textAlign = "right";
   context.font = "600 19px Outfit, Arial, sans-serif";
@@ -336,7 +336,7 @@ async function createResultPng({
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (blob) resolve(blob);
-      else reject(new Error("The result image could not be created."));
+      else reject(new Error("Nie udało się utworzyć obrazu z wynikiem."));
     }, "image/png");
   });
 }
@@ -347,7 +347,7 @@ function safeFileName(style: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 42);
-  return `archicompass-${slug || "interior-style"}.png`;
+  return `archicompass-${slug || "styl-wnetrza"}.png`;
 }
 
 function downloadBlob(blob: Blob, fileName: string) {
@@ -371,10 +371,10 @@ export default function ShareableStyleResult({
   const [error, setError] = useState<string | null>(null);
   const visiblePhotos = photos.slice(0, 4);
   const shareCaption = [
-    `My interior style is ${analysis.primaryStyle} (${confidenceLabel(analysis.confidence).toLowerCase()}).`,
+    `Mój styl wnętrza to ${analysis.primaryStyle} (${confidenceLabel(analysis.confidence).toLowerCase()}).`,
     conciseSentence(analysis.summary),
-    `Designer fit: ${conciseSentence(analysis.designerPrompt, 140)}`,
-    "Upload your inspiration and get a designer-ready brief with ArchiCompass.",
+    `Dopasowanie projektanta: ${conciseSentence(analysis.designerPrompt, 140)}`,
+    "Dodaj swoje inspiracje i otrzymaj brief gotowy dla projektanta z ArchiCompass.",
   ].join("\n\n");
 
   async function downloadResult() {
@@ -384,9 +384,9 @@ export default function ShareableStyleResult({
     try {
       const blob = await createResultPng({ analysis, photos });
       downloadBlob(blob, safeFileName(analysis.primaryStyle));
-      setNotice("PNG downloaded. It is ready for Stories, posts, or messages.");
+      setNotice("Plik PNG został pobrany. Możesz opublikować go w relacji, poście lub wiadomości.");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "The result could not be downloaded.");
+      setError(caught instanceof Error ? caught.message : "Nie udało się pobrać wyniku.");
     } finally {
       setBusyAction(null);
     }
@@ -405,25 +405,25 @@ export default function ShareableStyleResult({
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: `My interior style: ${analysis.primaryStyle}`,
+          title: `Mój styl wnętrza: ${analysis.primaryStyle}`,
           text: shareText,
         });
-        setNotice("Result shared.");
+        setNotice("Wynik został udostępniony.");
       } else if (navigator.share) {
         await navigator.share({
-          title: `My interior style: ${analysis.primaryStyle}`,
+          title: `Mój styl wnętrza: ${analysis.primaryStyle}`,
           text: shareText,
           url: window.location.href,
         });
-        setNotice("Result link shared. Use Download PNG to share the visual card.");
+        setNotice("Link do wyniku został udostępniony. Pobierz PNG, aby przesłać kartę wizualną.");
       } else {
         await copyText(`${shareText} ${window.location.href}`);
         downloadBlob(blob, fileName);
-        setNotice("Share text copied and PNG downloaded.");
+        setNotice("Tekst został skopiowany, a plik PNG pobrany.");
       }
     } catch (caught) {
       if (caught instanceof DOMException && caught.name === "AbortError") return;
-      setError(caught instanceof Error ? caught.message : "The result could not be shared.");
+      setError(caught instanceof Error ? caught.message : "Nie udało się udostępnić wyniku.");
     } finally {
       setBusyAction(null);
     }
@@ -435,9 +435,9 @@ export default function ShareableStyleResult({
     setError(null);
     try {
       await copyText(shareCaption);
-      setNotice("Caption copied. It is ready to paste into a post or message.");
+      setNotice("Podpis został skopiowany. Możesz wkleić go do posta lub wiadomości.");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "The caption could not be copied.");
+      setError(caught instanceof Error ? caught.message : "Nie udało się skopiować podpisu.");
     } finally {
       setBusyAction(null);
     }
@@ -447,10 +447,10 @@ export default function ShareableStyleResult({
     <section className="mt-5 border-t border-primary/20 pt-5" aria-labelledby="share-style-title">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="text-xs font-semibold uppercase text-primary">Ready to share</div>
-          <h3 id="share-style-title" className="mt-1 text-xl font-bold">Your ArchiCompass style card</h3>
+          <div className="text-xs font-semibold uppercase text-primary">Gotowe do udostępnienia</div>
+          <h3 id="share-style-title" className="mt-1 text-xl font-bold">Twoja karta stylu ArchiCompass</h3>
           <p className="mt-1 max-w-xl text-sm leading-6 text-muted">
-            Download a portrait PNG or share it from your phone. The card uses the first four reference photos.
+            Pobierz pionowy plik PNG lub udostępnij go z telefonu. Karta wykorzystuje pierwsze cztery zdjęcia referencyjne.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -460,7 +460,7 @@ export default function ShareableStyleResult({
             disabled={Boolean(busyAction)}
             className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
           >
-            {busyAction === "share" ? "Preparing..." : "Share result"}
+            {busyAction === "share" ? "Przygotowywanie..." : "Udostępnij wynik"}
           </button>
           <button
             type="button"
@@ -468,7 +468,7 @@ export default function ShareableStyleResult({
             disabled={Boolean(busyAction)}
             className="rounded-xl border border-primary bg-card px-4 py-3 text-sm font-semibold text-primary disabled:opacity-60"
           >
-            {busyAction === "download" ? "Creating PNG..." : "Download PNG"}
+            {busyAction === "download" ? "Tworzenie PNG..." : "Pobierz PNG"}
           </button>
           <button
             type="button"
@@ -476,7 +476,7 @@ export default function ShareableStyleResult({
             disabled={Boolean(busyAction)}
             className="rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold text-foreground disabled:opacity-60"
           >
-            {busyAction === "caption" ? "Copying..." : "Copy caption"}
+            {busyAction === "caption" ? "Kopiowanie..." : "Kopiuj podpis"}
           </button>
         </div>
       </div>
@@ -484,14 +484,14 @@ export default function ShareableStyleResult({
       <div className="mt-4 overflow-hidden rounded-lg border border-line bg-card shadow-sm">
         <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
           <BrandLogo className="h-8 w-[148px]" />
-          <span className="text-xs font-semibold uppercase text-muted">AI Interior Style Check</span>
+          <span className="text-xs font-semibold uppercase text-muted">Analiza stylu wnętrza AI</span>
         </div>
 
         <div className={visiblePhotos.length > 1 ? "grid grid-cols-2 gap-1" : "grid"}>
           {visiblePhotos.map((photo, index) => (
             <div key={photo.url} className="relative aspect-[4/3] overflow-hidden bg-primary-soft">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.url} alt={`Style reference ${index + 1}: ${photo.name}`} className="h-full w-full object-cover" />
+              <img src={photo.url} alt={`Inspiracja stylistyczna ${index + 1}: ${photo.name}`} className="h-full w-full object-cover" />
               {index === 3 && photos.length > 4 ? (
                 <span className="absolute bottom-2 right-2 rounded-full bg-foreground/85 px-3 py-1 text-xs font-semibold text-white">
                   +{photos.length - 4}
@@ -502,7 +502,7 @@ export default function ShareableStyleResult({
         </div>
 
         <div className="p-5 sm:p-6">
-          <div className="text-xs font-semibold uppercase text-primary">Your interior style</div>
+          <div className="text-xs font-semibold uppercase text-primary">Twój styl wnętrza</div>
           <div className="mt-1 flex flex-wrap items-center gap-3">
             <h4 className="text-3xl font-bold">{analysis.primaryStyle}</h4>
             <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
@@ -512,7 +512,7 @@ export default function ShareableStyleResult({
           <p className="mt-3 text-sm leading-6 text-muted">{conciseSentence(analysis.summary)}</p>
 
           <div className="mt-5">
-            <div className="text-xs font-semibold uppercase text-muted">Palette</div>
+            <div className="text-xs font-semibold uppercase text-muted">Paleta</div>
             <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {analysis.colorPalette.slice(0, 4).map((color, index) => (
                 <div key={color} className="text-center text-xs font-semibold">
@@ -524,7 +524,7 @@ export default function ShareableStyleResult({
           </div>
 
           <div className="mt-5">
-            <div className="text-xs font-semibold uppercase text-muted">Materials</div>
+            <div className="text-xs font-semibold uppercase text-muted">Materiały</div>
             <div className="mt-2 flex flex-wrap gap-2">
               {analysis.materials.slice(0, 6).map((material) => (
                 <span key={material} className="rounded-full bg-primary-soft px-3 py-1.5 text-xs font-semibold text-primary">{material}</span>
@@ -533,7 +533,7 @@ export default function ShareableStyleResult({
           </div>
 
           <div className="mt-5 rounded-lg bg-background p-4">
-            <div className="text-xs font-semibold uppercase text-primary">Designer fit</div>
+            <div className="text-xs font-semibold uppercase text-primary">Dopasowanie projektanta</div>
             <p className="mt-2 text-sm leading-6 text-muted">
               {conciseSentence(analysis.designerPrompt, 170)}
             </p>
@@ -541,9 +541,9 @@ export default function ShareableStyleResult({
 
           <div className="mt-5 border-t border-line pt-4">
             <div className="text-sm font-semibold text-primary">
-              Upload 4 photos. Get your designer-ready brief.
+              Dodaj 4 zdjęcia. Otrzymaj brief gotowy dla projektanta.
             </div>
-            <div className="mt-1 text-xs font-semibold text-muted">Made with ArchiCompass</div>
+            <div className="mt-1 text-xs font-semibold text-muted">Utworzono z ArchiCompass</div>
           </div>
         </div>
       </div>
