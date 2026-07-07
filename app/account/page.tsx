@@ -42,7 +42,7 @@ type DesignerInquiry = {
 };
 
 function profileName(profile: Partial<Profile>, email?: string) {
-  return profile.full_name || email || "Your ArchiCompass account";
+  return profile.full_name || email || "Twoje konto ArchiCompass";
 }
 
 function profileScore(profile: Partial<Profile>, isProfessional: boolean) {
@@ -129,18 +129,18 @@ export default async function AccountPage({
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
             <div>
-              <div className="text-sm font-semibold text-primary">Account Workspace</div>
+              <div className="text-sm font-semibold text-primary">Panel konta</div>
               <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
                 {profileName(profile, user.email ?? undefined)}
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
                 {isProfessional
-                  ? "Manage the profile, portfolio, studios, and requests that belong to your designer account."
-                  : "Build project briefs, contact designers and studios, and keep client conversations in one place."}
+                  ? "Zarządzaj profilem, portfolio, pracowniami i zapytaniami przypisanymi do konta projektanta."
+                  : "Twórz briefy, kontaktuj się z projektantami i pracowniami oraz prowadź rozmowy w jednym miejscu."}
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
-                  {profile.user_type || "Account"}
+                  {isProfessional ? "Projektant" : "Klient"}
                 </span>
                 {profile.location ? (
                   <span className="rounded-full border border-line bg-background px-3 py-1 text-sm font-semibold text-muted">
@@ -182,7 +182,7 @@ export default async function AccountPage({
         <div className="grid gap-7">
           {sp.profileDeleted ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900">
-              <div className="font-semibold">Professional profile deleted</div>
+              <div className="font-semibold">Profil profesjonalisty został usunięty</div>
               <p className="mt-1">
                 The public profile and portfolio were removed. Your designer account,
                 conversations, and studio memberships remain active.
@@ -199,14 +199,14 @@ export default async function AccountPage({
               href="/account/profile"
               className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
             >
-              <div className="text-sm font-semibold text-primary">Profile Builder</div>
+              <div className="text-sm font-semibold text-primary">Edycja profilu</div>
               <h2 className="mt-2 text-2xl font-bold">
-                {isProfessional ? "Edit public profile" : "Edit account profile"}
+                {isProfessional ? "Edytuj profil publiczny" : "Edytuj profil konta"}
               </h2>
               <p className="mt-3 text-sm leading-6 text-muted">
                 {isProfessional
-                  ? "Update your identity, specialties, pricing, contact details, and design approach."
-                  : "Keep your client identity and contact details current for briefs and conversations."}
+                  ? "Aktualizuj dane, specjalizacje, ceny, kontakt i podejście projektowe."
+                  : "Dbaj o aktualne dane klienta używane w briefach i rozmowach."}
               </p>
               <div className="mt-6 h-2 overflow-hidden rounded-full bg-primary-soft">
                 <div className="h-full rounded-full bg-primary" style={{ width: `${score}%` }} />
@@ -221,19 +221,19 @@ export default async function AccountPage({
                 href="/account/projects"
                 className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
               >
-                <div className="text-sm font-semibold text-primary">Portfolio Manager</div>
-                <h2 className="mt-2 text-2xl font-bold">Manage projects</h2>
+                <div className="text-sm font-semibold text-primary">Zarządzanie portfolio</div>
+                <h2 className="mt-2 text-2xl font-bold">Zarządzaj projektami</h2>
                 <p className="mt-3 text-sm leading-6 text-muted">
                   Add project cards that turn your personal profile into a visual
                   portfolio and also appear in connected studios.
                 </p>
                 <div className="mt-6 grid grid-cols-2 gap-3">
                   <div className="rounded-xl border border-line bg-background p-3">
-                    <div className="text-sm text-muted">Projects</div>
+                    <div className="text-sm text-muted">Projekty</div>
                     <div className="mt-1 text-xl font-bold">{projects.length}</div>
                   </div>
                   <div className="rounded-xl border border-line bg-background p-3">
-                    <div className="text-sm text-muted">Specialties</div>
+                    <div className="text-sm text-muted">Specjalizacje</div>
                     <div className="mt-1 text-xl font-bold">
                       {profile.specialties?.length ?? 0}
                     </div>
@@ -247,14 +247,14 @@ export default async function AccountPage({
                 href="/studio/team"
                 className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
               >
-                <div className="text-sm font-semibold text-primary">Studio Profile</div>
-                <h2 className="mt-2 text-2xl font-bold">Studio and team</h2>
+                <div className="text-sm font-semibold text-primary">Profil pracowni</div>
+                <h2 className="mt-2 text-2xl font-bold">Pracownia i zespół</h2>
                 <p className="mt-3 text-sm leading-6 text-muted">
                   Create a studio, invite designers, and share one team inbox and
                   aggregated portfolio.
                 </p>
                 <div className="mt-6 rounded-xl border border-line bg-background p-3">
-                  <div className="text-sm text-muted">Active studios</div>
+                  <div className="text-sm text-muted">Aktywne pracownie</div>
                   <div className="mt-1 text-xl font-bold">{studioIds.length}</div>
                 </div>
               </Link>
@@ -266,21 +266,21 @@ export default async function AccountPage({
             >
               <div className="text-sm font-semibold text-primary">Project Compass</div>
               <h2 className="mt-2 text-2xl font-bold">
-                {isProfessional ? "Brief history" : "Saved briefs"}
+                {isProfessional ? "Historia briefów" : "Zapisane briefy"}
               </h2>
               <p className="mt-3 text-sm leading-6 text-muted">
                 {isProfessional
-                  ? "Keep earlier client-side briefs as history. Designer accounts cannot send new requests."
-                  : "Review briefs with references, budget, and scope before contacting a designer or studio."}
+                  ? "Wcześniejsze briefy klienta pozostają w historii. Konto projektanta nie może wysyłać nowych zapytań."
+                  : "Przejrzyj briefy z inspiracjami, budżetem i zakresem przed kontaktem z projektantem lub pracownią."}
               </p>
               <div className="mt-6 grid grid-cols-2 gap-3">
                 <div className="rounded-xl border border-line bg-background p-3">
-                  <div className="text-sm text-muted">Briefs</div>
+                  <div className="text-sm text-muted">Briefy</div>
                   <div className="mt-1 text-xl font-bold">{briefs.length}</div>
                 </div>
                 <div className="rounded-xl border border-line bg-background p-3">
-                  <div className="text-sm text-muted">Tool</div>
-                  <div className="mt-1 text-xl font-bold">Live</div>
+                  <div className="text-sm text-muted">Narzędzie</div>
+                  <div className="mt-1 text-xl font-bold">Aktywne</div>
                 </div>
               </div>
             </Link>
@@ -289,17 +289,17 @@ export default async function AccountPage({
               href={isProfessional ? "/studio/inbox" : "/account/inquiries"}
               className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
             >
-              <div className="text-sm font-semibold text-primary">Project Requests</div>
-              <h2 className="mt-2 text-2xl font-bold">Brief requests</h2>
+              <div className="text-sm font-semibold text-primary">Zapytania projektowe</div>
+              <h2 className="mt-2 text-2xl font-bold">Zapytania z briefem</h2>
               <p className="mt-3 text-sm leading-6 text-muted">
                 {isProfessional
-                  ? "Review requests arriving to your personal profile and every studio you belong to."
-                  : "Track briefs sent to designers and studios and continue each conversation."}
+                  ? "Przeglądaj zapytania kierowane do Twojego profilu i pracowni, do których należysz."
+                  : "Śledź briefy wysłane do projektantów i pracowni oraz kontynuuj rozmowy."}
               </p>
               <div className="mt-6 grid grid-cols-2 gap-3">
                 <div className="rounded-xl border border-line bg-background p-3">
                   <div className="text-sm text-muted">
-                    {isProfessional ? "Incoming" : "Sent"}
+                    {isProfessional ? "Otrzymane" : "Wysłane"}
                   </div>
                   <div className="mt-1 text-xl font-bold">
                     {isProfessional ? incomingInquiries.length : sentInquiries.length}
@@ -307,10 +307,10 @@ export default async function AccountPage({
                 </div>
                 <div className="rounded-xl border border-line bg-background p-3">
                   <div className="text-sm text-muted">
-                    {isProfessional ? "Studios" : "Role"}
+                    {isProfessional ? "Pracownie" : "Rola"}
                   </div>
                   <div className="mt-1 text-xl font-bold">
-                    {isProfessional ? studioIds.length : "Client"}
+                    {isProfessional ? studioIds.length : "Klient"}
                   </div>
                 </div>
               </div>
@@ -320,9 +320,9 @@ export default async function AccountPage({
           <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-sm font-semibold text-primary">Next best actions</div>
+                <div className="text-sm font-semibold text-primary">Najlepsze kolejne działania</div>
                 <h2 className="mt-1 text-3xl font-bold">
-                  {isProfessional ? "Make the profile client-ready" : "Move the project forward"}
+                  {isProfessional ? "Przygotuj profil dla klientów" : "Poprowadź projekt dalej"}
                 </h2>
               </div>
               <Link
@@ -340,8 +340,8 @@ export default async function AccountPage({
                 </div>
                 <p className="mt-2 text-sm leading-6 text-muted">
                   {isProfessional
-                    ? "Add location, profession, rate, and contact details so clients can understand fit quickly."
-                    : "Capture project type, budget, timeline, style direction, and reference photos."}
+                    ? "Dodaj lokalizację, specjalizację, ceny i kontakt, aby klienci szybko ocenili dopasowanie."
+                    : "Określ typ inwestycji, budżet, termin, styl i dodaj zdjęcia referencyjne."}
                 </p>
               </div>
               <div className="rounded-2xl border border-line bg-background p-5">
@@ -351,7 +351,7 @@ export default async function AccountPage({
                 <p className="mt-2 text-sm leading-6 text-muted">
                   {isProfessional
                     ? "A single strong portfolio card already makes the public page much more credible."
-                    : "Review both individual designers and studios before choosing where to send the brief."}
+                    : "Porównaj niezależnych projektantów i pracownie, zanim wyślesz brief."}
                 </p>
               </div>
               <div className="rounded-2xl border border-line bg-background p-5">
@@ -360,8 +360,8 @@ export default async function AccountPage({
                 </div>
                 <p className="mt-2 text-sm leading-6 text-muted">
                   {isProfessional
-                    ? "Open the profile as a client and check whether the story feels clear."
-                    : "Keep replies, decisions, and project context together in the client workspace."}
+                    ? "Otwórz profil jak klient i sprawdź, czy opowieść jest jasna."
+                    : "Przechowuj odpowiedzi, decyzje i kontekst projektu razem w strefie klienta."}
                 </p>
               </div>
             </div>
@@ -369,15 +369,15 @@ export default async function AccountPage({
         </div>
 
         <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
-          <div className="text-sm font-semibold text-primary">Signed in</div>
-          <h2 className="mt-2 text-2xl font-bold">Account details</h2>
+          <div className="text-sm font-semibold text-primary">Zalogowano</div>
+          <h2 className="mt-2 text-2xl font-bold">Dane konta</h2>
           <div className="mt-5 grid gap-4 text-sm">
             <div>
               <div className="text-muted">Email</div>
               <div className="mt-1 break-words font-semibold">{user.email}</div>
             </div>
             <div>
-              <div className="text-muted">User ID</div>
+              <div className="text-muted">Identyfikator użytkownika</div>
               <code className="mt-1 block break-all rounded-xl bg-background p-3 text-xs">
                 {user.id}
               </code>
@@ -386,12 +386,12 @@ export default async function AccountPage({
 
           {hasPublicProfile ? (
             <div className="mt-6 border-t border-line pt-6">
-              <div className="font-bold">Public profile link</div>
+              <div className="font-bold">Link do profilu publicznego</div>
               <Link
                 href={`/designers/${myProfileId}`}
                 className="mt-3 flex rounded-xl bg-primary-soft px-4 py-3 text-center text-sm font-semibold text-primary hover:bg-primary hover:text-white"
               >
-                <span className="w-full">Open profile</span>
+                <span className="w-full">Otwórz profil</span>
               </Link>
             </div>
           ) : null}
