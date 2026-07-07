@@ -9,6 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const staticEntries: MetadataRoute.Sitemap = [
     ["/", "daily", 1],
+    ["/en", "monthly", 0.55],
     ["/designers", "daily", 0.95],
     ["/project-compass", "weekly", 0.9],
     ["/inspiration", "daily", 0.85],

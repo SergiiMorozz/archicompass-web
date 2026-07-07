@@ -26,6 +26,7 @@ type PageMetadataOptions = {
   noIndex?: boolean;
   type?: "website" | "article" | "profile";
   alternates?: Metadata["alternates"];
+  locale?: string;
 };
 
 export function pageMetadata({
@@ -36,6 +37,7 @@ export function pageMetadata({
   noIndex = false,
   type = "website",
   alternates,
+  locale = "pl_PL",
 }: PageMetadataOptions): Metadata {
   const canonical = absoluteUrl(path);
   const brandedTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
@@ -53,7 +55,7 @@ export function pageMetadata({
       type,
       url: canonical,
       siteName: SITE_NAME,
-      locale: "pl_PL",
+      locale,
       title: brandedTitle,
       description: cleanDescription,
       images: [{ url: socialImage, width: 1600, height: 900, alt: brandedTitle }],

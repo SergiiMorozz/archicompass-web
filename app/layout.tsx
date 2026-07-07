@@ -30,7 +30,10 @@ export const metadata: Metadata = {
     "portfolio projektanta wnętrz",
     "AI rozpoznawanie stylu wnętrza",
   ],
-  alternates: { canonical: siteUrl() },
+  alternates: {
+    canonical: siteUrl(),
+    languages: { pl: siteUrl(), en: absoluteUrl("/en"), "x-default": siteUrl() },
+  },
   openGraph: {
     type: "website",
     locale: "pl_PL",

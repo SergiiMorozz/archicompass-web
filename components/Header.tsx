@@ -209,9 +209,9 @@ export default function Header() {
         </nav>
 
         <div className="hidden items-center gap-2 xl:flex">
-          <button className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium text-foreground">
-            PL
-          </button>
+          <Link href="/en" hrefLang="en" className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium text-foreground">
+            EN
+          </Link>
           {account ? (
             <div className="flex items-center gap-1 rounded-xl border border-line bg-card p-1 shadow-sm">
               <Link
@@ -261,9 +261,9 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2 xl:hidden">
-          <button className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium">
-            PL
-          </button>
+          <Link href="/en" hrefLang="en" className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium">
+            EN
+          </Link>
           <button
             type="button"
             aria-label="Otwórz lub zamknij menu"
