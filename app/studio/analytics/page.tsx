@@ -118,11 +118,11 @@ export default async function StudioAnalyticsPage() {
     <main>
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="text-sm font-semibold text-primary">Profile performance</div>
-          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Analytics</h1>
+          <div className="text-sm font-semibold text-primary">Skuteczność profilu</div>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Statystyki</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-            See real profile visits, Project Compass requests, accepted fit, and your
-            measured response time. Tracking starts with this Studio release.
+            Zobacz rzeczywiste wizyty profilu, zapytania z Project Compass, zaakceptowane
+            dopasowania i zmierzony czas odpowiedzi.
           </p>
         </div>
       </section>
@@ -130,10 +130,10 @@ export default async function StudioAnalyticsPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            ["Views", String(views30), "Last 30 days"],
-            ["Requests", String(inquiries30), "Last 30 days"],
-            ["Accepted fit", `${acceptance}%`, `${accepted} accepted`],
-            ["First response", averageResponse === null ? "No data" : averageResponse < 24 ? `${Math.round(averageResponse)}h` : `${(averageResponse / 24).toFixed(1)}d`, "Measured from in-app replies"],
+            ["Wyświetlenia", String(views30), "Ostatnie 30 dni"],
+            ["Zapytania", String(inquiries30), "Ostatnie 30 dni"],
+            ["Zaakceptowane", `${acceptance}%`, `${accepted} zaakceptowanych`],
+            ["Pierwsza odpowiedź", averageResponse === null ? "Brak danych" : averageResponse < 24 ? `${Math.round(averageResponse)} godz.` : `${(averageResponse / 24).toFixed(1)} dni`, "Na podstawie odpowiedzi w platformie"],
           ].map(([label, value, detail]) => (
             <article key={label} className="rounded-lg border border-line bg-card p-5 shadow-sm">
               <div className="text-sm font-semibold text-muted">{label}</div>
@@ -147,10 +147,10 @@ export default async function StudioAnalyticsPage() {
           <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-sm font-semibold text-primary">Last 14 days</div>
-                <h2 className="mt-1 text-3xl font-bold">Profile views</h2>
+                <div className="text-sm font-semibold text-primary">Ostatnie 14 dni</div>
+                <h2 className="mt-1 text-3xl font-bold">Wyświetlenia profilu</h2>
               </div>
-              <div className="text-sm text-muted">One browser session per profile per day</div>
+              <div className="text-sm text-muted">Jedna sesja przeglądarki na profil dziennie</div>
             </div>
 
             <div className="mt-8 grid grid-cols-14 items-end gap-2" style={{ gridTemplateColumns: `repeat(${daily.length}, minmax(0, 1fr))` }}>
@@ -172,12 +172,12 @@ export default async function StudioAnalyticsPage() {
           <aside className="grid h-fit gap-5">
             <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
               <div className="text-sm font-semibold text-primary">90-day funnel</div>
-              <h2 className="mt-1 text-2xl font-bold">From view to fit</h2>
+              <h2 className="mt-1 text-2xl font-bold">Od wyświetlenia do współpracy</h2>
               <div className="mt-6 grid gap-4">
                 {[
-                  ["Profile views", views.length, 100],
-                  ["Requests", inquiries.length, views.length ? Math.min(100, (inquiries.length / views.length) * 100) : 0],
-                  ["Accepted", accepted, inquiries.length ? (accepted / inquiries.length) * 100 : 0],
+                  ["Wyświetlenia profilu", views.length, 100],
+                  ["Zapytania", inquiries.length, views.length ? Math.min(100, (inquiries.length / views.length) * 100) : 0],
+                  ["Zaakceptowane", accepted, inquiries.length ? (accepted / inquiries.length) * 100 : 0],
                 ].map(([label, value, width]) => (
                   <div key={String(label)}>
                     <div className="flex justify-between gap-4 text-sm">
@@ -193,17 +193,17 @@ export default async function StudioAnalyticsPage() {
             </section>
 
             <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-              <div className="text-sm font-semibold text-primary">Portfolio supply</div>
+              <div className="text-sm font-semibold text-primary">Zawartość portfolio</div>
               <div className="mt-2 text-4xl font-bold">{projects.length}</div>
               <p className="mt-2 text-sm leading-6 text-muted">
-                {countLabel(projects.length, "Public project", "Public projects")} available for clients to review before sending a brief.
+                {countLabel(projects.length, "Publiczny projekt", "Publiczne projekty")} dostępne dla klientów przed wysłaniem briefu.
               </p>
               <div className="mt-5 grid gap-3">
                 <Link href="/account/projects" className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white">
                   Manage projects
                 </Link>
                 <Link href={`/designers/${user.id}`} className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">
-                  Open public profile
+                  Otwórz profil publiczny
                 </Link>
               </div>
             </section>

@@ -75,8 +75,8 @@ async function sendMessage(formData: FormData) {
   const body = textValue(formData, "body");
   if (!inquiryId || !isUuid(inquiryId)) redirect("/studio/inbox");
   const files = attachmentFiles(formData);
-  if (!body && !files.length) actionError(inquiryId, "Write a message or attach a file before sending.");
-  if ((body?.length ?? 0) > 4000) actionError(inquiryId, "Messages can be up to 4,000 characters.");
+  if (!body && !files.length) actionError(inquiryId, "Napisz wiadomość lub dodaj załącznik przed wysłaniem.");
+  if ((body?.length ?? 0) > 4000) actionError(inquiryId, "Wiadomość może mieć maksymalnie 4000 znaków.");
 
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -86,14 +86,14 @@ async function sendMessage(formData: FormData) {
   const { data: canManage } = await supabase.rpc("can_manage_inquiry", {
     target_inquiry_id: inquiryId,
   });
-  if (!canManage) actionError(inquiryId, "This conversation is not available.");
+  if (!canManage) actionError(inquiryId, "Ta rozmowa nie jest dostępna.");
 
   const { data: inquiry } = await supabase
     .from("designer_inquiries")
     .select("id, client_id, designer_id, status, subject")
     .eq("id", inquiryId)
     .maybeSingle();
-  if (!inquiry) actionError(inquiryId, "This conversation is not available.");
+  if (!inquiry) actionError(inquiryId, "Ta rozmowa nie jest dostępna.");
 
   const upload = await uploadMessageAttachments({ files, inquiryId, supabase, userId: user.id });
   if (upload.error) actionError(inquiryId, upload.error);
@@ -101,7 +101,7 @@ async function sendMessage(formData: FormData) {
   const { data: insertedMessage, error } = await supabase.from("inquiry_messages").insert({
     inquiry_id: inquiryId,
     sender_id: user.id,
-    body: body || "Shared attachments",
+    body: body || "Udostępniono załączniki",
     attachment_names: upload.names,
     attachment_paths: upload.paths,
     attachment_types: upload.types,
@@ -134,7 +134,7 @@ async function sendMessage(formData: FormData) {
       name: clientProfile?.full_name || null,
       role: "client",
     },
-    senderName: senderProfile?.full_name || user.email || "Design professional",
+    senderName: senderProfile?.full_name || user.email || "Projektant wnętrz",
     subject: inquiry.subject,
   });
   if (notification.error) {
@@ -162,7 +162,7 @@ async function updateStatus(formData: FormData) {
   const status = textValue(formData, "status");
   if (!inquiryId || !isUuid(inquiryId)) redirect("/studio/inbox");
   if (!status || !statuses.includes(status as (typeof statuses)[number])) {
-    actionError(inquiryId, "Choose a valid request status.");
+    actionError(inquiryId, "Wybierz prawidłowy status zapytania.");
   }
 
   const supabase = await createSupabaseServerClient();
@@ -173,7 +173,7 @@ async function updateStatus(formData: FormData) {
   const { data: canManage } = await supabase.rpc("can_manage_inquiry", {
     target_inquiry_id: inquiryId,
   });
-  if (!canManage) actionError(inquiryId, "Only the receiving designer or studio team can update this request.");
+  if (!canManage) actionError(inquiryId, "Tylko projektant lub zespół pracowni może zmienić status tego zapytania.");
 
   const [{ data: inquiry }, { data: senderProfile }] = await Promise.all([
     supabase
@@ -198,14 +198,14 @@ async function updateStatus(formData: FormData) {
     .eq("id", inquiry.client_id)
     .maybeSingle();
   const notification = await sendConversationNotificationEmail({
-    body: `Request status changed to ${status}.`,
+    body: `Status zapytania został zmieniony na: ${status}.`,
     inquiryId,
     recipient: {
       email: clientProfile?.email || null,
       name: clientProfile?.full_name || null,
       role: "client",
     },
-    senderName: senderProfile?.full_name || user.email || "Design professional",
+    senderName: senderProfile?.full_name || user.email || "Projektant wnętrz",
     subject: inquiry.subject,
   });
   if (notification.error) {
@@ -324,7 +324,7 @@ export default async function StudioConversationPage({
   ]));
   const attachmentsByMessage = new Map(messageAttachmentEntries);
   const client = clientData as ClientProfile | null;
-  const clientName = client?.full_name || client?.email || "Client";
+  const clientName = client?.full_name || client?.email || "Klient";
   const { data: teamMemberships } = inquiry.studio_id
     ? await getStudioMemberships(supabase, user.id, "active")
     : { data: [] };
@@ -357,32 +357,32 @@ export default async function StudioConversationPage({
       <section className="border-b border-line bg-card px-4 py-8 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <Link href="/studio/inbox" className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary">
-            Back to inbox
+            Wróć do zapytań
           </Link>
           <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="text-sm font-semibold text-primary">Conversation with {clientName}</div>
+              <div className="text-sm font-semibold text-primary">Rozmowa z: {clientName}</div>
               <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">{inquiry.subject}</h1>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted">
                 <span>{client?.location || snapshotValue(inquiry.brief_snapshot, "location")}</span>
                 <span>{formatDate(inquiry.created_at)}</span>
                 <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusClass(inquiry.status)}`}>
-                  {inquiry.status === "sent" ? "New" : inquiry.status}
+                  {inquiry.status === "sent" ? "Nowe" : inquiry.status}
                 </span>
               </div>
             </div>
             <form action={updateStatus} className="flex flex-col gap-2 sm:flex-row sm:items-end">
               <input type="hidden" name="inquiry_id" value={inquiry.id} />
               <label className="text-sm font-semibold">
-                Lead status
+                Status zapytania
                 <select name="status" defaultValue={inquiry.status === "sent" ? "reviewing" : inquiry.status} className="mt-2 block rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary">
-                  <option value="reviewing">Reviewing</option>
-                  <option value="accepted">Accepted</option>
-                  <option value="declined">Declined</option>
+                  <option value="reviewing">W trakcie analizy</option>
+                  <option value="accepted">Zaakceptowane</option>
+                  <option value="declined">Odrzucone</option>
                 </select>
               </label>
               <button type="submit" className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
-                Update
+                Aktualizuj
               </button>
             </form>
           </div>
@@ -393,12 +393,12 @@ export default async function StudioConversationPage({
         <div className="grid gap-6">
           {sp.sent ? (
             <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-              Message sent. The client can now see it in their request history.
+              Wiadomość została wysłana. Klient widzi ją w historii zapytania.
             </div>
           ) : null}
           {sp.status ? (
             <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-              Lead status updated.
+              Status zapytania został zaktualizowany.
             </div>
           ) : null}
           {sp.error ? (
@@ -410,13 +410,13 @@ export default async function StudioConversationPage({
           <section className="rounded-lg border border-line bg-card p-5 shadow-sm sm:p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-sm font-semibold text-primary">Messages</div>
-                <h2 className="mt-1 text-3xl font-bold">Client conversation</h2>
+                <div className="text-sm font-semibold text-primary">Wiadomości</div>
+                <h2 className="mt-1 text-3xl font-bold">Rozmowa z klientem</h2>
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <ConversationAutoRefresh />
                 <Link href={`/studio/inbox/${inquiry.id}`} className="text-sm font-semibold text-primary hover:underline">
-                  Refresh
+                  Odśwież
                 </Link>
               </div>
             </div>
@@ -424,7 +424,7 @@ export default async function StudioConversationPage({
             <div className="mt-6 grid gap-4" aria-live="polite">
               {inquiry.message ? (
                 <div className="mr-auto max-w-[85%] rounded-lg rounded-bl-sm bg-background p-4">
-                  <div className="text-xs font-semibold text-primary">{clientName} · original note</div>
+                  <div className="text-xs font-semibold text-primary">{clientName} · pierwsza wiadomość</div>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{inquiry.message}</p>
                 </div>
               ) : null}
@@ -434,9 +434,9 @@ export default async function StudioConversationPage({
                 const fromTeam = teamUserIds.has(message.sender_id);
                 const senderProfile = teamProfiles.get(message.sender_id);
                 const senderLabel = mine
-                  ? "You"
+                  ? "Ty"
                   : fromTeam
-                    ? senderProfile?.full_name || senderProfile?.email || "Studio team"
+                    ? senderProfile?.full_name || senderProfile?.email || "Zespół pracowni"
                     : clientName;
                 return (
                   <div
@@ -455,7 +455,7 @@ export default async function StudioConversationPage({
                     <MessageAttachments attachments={attachmentsByMessage.get(message.id) ?? []} inverted={fromTeam} />
                     {fromTeam ? (
                       <div className="mt-2 text-right text-[11px] font-semibold opacity-70">
-                        {message.read_at ? "Read by client" : "Sent"}
+                        {message.read_at ? "Przeczytane przez klienta" : "Wysłano"}
                       </div>
                     ) : null}
                   </div>
@@ -464,8 +464,8 @@ export default async function StudioConversationPage({
 
               {!inquiry.message && !messages.length ? (
                 <div className="rounded-lg border border-dashed border-line bg-background p-6 text-sm leading-6 text-muted">
-                  No messages yet. Start with one practical question about scope,
-                  timeline, budget, or availability.
+                  Nie ma jeszcze wiadomości. Zacznij od konkretnego pytania o zakres,
+                  termin, budżet lub dostępność.
                 </div>
               ) : null}
             </div>
@@ -473,28 +473,27 @@ export default async function StudioConversationPage({
             <form action={sendMessage} className="sticky bottom-3 z-10 mt-6 rounded-xl border border-line bg-card p-4 shadow-lg">
               <input type="hidden" name="inquiry_id" value={inquiry.id} />
               <label className="block text-sm font-semibold">
-                Reply to {clientName}
+                Odpowiedz: {clientName}
                 <textarea
                   name="body"
                   maxLength={4000}
                   rows={5}
-                  placeholder="Ask a question, confirm fit, or suggest the next step..."
+                  placeholder="Zadaj pytanie, potwierdź dopasowanie lub zaproponuj następny krok..."
                   className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary"
                 />
               </label>
               <label className="mt-3 block text-sm font-semibold">
-                Attach plans or documents <span className="font-normal text-muted">up to 5 files, 20 MB each</span>
+                Dodaj plany lub dokumenty <span className="font-normal text-muted">do 5 plików, po 20 MB</span>
                 <input name="attachments" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.dwg,.dxf,.zip,.txt" className="mt-2 block w-full rounded-xl border border-dashed border-line bg-background px-4 py-3 text-sm font-normal text-muted" />
               </label>
               <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs leading-5 text-muted">
-                  Messages are visible only to this client and the receiving designer or
-                  active studio team.
+                  Wiadomości widzi tylko ten klient oraz projektant lub aktywny zespół pracowni.
                 </p>
                 <PendingSubmitButton
                   className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"
-                  idleLabel="Send message"
-                  pendingLabel="Sending..."
+                  idleLabel="Wyślij wiadomość"
+                  pendingLabel="Wysyłanie..."
                 />
               </div>
             </form>
@@ -503,20 +502,20 @@ export default async function StudioConversationPage({
 
         <aside className="grid h-fit gap-5 xl:sticky xl:top-40">
           <section className="rounded-lg border border-line bg-card p-5 shadow-sm">
-            <div className="text-sm font-semibold text-primary">Project fit</div>
+            <div className="text-sm font-semibold text-primary">Dopasowanie projektu</div>
             <div className="mt-4 grid gap-3 text-sm">
               {[
-                ["Project", snapshotValue(inquiry.brief_snapshot, "project_type")],
-                ["Goal", snapshotValue(inquiry.brief_snapshot, "goal")],
-                ["Style", snapshotValue(inquiry.brief_snapshot, "style_direction")],
-                ["Support", snapshotValue(inquiry.brief_snapshot, "support_scope")],
-                ["Budget", snapshotValue(inquiry.brief_snapshot, "budget_signal")],
-                ["Area", snapshotValue(inquiry.brief_snapshot, "area_m2")],
-                ["Rooms", snapshotValue(inquiry.brief_snapshot, "room_types")],
-                ["Property", snapshotValue(inquiry.brief_snapshot, "property_status")],
+                ["Projekt", snapshotValue(inquiry.brief_snapshot, "project_type")],
+                ["Cel", snapshotValue(inquiry.brief_snapshot, "goal")],
+                ["Styl", snapshotValue(inquiry.brief_snapshot, "style_direction")],
+                ["Wsparcie", snapshotValue(inquiry.brief_snapshot, "support_scope")],
+                ["Budżet", snapshotValue(inquiry.brief_snapshot, "budget_signal")],
+                ["Powierzchnia", snapshotValue(inquiry.brief_snapshot, "area_m2")],
+                ["Pomieszczenia", snapshotValue(inquiry.brief_snapshot, "room_types")],
+                ["Nieruchomość", snapshotValue(inquiry.brief_snapshot, "property_status")],
                 ["3D", snapshotValue(inquiry.brief_snapshot, "visualization_need")],
-                ["Supervision", snapshotValue(inquiry.brief_snapshot, "supervision_need")],
-                ["Location", snapshotValue(inquiry.brief_snapshot, "location")],
+                ["Nadzór", snapshotValue(inquiry.brief_snapshot, "supervision_need")],
+                ["Lokalizacja", snapshotValue(inquiry.brief_snapshot, "location")],
               ].map(([label, value]) => (
                 <div key={label} className="flex justify-between gap-4 border-b border-line pb-3 last:border-0 last:pb-0">
                   <span className="text-muted">{label}</span>
@@ -527,17 +526,17 @@ export default async function StudioConversationPage({
           </section>
 
           <section className="rounded-lg border border-line bg-card p-5 shadow-sm">
-            <div className="text-sm font-semibold text-primary">Client contact</div>
+            <div className="text-sm font-semibold text-primary">Kontakt z klientem</div>
             <div className="mt-3 grid gap-2 text-sm">
-              <div><span className="text-muted">Email: </span><span className="font-semibold">{client?.email || "Not provided"}</span></div>
-              <div><span className="text-muted">Phone: </span><span className="font-semibold">{client?.phone || "Not provided"}</span></div>
+              <div><span className="text-muted">Email: </span><span className="font-semibold">{client?.email || "Nie podano"}</span></div>
+              <div><span className="text-muted">Telefon: </span><span className="font-semibold">{client?.phone || "Nie podano"}</span></div>
             </div>
           </section>
 
-          <ReferencePhotoGrid photos={photos} title="Client reference photos" />
+          <ReferencePhotoGrid photos={photos} title="Zdjęcia referencyjne klienta" />
 
           <details className="rounded-lg border border-line bg-card p-5 shadow-sm">
-            <summary className="cursor-pointer font-semibold">Open full brief text</summary>
+            <summary className="cursor-pointer font-semibold">Otwórz pełną treść briefu</summary>
             <pre className="mt-4 max-h-80 overflow-auto whitespace-pre-wrap rounded-lg bg-[#1f172a] p-4 text-xs leading-6 text-white/80">
               {inquiry.brief_text}
             </pre>

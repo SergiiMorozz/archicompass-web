@@ -133,14 +133,14 @@ export default async function StudioInboxPage({
 
   return (
     <main>
-      <UnreadPageTitle count={totalUnread} label="Designer Inbox" />
+      <UnreadPageTitle count={totalUnread} label="Zapytania projektowe" />
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="text-sm font-semibold text-primary">Client communication</div>
-          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Incoming briefs</h1>
+          <div className="text-sm font-semibold text-primary">Komunikacja z klientami</div>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Otrzymane briefy</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-            Review project fit, update the lead status, and keep every conversation next
-            to the original client brief.
+            Oceniaj dopasowanie projektu, aktualizuj status i prowadź każdą rozmowę
+            bezpośrednio przy oryginalnym briefie klienta.
           </p>
         </div>
       </section>
@@ -185,7 +185,7 @@ export default async function StudioInboxPage({
 
         {error ? (
           <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">
-            Requests could not be loaded: {error.message}
+            Nie udało się wczytać zapytań: {error.message}
           </div>
         ) : visibleInquiries.length ? (
           <div className="mt-6 grid gap-4">
@@ -208,13 +208,13 @@ export default async function StudioInboxPage({
                         ) : null}
                         <span className="rounded-full border border-line bg-background px-3 py-1 text-xs font-semibold text-muted">
                           {inquiry.studio_id
-                            ? studiosById.get(inquiry.studio_id)?.name || "Studio inbox"
-                            : "Personal profile"}
+                            ? studiosById.get(inquiry.studio_id)?.name || "Skrzynka pracowni"
+                            : "Profil osobisty"}
                         </span>
                       </div>
                       <h2 className="mt-3 text-2xl font-bold">{inquiry.subject}</h2>
                       <div className="mt-2 text-sm text-muted">
-                        {client?.full_name || client?.email || "New client"}
+                        {client?.full_name || client?.email || "Nowy klient"}
                         {client?.location ? ` · ${client.location}` : ""}
                       </div>
 
@@ -230,12 +230,12 @@ export default async function StudioInboxPage({
                         <div className="font-semibold text-foreground">
                           {latest
                             ? latest.sender_id === inquiry.client_id
-                              ? client?.full_name || client?.email || "Client"
-                              : "You / studio team"
-                            : "Client introduction"}
+                              ? client?.full_name || client?.email || "Klient"
+                              : "Ty / zespół pracowni"
+                            : "Wiadomość klienta"}
                         </div>
                         <p className="mt-1 line-clamp-2">
-                          {latest?.body || inquiry.message || "Open the brief to review the full project context."}
+                          {latest?.body || inquiry.message || "Otwórz brief, aby zobaczyć pełny kontekst projektu."}
                         </p>
                         <div className="mt-2 text-xs">
                           {formatDate(latest?.created_at || inquiry.created_at)}
@@ -247,7 +247,7 @@ export default async function StudioInboxPage({
                       href={`/studio/inbox/${inquiry.id}`}
                       className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white"
                     >
-                      {unread ? "Reply to client" : "Open conversation"}
+                      {unread ? "Odpowiedz klientowi" : "Otwórz rozmowę"}
                     </Link>
                   </div>
                 </article>
@@ -257,15 +257,15 @@ export default async function StudioInboxPage({
         ) : (
           <div className="mt-6 rounded-lg border border-dashed border-line bg-card p-8">
             <h2 className="text-2xl font-bold">
-              {selectedView === "unread" ? "Inbox clear" : "No requests in this view"}
+              {selectedView === "unread" ? "Wszystko przeczytane" : "Brak zapytań w tym widoku"}
             </h2>
             <p className="mt-2 max-w-xl leading-7 text-muted">
               {selectedView === "unread"
-                ? "New client replies will appear here and in the Inbox counter."
-                : "New Project Compass briefs will appear here with their references, scope, budget signal, and client message."}
+                ? "Nowe odpowiedzi klientów pojawią się tutaj oraz w liczniku zapytań."
+                : "Nowe briefy z Project Compass pojawią się tutaj razem z inspiracjami, zakresem, budżetem i wiadomością klienta."}
             </p>
             <Link href={selectedView === "unread" ? "/studio/inbox" : "/account/profile"} className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
-              {selectedView === "unread" ? "View all requests" : "Improve public profile"}
+              {selectedView === "unread" ? "Zobacz wszystkie zapytania" : "Ulepsz profil publiczny"}
             </Link>
           </div>
         )}
