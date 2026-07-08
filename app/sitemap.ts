@@ -5,11 +5,14 @@ import { locationPath, seoLocations } from "@/lib/seo-locations";
 
 export const revalidate = 3600;
 
+function englishPath(path: string) {
+  return path === "/" ? "/en" : `/en${path}`;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const staticEntries: MetadataRoute.Sitemap = [
     ["/", "daily", 1],
-    ["/en", "monthly", 0.55],
     ["/designers", "daily", 0.95],
     ["/project-compass", "weekly", 0.9],
     ["/inspiration", "daily", 0.85],
@@ -22,6 +25,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: changeFrequency as MetadataRoute.Sitemap[number]["changeFrequency"],
     priority: priority as number,
   }));
+
+  const englishStaticEntries: MetadataRoute.Sitemap = staticEntries.map((entry) => {
+    const path = new URL(entry.url).pathname;
+    return {
+      ...entry,
+      url: absoluteUrl(englishPath(path)),
+    };
+  });
 
   try {
     const supabase = createPublicSupabaseClient();
@@ -39,6 +50,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.75,
     }));
 
+    const englishArticleEntries: MetadataRoute.Sitemap = articleEntries.map((entry) => ({
+      ...entry,
+      url: absoluteUrl(englishPath(new URL(entry.url).pathname)),
+    }));
+
     const locationEntries: MetadataRoute.Sitemap = seoLocations
       .filter((location) => location.countryCode === "PL")
       .map((location) => ({
@@ -47,12 +63,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: location.countryCode === "PL" ? 0.85 : 0.75,
       }));
 
+    const englishLocationEntries: MetadataRoute.Sitemap = locationEntries.map((entry) => ({
+      ...entry,
+      url: absoluteUrl(englishPath(new URL(entry.url).pathname)),
+    }));
+
     return [
       ...staticEntries,
+      ...englishStaticEntries,
       ...articleEntries,
+      ...englishArticleEntries,
       ...locationEntries,
+      ...englishLocationEntries,
     ];
   } catch {
-    return staticEntries;
+    return [...staticEntries, ...englishStaticEntries];
   }
 }

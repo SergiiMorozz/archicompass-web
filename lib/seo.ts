@@ -12,6 +12,11 @@ export function absoluteUrl(path = "/") {
   return `${siteUrl()}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
+export function englishUrl(path = "/") {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return absoluteUrl(normalizedPath === "/" ? "/en" : `/en${normalizedPath}`);
+}
+
 export function truncateDescription(value: string, maxLength = 160) {
   const clean = value.replace(/\s+/g, " ").trim();
   if (clean.length <= maxLength) return clean;
@@ -50,7 +55,14 @@ export function pageMetadata({
   return {
     title: { absolute: brandedTitle },
     description: cleanDescription,
-    alternates: alternates || { canonical },
+    alternates: alternates || {
+      canonical,
+      languages: {
+        pl: canonical,
+        en: englishUrl(path),
+        "x-default": canonical,
+      },
+    },
     openGraph: {
       type,
       url: canonical,

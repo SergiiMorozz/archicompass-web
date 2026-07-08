@@ -85,9 +85,17 @@ export default function Header() {
   const pathname = usePathname();
   const isGetStartedActive = pathname === "/get-started";
   const [isOpen, setIsOpen] = useState(false);
+  const [englishHref, setEnglishHref] = useState(() =>
+    pathname === "/" ? "/en" : `/en${pathname}`
+  );
   const [account, setAccount] = useState<
     { id: string; isAdmin: boolean; isProfessional: boolean; unreadCount: number } | null
   >(null);
+
+  useEffect(() => {
+    const path = pathname === "/" ? "/en" : `/en${pathname}`;
+    setEnglishHref(`${path}${window.location.search}${window.location.hash}`);
+  }, [pathname]);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -209,9 +217,9 @@ export default function Header() {
         </nav>
 
         <div className="hidden items-center gap-2 xl:flex">
-          <Link href="/en" hrefLang="en" className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium text-foreground">
+          <a href={englishHref} hrefLang="en" className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium text-foreground">
             EN
-          </Link>
+          </a>
           {account ? (
             <div className="flex items-center gap-1 rounded-xl border border-line bg-card p-1 shadow-sm">
               <Link
@@ -261,9 +269,9 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2 xl:hidden">
-          <Link href="/en" hrefLang="en" className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium">
+          <a href={englishHref} hrefLang="en" className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium">
             EN
-          </Link>
+          </a>
           <button
             type="button"
             aria-label="Otwórz lub zamknij menu"
