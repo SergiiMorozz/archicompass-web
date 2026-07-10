@@ -1,5 +1,5 @@
 import type { ReferencePhotoPreview } from "@/lib/reference-photos";
-import { countLabel } from "@/lib/count-label";
+import { polishCountLabel } from "@/lib/count-label";
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -17,7 +17,7 @@ export default function ReferencePhotoGrid({
       <div className="flex items-center justify-between gap-3">
         <div className="text-sm font-semibold">{title}</div>
         <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-          {countLabel(photos.length, "photo")}
+          {polishCountLabel(photos.length, "zdjęcie", "zdjęcia", "zdjęć")}
         </span>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -34,7 +34,7 @@ export default function ReferencePhotoGrid({
               />
             </a>
             <figcaption className="truncate px-3 py-2 text-xs font-semibold text-muted">
-              <a href={photo.url} target="_blank" rel="noreferrer" className="hover:text-primary">{photo.name} - open full size</a>
+              <a href={photo.url} target="_blank" rel="noreferrer" className="hover:text-primary">{photo.name} - otwórz pełny rozmiar</a>
             </figcaption>
           </figure>
         ))}

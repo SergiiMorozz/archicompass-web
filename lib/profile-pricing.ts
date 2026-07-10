@@ -70,16 +70,16 @@ export function pricingLabel(details: PricingDetails) {
   const to = details.price_to;
   const unit =
     model === "Hourly"
-      ? "/godz."
+      ? " zł/godz."
       : model === "Per m2"
-        ? "/m²"
+        ? " zł/m²"
         : model === "Fixed package"
-          ? "/pakiet"
+          ? " zł/pakiet"
           : "";
 
-  if (from && to) return `${amount(from)}-${amount(to)} PLN${unit}`;
-  if (from) return `Od ${amount(from)} PLN${unit}`;
-  if (to) return `Do ${amount(to)} PLN${unit}`;
-  if (details.hourly_rate) return `${amount(details.hourly_rate)} PLN/godz.`;
+  if (from && to) return `${amount(from)}-${amount(to)}${unit}`;
+  if (from) return `Od ${amount(from)}${unit}`;
+  if (to) return `Do ${amount(to)}${unit}`;
+  if (details.hourly_rate) return `${amount(details.hourly_rate)} zł/godz.`;
   return model === "Custom quote" ? "Wycena indywidualna" : "Wycena po zapoznaniu się z briefem";
 }

@@ -49,11 +49,11 @@ function escapeHtml(value: string) {
 }
 
 function briefLine(label: string, value: string | null | undefined) {
-  return `${label}: ${value?.trim() || "Not specified"}`;
+  return `${label}: ${value?.trim() || "Nie podano"}`;
 }
 
 function emailSubject(brief: BriefForEmail) {
-  return `New ArchiCompass request: ${brief.title || brief.project_type || "Project brief"}`;
+  return `Nowe zapytanie ArchiCompass: ${brief.title || brief.project_type || "brief projektowy"}`;
 }
 
 function emailText({
@@ -68,31 +68,31 @@ function emailText({
   message: string | null;
 }) {
   return [
-    "You received a new Project Compass request on ArchiCompass.",
+    "Otrzymujesz nowe zapytanie Project Compass w ArchiCompass.",
     "",
-    clientEmail ? `Client email: ${clientEmail}` : null,
-    message ? `Client message: ${message}` : null,
+    clientEmail ? `E-mail klienta: ${clientEmail}` : null,
+    message ? `Wiadomość klienta: ${message}` : null,
     "",
-    briefLine("Project", brief.project_type),
-    briefLine("Goal", brief.goal),
+    briefLine("Projekt", brief.project_type),
+    briefLine("Cel", brief.goal),
     briefLine("Style", brief.style_direction),
-    briefLine("Support", brief.support_scope),
-    briefLine("Budget", brief.budget_signal),
-    briefLine("Timeline", brief.timeline),
-    briefLine("Area", brief.area_m2 ? `${brief.area_m2} m2` : null),
-    briefLine("Room count", brief.room_count ? String(brief.room_count) : null),
-    brief.room_types?.length ? `Rooms: ${brief.room_types.join(", ")}` : null,
-    briefLine("Property status", brief.property_status),
-    briefLine("3D visualization", brief.visualization_need),
-    briefLine("Supervision", brief.supervision_need),
-    briefLine("Location", brief.location),
-    brief.visual_cues?.length ? `Visual cues: ${brief.visual_cues.join(", ")}` : null,
-    `Reference photos: ${brief.reference_photo_names?.length ?? 0}`,
+    briefLine("Zakres wsparcia", brief.support_scope),
+    briefLine("Budżet", brief.budget_signal),
+    briefLine("Termin", brief.timeline),
+    briefLine("Powierzchnia", brief.area_m2 ? `${brief.area_m2} m²` : null),
+    briefLine("Liczba pomieszczeń", brief.room_count ? String(brief.room_count) : null),
+    brief.room_types?.length ? `Pomieszczenia: ${brief.room_types.join(", ")}` : null,
+    briefLine("Status nieruchomości", brief.property_status),
+    briefLine("Wizualizacja 3D", brief.visualization_need),
+    briefLine("Nadzór", brief.supervision_need),
+    briefLine("Lokalizacja", brief.location),
+    brief.visual_cues?.length ? `Wskazówki wizualne: ${brief.visual_cues.join(", ")}` : null,
+    `Zdjęcia referencyjne: ${brief.reference_photo_names?.length ?? 0}`,
     "",
     "Brief:",
     brief.brief_text,
     "",
-    `Open request: ${appUrl()}/studio/inbox/${inquiryId}`,
+    `Otwórz zapytanie: ${appUrl()}/studio/inbox/${inquiryId}`,
   ]
     .filter((line): line is string => line !== null)
     .join("\n");
@@ -112,21 +112,21 @@ function emailHtml({
   message: string | null;
 }) {
   const rows: Array<[string, string | null | undefined]> = [
-    ["Project", brief.project_type],
-    ["Goal", brief.goal],
+    ["Projekt", brief.project_type],
+    ["Cel", brief.goal],
     ["Style", brief.style_direction],
-    ["Support", brief.support_scope],
-    ["Budget", brief.budget_signal],
-    ["Timeline", brief.timeline],
-    ["Area", brief.area_m2 ? `${brief.area_m2} m2` : null],
-    ["Room count", brief.room_count ? String(brief.room_count) : null],
-    ["Rooms", brief.room_types?.join(", ")],
-    ["Property status", brief.property_status],
-    ["3D visualization", brief.visualization_need],
-    ["Supervision", brief.supervision_need],
-    ["Location", brief.location],
-    ["Visual cues", brief.visual_cues?.join(", ")],
-    ["Reference photos", String(brief.reference_photo_names?.length ?? 0)],
+    ["Zakres wsparcia", brief.support_scope],
+    ["Budżet", brief.budget_signal],
+    ["Termin", brief.timeline],
+    ["Powierzchnia", brief.area_m2 ? `${brief.area_m2} m²` : null],
+    ["Liczba pomieszczeń", brief.room_count ? String(brief.room_count) : null],
+    ["Pomieszczenia", brief.room_types?.join(", ")],
+    ["Status nieruchomości", brief.property_status],
+    ["Wizualizacja 3D", brief.visualization_need],
+    ["Nadzór", brief.supervision_need],
+    ["Lokalizacja", brief.location],
+    ["Wskazówki wizualne", brief.visual_cues?.join(", ")],
+    ["Zdjęcia referencyjne", String(brief.reference_photo_names?.length ?? 0)],
   ];
 
   return `<!doctype html>
@@ -134,28 +134,28 @@ function emailHtml({
   <body style="margin:0;background:#f7f3ee;color:#1f172a;font-family:Arial,sans-serif;">
     <div style="max-width:680px;margin:0 auto;padding:28px;">
       <div style="font-size:14px;font-weight:700;color:#8b5e34;">ArchiCompass</div>
-      <h1 style="margin:12px 0 8px;font-size:28px;line-height:1.2;">New Project Compass request</h1>
+      <h1 style="margin:12px 0 8px;font-size:28px;line-height:1.2;">Nowe zapytanie Project Compass</h1>
       <p style="margin:0 0 20px;color:#665f68;line-height:1.6;">
-        ${escapeHtml(designer.full_name || "Hello")}, a client sent you a saved project brief.
+        ${escapeHtml(designer.full_name || "Dzień dobry")}, klient wysłał zapisany brief projektowy.
       </p>
 
       ${
         message
           ? `<div style="margin:0 0 20px;padding:16px;border:1px solid #e2d8ce;border-radius:14px;background:#fff;">
-              <div style="font-size:13px;font-weight:700;color:#8b5e34;">Client message</div>
+              <div style="font-size:13px;font-weight:700;color:#8b5e34;">Wiadomość klienta</div>
               <p style="margin:8px 0 0;line-height:1.6;">${escapeHtml(message)}</p>
             </div>`
           : ""
       }
 
       <div style="margin:0 0 20px;padding:16px;border:1px solid #e2d8ce;border-radius:14px;background:#fff;">
-        <div style="font-size:13px;font-weight:700;color:#8b5e34;">Brief snapshot</div>
+        <div style="font-size:13px;font-weight:700;color:#8b5e34;">Podsumowanie briefu</div>
         <table style="width:100%;margin-top:10px;border-collapse:collapse;">
           ${rows
             .map(
               ([label, value]) => `<tr>
                 <td style="padding:8px 0;color:#665f68;width:150px;">${escapeHtml(label)}</td>
-                <td style="padding:8px 0;font-weight:700;">${escapeHtml(value || "Not specified")}</td>
+                <td style="padding:8px 0;font-weight:700;">${escapeHtml(value || "Nie podano")}</td>
               </tr>`
             )
             .join("")}
@@ -170,14 +170,14 @@ function emailHtml({
 
       ${
         clientEmail
-          ? `<p style="margin:0 0 20px;color:#665f68;line-height:1.6;">Client email: <strong>${escapeHtml(
+          ? `<p style="margin:0 0 20px;color:#665f68;line-height:1.6;">E-mail klienta: <strong>${escapeHtml(
               clientEmail
             )}</strong></p>`
           : ""
       }
 
       <a href="${appUrl()}/studio/inbox/${inquiryId}" style="display:inline-block;padding:12px 18px;border-radius:12px;background:#8b5e34;color:#fff;text-decoration:none;font-weight:700;">
-        Open request
+        Otwórz zapytanie
       </a>
     </div>
   </body>
@@ -199,7 +199,7 @@ export async function sendInquiryNotificationEmail({
 }): Promise<NotificationResult> {
   if (!designer.email) {
     return {
-      error: "Designer profile has no email address.",
+      error: "Profil projektanta nie ma adresu e-mail.",
       sentAt: null,
       status: "skipped",
     };

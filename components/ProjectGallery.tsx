@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { countLabel } from "@/lib/count-label";
+import { polishCountLabel } from "@/lib/count-label";
 
 type ProjectGalleryProps = {
   category?: string | null;
@@ -65,7 +65,7 @@ export default function ProjectGallery({
             </div>
             <h3 className="mt-1 text-xl font-bold">{title}</h3>
             <div className="mt-3 inline-flex rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">
-              View {countLabel(safeImages.length, "photo")}
+              Zobacz {polishCountLabel(safeImages.length, "zdjęcie", "zdjęcia", "zdjęć")}
             </div>
           </div>
         </button>
@@ -101,7 +101,7 @@ export default function ProjectGallery({
               <div className="min-w-0">
                 <div className="truncate text-lg font-bold">{title}</div>
                 <div className="text-sm text-white/70">
-                  Photo {(activeIndex ?? 0) + 1} of {safeImages.length}
+                  Zdjęcie {(activeIndex ?? 0) + 1} z {safeImages.length}
                 </div>
               </div>
               <button
@@ -109,7 +109,7 @@ export default function ProjectGallery({
                 onClick={() => setActiveIndex(null)}
                 className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-foreground"
               >
-                Close
+                Zamknij
               </button>
             </div>
 
@@ -134,7 +134,7 @@ export default function ProjectGallery({
                     }
                     className="absolute left-3 top-1/2 rounded-full bg-white px-4 py-3 text-sm font-bold text-foreground shadow"
                   >
-                    Prev
+                    Poprzednie
                   </button>
                   <button
                     type="button"
@@ -145,7 +145,7 @@ export default function ProjectGallery({
                     }
                     className="absolute right-3 top-1/2 rounded-full bg-white px-4 py-3 text-sm font-bold text-foreground shadow"
                   >
-                    Next
+                    Następne
                   </button>
                 </>
               ) : null}

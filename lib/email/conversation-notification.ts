@@ -53,25 +53,25 @@ export async function sendConversationNotificationEmail({
   subject: string;
 }): Promise<ConversationNotificationResult> {
   if (!recipient.email) {
-    return { error: "Recipient has no email address.", status: "skipped" };
+    return { error: "Odbiorca nie ma adresu e-mail.", status: "skipped" };
   }
 
   const url = conversationUrl(inquiryId, recipient.role);
   const preview = body.trim().slice(0, 1200);
   const isReminder = kind === "unread_reminder";
-  const title = `${isReminder ? "Unread message reminder" : "New ArchiCompass message"}: ${
-    short(subject, 120) || "Project conversation"
+  const title = `${isReminder ? "Przypomnienie o nieodczytanej wiadomości" : "Nowa wiadomość ArchiCompass"}: ${
+    short(subject, 120) || "Rozmowa o projekcie"
   }`;
   const text = [
-    `${recipient.name || "Hello"},`,
+    `${recipient.name || "Dzień dobry"},`,
     "",
     isReminder
-      ? `A message from ${senderName} has been waiting for 24 hours on ArchiCompass.`
-      : `${senderName} sent a new message on ArchiCompass:`,
+      ? `Wiadomość od ${senderName} czeka w ArchiCompass od 24 godzin.`
+      : `${senderName} wysłał(a) nową wiadomość w ArchiCompass:`,
     "",
     preview,
     "",
-    `Open conversation: ${url}`,
+    `Otwórz rozmowę: ${url}`,
   ].join("\n");
   const html = `<!doctype html>
 <html>
@@ -79,13 +79,13 @@ export async function sendConversationNotificationEmail({
     <div style="max-width:640px;margin:0 auto;padding:28px;">
       <div style="font-size:14px;font-weight:700;color:#6f2f9f;">ArchiCompass</div>
       <h1 style="margin:12px 0 8px;font-size:28px;line-height:1.2;">${
-        isReminder ? "Unread message reminder" : "New message"
+        isReminder ? "Przypomnienie o wiadomości" : "Nowa wiadomość"
       }</h1>
       <p style="margin:0 0 20px;color:#665f68;line-height:1.6;">
-        ${escapeHtml(recipient.name || "Hello")}, ${
+        ${escapeHtml(recipient.name || "Dzień dobry")}, ${
           isReminder
-            ? `a message from ${escapeHtml(senderName)} has been unread for 24 hours.`
-            : `${escapeHtml(senderName)} replied in your project conversation.`
+            ? `wiadomość od ${escapeHtml(senderName)} pozostaje nieodczytana od 24 godzin.`
+            : `${escapeHtml(senderName)} odpowiedział(a) w rozmowie o projekcie.`
         }
       </p>
       <div style="margin:0 0 20px;padding:16px;border:1px solid #e2d8ce;border-radius:12px;background:#fff;">
@@ -93,7 +93,7 @@ export async function sendConversationNotificationEmail({
         <p style="margin:8px 0 0;white-space:pre-wrap;line-height:1.6;">${escapeHtml(preview)}</p>
       </div>
       <a href="${url}" style="display:inline-block;padding:12px 18px;border-radius:10px;background:#6f2f9f;color:#fff;text-decoration:none;font-weight:700;">
-        ${isReminder ? "Read message" : "Open conversation"}
+        ${isReminder ? "Przeczytaj wiadomość" : "Otwórz rozmowę"}
       </a>
     </div>
   </body>

@@ -43,7 +43,13 @@ function textValue(formData: FormData, key: string) {
 }
 
 function statusLabel(status: string) {
-  return status.charAt(0).toUpperCase() + status.slice(1);
+  const labels: Record<string, string> = {
+    accepted: "Zaakceptowane",
+    declined: "Odrzucone",
+    reviewing: "W analizie",
+    sent: "Wysłane",
+  };
+  return labels[status] || status;
 }
 
 function statusClass(status: string) {
@@ -54,7 +60,7 @@ function statusClass(status: string) {
 }
 
 function createdLabel(value: string) {
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("pl-PL", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -62,7 +68,7 @@ function createdLabel(value: string) {
 }
 
 function profileName(profile?: Profile) {
-  return profile?.full_name || "Unnamed professional";
+  return profile?.full_name || "Specjalista ArchiCompass";
 }
 
 function profileMeta(profile?: Profile) {
@@ -74,8 +80,8 @@ function profileMeta(profile?: Profile) {
 function snapshotText(snapshot: Record<string, unknown> | null, key: string) {
   const value = snapshot?.[key];
   if (typeof value === "number") return String(value);
-  if (Array.isArray(value)) return value.filter((item) => typeof item === "string").join(", ") || "Not specified";
-  return typeof value === "string" && value.trim() ? value : "Not specified";
+  if (Array.isArray(value)) return value.filter((item) => typeof item === "string").join(", ") || "Nie podano";
+  return typeof value === "string" && value.trim() ? value : "Nie podano";
 }
 
 function errorRedirect(message: string) {
@@ -94,9 +100,9 @@ async function updateInquiryStatus(formData: FormData) {
   const inquiryId = textValue(formData, "inquiry_id");
   const status = textValue(formData, "status");
 
-  if (!inquiryId) errorRedirect("Request was not found.");
+  if (!inquiryId) errorRedirect("Nie znaleziono zapytania.");
   if (!status || !designerStatuses.includes(status as (typeof designerStatuses)[number])) {
-    errorRedirect("Choose a valid request status.");
+    errorRedirect("Wybierz poprawny status zapytania.");
   }
 
   const { data: updated, error } = await supabase
@@ -111,7 +117,7 @@ async function updateInquiryStatus(formData: FormData) {
     .maybeSingle();
 
   if (error) errorRedirect(error.message);
-  if (!updated) errorRedirect("Only the receiving designer can update this request.");
+  if (!updated) errorRedirect("Tylko odbiorca zapytania może zmienić jego status.");
 
   revalidatePath("/account");
   revalidatePath("/account/inquiries");
@@ -128,7 +134,7 @@ async function cancelSentInquiry(formData: FormData) {
   if (!user) redirect("/login");
 
   const inquiryId = textValue(formData, "inquiry_id");
-  if (!inquiryId) errorRedirect("Request was not found.");
+  if (!inquiryId) errorRedirect("Nie znaleziono zapytania.");
 
   const { data: deleted, error } = await supabase
     .from("designer_inquiries")
@@ -139,7 +145,7 @@ async function cancelSentInquiry(formData: FormData) {
     .maybeSingle();
 
   if (error) errorRedirect(error.message);
-  if (!deleted) errorRedirect("Only the sender can cancel this request.");
+  if (!deleted) errorRedirect("Tylko nadawca może anulować to zapytanie.");
 
   revalidatePath("/account");
   revalidatePath("/account/briefs");
@@ -165,7 +171,7 @@ function InquiryCard({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="text-sm font-semibold text-primary">
-            {mode === "sent" ? "Sent to" : "Request from"}
+            {mode === "sent" ? "Wysłano do" : "Zapytanie od"}
           </div>
           <h2 className="mt-1 text-2xl font-bold">{profileName(profile)}</h2>
           {profileMeta(profile) ? (
@@ -177,7 +183,7 @@ function InquiryCard({
         </span>
       </div>
 
-      <div className="mt-5 text-sm text-muted">Sent {createdLabel(inquiry.created_at)}</div>
+      <div className="mt-5 text-sm text-muted">Wysłano {createdLabel(inquiry.created_at)}</div>
       <h3 className="mt-2 text-xl font-bold">{inquiry.subject}</h3>
 
       {inquiry.message ? (
@@ -188,18 +194,18 @@ function InquiryCard({
 
       <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
         {[
-          ["Project", snapshotText(snapshot, "project_type")],
+          ["Projekt", snapshotText(snapshot, "project_type")],
           ["Style", snapshotText(snapshot, "style_direction")],
-          ["Support", snapshotText(snapshot, "support_scope")],
-          ["Budget", snapshotText(snapshot, "budget_signal")],
-          ["Timeline", snapshotText(snapshot, "timeline")],
-          ["Area", snapshotText(snapshot, "area_m2") === "Not specified" ? "Not specified" : `${snapshotText(snapshot, "area_m2")} m2`],
-          ["Rooms", snapshotText(snapshot, "room_types")],
-          ["Property", snapshotText(snapshot, "property_status")],
+          ["Zakres", snapshotText(snapshot, "support_scope")],
+          ["Budżet", snapshotText(snapshot, "budget_signal")],
+          ["Termin", snapshotText(snapshot, "timeline")],
+          ["Powierzchnia", snapshotText(snapshot, "area_m2") === "Nie podano" ? "Nie podano" : `${snapshotText(snapshot, "area_m2")} m²`],
+          ["Pomieszczenia", snapshotText(snapshot, "room_types")],
+          ["Nieruchomość", snapshotText(snapshot, "property_status")],
           ["3D", snapshotText(snapshot, "visualization_need")],
-          ["Supervision", snapshotText(snapshot, "supervision_need")],
-          ["Location", snapshotText(snapshot, "location")],
-          ["Goal", snapshotText(snapshot, "goal")],
+          ["Nadzór", snapshotText(snapshot, "supervision_need")],
+          ["Lokalizacja", snapshotText(snapshot, "location")],
+          ["Cel", snapshotText(snapshot, "goal")],
         ].map(([label, value]) => (
           <div key={label} className="rounded-xl border border-line bg-background p-3">
             <div className="text-muted">{label}</div>
@@ -212,7 +218,7 @@ function InquiryCard({
         {inquiry.brief_text}
       </pre>
 
-      <ReferencePhotoGrid photos={photos} title="Request reference photos" />
+      <ReferencePhotoGrid photos={photos} title="Zdjęcia referencyjne z zapytania" />
 
       <div className="mt-5 flex flex-wrap gap-3">
         <Link
@@ -223,21 +229,21 @@ function InquiryCard({
           }
           className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
         >
-          Open conversation
+          Otwórz rozmowę
         </Link>
         {mode === "sent" ? (
           <Link
             href={`/designers/${inquiry.designer_id}`}
             className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
           >
-            Open designer profile
+            Otwórz profil projektanta
           </Link>
         ) : profile?.email ? (
           <a
             href={`mailto:${profile.email}?subject=${encodeURIComponent(`Re: ${inquiry.subject}`)}`}
             className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
           >
-            Reply by email
+            Odpowiedz e-mailem
           </a>
         ) : null}
       </div>
@@ -249,7 +255,7 @@ function InquiryCard({
         >
           <input type="hidden" name="inquiry_id" value={inquiry.id} />
           <label className="block text-sm font-semibold">
-            Request status
+            Status zapytania
             <select
               name="status"
               defaultValue={
@@ -374,26 +380,26 @@ export default async function InquiriesPage({
             href="/account"
             className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
           >
-            Back to account
+            Wróć do konta
           </Link>
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
-              <div className="text-sm font-semibold text-primary">Project Requests</div>
+              <div className="text-sm font-semibold text-primary">Zapytania projektowe</div>
               <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
-                Brief requests
+                Zapytania z briefów
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
                 {isDesigner
-                  ? "Review project briefs and messages sent to your professional profile."
-                  : "Track the project briefs and conversations you started with designers."}
+                  ? "Przeglądaj briefy i wiadomości wysłane do Twojego profilu specjalisty."
+                  : "Śledź briefy projektowe i rozmowy rozpoczęte z projektantami."}
               </p>
             </div>
 
             <div className="rounded-2xl border border-line bg-background p-5 shadow-sm">
               <div className="grid gap-3">
                 <div className="rounded-xl border border-line bg-card p-4">
-                  <div className="text-sm text-muted">{isDesigner ? "Incoming" : "Sent"}</div>
+                  <div className="text-sm text-muted">{isDesigner ? "Przychodzące" : "Wysłane"}</div>
                   <div className="mt-1 text-2xl font-bold">{isDesigner ? incoming.length : sent.length}</div>
                 </div>
               </div>
@@ -401,7 +407,7 @@ export default async function InquiriesPage({
                 href="/account/briefs"
                 className="mt-4 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
               >
-                <span className="w-full">Send a saved brief</span>
+                <span className="w-full">Wyślij zapisany brief</span>
               </Link> : null}
             </div>
           </div>
@@ -410,18 +416,18 @@ export default async function InquiriesPage({
 
       <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6">
         <div className="rounded-2xl border border-line bg-card p-5 text-sm leading-6 text-muted lg:col-span-2">
-          <div className="font-semibold text-foreground">Request status guide</div>
+          <div className="font-semibold text-foreground">Przewodnik po statusach zapytań</div>
           <div className="mt-3 flex flex-wrap gap-2">
             {[
-              ["Sent", "Waiting for the designer to review it."],
-              ["Reviewing", "The designer is checking fit and scope."],
-              ["Accepted", "The designer is interested in the project."],
-              ["Declined", "The project is not a fit right now."],
+              ["Wysłane", "Zapytanie czeka na sprawdzenie przez projektanta."],
+              ["W analizie", "Projektant sprawdza dopasowanie i zakres."],
+              ["Zaakceptowane", "Projektant jest zainteresowany projektem."],
+              ["Odrzucone", "Projekt nie pasuje teraz do zakresu lub dostępności."],
             ].map(([label, copy]) => (
               <span
                 key={label}
                 className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass(
-                  label.toLowerCase()
+                  label === "Wysłane" ? "sent" : label === "W analizie" ? "reviewing" : label === "Zaakceptowane" ? "accepted" : "declined"
                 )}`}
                 title={copy}
               >
@@ -433,28 +439,28 @@ export default async function InquiriesPage({
 
         {sp.updated ? (
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900 lg:col-span-2">
-            <div className="font-semibold">Request updated</div>
-            <p className="mt-1">The client can now see the latest status.</p>
+            <div className="font-semibold">Zapytanie zaktualizowane</div>
+            <p className="mt-1">Klient widzi już najnowszy status.</p>
           </div>
         ) : null}
 
         {sp.cancelled ? (
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900 lg:col-span-2">
-            <div className="font-semibold">Request cancelled</div>
-            <p className="mt-1">The saved brief is still available if you want to send it again.</p>
+            <div className="font-semibold">Zapytanie anulowane</div>
+            <p className="mt-1">Zapisany brief nadal jest dostępny, jeśli zechcesz wysłać go ponownie.</p>
           </div>
         ) : null}
 
         {sp.error ? (
           <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-700 lg:col-span-2">
-            <div className="font-semibold">Request action failed</div>
+            <div className="font-semibold">Nie udało się wykonać działania na zapytaniu</div>
             <p className="mt-1">{sp.error}</p>
           </div>
         ) : null}
 
         {!isDesigner ? <div>
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-2xl font-bold">Sent requests</h2>
+            <h2 className="text-2xl font-bold">Wysłane zapytania</h2>
             <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
               {sent.length}
             </span>
@@ -478,16 +484,16 @@ export default async function InquiriesPage({
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-line bg-card p-6 text-sm leading-6 text-muted">
-              <div className="text-lg font-bold text-foreground">No sent requests yet</div>
+              <div className="text-lg font-bold text-foreground">Nie masz jeszcze wysłanych zapytań</div>
               <p className="mt-2">
-                Send a saved Project Compass brief when you are ready to contact a
-                designer.
+                Wyślij zapisany brief Project Compass, gdy będziesz gotowy do kontaktu
+                z projektantem.
               </p>
               <Link
                 href="/account/briefs"
                 className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
               >
-                Send a saved brief
+                Wyślij zapisany brief
               </Link>
             </div>
           )}
@@ -495,7 +501,7 @@ export default async function InquiriesPage({
 
         {isDesigner ? <div>
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-2xl font-bold">Incoming requests</h2>
+            <h2 className="text-2xl font-bold">Przychodzące zapytania</h2>
             <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
               {incoming.length}
             </span>

@@ -57,8 +57,8 @@ function formatDate(value: string) {
 function snapshotValue(snapshot: Record<string, unknown> | null, key: string) {
   const value = snapshot?.[key];
   if (typeof value === "number") return String(value);
-  if (Array.isArray(value)) return value.filter((item) => typeof item === "string").join(", ") || "Not specified";
-  return typeof value === "string" && value.trim() ? value : "Not specified";
+  if (Array.isArray(value)) return value.filter((item) => typeof item === "string").join(", ") || "Nie podano";
+  return typeof value === "string" && value.trim() ? value : "Nie podano";
 }
 
 export default async function StudioInboxPage({

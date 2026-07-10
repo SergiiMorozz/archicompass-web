@@ -12,7 +12,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
 export const metadata: Metadata = {
-  title: "Designer Studio",
+  title: "Studio projektanta",
   robots: { index: false, follow: false, nocache: true },
 };
 
@@ -38,18 +38,18 @@ export default async function StudioLayout({ children }: { children: React.React
     return (
       <main className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
         <div className="rounded-lg border border-line bg-card p-8 shadow-sm">
-          <div className="text-sm font-semibold text-primary">Professional access</div>
-          <h1 className="mt-2 text-4xl font-bold">This is a client account</h1>
+          <div className="text-sm font-semibold text-primary">Dostęp dla specjalistów</div>
+          <h1 className="mt-2 text-4xl font-bold">To jest konto klienta</h1>
           <p className="mt-4 max-w-2xl leading-7 text-muted">
-            Client accounts create and send briefs. Designer Studio is available only to
-            accounts created with the Designer role.
+            Konta klientów tworzą i wysyłają briefy. Studio projektanta jest dostępne
+            tylko dla kont utworzonych z rolą projektanta.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/account/profile" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-              Review account role
+              Sprawdź rolę konta
             </Link>
             <Link href="/account" className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold">
-              Back to account
+              Wróć do konta
             </Link>
           </div>
         </div>

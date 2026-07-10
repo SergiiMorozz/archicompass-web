@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { countLabel } from "@/lib/count-label";
+import { polishCountLabel } from "@/lib/count-label";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -27,7 +27,7 @@ type Brief = {
 };
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("pl-PL", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -68,7 +68,7 @@ export default async function ClientBriefsPage() {
             <div className="text-sm font-semibold text-primary">Biblioteka Project Compass</div>
             <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Zapisane briefy</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-              Your saved project prompts stay here with scope, budget, timing, and reference context.
+              Twoje zapisane briefy pozostają tutaj razem z zakresem prac, budżetem, terminem i zdjęciami referencyjnymi.
             </p>
           </div>
           <Link href="/project-compass" className="w-fit rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">Utwórz kolejny brief</Link>
@@ -77,7 +77,7 @@ export default async function ClientBriefsPage() {
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         {error ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">Briefs could not be loaded: {error.message}</div>
+          <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">Nie udało się wczytać briefów: {error.message}</div>
         ) : briefs.length ? (
           <div className="grid gap-5 lg:grid-cols-2">
             {briefs.map((brief) => (
@@ -86,21 +86,21 @@ export default async function ClientBriefsPage() {
                   <div>
                     <div className="text-sm font-semibold text-primary">{brief.project_type || "Brief projektowy"}</div>
                     <h2 className="mt-1 text-2xl font-bold">{brief.title || "Brief bez tytułu"}</h2>
-                    <div className="mt-2 text-sm text-muted">Saved {formatDate(brief.created_at)}</div>
+                    <div className="mt-2 text-sm text-muted">Zapisano {formatDate(brief.created_at)}</div>
                   </div>
                   <span className="w-fit rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
-                    {countLabel(brief.reference_photo_names?.length ?? 0, "photo")}
+                    {polishCountLabel(brief.reference_photo_names?.length ?? 0, "zdjęcie", "zdjęcia", "zdjęć")}
                   </span>
                 </div>
 
                 <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
                   {[
-                    ["Goal", brief.goal],
+                    ["Cel", brief.goal],
                     ["Styl", brief.style_direction],
                     ["Wsparcie", brief.support_scope],
                     ["Budżet", brief.budget_signal],
                     ["Termin", brief.timeline],
-                    ["Area", brief.area_m2 ? `${brief.area_m2} m2` : null],
+                    ["Powierzchnia", brief.area_m2 ? `${brief.area_m2} m²` : null],
                     ["Pomieszczenia", brief.room_types?.join(", ") || (brief.room_count ? String(brief.room_count) : null)],
                     ["Nieruchomość", brief.property_status],
                     ["3D", brief.visualization_need],

@@ -17,6 +17,7 @@ import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import {
   applyDemoProfilePresentation,
+  getDemoProfilePresentation,
   getDemoProjectPresentation,
 } from "@/lib/public-demo-profiles";
 
@@ -143,16 +144,18 @@ export async function generateMetadata({
   if (!profile) {
     return pageMetadata({ title: "Nie znaleziono projektanta", description: "Ten profil projektanta jest niedostępny.", path: `/designers/${id}`, noIndex: true });
   }
-  const name = profile.full_name || "Specjalista ArchiCompass";
-  const profession = profile.profession_type || "Projektant wnętrz";
-  const location = profile.location ? ` – ${profile.location}` : "";
+  const demo = getDemoProfilePresentation(id);
+  const name = demo?.profile.full_name || profile.full_name || "Specjalista ArchiCompass";
+  const profession = demo?.profile.profession_type || profile.profession_type || "Projektant wnętrz";
+  const locationValue = demo?.profile.location || profile.location;
+  const location = locationValue ? ` – ${locationValue}` : "";
   const banner = profile.profile_banner_path
     ? supabase.storage.from(profileMediaBucket).getPublicUrl(profile.profile_banner_path).data.publicUrl
     : null;
   const image = banner || projects?.[0]?.image_url || projects?.[0]?.image_urls?.[0] || null;
   return pageMetadata({
     title: `${name} – ${profession}${location}`,
-    description: profile.bio || `Zobacz profil ${name}, portfolio, specjalizacje, usługi, dostępność i dopasowanie do projektu w ArchiCompass.`,
+    description: demo?.profile.bio || profile.bio || `Zobacz profil ${name}, portfolio, specjalizacje, usługi, dostępność i dopasowanie do projektu w ArchiCompass.`,
     path: `/designers/${id}`,
     image,
     type: "profile",
@@ -406,7 +409,7 @@ export default async function DesignerProfilePage({
   const bannerUrl = profileMediaUrl(supabase, profile.profile_banner_path);
   const profileHero = heroImage(profile.id, projects, bannerUrl);
   const heroHeadline =
-    profile.profile_headline || `${type}${profile.location ? ` in ${profile.location}` : ""}`;
+    profile.profile_headline || `${type}${profile.location ? ` · ${profileLocation(profile)}` : ""}`;
   const categoryFilters = Array.from(
     new Set(projects.map((project) => project.category).filter(Boolean))
   ) as string[];

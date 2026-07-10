@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
   if (!user) {
     return NextResponse.json(
-      { error: "Sign in to save favorites.", code: "AUTH_REQUIRED" },
+      { error: "Zaloguj się, aby zapisywać ulubione.", code: "AUTH_REQUIRED" },
       { status: 401 }
     );
   }
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid favorite request." }, { status: 400 });
+    return NextResponse.json({ error: "Nieprawidłowe żądanie zapisu ulubionych." }, { status: 400 });
   }
 
   const entityType = body.entityType;
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
   const shouldSave = body.saved === true;
 
   if (!isSupportedEntityType(entityType) || !isUuid(entityKey)) {
-    return NextResponse.json({ error: "Invalid favorite target." }, { status: 400 });
+    return NextResponse.json({ error: "Nieprawidłowy element ulubionych." }, { status: 400 });
   }
 
   if (shouldSave) {
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (!target) {
-      return NextResponse.json({ error: "This item is no longer available." }, { status: 404 });
+      return NextResponse.json({ error: "Ten element nie jest już dostępny." }, { status: 404 });
     }
 
     const { error } = await supabase.from("favorites").insert({

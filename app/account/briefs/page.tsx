@@ -2,7 +2,7 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import ReferencePhotoGrid from "@/components/ReferencePhotoGrid";
-import { countLabel } from "@/lib/count-label";
+import { polishCountLabel } from "@/lib/count-label";
 import { sendInquiryNotificationEmail } from "@/lib/email/inquiry-notification";
 import {
   referencePhotoPreviews,
@@ -75,7 +75,7 @@ function textValue(formData: FormData, key: string) {
 }
 
 function createdLabel(value: string) {
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("pl-PL", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -83,7 +83,7 @@ function createdLabel(value: string) {
 }
 
 function designerLabel(designer: Designer) {
-  const name = designer.full_name || "Unnamed professional";
+  const name = designer.full_name || "Specjalista ArchiCompass";
   const detail = [designer.profession_type || designer.user_type, designer.location]
     .filter(Boolean)
     .join(" · ");
@@ -158,7 +158,7 @@ async function sendBriefInquiry(formData: FormData) {
       .eq("id", recipientId)
       .eq("published", true)
       .maybeSingle();
-    if (studioError || !studioData) errorRedirect("This studio profile could not be found.");
+    if (studioError || !studioData) errorRedirect("Nie znaleziono profilu tej pracowni.");
 
     const studio = studioData as StudioRecipient;
     studioId = studio.id;
@@ -167,7 +167,7 @@ async function sendBriefInquiry(formData: FormData) {
       id: studio.id,
       email: studio.email,
       full_name: studio.name,
-      profession_type: "Design studio",
+      profession_type: "Pracownia projektowa",
       user_type: "professional",
       location: studio.location,
     };
@@ -180,11 +180,11 @@ async function sendBriefInquiry(formData: FormData) {
       .maybeSingle();
 
     if (designerError || !designerData) {
-      errorRedirect("This designer profile could not be found.");
+      errorRedirect("Nie znaleziono profilu tego projektanta.");
     }
     designer = designerData as Designer;
   }
-  const subject = `Project request: ${brief.title || brief.project_type || "Project brief"}`;
+  const subject = `Zapytanie projektowe: ${brief.title || brief.project_type || "brief projektowy"}`;
   let duplicateQuery = supabase
     .from("designer_inquiries")
     .select("id")
@@ -196,7 +196,7 @@ async function sendBriefInquiry(formData: FormData) {
   const { data: existingInquiry, error: duplicateError } = await duplicateQuery.limit(1).maybeSingle();
   if (duplicateError) errorRedirect(duplicateError.message);
   if (existingInquiry) {
-    errorRedirect("This brief has already been sent to the selected professional.");
+    errorRedirect("Ten brief został już wysłany do wybranego specjalisty.");
   }
 
   const inquiryId = crypto.randomUUID();
@@ -271,7 +271,7 @@ async function deleteSavedBrief(formData: FormData) {
   if (!user) redirect("/login");
 
   const briefId = textValue(formData, "brief_id");
-  if (!briefId) errorRedirect("Saved brief was not found.");
+  if (!briefId) errorRedirect("Nie znaleziono zapisanego briefu.");
 
   const { data: existingInquiry, error: inquiryError } = await supabase
     .from("designer_inquiries")
@@ -283,7 +283,7 @@ async function deleteSavedBrief(formData: FormData) {
 
   if (inquiryError) errorRedirect(inquiryError.message);
   if (existingInquiry) {
-    errorRedirect("This brief was already sent. Cancel its request before deleting it.");
+    errorRedirect("Ten brief został już wysłany. Anuluj zapytanie przed usunięciem briefu.");
   }
 
   const { data: briefData, error: briefError } = await supabase
@@ -294,7 +294,7 @@ async function deleteSavedBrief(formData: FormData) {
     .single();
 
   if (briefError || !briefData) {
-    errorRedirect("Saved brief was not found.");
+    errorRedirect("Nie znaleziono zapisanego briefu.");
   }
 
   const brief = briefData as Pick<ProjectBrief, "id" | "reference_photo_paths">;
@@ -414,38 +414,38 @@ export default async function SavedBriefsPage({
             href="/account"
             className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
           >
-            Back to account
+            Wróć do konta
           </Link>
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
               <div className="text-sm font-semibold text-primary">Project Compass</div>
               <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
-                Saved briefs
+                Zapisane briefy
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
                 {canSendBriefs
-                  ? "Review briefs created with Project Compass, then send one to a designer or studio as a clear first request."
-                  : "Your earlier client-side briefs remain available as history. Designer accounts cannot send new requests."}
+                  ? "Przejrzyj briefy utworzone w Project Compass i wyślij jeden do projektanta lub pracowni jako czytelne pierwsze zapytanie."
+                  : "Wcześniejsze briefy klienta pozostają dostępne jako historia. Konta projektantów nie mogą wysyłać nowych zapytań."}
               </p>
             </div>
 
             <div className="rounded-2xl border border-line bg-background p-5 shadow-sm">
-              <div className="text-sm font-semibold text-muted">Saved briefs</div>
+              <div className="text-sm font-semibold text-muted">Zapisane briefy</div>
               <div className="mt-2 text-3xl font-bold text-primary">{briefs.length}</div>
               {canSendBriefs ? (
                 <Link
                   href="/project-compass"
                   className="mt-4 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
                 >
-                  <span className="w-full">Create new brief</span>
+                  <span className="w-full">Utwórz nowy brief</span>
                 </Link>
               ) : null}
               <Link
                 href="/account/inquiries"
                 className="mt-3 flex rounded-xl border border-line bg-card px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
               >
-                <span className="w-full">View requests</span>
+                <span className="w-full">Zobacz zapytania</span>
               </Link>
             </div>
           </div>
@@ -455,32 +455,31 @@ export default async function SavedBriefsPage({
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         {!canSendBriefs ? (
           <div className="mb-5 rounded-2xl border border-line bg-card p-5 text-sm leading-6 text-muted">
-            <div className="font-semibold text-foreground">Designer account mode</div>
+            <div className="font-semibold text-foreground">Tryb konta projektanta</div>
             <p className="mt-1">
-              This account receives project requests. Sending a new brief is reserved for
-              client accounts, so the former dual-role behavior is now disabled.
+              To konto otrzymuje zapytania projektowe. Wysyłanie nowych briefów jest zarezerwowane dla kont klientów.
             </p>
           </div>
         ) : null}
         {sp.sent ? (
           <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900">
-            <div className="font-semibold">Brief sent</div>
+            <div className="font-semibold">Brief wysłany</div>
             <p className="mt-1">
-              The request is saved in ArchiCompass. You can review it in requests.
+              Zapytanie zostało zapisane w ArchiCompass. Możesz je sprawdzić w zakładce zapytań.
             </p>
           </div>
         ) : null}
 
         {sp.deleted ? (
           <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900">
-            <div className="font-semibold">Brief deleted</div>
-            <p className="mt-1">The saved brief and its private reference photos were removed.</p>
+            <div className="font-semibold">Brief usunięty</div>
+            <p className="mt-1">Zapisany brief i prywatne zdjęcia referencyjne zostały usunięte.</p>
           </div>
         ) : null}
 
         {sp.error ? (
           <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-700">
-            <div className="font-semibold">Brief action failed</div>
+            <div className="font-semibold">Nie udało się wykonać działania na briefie</div>
             <p className="mt-1">{sp.error}</p>
           </div>
         ) : null}
@@ -491,17 +490,17 @@ export default async function SavedBriefsPage({
           </div>
         ) : !briefs.length ? (
           <div className="rounded-2xl border border-dashed border-line bg-card p-8 text-center shadow-sm">
-            <h2 className="text-2xl font-bold">No saved briefs yet</h2>
+            <h2 className="text-2xl font-bold">Nie masz jeszcze zapisanych briefów</h2>
             <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted">
-              Build a Project Compass brief with your style direction, visual cues, and
-              reference photos, then save it here.
+              Utwórz brief Project Compass z kierunkiem stylistycznym, wskazówkami wizualnymi
+              i zdjęciami referencyjnymi, a następnie zapisz go tutaj.
             </p>
             {canSendBriefs ? (
               <Link
                 href="/project-compass"
                 className="mt-6 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"
               >
-                Build project brief
+                Utwórz brief projektowy
               </Link>
             ) : null}
           </div>
@@ -519,46 +518,46 @@ export default async function SavedBriefsPage({
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <div className="text-sm font-semibold text-primary">
-                        {brief.project_type || "Project brief"}
+                        {brief.project_type || "Brief projektowy"}
                       </div>
                       <h2 className="mt-1 text-2xl font-bold">
-                        {brief.title || "Untitled brief"}
+                        {brief.title || "Brief bez tytułu"}
                       </h2>
                       <div className="mt-2 text-sm text-muted">
-                        Saved {createdLabel(brief.created_at)}
+                        Zapisano {createdLabel(brief.created_at)}
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {sp.brief === brief.id ? (
                         <span className="rounded-full bg-primary px-3 py-1 text-sm font-semibold text-white">
-                          Selected brief
+                          Wybrany brief
                         </span>
                       ) : null}
                       <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
-                        {countLabel(brief.reference_photo_names?.length ?? 0, "photo")}
+                        {polishCountLabel(brief.reference_photo_names?.length ?? 0, "zdjęcie", "zdjęcia", "zdjęć")}
                       </span>
                     </div>
                   </div>
 
                   <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
                     {[
-                      ["Goal", brief.goal],
+                      ["Cel", brief.goal],
                       ["Style", brief.style_direction],
-                      ["Support", brief.support_scope],
-                      ["Budget", brief.budget_signal],
-                      ["Timeline", brief.timeline],
-                      ["Area", brief.area_m2 ? `${brief.area_m2} m2` : null],
-                      ["Room count", brief.room_count ? String(brief.room_count) : null],
-                      ["Rooms", brief.room_types?.join(", ") || null],
-                      ["Property status", brief.property_status],
-                      ["3D visualization", brief.visualization_need],
-                      ["Supervision", brief.supervision_need],
-                      ["Location", brief.location],
-                      ["Visual cues", brief.visual_cues?.join(", ") || "Not tagged"],
+                      ["Zakres", brief.support_scope],
+                      ["Budżet", brief.budget_signal],
+                      ["Termin", brief.timeline],
+                      ["Powierzchnia", brief.area_m2 ? `${brief.area_m2} m²` : null],
+                      ["Liczba pomieszczeń", brief.room_count ? String(brief.room_count) : null],
+                      ["Pomieszczenia", brief.room_types?.join(", ") || null],
+                      ["Status nieruchomości", brief.property_status],
+                      ["Wizualizacja 3D", brief.visualization_need],
+                      ["Nadzór", brief.supervision_need],
+                      ["Lokalizacja", brief.location],
+                      ["Wskazówki wizualne", brief.visual_cues?.join(", ") || "Brak tagów"],
                     ].map(([label, value]) => (
                       <div key={label} className="rounded-xl border border-line bg-background p-3">
                         <div className="text-muted">{label}</div>
-                        <div className="mt-1 font-semibold">{value || "Not specified"}</div>
+                        <div className="mt-1 font-semibold">{value || "Nie podano"}</div>
                       </div>
                     ))}
                   </div>
@@ -569,30 +568,30 @@ export default async function SavedBriefsPage({
 
                   <ReferencePhotoGrid
                     photos={briefPhotos.get(brief.id) ?? []}
-                    title="Brief reference photos"
+                    title="Zdjęcia referencyjne briefu"
                   />
 
                   <div className="mt-5 rounded-2xl border border-line bg-background p-4">
-                    <div className="text-sm font-semibold">Send this brief</div>
+                    <div className="text-sm font-semibold">Wyślij ten brief</div>
                     <p className="mt-1 text-sm leading-6 text-muted">
-                      Choose an individual designer or a design studio and add a short
-                      note. The full brief will be saved with the request.
+                      Wybierz projektanta lub pracownię i dodaj krótką wiadomość.
+                      Pełny brief zostanie zapisany razem z zapytaniem.
                     </p>
 
                     {canSendBriefs && (designers.length || studios.length) ? (
                       <form action={sendBriefInquiry} className="mt-4 grid gap-4">
                         <input type="hidden" name="brief_id" value={brief.id} />
                         <label className="block text-sm font-semibold">
-                          Recipient
+                          Odbiorca
                           <select
                             name="recipient_key"
                             defaultValue={preselectedRecipient}
                             className={fieldClass}
                             required
                           >
-                            <option value="">Choose designer or studio</option>
+                            <option value="">Wybierz projektanta lub pracownię</option>
                             {designers.length ? (
-                              <optgroup label="Individual designers">
+                              <optgroup label="Niezależni projektanci">
                                 {designers.map((designer) => (
                                   <option key={designer.id} value={`designer:${designer.id}`}>
                                     {designerLabel(designer)}
@@ -601,7 +600,7 @@ export default async function SavedBriefsPage({
                               </optgroup>
                             ) : null}
                             {studios.length ? (
-                              <optgroup label="Design studios">
+                              <optgroup label="Pracownie projektowe">
                                 {studios.map((studio) => (
                                   <option key={studio.id} value={`studio:${studio.id}`}>
                                     {studio.name}{studio.location ? ` — ${studio.location}` : ""}
@@ -613,12 +612,12 @@ export default async function SavedBriefsPage({
                         </label>
 
                         <label className="block text-sm font-semibold">
-                          Message
+                          Wiadomość
                           <textarea
                             name="message"
                             rows={4}
                             className={areaClass}
-                            placeholder="Hi, I prepared a Project Compass brief and would like to check if this project is a good fit."
+                            placeholder="Dzień dobry, przygotowałem brief Project Compass i chciałbym sprawdzić, czy ten projekt pasuje do Państwa zakresu pracy."
                           />
                         </label>
 
@@ -626,22 +625,22 @@ export default async function SavedBriefsPage({
                           type="submit"
                           className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                         >
-                          Send brief
+                          Wyślij brief
                         </button>
                       </form>
                     ) : !canSendBriefs ? (
                       <div className="mt-4 rounded-xl border border-line bg-card p-4 text-sm leading-6 text-muted">
-                        Designer accounts cannot send client briefs.
+                        Konta projektantów nie mogą wysyłać briefów jako klienci.
                       </div>
                     ) : (
                       <div className="mt-4 rounded-xl border border-dashed border-line p-4 text-sm leading-6 text-muted">
-                        No designer or studio profiles are available yet.
+                        Nie ma jeszcze dostępnych profili projektantów ani pracowni.
                       </div>
                     )}
 
                     {sentInquiries.length ? (
                       <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
-                        <div className="font-semibold">Already sent</div>
+                        <div className="font-semibold">Już wysłano</div>
                         <div className="mt-1">
                           {sentInquiries
                             .slice(0, 3)
@@ -651,7 +650,7 @@ export default async function SavedBriefsPage({
                                 : null;
                               if (studio) return studio.name;
                               const designer = designersById.get(inquiry.designer_id);
-                              return designer ? designer.full_name || "Unnamed professional" : "Designer";
+                              return designer ? designer.full_name || "Specjalista ArchiCompass" : "Projektant";
                             })
                             .join(", ")}
                         </div>
@@ -664,26 +663,26 @@ export default async function SavedBriefsPage({
                       href={matchingDesignersHref(brief)}
                       className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                     >
-                      Find matching designers
+                      Znajdź dopasowanych projektantów
                     </Link>
                     {canSendBriefs ? (
                       <Link
                         href="/project-compass"
                         className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
                       >
-                        Create another brief
+                        Utwórz kolejny brief
                       </Link>
                     ) : null}
                   </div>
 
                   <details className="mt-5 overflow-hidden rounded-xl border border-red-200 bg-red-50">
                     <summary className="block cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-red-700">
-                      Delete saved brief
+                      Usuń zapisany brief
                     </summary>
                     <div className="border-t border-red-200 p-4">
                       <p className="text-sm leading-6 text-red-700">
-                        This removes the saved brief and its private reference photos.
-                        Briefs already sent to designers must be cancelled first.
+                        To usunie zapisany brief i prywatne zdjęcia referencyjne.
+                        Briefy wysłane już do projektantów trzeba najpierw anulować.
                       </p>
                       <form action={deleteSavedBrief} className="mt-4">
                         <input type="hidden" name="brief_id" value={brief.id} />
@@ -691,7 +690,7 @@ export default async function SavedBriefsPage({
                           type="submit"
                           className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white hover:bg-red-700"
                         >
-                          Delete this brief
+                          Usuń ten brief
                         </button>
                       </form>
                     </div>
