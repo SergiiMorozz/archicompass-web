@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
+import { applyPolishArticleCopy, inspirationCopy } from "@/content/pl/copy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
@@ -22,14 +23,9 @@ type Article = {
   updated_at: string;
 };
 
-const categoryLabels: Record<string, string> = {
-  Inspiration: "Inspiracje",
-  Trends: "Trendy",
-  Guides: "Poradniki",
-  Materials: "Materiały",
-  Rooms: "Pomieszczenia",
-  Sustainability: "Zrównoważone wnętrza",
-};
+function categoryLabel(value: string) {
+  return inspirationCopy.categoryLabels[value as keyof typeof inspirationCopy.categoryLabels] || value;
+}
 
 export async function generateMetadata({
   params,
@@ -47,11 +43,12 @@ export async function generateMetadata({
   if (!article) {
     return pageMetadata({ title: "Nie znaleziono artykułu", description: "Ten artykuł nie jest dostępny.", path: `/inspiration/${slug}`, noIndex: true });
   }
+  const copy = applyPolishArticleCopy({ slug, ...article });
   return pageMetadata({
-    title: article.title,
-    description: article.excerpt,
+    title: copy.title,
+    description: copy.excerpt,
     path: `/inspiration/${slug}`,
-    image: article.image_url,
+    image: copy.image_url,
     type: "article",
   });
 }
@@ -75,7 +72,7 @@ export default async function InspirationArticlePage({ params }: { params: Promi
     .eq("status", "published")
     .maybeSingle();
   if (!data) notFound();
-  const article = data as Article;
+  const article = applyPolishArticleCopy(data as Article);
   const { data: userData } = await supabase.auth.getUser();
   const { data: favorite } = userData.user
     ? await supabase
@@ -122,7 +119,7 @@ export default async function InspirationArticlePage({ params }: { params: Promi
             Wróć do Inspiration Hub
           </Link>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">{categoryLabels[article.category] || article.category}</span>
+            <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">{categoryLabel(article.category)}</span>
             <span className="text-sm text-muted">{formatDate(article.published_at)}</span>
           </div>
           <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-6xl">{article.title}</h1>
@@ -152,7 +149,7 @@ export default async function InspirationArticlePage({ params }: { params: Promi
         </div>
         <section className="mt-12 rounded-lg border border-line bg-primary-soft p-6">
           <div className="text-sm font-semibold text-primary">Zamień pomysły w projekt</div>
-          <h2 className="mt-1 text-2xl font-bold">Utwórz brief na podstawie swoich inspiracji</h2>
+          <h2 className="mt-1 text-2xl font-bold">Stwórz brief na podstawie swoich inspiracji</h2>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link href="/project-compass" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">Otwórz Project Compass</Link>
             <Link href="/designers" className="rounded-xl border border-line bg-card px-5 py-3 text-sm font-semibold">Znajdź projektantów</Link>

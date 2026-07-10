@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
         <h1 className="mt-2 text-4xl font-bold">Zresetuj hasło</h1>
         <p className="mt-3 leading-7 text-muted">Wpisz adres e-mail przypisany do konta. Link służy wyłącznie do zmiany hasła.</p>
         <form onSubmit={submit} className="mt-7 grid gap-4">
-          <label className="text-sm font-bold">Email<input type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label>
+          <label className="text-sm font-bold">Adres e-mail<input type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label>
           <button disabled={busy} className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white disabled:opacity-60">{busy ? "Wysyłanie..." : "Wyślij wiadomość do zmiany hasła"}</button>
         </form>
         {message ? <div className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{message}</div> : null}

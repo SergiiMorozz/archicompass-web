@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { applyPolishArticleCopy, homeCopy } from "@/content/pl/copy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Znajdź projektanta wnętrz z pomocą AI",
-  description:
-    "Znajdź projektantów wnętrz i pracownie projektowe według lokalizacji, stylu, usług i portfolio. Stwórz precyzyjny brief na podstawie zdjęć inspiracji.",
+  title: homeCopy.metadata.title,
+  description: homeCopy.metadata.description,
   path: "/",
 });
 
@@ -101,12 +101,12 @@ async function homeData() {
 
   return {
     metrics: [
-      [metricValue((designers.count ?? 0) + (studios.count ?? 0)), "Projektanci i pracownie"],
-      [metricValue(projects.count ?? 0), "Opublikowane projekty"],
-      [metricValue(reviewCount), "Połączone opinie Google"],
+      [metricValue((designers.count ?? 0) + (studios.count ?? 0)), homeCopy.metrics.designers],
+      [metricValue(projects.count ?? 0), homeCopy.metrics.projects],
+      [metricValue(reviewCount), homeCopy.metrics.reviews],
     ],
     featuredProjects,
-    featuredArticles: (articles.data ?? []) as FeaturedArticle[],
+    featuredArticles: ((articles.data ?? []) as FeaturedArticle[]).map(applyPolishArticleCopy),
   };
 }
 
@@ -131,14 +131,13 @@ export default async function Home() {
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/12 px-4 py-2 text-sm font-semibold backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-[#48d9c7]" />
-              Dopasowanie projektanta wnętrz wspierane przez AI
+              {homeCopy.hero.eyebrow}
             </div>
             <h1 className="mt-6 text-5xl font-bold leading-[1.03] sm:text-7xl">
-              Znajdź właściwego projektanta wnętrz dla swojego projektu.
+              {homeCopy.hero.headline}
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/82 sm:text-xl">
-              Zamień zdjęcia inspiracji w precyzyjny brief, poznaj swój styl
-              i porównaj specjalistów dopasowanych do rzeczywistego zakresu prac.
+              {homeCopy.hero.body}
             </p>
 
             <div className="mt-9 grid max-w-2xl gap-3 sm:grid-cols-[1.25fr_0.75fr]">
@@ -147,25 +146,25 @@ export default async function Home() {
                 className="group rounded-lg border border-[#a57aff] bg-[#7c3aed] px-6 py-5 text-center font-bold text-white shadow-[0_18px_45px_rgba(86,35,168,0.38)] transition hover:bg-[#8b4cf0]"
               >
                 <span className="mr-2 rounded-full bg-white px-2 py-1 text-xs font-bold text-primary">AI</span>
-                Poznaj swój styl i stwórz brief
+                {homeCopy.hero.primaryCta}
                 <span className="ml-2 transition group-hover:translate-x-1">&#8594;</span>
               </Link>
               <Link
                 href="/designers"
                 className="rounded-lg border border-white/55 bg-white/12 px-6 py-5 text-center font-semibold text-white backdrop-blur transition hover:bg-white/20"
               >
-                Znajdź projektanta
+                {homeCopy.hero.secondaryCta}
               </Link>
             </div>
 
             <Link href="/get-started" className="mt-5 inline-flex text-sm font-semibold text-white/80 hover:text-white">
-              Jesteś projektantem lub architektem? Utwórz swój profil &#8594;
+              {homeCopy.hero.designerCta} &#8594;
             </Link>
 
             <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/78">
-              <span><b className="text-[#5de1d1]">&#10003;</b> Prawdziwe portfolio</span>
-              <span><b className="text-[#5de1d1]">&#10003;</b> Bezpośredni kontakt</span>
-              <span><b className="text-[#5de1d1]">&#10003;</b> Bezpłatny start</span>
+              {homeCopy.hero.benefits.map((benefit) => (
+                <span key={benefit}><b className="text-[#5de1d1]">&#10003;</b> {benefit}</span>
+              ))}
             </div>
           </div>
         </div>
@@ -180,7 +179,7 @@ export default async function Home() {
                 index === 0 ? "text-primary" : index === 1 ? "text-accent" : "text-warm",
               ].join(" ")}>{value}</div>
               <div className="mt-1 text-sm font-semibold text-muted">{label}</div>
-              <div className="mt-2 text-xs text-muted">Aktualne dane platformy</div>
+              <div className="mt-2 text-xs text-muted">{homeCopy.metrics.caption}</div>
             </div>
           ))}
         </div>
@@ -188,27 +187,22 @@ export default async function Home() {
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <div className="max-w-3xl">
-          <p className="text-sm font-bold uppercase text-accent">Jak to działa</p>
-          <h2 className="mt-3 text-4xl font-bold">Od zapisanych zdjęć do konkretnej pierwszej rozmowy.</h2>
+          <p className="text-sm font-bold uppercase text-accent">{homeCopy.howItWorks.eyebrow}</p>
+          <h2 className="mt-3 text-4xl font-bold">{homeCopy.howItWorks.headline}</h2>
           <p className="mt-4 text-lg leading-8 text-muted">
-            ArchiCompass łączy gust wizualny z informacjami potrzebnymi specjaliście:
-            zakresem, pomieszczeniami, budżetem, terminem, usługami i stanem inwestycji.
+            {homeCopy.howItWorks.body}
           </p>
         </div>
 
         <div className="mt-9 grid gap-5 lg:grid-cols-3">
-          {[
-            ["01", "Dodaj inspiracje", "Prześlij zdjęcia pomieszczeń, detali i nastrojów. AI rozpozna powtarzające się cechy."],
-            ["02", "Dopracuj brief", "Dodaj metraż, pomieszczenia, budżet, termin oraz potrzeby dotyczące wizualizacji 3D i nadzoru."],
-            ["03", "Poznaj właściwego specjalistę", "Porównaj portfolio i wyślij uporządkowane zapytanie projektowe."],
-          ].map(([number, title, copy], index) => (
+          {homeCopy.howItWorks.steps.map(({ body, number, title }, index) => (
             <article key={title} className="rounded-lg border border-line bg-card p-6 shadow-[0_14px_40px_rgba(54,31,73,0.07)]">
               <div className={[
                 "grid h-11 w-11 place-items-center rounded-lg text-sm font-bold text-white",
                 index === 0 ? "bg-primary" : index === 1 ? "bg-accent" : "bg-warm",
               ].join(" ")}>{number}</div>
               <h3 className="mt-5 text-2xl font-bold">{title}</h3>
-              <p className="mt-3 text-sm leading-6 text-muted">{copy}</p>
+              <p className="mt-3 text-sm leading-6 text-muted">{body}</p>
             </article>
           ))}
         </div>
@@ -217,32 +211,26 @@ export default async function Home() {
       <section className="border-y border-line bg-[#261631] text-white">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
-            <span className="rounded-full bg-[#4fd8c7] px-3 py-1 text-xs font-bold text-[#173d39]">AI PROJECT COMPASS</span>
-            <h2 className="mt-5 text-4xl font-bold">Twoje zdjęcia stają się czymś więcej niż moodboardem.</h2>
+            <span className="rounded-full bg-[#4fd8c7] px-3 py-1 text-xs font-bold text-[#173d39]">{homeCopy.aiProjectCompass.eyebrow}</span>
+            <h2 className="mt-5 text-4xl font-bold">{homeCopy.aiProjectCompass.headline}</h2>
             <p className="mt-4 text-lg leading-8 text-white/72">
-              Otrzymaj kierunek stylistyczny, paletę kolorów, propozycje materiałów
-              i wskazówki dopasowania. Rozwijaj ten sam brief bez zaczynania od nowa.
+              {homeCopy.aiProjectCompass.body}
             </p>
             <Link href="/project-compass" className="mt-7 inline-flex rounded-lg bg-[#7c3aed] px-6 py-4 font-bold text-white shadow-lg shadow-[#7c3aed]/25">
-              Przeanalizuj zdjęcia inspiracji &#8594;
+              {homeCopy.aiProjectCompass.cta} &#8594;
             </Link>
           </div>
 
           <div className="rounded-lg border border-white/15 bg-white p-6 text-foreground shadow-2xl">
             <div className="flex items-start justify-between gap-4 border-b border-line pb-4">
               <div>
-                <div className="text-xs font-bold uppercase text-primary">Przykładowy kierunek AI</div>
-                <div className="mt-1 text-3xl font-bold">Ciepłe japandi</div>
+                <div className="text-xs font-bold uppercase text-primary">{homeCopy.aiProjectCompass.example.eyebrow}</div>
+                <div className="mt-1 text-3xl font-bold">{homeCopy.aiProjectCompass.example.style}</div>
               </div>
-              <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-bold text-accent">Gotowe do briefu</span>
+              <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-bold text-accent">{homeCopy.aiProjectCompass.example.status}</span>
             </div>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {[
-                ["Paleta", "Krem, glina, ciepły dąb"],
-                ["Materiały", "Jasne drewno, len, kamień"],
-                ["Nastrój", "Spokojny, naturalny, uporządkowany"],
-                ["Profil projektanta", "Wnętrza mieszkalne, zabudowy, naturalne wykończenia"],
-              ].map(([title, copy]) => (
+              {homeCopy.aiProjectCompass.example.items.map(([title, copy]) => (
                 <div key={title} className="rounded-lg border border-line bg-background p-4">
                   <div className="text-xs font-bold uppercase text-muted">{title}</div>
                   <div className="mt-2 font-semibold">{copy}</div>
@@ -257,9 +245,9 @@ export default async function Home() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-bold uppercase text-warm">Najnowsze realizacje</p>
-            <h2 className="mt-2 text-4xl font-bold">Projekty w ArchiCompass</h2>
+            <h2 className="mt-2 text-4xl font-bold">{homeCopy.latestProjects.headline}</h2>
           </div>
-          <Link href="/designers" className="font-bold text-primary hover:underline">Zobacz wszystkich specjalistów &#8594;</Link>
+          <Link href="/designers" className="font-bold text-primary hover:underline">{homeCopy.latestProjects.cta} &#8594;</Link>
         </div>
 
         {featuredProjects.length ? (
@@ -286,8 +274,8 @@ export default async function Home() {
           </div>
         ) : (
           <div className="mt-8 rounded-lg border border-dashed border-line bg-card p-8 text-center">
-            <h3 className="text-xl font-bold">Pierwsze publiczne projekty pojawią się tutaj.</h3>
-            <p className="mt-2 text-muted">Każdy opublikowany projekt automatycznie zaktualizuje licznik powyżej.</p>
+            <h3 className="text-xl font-bold">{homeCopy.latestProjects.emptyTitle}</h3>
+            <p className="mt-2 text-muted">{homeCopy.latestProjects.emptyBody}</p>
           </div>
         )}
       </section>
@@ -296,15 +284,14 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-3xl">
-              <p className="text-sm font-bold uppercase text-accent">Inspiration Hub</p>
-              <h2 className="mt-2 text-4xl font-bold">Inspiracje, które pomagają podejmować lepsze decyzje projektowe.</h2>
+              <p className="text-sm font-bold uppercase text-accent">{homeCopy.inspirationHub.eyebrow}</p>
+              <h2 className="mt-2 text-4xl font-bold">{homeCopy.inspirationHub.headline}</h2>
               <p className="mt-4 text-lg leading-8 text-muted">
-                Poznaj praktyczne poradniki o stylach, materiałach, pomieszczeniach,
-                planowaniu remontu i zrównoważonych wnętrzach. Zapisuj artykuły w strefie klienta.
+                {homeCopy.inspirationHub.body}
               </p>
             </div>
             <Link href="/inspiration" className="font-bold text-primary hover:underline">
-              Odkryj Inspiration Hub &#8594;
+              {homeCopy.inspirationHub.cta} &#8594;
             </Link>
           </div>
 
@@ -330,7 +317,7 @@ export default async function Home() {
                       <div className="text-xs font-bold uppercase text-accent">{article.category}</div>
                       <h3 className="mt-2 text-xl font-bold hover:text-primary">{article.title}</h3>
                       <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted">{article.excerpt}</p>
-                      <div className="mt-5 text-sm font-bold text-primary">Czytaj artykuł &#8594;</div>
+                      <div className="mt-5 text-sm font-bold text-primary">{homeCopy.inspirationHub.readCta} &#8594;</div>
                     </div>
                   </Link>
                 </article>
@@ -338,8 +325,8 @@ export default async function Home() {
             </div>
           ) : (
             <div className="mt-8 rounded-lg border border-dashed border-line bg-background p-7">
-              <h3 className="text-xl font-bold">Przygotowujemy pierwsze poradniki i inspiracje.</h3>
-              <Link href="/inspiration" className="mt-3 inline-flex font-bold text-primary hover:underline">Otwórz Inspiration Hub</Link>
+              <h3 className="text-xl font-bold">{homeCopy.inspirationHub.emptyTitle}</h3>
+              <Link href="/inspiration" className="mt-3 inline-flex font-bold text-primary hover:underline">{homeCopy.inspirationHub.emptyCta}</Link>
             </div>
           )}
         </div>
@@ -348,11 +335,11 @@ export default async function Home() {
       <section className="bg-accent text-white">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
-            <p className="text-sm font-bold uppercase text-white/65">Dla projektantów i pracowni</p>
-            <h2 className="mt-2 text-4xl font-bold">Pokaż najlepsze realizacje. Otrzymuj precyzyjniejsze zapytania.</h2>
-            <p className="mt-4 max-w-2xl leading-7 text-white/80">Utwórz publiczne portfolio, połącz opinie Google i zarządzaj uporządkowanymi briefami w jednym miejscu.</p>
+            <p className="text-sm font-bold uppercase text-white/65">{homeCopy.forDesigners.eyebrow}</p>
+            <h2 className="mt-2 text-4xl font-bold">{homeCopy.forDesigners.headline}</h2>
+            <p className="mt-4 max-w-2xl leading-7 text-white/80">{homeCopy.forDesigners.body}</p>
           </div>
-          <Link href="/get-started" className="rounded-lg bg-white px-6 py-4 text-center font-bold text-accent">Dołącz jako specjalista</Link>
+          <Link href="/get-started" className="rounded-lg bg-white px-6 py-4 text-center font-bold text-accent">{homeCopy.forDesigners.cta}</Link>
         </div>
       </section>
     </main>

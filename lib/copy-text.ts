@@ -19,5 +19,5 @@ export async function copyText(text: string) {
   textarea.setSelectionRange(0, textarea.value.length);
   const copied = document.execCommand("copy");
   document.body.removeChild(textarea);
-  if (!copied) throw new Error("Copying is blocked by this browser. Select and copy the text manually.");
+  if (!copied) throw new Error("Przeglądarka zablokowała kopiowanie. Zaznacz tekst i skopiuj go ręcznie.");
 }

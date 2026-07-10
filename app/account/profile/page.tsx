@@ -587,7 +587,7 @@ export default async function EditProfilePage({
                   name="profile_headline"
                   maxLength={140}
                   defaultValue={p.profile_headline ?? ""}
-                  placeholder="Ciepłe, funkcjonalne wnętrza do współczesnego życia w mieście"
+                  placeholder="Ciepłe, funkcjonalne wnętrza do współczesnego życia"
                   className={fieldClass}
                 />
               </Field>

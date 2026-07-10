@@ -45,7 +45,7 @@ export type MatchReason = {
 
 export type ProfessionalMatch = {
   percent: number;
-  label: "Strong match" | "Promising match" | "Worth exploring";
+  label: "Bardzo dobre dopasowanie" | "Obiecujące dopasowanie" | "Warto sprawdzić";
   reasons: MatchReason[];
 };
 
@@ -62,6 +62,12 @@ function contains(text: string, value: string) {
 }
 
 function budgetRange(value: string) {
+  if (value === "Under 50k PLN total project budget") return { min: 0, max: 50_000 };
+  if (value === "50k-100k PLN total project budget") return { min: 50_000, max: 100_000 };
+  if (value === "100k-200k PLN total project budget") return { min: 100_000, max: 200_000 };
+  if (value === "200k-400k PLN total project budget") return { min: 200_000, max: 400_000 };
+  if (value === "400k-800k PLN total project budget") return { min: 400_000, max: 800_000 };
+  if (value === "800k+ PLN total project budget") return { min: 800_000, max: Number.POSITIVE_INFINITY };
   if (value === "Under 10k PLN") return { min: 0, max: 10_000 };
   if (value === "10k-30k PLN") return { min: 10_000, max: 30_000 };
   if (value === "30k-80k PLN") return { min: 30_000, max: 80_000 };
@@ -70,7 +76,7 @@ function budgetRange(value: string) {
 }
 
 function formatAmount(value: number) {
-  return new Intl.NumberFormat("en", { maximumFractionDigits: 0 }).format(value);
+  return new Intl.NumberFormat("pl-PL", { maximumFractionDigits: 0 }).format(value);
 }
 
 export function scoreProfessionalMatch(
@@ -100,12 +106,12 @@ export function scoreProfessionalMatch(
     const cueMatches = brief.cues.filter((cue) => contains(professionalText, cue));
     points += (styleMatch ? 14 : 0) + Math.min(8, cueMatches.length * 2);
     reasons.push({
-      label: "Style",
+      label: "Styl",
       value: styleMatch
-        ? `${brief.style} appears in profile or portfolio`
+        ? `${brief.style} pojawia się w profilu lub portfolio`
         : cueMatches.length
-          ? `${cueMatches.length} visual preference${cueMatches.length === 1 ? "" : "s"} matched`
-          : `${brief.style || "Visual direction"} needs portfolio review`,
+          ? `Dopasowano ${cueMatches.length} ${cueMatches.length === 1 ? "cechę wizualną" : "cechy wizualne"}`
+          : `${brief.style || "Kierunek wizualny"} wymaga sprawdzenia portfolio`,
       status: styleMatch ? "strong" : cueMatches.length ? "partial" : "check",
     });
   }
@@ -116,12 +122,12 @@ export function scoreProfessionalMatch(
     possible += 15;
     const matchedSignals = projectSignals.filter((signal) => contains(professionalText, signal));
     points += Math.round((matchedSignals.length / projectSignals.length) * 15);
-    const size = brief.area ? ` · ${brief.area} m2` : "";
+    const size = brief.area ? ` · ${brief.area} m²` : "";
     reasons.push({
-      label: "Project scope",
+      label: "Zakres projektu",
       value: matchedSignals.length
-        ? `${matchedSignals.length}/${projectSignals.length} brief signals found${size}`
-        : `${brief.projectType || "Project"}${size} · confirm similar experience`,
+        ? `Znaleziono ${matchedSignals.length}/${projectSignals.length} sygnałów z briefu${size}`
+        : `${brief.projectType || "Projekt"}${size} · potwierdź podobne doświadczenie`,
       status:
         matchedSignals.length >= Math.ceil(projectSignals.length / 2)
           ? "strong"
@@ -142,11 +148,11 @@ export function scoreProfessionalMatch(
     const confirmed = requiredCapabilities.filter((capability) => available.includes(capability));
     points += Math.round((confirmed.length / requiredCapabilities.length) * 20);
     reasons.push({
-      label: "Services",
+      label: "Usługi",
       value:
         confirmed.length === requiredCapabilities.length
-          ? `All ${requiredCapabilities.length} requested services confirmed`
-          : `${confirmed.length}/${requiredCapabilities.length} requested services confirmed`,
+          ? `Potwierdzono wszystkie wymagane usługi (${requiredCapabilities.length})`
+          : `Potwierdzono ${confirmed.length}/${requiredCapabilities.length} wymaganych usług`,
       status:
         confirmed.length === requiredCapabilities.length
           ? "strong"
@@ -159,8 +165,8 @@ export function scoreProfessionalMatch(
     const supportMatch = contains(professionalText, brief.support);
     points += supportMatch ? 10 : 3;
     reasons.push({
-      label: "Support",
-      value: supportMatch ? `${brief.support} experience found` : `${brief.support} needs confirmation`,
+      label: "Wsparcie",
+      value: supportMatch ? `W profilu widać doświadczenie: ${brief.support}` : `Do potwierdzenia: ${brief.support}`,
       status: supportMatch ? "strong" : "check",
     });
   }
@@ -171,12 +177,12 @@ export function scoreProfessionalMatch(
     const remote = (professional.work_modes ?? []).some((mode) => mode === "Remote" || mode === "Hybrid");
     points += local ? 12 : remote ? 8 : 2;
     reasons.push({
-      label: "Location",
+      label: "Lokalizacja",
       value: local
-        ? `Local match · ${professional.location}`
+        ? `Dopasowanie lokalne · ${professional.location}`
         : remote
-          ? `Remote or hybrid work available · ${professional.location || "location on request"}`
-          : `Check service area · ${professional.location || "not provided"}`,
+          ? `Możliwa współpraca zdalna lub hybrydowa · ${professional.location || "lokalizacja do ustalenia"}`
+          : `Sprawdź obszar działania · ${professional.location || "nie podano"}`,
       status: local ? "strong" : remote ? "partial" : "check",
     });
   }
@@ -188,24 +194,24 @@ export function scoreProfessionalMatch(
     if (minimum === null) {
       points += 6;
       reasons.push({
-        label: "Budget",
-        value: `${brief.budget} · pricing needs confirmation`,
+        label: "Budżet",
+        value: `${brief.budget} · wycena wymaga potwierdzenia`,
         status: "check",
       });
     } else if (minimum <= clientBudget.max) {
       const partlyAbove = professional.price_to !== null && professional.price_to > clientBudget.max;
       points += partlyAbove ? 14 : 18;
       reasons.push({
-        label: "Budget",
+        label: "Budżet",
         value: partlyAbove
-          ? `Packages overlap ${brief.budget}`
-          : `Starting level fits ${brief.budget}`,
+          ? `Zakres cen częściowo pokrywa się z budżetem: ${brief.budget}`
+          : `Poziom startowy mieści się w budżecie: ${brief.budget}`,
         status: partlyAbove ? "partial" : "strong",
       });
     } else {
       reasons.push({
-        label: "Budget",
-        value: `Minimum project is ${formatAmount(minimum)} PLN`,
+        label: "Budżet",
+        value: `Minimalny budżet projektu: ${formatAmount(minimum)} PLN`,
         status: "check",
       });
     }
@@ -226,8 +232,8 @@ export function scoreProfessionalMatch(
             : 3;
     points += availabilityPoints;
     reasons.push({
-      label: "Timing",
-      value: `${brief.timeline} · ${availability || "availability needs confirmation"}`,
+      label: "Termin",
+      value: `${brief.timeline} · ${availability || "dostępność do potwierdzenia"}`,
       status: availabilityPoints >= 7 ? "strong" : availabilityPoints >= 3 ? "partial" : "check",
     });
   }
@@ -236,8 +242,8 @@ export function scoreProfessionalMatch(
     possible += 5;
     points += 5;
     reasons.push({
-      label: "Evidence",
-      value: `${portfolio.length} public portfolio project${portfolio.length === 1 ? "" : "s"}`,
+      label: "Portfolio",
+      value: `${portfolio.length} ${portfolio.length === 1 ? "publiczny projekt" : "publicznych projektów"}`,
       status: "strong",
     });
   }
@@ -245,7 +251,7 @@ export function scoreProfessionalMatch(
   const percent = possible ? Math.round((points / possible) * 100) : 0;
   return {
     percent,
-    label: percent >= 75 ? "Strong match" : percent >= 50 ? "Promising match" : "Worth exploring",
+    label: percent >= 75 ? "Bardzo dobre dopasowanie" : percent >= 50 ? "Obiecujące dopasowanie" : "Warto sprawdzić",
     reasons,
   };
 }

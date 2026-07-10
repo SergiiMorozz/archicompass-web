@@ -43,7 +43,7 @@ const projectTypes: Option[] = [
   {
     label: "Mieszkanie",
     value: "Apartment",
-    description: "Mieszkanie własne, na wynajem lub apartament w mieście.",
+    description: "Mieszkanie własne, na wynajem lub apartament miejski.",
   },
   {
     label: "Dom",
@@ -129,7 +129,7 @@ const styles: Option[] = [
     specialty: "mid-century",
   },
   {
-    label: "Art Deco",
+    label: "Art déco",
     value: "Art Deco",
     description: "Geometria, szlachetne materiały, symetria i eleganckie akcenty.",
     specialty: "art deco",

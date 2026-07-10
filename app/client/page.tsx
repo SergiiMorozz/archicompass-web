@@ -184,7 +184,7 @@ export default async function ClientOverviewPage({
             </h2>
             <p className="mt-3 text-sm leading-6 text-muted">
               {briefs.length
-                ? "Zapisuj interesujących projektantów i realizacje w Ulubionych, a potem wyślij jeden konkretny brief."
+                ? "Zapisuj interesujących projektantów i realizacje w Ulubionych, a potem wyślij dobrze przygotowany brief."
                 : "Dodaj inspiracje, zakres, budżet i termin, aby projektanci mogli dobrze zrozumieć inwestycję przed odpowiedzią."}
             </p>
             <div className="mt-6 grid gap-3">

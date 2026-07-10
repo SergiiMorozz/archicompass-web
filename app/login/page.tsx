@@ -3,6 +3,7 @@
 import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { authCopy } from "@/content/pl/copy";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type Mode = "signin" | "signup";
@@ -125,25 +126,21 @@ function LoginContent() {
         <section>
           <div className="inline-flex items-center gap-2 rounded-full border border-line bg-card px-3 py-1 text-xs font-semibold text-muted">
             <span className="h-2 w-2 rounded-full bg-accent" />
-            Bezpieczne logowanie e-mailem i hasłem
+            {authCopy.securityBadge}
           </div>
           <h1 className="mt-5 text-4xl font-bold leading-tight sm:text-6xl">
-            {mode === "signup" ? "Utwórz konto ArchiCompass" : "Witaj ponownie w ArchiCompass"}
+            {mode === "signup" ? authCopy.signUp.headline : authCopy.signIn.headline}
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-8 text-muted">
-            {mode === "signup"
-              ? "Wybierz jedną rolę konta. Po rejestracji strefa klienta i studio projektanta pozostają oddzielne."
-              : "Zaloguj się adresem e-mail i ustalonym hasłem. Nie potrzebujesz linku do logowania."}
+            {mode === "signup" ? authCopy.signUp.description : authCopy.signIn.description}
           </p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border border-line bg-card p-5">
-              <div className="font-bold">Dla klientów</div>
-              <p className="mt-2 text-sm leading-6 text-muted">Zapisuj briefy, porównuj projektantów i prowadź rozmowy.</p>
-            </div>
-            <div className="rounded-lg border border-line bg-card p-5">
-              <div className="font-bold">Dla projektantów</div>
-              <p className="mt-2 text-sm leading-6 text-muted">Publikuj portfolio i otrzymuj zapytania od klientów.</p>
-            </div>
+            {authCopy.audienceCards.map((card) => (
+              <div key={card.title} className="rounded-lg border border-line bg-card p-5">
+                <div className="font-bold">{card.title}</div>
+                <p className="mt-2 text-sm leading-6 text-muted">{card.description}</p>
+              </div>
+            ))}
           </div>
           <Link href="/" className="mt-7 inline-flex text-sm font-bold text-primary hover:underline">Przejdź do strony głównej</Link>
         </section>
@@ -170,7 +167,7 @@ function LoginContent() {
             ) : null}
 
             <label className="text-sm font-bold">
-              Email
+              Adres e-mail
               <input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
             <label className="text-sm font-bold">

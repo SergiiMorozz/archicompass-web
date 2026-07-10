@@ -290,7 +290,7 @@ function StudioCard({
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="text-sm font-semibold text-primary">
-            {countLabel(memberCount, "connected designer")}
+            {polishCountLabel(memberCount, "powiązany projektant", "powiązanych projektantów", "powiązanych projektantów")}
           </div>
           <FavoriteButton compact entityType="studio" entityKey={studio.id} initialSaved={initialSaved} />
         </div>

@@ -80,6 +80,6 @@ export function pricingLabel(details: PricingDetails) {
   if (from && to) return `${amount(from)}-${amount(to)} PLN${unit}`;
   if (from) return `Od ${amount(from)} PLN${unit}`;
   if (to) return `Do ${amount(to)} PLN${unit}`;
-  if (details.hourly_rate) return `${amount(details.hourly_rate)} PLN/hour`;
+  if (details.hourly_rate) return `${amount(details.hourly_rate)} PLN/godz.`;
   return model === "Custom quote" ? "Wycena indywidualna" : "Wycena po zapoznaniu się z briefem";
 }

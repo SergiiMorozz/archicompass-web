@@ -1,5 +1,6 @@
 import Link from "next/link";
 import BrandLogo from "@/components/BrandLogo";
+import { siteCopy } from "@/content/pl/copy";
 
 const navigation = [
   { href: "/", label: "Strona główna" },
@@ -25,14 +26,13 @@ export default function Footer() {
             <BrandLogo variant="white" className="h-11 w-[190px]" />
           </Link>
           <p className="mt-5 max-w-md text-sm leading-6 text-white/70">
-            Zamień inspiracje w precyzyjny brief projektowy, a następnie znajdź
-            projektantów i architektów dopasowanych do Twojej inwestycji.
+            {siteCopy.brandDescription}
           </p>
         </div>
 
         <div>
           <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
-            Nawigacja
+            {siteCopy.footer.navigationTitle}
           </h2>
           <div className="mt-4 grid gap-3 text-sm text-white/75">
             {navigation.map((item) => (
@@ -45,7 +45,7 @@ export default function Footer() {
 
         <div>
           <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
-            Popularne lokalizacje
+            {siteCopy.footer.popularLocationsTitle}
           </h2>
           <div className="mt-4 grid gap-3 text-sm text-white/75">
             {popularLocations.map((item) => (
@@ -58,7 +58,7 @@ export default function Footer() {
 
         <div>
           <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
-            Informacje prawne
+            {siteCopy.footer.legalTitle}
           </h2>
           <div className="mt-4 grid gap-3 text-sm text-white/75">
             <Link href="/privacy" className="hover:text-white">
@@ -77,10 +77,8 @@ export default function Footer() {
         </div>
       </div>
       <div className="border-t border-white/10 px-4 py-5 text-center text-xs text-white/50">
-        <div>&copy; 2026 ArchiCompass. Wszelkie prawa zastrzeżone.</div>
-        <div className="mt-2">
-          Platforma prowadzona przez SM Advisory, Sergii Moroz · NIP 5252995634 · REGON 528006413 · ul. Grzybowska 2, lok. 31, 00-131 Warszawa, Polska
-        </div>
+        <div>{siteCopy.footer.copyright}</div>
+        <div className="mt-2">{siteCopy.company}</div>
       </div>
     </footer>
   );

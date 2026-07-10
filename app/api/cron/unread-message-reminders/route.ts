@@ -228,7 +228,7 @@ export async function GET(request: Request) {
             role: "client",
           },
       senderName:
-        sender?.full_name || sender?.email || (sentByClient ? "Client" : "Design professional"),
+        sender?.full_name || sender?.email || (sentByClient ? "Klient" : "Projektant wnętrz"),
       subject: inquiry.subject,
     });
     await supabase

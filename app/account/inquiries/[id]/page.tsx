@@ -219,7 +219,7 @@ export default async function AccountConversationPage({
   const attachmentsByMessage = new Map(messageAttachmentEntries);
   const other = profileData as Profile | null;
   const studio = studioData as Studio | null;
-  const otherName = studio?.name || other?.full_name || studio?.email || other?.email || "Design professional";
+  const otherName = studio?.name || other?.full_name || studio?.email || other?.email || "Projektant wnętrz";
   const originalAuthor = "You";
 
   return (

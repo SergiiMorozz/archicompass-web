@@ -1,9 +1,14 @@
+import { polishCityGrammar } from "@/content/pl/locations";
+
 export type SeoLocation = {
+  adjective?: string;
   country: string;
   countryCode: string;
   countrySlug: string;
   city: string;
   citySlug: string;
+  genitive?: string;
+  locative?: string;
   marketNote: string;
   planningNote: string;
   styleNote: string;
@@ -14,8 +19,7 @@ export const seoLocations: SeoLocation[] = [
     country: "Polska",
     countryCode: "PL",
     countrySlug: "poland",
-    city: "Warszawa",
-    citySlug: "warsaw",
+    ...polishCityGrammar.warsaw,
     marketNote: "Warszawski rynek obejmuje zarówno kompaktowe mieszkania w historycznych dzielnicach, jak i nowe domy oraz wnętrza komercyjne w całej aglomeracji.",
     planningNote: "Przed wysłaniem briefu porównaj doświadczenie w projektowaniu układów mieszkań, koordynacji remontów, pracy z zabytkami, nowymi inwestycjami i współpracy zdalnej.",
     styleNote: "Popularne kierunki to ciepły minimalizm, współczesne polskie wzornictwo, japandi, modern classic oraz starannie odrestaurowane detale historyczne.",
@@ -24,38 +28,34 @@ export const seoLocations: SeoLocation[] = [
     country: "Polska",
     countryCode: "PL",
     countrySlug: "poland",
-    city: "Krakow",
-    citySlug: "krakow",
-    marketNote: "Kraków łączy zabytkowe mieszkania, powojenną zabudowę, nowe inwestycje, obiekty hotelarskie i domy w całej aglomeracji.",
-    planningNote: "Szukaj doświadczenia w remontach, realistycznego zakresu dokumentacji, znajomości lokalnych wykonawców i jasnego podejścia do ograniczeń starszych budynków.",
-    styleNote: "Krakowskie portfolio często łączą współczesny komfort z naturalnymi materiałami, stonowanym kolorem, stolarką na wymiar i szacunkiem dla historycznego charakteru.",
+    ...polishCityGrammar.krakow,
+    marketNote: "Kraków łączy zabytkowe mieszkania, powojenną zabudowę, nowe inwestycje, obiekty hotelarskie i domy w całej aglomeracji. To rynek, na którym szczególnie liczą się wyczucie kontekstu, doświadczenie remontowe i umiejętność pracy z istniejącą tkanką budynku.",
+    planningNote: "Zwróć uwagę na doświadczenie w remontach, zakres dokumentacji, znajomość lokalnych wykonawców oraz sposób pracy z ograniczeniami starszych budynków.",
+    styleNote: "W krakowskich realizacjach często spotyka się połączenie współczesnego komfortu z naturalnymi materiałami, stonowaną kolorystyką, stolarką na wymiar i szacunkiem dla historycznego charakteru wnętrza.",
   },
   {
     country: "Polska",
     countryCode: "PL",
     countrySlug: "poland",
-    city: "Wrocław",
-    citySlug: "wroclaw",
-    marketNote: "Wrocław oferuje połączenie mieszkań w kamienicach, nowych osiedli, domów rodzinnych, biur i elastycznych przestrzeni miejskich.",
-    planningNote: "Wykorzystaj brief, aby porównać umiejętność planowania przestrzeni, zakres dokumentacji, wizualizacje 3D, wsparcie zakupowe i nadzór na budowie.",
-    styleNote: "Klienci często szukają tu wnętrz nowoczesnych, skandynawskich, industrialnych, eklektycznych i w stylu soft minimalism.",
+    ...polishCityGrammar.wroclaw,
+    marketNote: "Wrocław łączy mieszkania w kamienicach, nowe osiedla, domy rodzinne, biura i elastyczne przestrzenie miejskie.",
+    planningNote: "Wykorzystaj brief, aby porównać doświadczenie w planowaniu układów funkcjonalnych, zakres dokumentacji, jakość wizualizacji 3D, wsparcie przy zakupach oraz możliwość nadzoru na budowie.",
+    styleNote: "We wrocławskich realizacjach często pojawiają się wnętrza nowoczesne, skandynawskie, industrialne, eklektyczne i w duchu soft minimalizmu.",
   },
   {
     country: "Polska",
     countryCode: "PL",
     countrySlug: "poland",
-    city: "Gdańsk",
-    citySlug: "gdansk",
+    ...polishCityGrammar.gdansk,
     marketNote: "Rynek Gdańska i Trójmiasta obejmuje apartamenty nad morzem, zabytkowe nieruchomości, domy rodzinne, lokale inwestycyjne i wnętrza hotelarskie.",
-    planningNote: "Sprawdź, czy projektant pracuje w Gdańsku, Gdyni i Sopocie oraz czy usługa obejmuje zakupy i wsparcie podczas realizacji.",
-    styleNote: "Częste kierunki to jasne, zmysłowe wnętrza, nadmorska prostota, ciepłe drewno, modern classic i trwałe projekty dla najmu.",
+    planningNote: "Sprawdź, czy projektant realizuje projekty w Gdańsku, Gdyni i Sopocie oraz czy zakres współpracy obejmuje zakupy, kontakt z wykonawcami i wsparcie na etapie realizacji.",
+    styleNote: "W Trójmieście często sprawdzają się jasne, zmysłowe wnętrza, nadmorska prostota, ciepłe drewno, modern classic oraz trwałe rozwiązania dla mieszkań na wynajem.",
   },
   {
     country: "Polska",
     countryCode: "PL",
     countrySlug: "poland",
-    city: "Poznań",
-    citySlug: "poznan",
+    ...polishCityGrammar.poznan,
     marketNote: "Poznańskie projekty obejmują mieszkania, remontowane domy, nowe inwestycje, biura, lokale handlowe i wnętrza hotelarskie.",
     planningNote: "Porównaj portfolio według typu projektu i zapytaj, jak wyceniane są koncepcja, dokumentacja wykonawcza, zakupy i nadzór.",
     styleNote: "Dobrze reprezentowane są funkcjonalne wnętrza współczesne, ciepły minimalizm, mocne akcenty kolorystyczne, meble na wymiar i rodzinne układy.",
@@ -64,8 +64,7 @@ export const seoLocations: SeoLocation[] = [
     country: "Polska",
     countryCode: "PL",
     countrySlug: "poland",
-    city: "Łódź",
-    citySlug: "lodz",
+    ...polishCityGrammar.lodz,
     marketNote: "Łódź oferuje charakterystyczne przestrzenie poprzemysłowe, mieszkania w kamienicach, domy rodzinne, nowe inwestycje i kreatywne lokale komercyjne.",
     planningNote: "Przy złożonym remoncie wybieraj specjalistów, którzy wcześnie wyjaśniają zakres inwentaryzacji, koordynację techniczną, materiały i ryzyka realizacyjne.",
     styleNote: "Industrialne odniesienia, sztuka współczesna, oryginalna cegła, modern classic i łagodny minimalizm pasują do różnorodnej zabudowy miasta.",
@@ -74,8 +73,7 @@ export const seoLocations: SeoLocation[] = [
     country: "Polska",
     countryCode: "PL",
     countrySlug: "poland",
-    city: "Katowice",
-    citySlug: "katowice",
+    ...polishCityGrammar.katowice,
     marketNote: "Katowice i cały Śląsk łączą mieszkania, domy jednorodzinne, adaptacje, biura i wymagające technicznie remonty.",
     planningNote: "Potwierdź obszar działania projektanta, jego obecność na budowie, zakres dokumentacji i doświadczenie w koordynacji wykonawców w regionie.",
     styleNote: "Współczesne, industrialne, modernistyczne, ciepło minimalistyczne i kontrastowe wnętrza dobrze odzwierciedlają architektoniczną tożsamość regionu.",
