@@ -10,8 +10,11 @@ import {
   serviceCapabilityValues,
 } from "@/lib/service-capabilities";
 import {
+  availabilityLabel,
   availabilityStatuses,
+  pricingModelLabel,
   pricingModels,
+  workModeLabel,
   workModes,
   workModeValues,
 } from "@/lib/profile-pricing";
@@ -551,15 +554,15 @@ export default async function StudioTeamPage({
                       <label className="text-sm font-semibold">Phone<input name="phone" defaultValue={studio.phone ?? ""} className={fieldClass} /></label>
                       <label className="text-sm font-semibold">Experience<input name="years_experience" inputMode="numeric" defaultValue={studio.years_experience ?? ""} className={fieldClass} /></label>
                       <div className="grid gap-3 sm:grid-cols-2">
-                        <label className="text-sm font-semibold">Pricing model<select name="pricing_model" defaultValue={studio.pricing_model ?? "Custom quote"} className={fieldClass}>{pricingModels.map((model) => <option key={model} value={model}>{model}</option>)}</select></label>
-                        <label className="text-sm font-semibold">Availability<select name="availability_status" defaultValue={studio.availability_status ?? "Waitlist / ask"} className={fieldClass}>{availabilityStatuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></label>
-                        <label className="text-sm font-semibold">Price from, PLN per selected model<input name="price_from" inputMode="numeric" defaultValue={studio.price_from ?? ""} className={fieldClass} /></label>
-                        <label className="text-sm font-semibold">Price to, PLN per selected model<input name="price_to" inputMode="numeric" defaultValue={studio.price_to ?? ""} className={fieldClass} /></label>
-                        <label className="text-sm font-semibold sm:col-span-2">Minimum project budget, PLN<input name="minimum_project_budget" inputMode="numeric" defaultValue={studio.minimum_project_budget ?? ""} className={fieldClass} /></label>
+                        <label className="text-sm font-semibold">Model rozliczenia<select name="pricing_model" defaultValue={studio.pricing_model ?? "Custom quote"} className={fieldClass}>{pricingModels.map((model) => <option key={model} value={model}>{pricingModelLabel(model)}</option>)}</select></label>
+                        <label className="text-sm font-semibold">Dostępność<select name="availability_status" defaultValue={studio.availability_status ?? "Waitlist / ask"} className={fieldClass}>{availabilityStatuses.map((status) => <option key={status} value={status}>{availabilityLabel(status)}</option>)}</select></label>
+                        <label className="text-sm font-semibold">Cena od, PLN w wybranym modelu<input name="price_from" inputMode="numeric" defaultValue={studio.price_from ?? ""} className={fieldClass} /></label>
+                        <label className="text-sm font-semibold">Cena do, PLN w wybranym modelu<input name="price_to" inputMode="numeric" defaultValue={studio.price_to ?? ""} className={fieldClass} /></label>
+                        <label className="text-sm font-semibold sm:col-span-2">Minimalny budżet inwestycji, PLN<input name="minimum_project_budget" inputMode="numeric" defaultValue={studio.minimum_project_budget ?? ""} className={fieldClass} /></label>
                       </div>
                       <fieldset>
-                        <legend className="text-sm font-semibold">Work formats</legend>
-                        <div className="mt-3 flex flex-wrap gap-2">{workModes.map((mode) => <label key={mode} className="flex items-center gap-2 rounded-xl border border-line bg-card px-3 py-2 text-sm font-semibold"><input type="checkbox" name="work_modes" value={mode} defaultChecked={studio.work_modes?.includes(mode)} className="h-4 w-4 accent-primary" />{mode}</label>)}</div>
+                        <legend className="text-sm font-semibold">Format współpracy</legend>
+                        <div className="mt-3 flex flex-wrap gap-2">{workModes.map((mode) => <label key={mode} className="flex items-center gap-2 rounded-xl border border-line bg-card px-3 py-2 text-sm font-semibold"><input type="checkbox" name="work_modes" value={mode} defaultChecked={studio.work_modes?.includes(mode)} className="h-4 w-4 accent-primary" />{workModeLabel(mode)}</label>)}</div>
                       </fieldset>
                       <label className="text-sm font-semibold">Cooperation terms<textarea name="cooperation_terms" rows={4} defaultValue={studio.cooperation_terms ?? ""} className={fieldClass} /></label>
                       <div className="rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-4">
@@ -620,12 +623,12 @@ export default async function StudioTeamPage({
             <label className="text-sm font-semibold">Public email<input name="email" type="email" defaultValue={user.email ?? ""} className={fieldClass} /></label>
             <label className="text-sm font-semibold">Phone<input name="phone" className={fieldClass} /></label>
             <label className="text-sm font-semibold">Years of experience<input name="years_experience" inputMode="numeric" className={fieldClass} /></label>
-            <label className="text-sm font-semibold">Pricing model<select name="pricing_model" defaultValue="Custom quote" className={fieldClass}>{pricingModels.map((model) => <option key={model} value={model}>{model}</option>)}</select></label>
-            <label className="text-sm font-semibold">Availability<select name="availability_status" defaultValue="Waitlist / ask" className={fieldClass}>{availabilityStatuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></label>
-            <label className="text-sm font-semibold">Price from, PLN per selected model<input name="price_from" inputMode="numeric" className={fieldClass} /></label>
-            <label className="text-sm font-semibold">Price to, PLN per selected model<input name="price_to" inputMode="numeric" className={fieldClass} /></label>
-            <label className="text-sm font-semibold md:col-span-2">Minimum project budget, PLN<input name="minimum_project_budget" inputMode="numeric" className={fieldClass} /></label>
-            <fieldset className="md:col-span-2"><legend className="text-sm font-semibold">Work formats</legend><div className="mt-3 flex flex-wrap gap-2">{workModes.map((mode) => <label key={mode} className="flex items-center gap-2 rounded-xl border border-line bg-background px-3 py-2 text-sm font-semibold"><input type="checkbox" name="work_modes" value={mode} className="h-4 w-4 accent-primary" />{mode}</label>)}</div></fieldset>
+            <label className="text-sm font-semibold">Model rozliczenia<select name="pricing_model" defaultValue="Custom quote" className={fieldClass}>{pricingModels.map((model) => <option key={model} value={model}>{pricingModelLabel(model)}</option>)}</select></label>
+            <label className="text-sm font-semibold">Dostępność<select name="availability_status" defaultValue="Waitlist / ask" className={fieldClass}>{availabilityStatuses.map((status) => <option key={status} value={status}>{availabilityLabel(status)}</option>)}</select></label>
+            <label className="text-sm font-semibold">Cena od, PLN w wybranym modelu<input name="price_from" inputMode="numeric" className={fieldClass} /></label>
+            <label className="text-sm font-semibold">Cena do, PLN w wybranym modelu<input name="price_to" inputMode="numeric" className={fieldClass} /></label>
+            <label className="text-sm font-semibold md:col-span-2">Minimalny budżet inwestycji, PLN<input name="minimum_project_budget" inputMode="numeric" className={fieldClass} /></label>
+            <fieldset className="md:col-span-2"><legend className="text-sm font-semibold">Format współpracy</legend><div className="mt-3 flex flex-wrap gap-2">{workModes.map((mode) => <label key={mode} className="flex items-center gap-2 rounded-xl border border-line bg-background px-3 py-2 text-sm font-semibold"><input type="checkbox" name="work_modes" value={mode} className="h-4 w-4 accent-primary" />{workModeLabel(mode)}</label>)}</div></fieldset>
             <label className="text-sm font-semibold md:col-span-2">Cooperation terms<textarea name="cooperation_terms" rows={4} className={fieldClass} /></label>
             <div className="rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-4 md:col-span-2">
               <div className="font-bold">Google Business rating</div>

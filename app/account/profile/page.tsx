@@ -483,11 +483,11 @@ export default async function EditProfilePage({
                 </select>
               </Field>
 
-              <Field label="Cena od" hint="PLN w wybranym modelu rozliczenia">
+              <Field label="Cena od" hint="Kwota pokaże się jako zł/godz., zł/m² albo zł/pakiet zgodnie z modelem.">
                 <input name="price_from" defaultValue={p.price_from ?? ""} inputMode="numeric" placeholder="5000" className={fieldClass} />
               </Field>
 
-              <Field label="Cena do" hint="PLN w wybranym modelu rozliczenia">
+              <Field label="Cena do" hint="Kwota pokaże się jako zł/godz., zł/m² albo zł/pakiet zgodnie z modelem.">
                 <input name="price_to" defaultValue={p.price_to ?? ""} inputMode="numeric" placeholder="15000" className={fieldClass} />
               </Field>
 
