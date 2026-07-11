@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { countLabel } from "@/lib/count-label";
 import { getStudioMemberships, inquiryRecipientFilter } from "@/lib/studios";
+import { profileReadinessScore } from "@/lib/profile-readiness";
 
 export const revalidate = 0;
 
@@ -43,19 +44,6 @@ function statusClass(status: string) {
   return "bg-primary-soft text-primary";
 }
 
-function profileReadiness(profile: Record<string, unknown> | null) {
-  if (!profile) return 0;
-  const values = [
-    profile.full_name,
-    profile.bio,
-    profile.location,
-    profile.profession_type,
-    Array.isArray(profile.specialties) && profile.specialties.length ? "specialties" : null,
-    profile.years_experience,
-  ];
-  return Math.round((values.filter(Boolean).length / values.length) * 100);
-}
-
 export default async function StudioOverviewPage() {
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -71,7 +59,7 @@ export default async function StudioOverviewPage() {
   const [profileResult, projectResult, inquiryResult, viewResult] = await Promise.all([
     supabase
       .from("profiles")
-      .select("full_name, bio, location, profession_type, specialties, years_experience")
+      .select("full_name, profile_headline, location, profession_type, specialties, bio, email, service_capabilities, pricing_model, price_from, price_to, work_modes, availability_status, years_experience")
       .eq("id", user.id)
       .maybeSingle(),
     supabase.from("projects").select("id").eq("profile_id", user.id),
@@ -113,7 +101,7 @@ export default async function StudioOverviewPage() {
   const accepted = inquiries.filter((inquiry) => inquiry.status === "accepted").length;
   const newRequests = inquiries.filter((inquiry) => inquiry.status === "sent").length;
   const conversion = inquiries.length ? Math.round((accepted / inquiries.length) * 100) : 0;
-  const readiness = profileReadiness(profile);
+  const readiness = profileReadinessScore(profile, true);
 
   const stats = [
     ["Wyświetlenia profilu", String(views.length), "Ostatnie 30 dni"],

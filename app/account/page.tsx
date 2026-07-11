@@ -7,6 +7,7 @@ import {
   getStudioMemberships,
   inquiryRecipientFilter,
 } from "@/lib/studios";
+import { profileReadinessScore } from "@/lib/profile-readiness";
 
 export const revalidate = 0;
 
@@ -43,27 +44,6 @@ type DesignerInquiry = {
 
 function profileName(profile: Partial<Profile>, email?: string) {
   return profile.full_name || email || "Twoje konto ArchiCompass";
-}
-
-function profileScore(profile: Partial<Profile>, isProfessional: boolean) {
-  const fields = isProfessional
-    ? [
-        profile.full_name,
-        profile.location,
-        profile.profession_type,
-        profile.email,
-        profile.bio,
-        profile.profile_headline,
-        profile.specialties?.length ? "specialties" : null,
-        profile.service_capabilities?.length ? "services" : null,
-        profile.pricing_model,
-        profile.price_from || profile.price_to,
-        profile.work_modes?.length ? "work modes" : null,
-        profile.availability_status,
-        profile.years_experience,
-      ]
-    : [profile.full_name, profile.location, profile.email, profile.phone];
-  return Math.round((fields.filter(Boolean).length / fields.length) * 100);
 }
 
 export default async function AccountPage({
@@ -120,7 +100,7 @@ export default async function AccountPage({
   const sentInquiries = (sentInquiriesData ?? []) as DesignerInquiry[];
   const incomingInquiries = (incomingInquiriesData ?? []) as DesignerInquiry[];
   const isProfessional = accountRole === "designer";
-  const score = profileScore(profile, isProfessional);
+  const score = profileReadinessScore(profile, isProfessional);
   const hasPublicProfile = isProfessional && Boolean(profileData);
 
   return (

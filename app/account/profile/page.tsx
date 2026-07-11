@@ -19,6 +19,7 @@ import {
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { publicTextError } from "@/lib/content-moderation";
 import { fetchGooglePlaceSummary } from "@/lib/google-places";
+import { profileReadinessScore } from "@/lib/profile-readiness";
 
 export const revalidate = 0;
 
@@ -100,27 +101,6 @@ function specialtiesValue(formData: FormData) {
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
-}
-
-function completionScore(profile: Partial<Profile>, isProfessional: boolean) {
-  const fields = isProfessional
-    ? [
-        profile.full_name,
-        profile.location,
-        profile.profession_type,
-        profile.email,
-        profile.bio,
-        profile.profile_headline,
-        profile.specialties?.length ? "specialties" : null,
-        profile.service_capabilities?.length ? "services" : null,
-        profile.pricing_model,
-        profile.price_from || profile.price_to,
-        profile.work_modes?.length ? "work modes" : null,
-        profile.availability_status,
-        profile.years_experience,
-      ]
-    : [profile.full_name, profile.location, profile.email, profile.phone];
-  return Math.round((fields.filter(Boolean).length / fields.length) * 100);
 }
 
 function fileValue(formData: FormData, key: string) {
@@ -349,7 +329,7 @@ export default async function EditProfilePage({
   if (!accountRole) redirect("/onboarding?next=%2Faccount%2Fprofile");
   const isProfessional = accountRole === "designer";
   const hasProfile = Boolean(profile);
-  const score = completionScore(p, isProfessional);
+  const score = profileReadinessScore(p, isProfessional);
   const specialtyCount = p.specialties?.length ?? 0;
   const backHref = isProfessional ? "/account" : "/client";
 
