@@ -61,6 +61,13 @@ function contains(text: string, value: string) {
   return Boolean(normalized) && text.includes(normalized);
 }
 
+function splitStyleValues(value: string) {
+  return value
+    .split("|")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function budgetRange(value: string) {
   if (value === "Under 50k PLN total project budget") return { min: 0, max: 50_000 };
   if (value === "50k-100k PLN total project budget") return { min: 50_000, max: 100_000 };
@@ -102,16 +109,18 @@ export function scoreProfessionalMatch(
 
   if (brief.style || brief.cues.length) {
     possible += 22;
-    const styleMatch = brief.style ? contains(professionalText, brief.style) : false;
+    const styleValues = brief.style ? splitStyleValues(brief.style) : [];
+    const matchedStyles = styleValues.filter((style) => contains(professionalText, style));
+    const styleMatch = matchedStyles.length > 0;
     const cueMatches = brief.cues.filter((cue) => contains(professionalText, cue));
-    points += (styleMatch ? 14 : 0) + Math.min(8, cueMatches.length * 2);
+    points += (styleMatch ? Math.min(14, matchedStyles.length * 7) : 0) + Math.min(8, cueMatches.length * 2);
     reasons.push({
       label: "Styl",
       value: styleMatch
-        ? `${brief.style} pojawia się w profilu lub portfolio`
+        ? `${matchedStyles.join(" / ")} pojawia się w profilu lub portfolio`
         : cueMatches.length
           ? `Dopasowano ${cueMatches.length} ${cueMatches.length === 1 ? "cechę wizualną" : "cechy wizualne"}`
-          : `${brief.style || "Kierunek wizualny"} wymaga sprawdzenia portfolio`,
+          : `${styleValues.join(" / ") || "Kierunek wizualny"} wymaga sprawdzenia portfolio`,
       status: styleMatch ? "strong" : cueMatches.length ? "partial" : "check",
     });
   }

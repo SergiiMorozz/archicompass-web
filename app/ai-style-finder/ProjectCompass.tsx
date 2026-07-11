@@ -427,6 +427,21 @@ function styleLabels(value: string) {
     .join(" / ");
 }
 
+function styleValues(value: string) {
+  const values = value.split(" | ").filter(Boolean);
+  return values.length ? values : ["Not sure yet"];
+}
+
+function primaryStyleValue(value: string) {
+  return styleValues(value)[0] ?? "Not sure yet";
+}
+
+function mergeStyleValue(current: string, suggested: string) {
+  if (!suggested || suggested === "Not sure yet") return current;
+  const values = styleValues(current).filter((item) => item !== "Not sure yet");
+  return Array.from(new Set([suggested, ...values])).slice(0, 4).join(" | ");
+}
+
 function OptionGrid({
   label,
   options,
@@ -485,7 +500,10 @@ function MultiOptionGrid({
   return (
     <section>
       <h2 className="text-base font-bold">{label}</h2>
-      <p className="mt-1 text-sm leading-6 text-muted">Wybierz jeden lub kilka kierunków. Łączenie stylów jest naturalne i pomaga w lepszym dopasowaniu projektanta.</p>
+      <p className="mt-1 text-sm leading-6 text-muted">
+        Wybierz jeden lub kilka kierunków, maksymalnie cztery. Łączenie stylów jest
+        naturalne i pomaga w lepszym dopasowaniu projektanta.
+      </p>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {options.map((option) => {
           const selected = values.includes(option.value);
@@ -547,7 +565,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const objectUrls = useRef<string[]>([]);
 
-  const selectedStyles = style.split(" | ").filter(Boolean);
+  const selectedStyles = styleValues(style);
   const selectedStyle = selectedOption(styles, selectedStyles[0]);
   const selectedScope = selectedOption(scopes, scope);
   const selectedCueOptions = useMemo(
@@ -735,7 +753,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
     const formData = new FormData();
     formData.set("project_type", projectType);
-    formData.set("style_direction", style);
+    formData.set("style_direction", primaryStyleValue(style));
     formData.set("visual_cues", selectedVisualCues.join(", "));
 
     referencePhotos.slice(0, maxAnalysisPhotos).forEach((photo) => {
@@ -759,7 +777,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
       setStyleAnalysis(payload.analysis);
       if (styles.some((option) => option.value === payload.analysis?.styleDirection)) {
-        setStyle(payload.analysis.styleDirection);
+        setStyle((current) => mergeStyleValue(current, payload.analysis!.styleDirection));
       }
 
       setSelectedVisualCues((current) =>
@@ -1329,6 +1347,43 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                 className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary"
               />
             </label>
+          </div>
+
+          <div className="rounded-2xl border border-primary/20 bg-primary-soft p-4">
+            <div className="text-sm font-semibold text-primary">Gotowe?</div>
+            <p className="mt-1 text-sm leading-6 text-muted">
+              Możesz zapisać brief, od razu przejść do dopasowanych projektantów albo
+              skopiować tekst i wysłać go poza platformą.
+            </p>
+            {isDesigner ? (
+              <div className="mt-4 rounded-xl border border-primary/30 bg-card p-3 text-sm leading-6 text-muted">
+                Jako projektant możesz korzystać z analizy AI i podglądu dopasowań, ale
+                zapisywanie oraz wysyłanie briefów klienta jest zablokowane.
+              </div>
+            ) : null}
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <button
+                type="button"
+                onClick={() => saveBrief(true)}
+                disabled={isSaving || isDesigner}
+                className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSaving ? "Zapisywanie briefu..." : "Zapisz brief i znajdź projektantów"}
+              </button>
+              <Link
+                href={designerHref}
+                className="rounded-xl border border-line bg-card px-5 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
+              >
+                Zobacz dopasowania bez zapisywania
+              </Link>
+              <button
+                type="button"
+                onClick={copyBrief}
+                className="rounded-xl border border-line bg-card px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
+              >
+                {copied ? "Brief skopiowany" : "Kopiuj brief"}
+              </button>
+            </div>
           </div>
         </div>
 

@@ -32,6 +32,15 @@ const allowedStyles = [
   "Modern classic",
   "Industrial",
   "Japandi",
+  "Contemporary",
+  "Mid-century modern",
+  "Art Deco",
+  "Mediterranean",
+  "Bohemian",
+  "Eclectic",
+  "Rustic / organic",
+  "Traditional",
+  "Luxury contemporary",
   "Not sure yet",
 ];
 

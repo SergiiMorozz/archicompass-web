@@ -476,7 +476,11 @@ export default function ShareableStyleResult({
             disabled={Boolean(busyAction)}
             className="rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold text-foreground disabled:opacity-60"
           >
-            {busyAction === "caption" ? "Kopiowanie..." : "Kopiuj podpis"}
+            {busyAction === "caption"
+              ? "Kopiowanie..."
+              : notice?.startsWith("Podpis")
+                ? "Podpis skopiowany"
+                : "Kopiuj podpis"}
           </button>
         </div>
       </div>
