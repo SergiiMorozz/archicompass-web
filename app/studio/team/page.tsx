@@ -30,6 +30,10 @@ type Studio = {
   specialties: string[] | null;
   service_capabilities: string[] | null;
   website: string | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  behance_url: string | null;
+  linkedin_url: string | null;
   phone: string | null;
   email: string | null;
   hourly_rate: number | null;
@@ -79,6 +83,14 @@ function numberValue(formData: FormData, key: string) {
   if (!value) return null;
   const number = Number(value);
   return Number.isFinite(number) && number >= 0 ? number : null;
+}
+
+function urlValue(formData: FormData, key: string) {
+  const value = textValue(formData, key);
+  if (!value) return null;
+  return value.startsWith("http://") || value.startsWith("https://")
+    ? value
+    : `https://${value}`;
 }
 
 function listValue(formData: FormData, key: string) {
@@ -132,8 +144,11 @@ async function studioPayload(
   const specialties = listValue(formData, "specialties");
   const moderationError = publicTextError([name, headline, bio, cooperationTerms, ...specialties]);
   if (moderationError) actionRedirect(moderationError);
-  const placeId = textValue(formData, "google_place_id");
-  const google = placeId ? await fetchGooglePlaceSummary(placeId) : { data: null };
+  const googleInput = textValue(formData, "google_place_input");
+  const google = googleInput ? await fetchGooglePlaceSummary(googleInput) : { data: null, error: null };
+  if (googleInput && !google.data) {
+    actionRedirect(google.error || "Google nie mógł zweryfikować tego profilu firmy.");
+  }
   const logoPath = await uploadStudioMedia(supabase, userId, "logo", fileValue(formData, "profile_logo"));
   const bannerPath = await uploadStudioMedia(supabase, userId, "banner", fileValue(formData, "profile_banner"));
 
@@ -146,7 +161,11 @@ async function studioPayload(
     location: textValue(formData, "location"),
     specialties,
     service_capabilities: serviceCapabilityValues(formData),
-    website: textValue(formData, "website"),
+    website: urlValue(formData, "website"),
+    instagram_url: urlValue(formData, "instagram_url"),
+    facebook_url: urlValue(formData, "facebook_url"),
+    behance_url: urlValue(formData, "behance_url"),
+    linkedin_url: urlValue(formData, "linkedin_url"),
     phone: textValue(formData, "phone"),
     email: textValue(formData, "email"),
     hourly_rate: null,
@@ -158,7 +177,7 @@ async function studioPayload(
     availability_status: textValue(formData, "availability_status"),
     cooperation_terms: cooperationTerms,
     years_experience: numberValue(formData, "years_experience"),
-    google_place_id: placeId,
+    google_place_id: google.data?.placeId ?? null,
     google_business_url: google.data?.businessUrl ?? null,
     google_rating: google.data?.rating ?? null,
     google_review_count: google.data?.reviewCount ?? null,
@@ -321,7 +340,7 @@ export default async function StudioTeamPage({
   const { data: studioData } = studioIds.length
     ? await supabase
         .from("studios")
-        .select("id, owner_id, name, profile_headline, profile_logo_path, profile_banner_path, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_place_id, google_rating, google_review_count, published, created_at")
+        .select("id, owner_id, name, profile_headline, profile_logo_path, profile_banner_path, bio, location, specialties, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_place_id, google_rating, google_review_count, published, created_at")
         .in("id", studioIds)
         .order("created_at", { ascending: true })
     : { data: [] };
@@ -522,6 +541,12 @@ export default async function StudioTeamPage({
                       </fieldset>
                       <label className="text-sm font-semibold">Bio<textarea name="bio" rows={5} defaultValue={studio.bio ?? ""} className={fieldClass} /></label>
                       <label className="text-sm font-semibold">Website<input name="website" defaultValue={studio.website ?? ""} className={fieldClass} /></label>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="text-sm font-semibold">Instagram<input name="instagram_url" defaultValue={studio.instagram_url ?? ""} placeholder="https://instagram.com/..." className={fieldClass} /></label>
+                        <label className="text-sm font-semibold">Facebook<input name="facebook_url" defaultValue={studio.facebook_url ?? ""} placeholder="https://facebook.com/..." className={fieldClass} /></label>
+                        <label className="text-sm font-semibold">Behance<input name="behance_url" defaultValue={studio.behance_url ?? ""} placeholder="https://behance.net/..." className={fieldClass} /></label>
+                        <label className="text-sm font-semibold">LinkedIn<input name="linkedin_url" defaultValue={studio.linkedin_url ?? ""} placeholder="https://linkedin.com/company/..." className={fieldClass} /></label>
+                      </div>
                       <label className="text-sm font-semibold">Public email<input name="email" type="email" defaultValue={studio.email ?? ""} className={fieldClass} /></label>
                       <label className="text-sm font-semibold">Phone<input name="phone" defaultValue={studio.phone ?? ""} className={fieldClass} /></label>
                       <label className="text-sm font-semibold">Experience<input name="years_experience" inputMode="numeric" defaultValue={studio.years_experience ?? ""} className={fieldClass} /></label>
@@ -540,8 +565,8 @@ export default async function StudioTeamPage({
                       <div className="rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-4">
                         <div className="font-bold">Google Business rating</div>
                         <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                          <label className="text-sm font-semibold sm:col-span-2">Google Place ID<input name="google_place_id" defaultValue={studio.google_place_id ?? ""} placeholder="ChIJ..." className={fieldClass} /></label>
-                          <p className="text-sm text-muted sm:col-span-2">Rating and review count are verified automatically and cannot be typed manually.</p>
+                          <label className="text-sm font-semibold sm:col-span-2">Google Maps / Business link or Place ID<input name="google_place_input" defaultValue={studio.google_business_url ?? studio.google_place_id ?? ""} placeholder="https://maps.google.com/... or ChIJ..." className={fieldClass} /></label>
+                          <p className="text-sm text-muted sm:col-span-2">Rating and review count are verified by Google and cannot be typed manually.</p>
                         </div>
                       </div>
                       <label className="flex items-center gap-3 text-sm font-semibold">
@@ -588,6 +613,10 @@ export default async function StudioTeamPage({
             </fieldset>
             <label className="text-sm font-semibold md:col-span-2">Bio<textarea name="bio" rows={5} className={fieldClass} /></label>
             <label className="text-sm font-semibold">Website<input name="website" placeholder="https://" className={fieldClass} /></label>
+            <label className="text-sm font-semibold">Instagram<input name="instagram_url" placeholder="https://instagram.com/..." className={fieldClass} /></label>
+            <label className="text-sm font-semibold">Facebook<input name="facebook_url" placeholder="https://facebook.com/..." className={fieldClass} /></label>
+            <label className="text-sm font-semibold">Behance<input name="behance_url" placeholder="https://behance.net/..." className={fieldClass} /></label>
+            <label className="text-sm font-semibold">LinkedIn<input name="linkedin_url" placeholder="https://linkedin.com/company/..." className={fieldClass} /></label>
             <label className="text-sm font-semibold">Public email<input name="email" type="email" defaultValue={user.email ?? ""} className={fieldClass} /></label>
             <label className="text-sm font-semibold">Phone<input name="phone" className={fieldClass} /></label>
             <label className="text-sm font-semibold">Years of experience<input name="years_experience" inputMode="numeric" className={fieldClass} /></label>
@@ -601,8 +630,8 @@ export default async function StudioTeamPage({
             <div className="rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-4 md:col-span-2">
               <div className="font-bold">Google Business rating</div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <label className="text-sm font-semibold sm:col-span-2">Google Place ID<input name="google_place_id" placeholder="ChIJ..." className={fieldClass} /></label>
-                <p className="text-sm text-muted sm:col-span-2">Rating and review count are verified automatically.</p>
+                <label className="text-sm font-semibold sm:col-span-2">Google Maps / Business link or Place ID<input name="google_place_input" placeholder="https://maps.google.com/... or ChIJ..." className={fieldClass} /></label>
+                <p className="text-sm text-muted sm:col-span-2">Rating and review count are verified by Google.</p>
               </div>
             </div>
             <label className="flex items-center gap-3 text-sm font-semibold md:col-span-2">

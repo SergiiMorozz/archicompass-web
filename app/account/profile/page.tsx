@@ -34,6 +34,10 @@ type Profile = {
   specialties: string[] | null;
   service_capabilities: string[] | null;
   website: string | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  behance_url: string | null;
+  linkedin_url: string | null;
   phone: string | null;
   email: string | null;
   hourly_rate: number | null;
@@ -79,6 +83,14 @@ function numberValue(formData: FormData, key: string) {
   if (typeof value !== "string" || !value.trim()) return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function urlValue(formData: FormData, key: string) {
+  const value = textValue(formData, key);
+  if (!value) return null;
+  return value.startsWith("http://") || value.startsWith("https://")
+    ? value
+    : `https://${value}`;
 }
 
 function specialtiesValue(formData: FormData) {
@@ -201,8 +213,8 @@ async function updateProfile(formData: FormData) {
     : { path: null, error: null };
   if (bannerUpload.error) redirect(`/account/profile?error=${encodeURIComponent(bannerUpload.error)}`);
 
-  const placeId = isProfessional ? textValue(formData, "google_place_id") : null;
-  const google = placeId ? await fetchGooglePlaceSummary(placeId) : { data: null, error: null };
+  const googleInput = isProfessional ? textValue(formData, "google_place_input") : null;
+  const google = googleInput ? await fetchGooglePlaceSummary(googleInput) : { data: null, error: null };
 
   const commonProfile = {
     id: user.id,
@@ -222,7 +234,11 @@ async function updateProfile(formData: FormData) {
         user_type: "professional",
         specialties,
         service_capabilities: serviceCapabilityValues(formData),
-        website: textValue(formData, "website"),
+        website: urlValue(formData, "website"),
+        instagram_url: urlValue(formData, "instagram_url"),
+        facebook_url: urlValue(formData, "facebook_url"),
+        behance_url: urlValue(formData, "behance_url"),
+        linkedin_url: urlValue(formData, "linkedin_url"),
         hourly_rate: null,
         pricing_model: textValue(formData, "pricing_model"),
         price_from: numberValue(formData, "price_from"),
@@ -232,7 +248,7 @@ async function updateProfile(formData: FormData) {
         availability_status: textValue(formData, "availability_status"),
         cooperation_terms: cooperationTerms,
         years_experience: numberValue(formData, "years_experience"),
-        google_place_id: placeId,
+        google_place_id: google.data?.placeId ?? null,
         google_business_url: google.data?.businessUrl ?? null,
         google_rating: google.data?.rating ?? null,
         google_review_count: google.data?.reviewCount ?? null,
@@ -323,7 +339,7 @@ export default async function EditProfilePage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "full_name, profile_headline, profile_logo_path, profile_banner_path, bio, location, profession_type, user_type, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_place_id, google_rating, google_review_count, google_rating_updated_at"
+      "full_name, profile_headline, profile_logo_path, profile_banner_path, bio, location, profession_type, user_type, specialties, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_place_id, google_rating, google_review_count, google_rating_updated_at"
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -523,27 +539,48 @@ export default async function EditProfilePage({
                 </Field>
               </div>
 
+              <div className="sm:col-span-2">
+                <div className="text-sm font-bold text-foreground">Profile społecznościowe</div>
+                <p className="mt-1 text-sm leading-6 text-muted">
+                  Linki pojawią się jako ikony na profilu publicznym. Dodaj tylko aktywne profile zawodowe.
+                </p>
+                <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                  <Field label="Instagram">
+                    <input name="instagram_url" defaultValue={p.instagram_url ?? ""} placeholder="https://instagram.com/..." className={fieldClass} />
+                  </Field>
+                  <Field label="Facebook">
+                    <input name="facebook_url" defaultValue={p.facebook_url ?? ""} placeholder="https://facebook.com/..." className={fieldClass} />
+                  </Field>
+                  <Field label="Behance">
+                    <input name="behance_url" defaultValue={p.behance_url ?? ""} placeholder="https://behance.net/..." className={fieldClass} />
+                  </Field>
+                  <Field label="LinkedIn">
+                    <input name="linkedin_url" defaultValue={p.linkedin_url ?? ""} placeholder="https://linkedin.com/in/..." className={fieldClass} />
+                  </Field>
+                </div>
+              </div>
+
               <div className="sm:col-span-2 rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-5">
                 <div className="text-sm font-bold text-foreground">Ocena Google Business</div>
                 <p className="mt-1 text-sm leading-6 text-muted">
-                  Dodaj identyfikator miejsca z profilu Google Business. ArchiCompass weryfikuje ocenę bezpośrednio w Google; nie można wpisać jej ręcznie.
+                  Dodaj link do profilu Google Maps / Google Business albo Place ID. ArchiCompass weryfikuje ocenę bezpośrednio w Google; nie można wpisać jej ręcznie.
                 </p>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <div className="sm:col-span-2">
-                    <Field label="Google Place ID">
+                    <Field label="Google Maps / Business link albo Place ID">
                       <input
-                        name="google_place_id"
-                        defaultValue={p.google_place_id ?? ""}
-                        placeholder="ChIJ..."
+                        name="google_place_input"
+                        defaultValue={p.google_business_url ?? p.google_place_id ?? ""}
+                        placeholder="https://maps.google.com/... albo ChIJ..."
                         className={fieldClass}
                       />
                     </Field>
                   </div>
                   <div className="sm:col-span-2 rounded-xl border border-line bg-card p-4 text-sm text-muted">
                     {p.google_rating !== null && p.google_rating !== undefined
-                      ? `Zweryfikowano: ${p.google_rating.toFixed(1)} na podstawie ${p.google_review_count ?? 0} opinii Google.`
-                      : p.google_place_id
-                        ? "Place ID zapisano. Weryfikacja uruchomi się po połączeniu Google Places."
+                      ? `Zweryfikowano przez Google: ${p.google_rating.toFixed(1)} na podstawie ${p.google_review_count ?? 0} opinii.`
+                      : p.google_place_id || p.google_business_url
+                        ? "Profil Google jest zapisany, ale nie ma jeszcze zweryfikowanej oceny."
                         : "Brak zweryfikowanej oceny Google."}
                   </div>
                 </div>

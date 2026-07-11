@@ -6,6 +6,7 @@ import FavoriteButton from "@/components/FavoriteButton";
 import GoogleRating from "@/components/GoogleRating";
 import JsonLd from "@/components/JsonLd";
 import ProjectGallery from "@/components/ProjectGallery";
+import SocialLinks, { socialSameAs } from "@/components/SocialLinks";
 import { polishCountLabel } from "@/lib/count-label";
 import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -28,6 +29,10 @@ type Studio = {
   specialties: string[] | null;
   service_capabilities: string[] | null;
   website: string | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  behance_url: string | null;
+  linkedin_url: string | null;
   phone: string | null;
   email: string | null;
   hourly_rate: number | null;
@@ -138,7 +143,7 @@ export default async function PublicStudioPage({
 
   const { data: studioData } = await supabase
     .from("studios")
-    .select("id, owner_id, name, profile_headline, profile_logo_path, profile_banner_path, bio, location, specialties, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count, published")
+    .select("id, owner_id, name, profile_headline, profile_logo_path, profile_banner_path, bio, location, specialties, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count, published")
     .eq("id", id)
     .maybeSingle();
   if (!studioData) notFound();
@@ -206,6 +211,8 @@ export default async function PublicStudioPage({
     (favoriteData ?? []).map((favorite) => `${favorite.entity_type}:${favorite.entity_key}`)
   );
   const website = websiteHref(studio.website);
+  const hasVerifiedGoogleRating =
+    typeof studio.google_rating === "number" && typeof studio.google_review_count === "number";
   const profileMediaUrl = (path: string | null) => path
     ? supabase.storage.from("profile-media").getPublicUrl(path).data.publicUrl
     : null;
@@ -237,7 +244,16 @@ export default async function PublicStudioPage({
               ? { "@type": "Place", name: studio.location }
               : undefined,
             knowsAbout: studio.specialties || [],
-            sameAs: [website, studio.google_business_url].filter(Boolean),
+            sameAs: [
+              website,
+              studio.google_business_url,
+              ...socialSameAs({
+                instagramUrl: studio.instagram_url,
+                facebookUrl: studio.facebook_url,
+                behanceUrl: studio.behance_url,
+                linkedinUrl: studio.linkedin_url,
+              }),
+            ].filter(Boolean),
             employee: visibleMembers.map((member) => {
               const memberProfile = profilesById.get(member.user_id);
               return {
@@ -319,9 +335,11 @@ export default async function PublicStudioPage({
               <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Minimalny budżet</span><span className="text-right font-semibold">{studio.minimum_project_budget ? `${studio.minimum_project_budget} PLN` : "Nie podano"}</span></div>
               <div className="flex justify-between gap-4"><span className="text-muted">Kontakt</span><span className="truncate font-semibold">{studio.email || studio.phone || "Przez brief"}</span></div>
             </div>
-            <div className="mt-5">
-              <GoogleRating rating={studio.google_rating} count={studio.google_review_count} url={studio.google_business_url} />
-            </div>
+            {hasVerifiedGoogleRating ? (
+              <div className="mt-5">
+                <GoogleRating rating={studio.google_rating} count={studio.google_review_count} url={studio.google_business_url} />
+              </div>
+            ) : null}
             {studio.cooperation_terms ? <div className="mt-5 rounded-lg border border-line bg-background p-4"><div className="text-sm font-semibold text-primary">Warunki współpracy</div><p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted">{studio.cooperation_terms}</p></div> : null}
             {isMember ? (
               <Link href="/studio/inbox" className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"><span className="w-full">Otwórz skrzynkę zespołu</span></Link>
@@ -331,6 +349,14 @@ export default async function PublicStudioPage({
               <div className="mt-6 rounded-lg border border-line bg-background p-4 text-sm leading-6 text-muted">Konta projektantów otrzymują briefy i nie mogą wysyłać zapytań jako klienci.</div>
             )}
             {website ? <a href={website} target="_blank" rel="noreferrer" className="mt-3 flex rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold"><span className="w-full">Otwórz stronę internetową</span></a> : null}
+            <div className="mt-4">
+              <SocialLinks
+                behanceUrl={studio.behance_url}
+                facebookUrl={studio.facebook_url}
+                instagramUrl={studio.instagram_url}
+                linkedinUrl={studio.linkedin_url}
+              />
+            </div>
           </aside>
         </section>
       </section>

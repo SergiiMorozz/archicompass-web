@@ -8,6 +8,7 @@ import ProjectGallery from "@/components/ProjectGallery";
 import ProfileViewTracker from "@/components/ProfileViewTracker";
 import GoogleRating from "@/components/GoogleRating";
 import JsonLd from "@/components/JsonLd";
+import SocialLinks, { socialSameAs } from "@/components/SocialLinks";
 import { polishCountLabel } from "@/lib/count-label";
 import { getAccountRole } from "@/lib/studios";
 import { availabilityLabel, pricingLabel, workModeLabel } from "@/lib/profile-pricing";
@@ -38,6 +39,10 @@ type Profile = {
   languages: string[] | null;
   service_capabilities: string[] | null;
   website: string | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  behance_url: string | null;
+  linkedin_url: string | null;
   phone: string | null;
   email: string | null;
   hourly_rate: number | null;
@@ -319,7 +324,7 @@ export default async function DesignerProfilePage({
   const { data: profileData, error: pErr } = await supabase
     .from("profiles")
     .select(
-      "id, avatar_url, full_name, profile_headline, profile_logo_path, profile_banner_path, bio, location, profession_type, user_type, specialties, languages, service_capabilities, website, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count, is_demo"
+      "id, avatar_url, full_name, profile_headline, profile_logo_path, profile_banner_path, bio, location, profession_type, user_type, specialties, languages, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count, is_demo"
     )
     .eq("id", id)
     .single();
@@ -405,6 +410,8 @@ export default async function DesignerProfilePage({
   const specialties = profile.specialties?.filter(Boolean).slice(0, 10) ?? [];
   const serviceCapabilities = profile.service_capabilities?.filter(Boolean) ?? [];
   const webHref = websiteHref(profile.website);
+  const hasVerifiedGoogleRating =
+    typeof profile.google_rating === "number" && typeof profile.google_review_count === "number";
   const logoUrl = profileMediaUrl(supabase, profile.profile_logo_path);
   const bannerUrl = profileMediaUrl(supabase, profile.profile_banner_path);
   const profileHero = heroImage(profile.id, projects, bannerUrl);
@@ -448,7 +455,16 @@ export default async function DesignerProfilePage({
               ? { "@type": "Place", name: profile.location }
               : undefined,
             knowsAbout: specialties,
-            sameAs: [webHref, profile.google_business_url].filter(Boolean),
+            sameAs: [
+              webHref,
+              profile.google_business_url,
+              ...socialSameAs({
+                instagramUrl: profile.instagram_url,
+                facebookUrl: profile.facebook_url,
+                behanceUrl: profile.behance_url,
+                linkedinUrl: profile.linkedin_url,
+              }),
+            ].filter(Boolean),
             memberOf: studios.map((studio) => ({
               "@type": "Organization",
               name: studio.name,
@@ -690,6 +706,14 @@ export default async function DesignerProfilePage({
                 <span className="w-full">Otwórz stronę internetową</span>
               </a>
             ) : null}
+            <div className="mt-4">
+              <SocialLinks
+                behanceUrl={profile.behance_url}
+                facebookUrl={profile.facebook_url}
+                instagramUrl={profile.instagram_url}
+                linkedinUrl={profile.linkedin_url}
+              />
+            </div>
           </aside>
         </section>
       </section>
@@ -929,7 +953,7 @@ export default async function DesignerProfilePage({
                 <div className="text-sm font-semibold text-primary">Opinie</div>
                 <h2 className="mt-1 text-3xl font-bold">Opinie klientów</h2>
               </div>
-              {profile.google_rating || profile.google_review_count || profile.google_business_url ? (
+              {hasVerifiedGoogleRating ? (
                 <GoogleRating rating={profile.google_rating} count={profile.google_review_count} url={profile.google_business_url} />
               ) : (
                 <span className="rounded-full bg-background px-4 py-2 text-sm font-semibold text-muted">
@@ -951,7 +975,7 @@ export default async function DesignerProfilePage({
               </div>
               <div className="rounded-lg border border-dashed border-line bg-background p-5">
                 <h3 className="text-lg font-bold">
-                  {profile.google_business_url ? "Zobacz źródło w połączonym profilu Google" : "Tutaj można połączyć opinie Google"}
+                  {hasVerifiedGoogleRating ? "Zobacz źródło w połączonym profilu Google" : "Tutaj można połączyć opinie Google"}
                 </h3>
                 <p className="mt-2 text-sm leading-6 text-muted">
                   ArchiCompass pokazuje podsumowanie publicznej oceny, a pełna treść opinii
