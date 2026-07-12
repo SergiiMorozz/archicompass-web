@@ -12,20 +12,59 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createSupabaseServerClient();
-    const { data } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      const loginUrl = new URL("/login", origin);
+      loginUrl.searchParams.set("error", error.message);
+      return NextResponse.redirect(loginUrl);
+    }
     const user = data.user;
 
     if (user) {
-      const role = await getExplicitAccountRole(supabase, user.id);
-      if (!role && !next.startsWith("/onboarding")) {
+      let role = await getExplicitAccountRole(supabase, user.id);
+      const metadataIntent = user.user_metadata?.account_intent;
+
+      if (!role && (metadataIntent === "client" || metadataIntent === "designer")) {
+        const { error: roleError } = await supabase.rpc("set_my_account_role", { new_role: metadataIntent });
+        if (roleError) {
+          const onboarding = new URL("/onboarding", origin);
+          onboarding.searchParams.set("intent", metadataIntent);
+          onboarding.searchParams.set("next", next);
+          onboarding.searchParams.set("error", roleError.message);
+          return NextResponse.redirect(onboarding);
+        }
+        role = metadataIntent;
+        await supabase.from("profiles").upsert(
+          {
+            id: user.id,
+            email: user.email ?? null,
+            user_type: role === "designer" ? "professional" : "client",
+          },
+          { onConflict: "id" }
+        );
+      }
+
+      if (!role) {
         const onboarding = new URL("/onboarding", origin);
-        const metadataIntent = user.user_metadata?.account_intent;
         if (metadataIntent === "client" || metadataIntent === "designer") {
           onboarding.searchParams.set("intent", metadataIntent);
         }
         onboarding.searchParams.set("next", next);
         return NextResponse.redirect(onboarding);
       }
+
+      if (next === "/account" || next.startsWith("/onboarding")) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, phone, location")
+          .eq("id", user.id)
+          .maybeSingle();
+        const needsProfileSetup = !profile?.full_name || !profile?.phone || !profile?.location;
+        return NextResponse.redirect(
+          `${origin}${needsProfileSetup ? "/account/profile?onboarding=1" : role === "designer" ? "/studio" : "/client"}`
+        );
+      }
+
       if (role && next.startsWith("/onboarding")) {
         return NextResponse.redirect(`${origin}${role === "designer" ? "/studio" : "/client"}`);
       }

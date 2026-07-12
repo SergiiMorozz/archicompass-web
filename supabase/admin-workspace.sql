@@ -180,7 +180,7 @@ set search_path = public, pg_temp
 as $$
 begin
   if not public.is_admin() then
-    raise exception 'Admin access required' using errcode = '42501';
+    raise exception 'Wymagany dostęp admina' using errcode = '42501';
   end if;
 
   return jsonb_build_object(
@@ -258,7 +258,7 @@ set search_path = public, pg_temp
 as $$
 begin
   if not public.is_admin() then
-    raise exception 'Admin access required' using errcode = '42501';
+    raise exception 'Wymagany dostęp admina' using errcode = '42501';
   end if;
 
   return query
@@ -327,7 +327,7 @@ declare
   result jsonb;
 begin
   if not public.is_admin() then
-    raise exception 'Admin access required' using errcode = '42501';
+    raise exception 'Wymagany dostęp admina' using errcode = '42501';
   end if;
 
   select jsonb_build_object(
@@ -409,15 +409,15 @@ set search_path = public, pg_temp
 as $$
 begin
   if not public.is_admin() then
-    raise exception 'Admin access required' using errcode = '42501';
+    raise exception 'Wymagany dostęp admina' using errcode = '42501';
   end if;
 
   if review_status not in ('clear', 'needs_review', 'priority') then
-    raise exception 'Invalid review status' using errcode = '22023';
+    raise exception 'Nieprawidłowy status weryfikacji' using errcode = '22023';
   end if;
 
   if not exists (select 1 from auth.users where id = target_user_id) then
-    raise exception 'User not found' using errcode = 'P0002';
+    raise exception 'Nie znaleziono użytkownika' using errcode = 'P0002';
   end if;
 
   insert into public.admin_user_reviews (
@@ -471,34 +471,25 @@ set search_path = public, pg_temp
 as $$
 begin
   if not public.is_admin() then
-    raise exception 'Admin access required' using errcode = '42501';
+    raise exception 'Wymagany dostęp admina' using errcode = '42501';
   end if;
 
   if target_entity_type not in ('profile', 'project') then
-    raise exception 'Invalid content type' using errcode = '22023';
+    raise exception 'Nieprawidłowy typ treści' using errcode = '22023';
   end if;
 
   if target_visibility not in ('visible', 'hidden') then
-    raise exception 'Invalid visibility' using errcode = '22023';
+    raise exception 'Nieprawidłowa widoczność' using errcode = '22023';
   end if;
 
   if target_entity_type = 'profile'
     and not exists (select 1 from public.profiles where id = target_entity_id) then
-    raise exception 'Profile not found' using errcode = 'P0002';
+    raise exception 'Nie znaleziono profilu' using errcode = 'P0002';
   end if;
 
   if target_entity_type = 'project'
     and not exists (select 1 from public.projects where id = target_entity_id) then
-    raise exception 'Project not found' using errcode = 'P0002';
-  end if;
-
-  if target_entity_type = 'profile'
-    and target_visibility = 'hidden'
-    and exists (
-      select 1 from public.admin_roles
-      where user_id = target_entity_id and active and role in ('owner', 'admin')
-    ) then
-    raise exception 'Active administrator profiles cannot be hidden' using errcode = '42501';
+    raise exception 'Nie znaleziono projektu' using errcode = 'P0002';
   end if;
 
   insert into public.content_moderation (
@@ -562,7 +553,7 @@ set search_path = public, pg_temp
 as $$
 begin
   if not public.is_admin() then
-    raise exception 'Admin access required' using errcode = '42501';
+    raise exception 'Wymagany dostęp admina' using errcode = '42501';
   end if;
 
   return query

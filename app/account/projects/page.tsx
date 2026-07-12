@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getActiveAdminRole } from "@/lib/admin";
 import { getAccountRole } from "@/lib/studios";
 import ProjectGallery from "@/components/ProjectGallery";
 import ProjectCreateForm from "@/components/ProjectCreateForm";
@@ -134,7 +135,7 @@ async function uploadProjectImage(
 ) {
   if (!allowedImageTypes.includes(file.type)) {
     return {
-      error: "Please upload a JPEG, PNG, or WebP image.",
+      error: "Prześlij zdjęcie JPEG, PNG lub WebP.",
       path: null,
       publicUrl: null,
     };
@@ -142,7 +143,7 @@ async function uploadProjectImage(
 
   if (file.size > maxImageSize) {
     return {
-      error: "Please upload an image smaller than 10 MB.",
+      error: "Prześlij zdjęcie mniejsze niż 10 MB.",
       path: null,
       publicUrl: null,
     };
@@ -158,7 +159,7 @@ async function uploadProjectImage(
 
   if (error) {
     return {
-      error: `Image upload failed: ${error.message}`,
+      error: `Nie udało się przesłać zdjęcia: ${error.message}`,
       path: null,
       publicUrl: null,
     };
@@ -178,7 +179,7 @@ async function uploadProjectImages(
 ) {
   if (imageFiles.length > maxProjectImages) {
     return {
-      error: `Please upload up to ${maxProjectImages} images per project.`,
+      error: `Prześlij maksymalnie ${maxProjectImages} zdjęć na projekt.`,
       uploadedPaths: [],
       uploadedUrls: [],
     };
@@ -226,8 +227,8 @@ async function updateProject(formData: FormData) {
   const projectId = textValue(formData, "project_id");
   const title = textValue(formData, "title");
 
-  if (!projectId) redirect("/account/projects?error=Project%20id%20is%20required");
-  if (!title) redirect("/account/projects?error=Project%20title%20is%20required");
+  if (!projectId) redirect("/account/projects?error=Brakuje%20identyfikatora%20projektu");
+  if (!title) redirect("/account/projects?error=Tytu%C5%82%20projektu%20jest%20wymagany");
   const category = textValue(formData, "category");
   const description = textValue(formData, "description");
   const moderationError = publicTextError([title, category, description]);
@@ -243,7 +244,7 @@ async function updateProject(formData: FormData) {
   if (currentError || !currentProject) {
     redirect(
       `/account/projects?error=${encodeURIComponent(
-        currentError?.message ?? "Project not found."
+        currentError?.message ?? "Nie znaleziono projektu."
       )}`
     );
   }
@@ -291,7 +292,7 @@ async function updateProject(formData: FormData) {
     }
     redirect(
       `/account/projects?error=${encodeURIComponent(
-        `This project would have ${nextUrls.length} images. Please keep up to ${maxProjectImages}.`
+        `Ten projekt miałby ${nextUrls.length} zdjęć. Limit to ${maxProjectImages}.`
       )}`
     );
   }
@@ -344,9 +345,9 @@ async function deleteProjectImage(formData: FormData) {
   const imageIndexValue = textValue(formData, "image_index");
   const imageIndex = imageIndexValue ? Number.parseInt(imageIndexValue, 10) : Number.NaN;
 
-  if (!projectId) redirect("/account/projects?error=Project%20id%20is%20required");
+  if (!projectId) redirect("/account/projects?error=Brakuje%20identyfikatora%20projektu");
   if (!Number.isInteger(imageIndex) || imageIndex < 0) {
-    redirect("/account/projects?error=Image%20selection%20is%20invalid");
+    redirect("/account/projects?error=Nieprawid%C5%82owy%20wyb%C3%B3r%20zdj%C4%99cia");
   }
 
   const { data: currentProject, error: currentError } = await supabase
@@ -359,7 +360,7 @@ async function deleteProjectImage(formData: FormData) {
   if (currentError || !currentProject) {
     redirect(
       `/account/projects?error=${encodeURIComponent(
-        currentError?.message ?? "Project not found."
+        currentError?.message ?? "Nie znaleziono projektu."
       )}`
     );
   }
@@ -380,7 +381,7 @@ async function deleteProjectImage(formData: FormData) {
       : [];
 
   if (imageIndex >= currentUrls.length) {
-    redirect("/account/projects?error=Image%20selection%20is%20invalid");
+    redirect("/account/projects?error=Nieprawid%C5%82owy%20wyb%C3%B3r%20zdj%C4%99cia");
   }
 
   const pathToRemove = currentPaths[imageIndex] ?? null;
@@ -423,7 +424,7 @@ async function deleteProject(formData: FormData) {
   if (!user) redirect("/login");
 
   const projectId = textValue(formData, "project_id");
-  if (!projectId) redirect("/account/projects?error=Project%20id%20is%20required");
+  if (!projectId) redirect("/account/projects?error=Brakuje%20identyfikatora%20projektu");
 
   const { data: currentProject, error: currentError } = await supabase
     .from("projects")
@@ -435,7 +436,7 @@ async function deleteProject(formData: FormData) {
   if (currentError || !currentProject) {
     redirect(
       `/account/projects?error=${encodeURIComponent(
-        currentError?.message ?? "Project not found."
+        currentError?.message ?? "Nie znaleziono projektu."
       )}`
     );
   }
@@ -485,8 +486,12 @@ export default async function ManageProjectsPage({
   const user = userData.user;
 
   if (!user) redirect("/login");
-  if ((await getAccountRole(supabase, user.id)) !== "designer") {
-    redirect("/account/profile?error=Switch%20to%20a%20designer%20account%20before%20managing%20a%20portfolio.");
+  const [accountRole, adminRole] = await Promise.all([
+    getAccountRole(supabase, user.id),
+    getActiveAdminRole(supabase, user.id),
+  ]);
+  if (accountRole !== "designer" && !adminRole) {
+    redirect("/account/profile?error=Konto%20klienta%20nie%20mo%C5%BCe%20zarz%C4%85dza%C4%87%20portfolio%20projektanta.");
   }
 
   const { data: projectsData, error } = await supabase
@@ -676,7 +681,7 @@ export default async function ManageProjectsPage({
                                 className="overflow-hidden rounded-xl border border-line bg-background"
                               >
                                 <div
-                                  aria-label={`${project.title || "Project"} image ${
+                                  aria-label={`${project.title || "Projekt"} zdjęcie ${
                                     image.index + 1
                                   }`}
                                   className="h-28 w-full bg-cover bg-center"
@@ -752,7 +757,7 @@ export default async function ManageProjectsPage({
                             <input
                               name="project_url"
                               defaultValue={project.project_url ?? ""}
-                              placeholder="https://your-studio.com/projects/..."
+                              placeholder="https://twoja-pracownia.pl/projekty/..."
                               className={fieldClass}
                             />
                           </Field>

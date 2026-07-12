@@ -34,7 +34,7 @@ function numberValue(value: number | undefined) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("pl-PL", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -42,8 +42,8 @@ function formatDate(value: string) {
 }
 
 function accountLabel(user: AdminUser) {
-  if (user.profession_type || user.user_type === "professional") return "Professional";
-  return user.user_type || "Client";
+  if (user.profession_type || user.user_type === "professional") return "Specjalista";
+  return user.user_type === "client" ? "Klient" : "Brak profilu";
 }
 
 function reviewClass(status: string) {
@@ -74,15 +74,15 @@ export default async function AdminOverviewPage() {
   const contentRows = contentResult.data ?? [];
   const publishedArticles = contentRows.filter((article) => article.status === "published").length;
   const cards = [
-    ["Accounts", numberValue(stats.users), `${numberValue(stats.signups_30)} new in 30 days`],
-    ["Professionals", numberValue(stats.professionals), "Profile supply"],
-    ["Clients", numberValue(stats.clients), `${numberValue(stats.active_30)} active accounts`],
-    ["Portfolio projects", numberValue(stats.projects), "Public work"],
-    ["Saved briefs", briefCount, "Project Compass output"],
-    ["Designer requests", inquiryCount, "Across the platform"],
-    ["Inspiration articles", contentRows.length, `${publishedArticles} published`],
-    ["Hidden content", numberValue(stats.hidden_profiles) + numberValue(stats.hidden_projects), `${numberValue(stats.hidden_profiles)} profiles, ${numberValue(stats.hidden_projects)} projects`],
-    ["Profile views", numberValue(stats.profile_views_30), "Last 30 days"],
+    ["Konta", numberValue(stats.users), `${numberValue(stats.signups_30)} nowych w 30 dni`],
+    ["Specjaliści", numberValue(stats.professionals), "Podaż profili"],
+    ["Klienci", numberValue(stats.clients), `${numberValue(stats.active_30)} aktywnych kont`],
+    ["Projekty portfolio", numberValue(stats.projects), "Prace publiczne"],
+    ["Zapisane briefy", briefCount, "Wynik Project Compass"],
+    ["Zapytania", inquiryCount, "W całej platformie"],
+    ["Artykuły Inspiration Hub", contentRows.length, `${publishedArticles} opublikowanych`],
+    ["Ukryte treści", numberValue(stats.hidden_profiles) + numberValue(stats.hidden_projects), `${numberValue(stats.hidden_profiles)} profili, ${numberValue(stats.hidden_projects)} projektów`],
+    ["Wyświetlenia profili", numberValue(stats.profile_views_30), "Ostatnie 30 dni"],
   ];
 
   return (
@@ -90,18 +90,18 @@ export default async function AdminOverviewPage() {
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="text-sm font-semibold text-primary">Platform operations</div>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Admin overview</h1>
+            <div className="text-sm font-semibold text-primary">Operacje platformy</div>
+            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Admin</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-              Monitor the platform, review accounts, and understand how users move
-              from inspiration to a designer conversation.
+              Monitoruj platformę, sprawdzaj konta i obserwuj, jak użytkownicy przechodzą
+              od inspiracji do rozmowy z projektantem.
             </p>
           </div>
           <Link
             href="/admin/users"
             className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white"
           >
-            Open user directory
+            Otwórz użytkowników
           </Link>
         </div>
       </section>
@@ -109,8 +109,7 @@ export default async function AdminOverviewPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         {statsResult.error || usersResult.error || contentResult.error ? (
           <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-5 text-sm text-red-700">
-            Admin data could not be loaded. Apply the Admin Workspace database migration
-            and Inspiration Content migration, then confirm this account has an active owner role.
+            Nie udało się wczytać danych admina. Sprawdź migracje bazy oraz aktywną rolę owner/admin dla tego konta.
           </div>
         ) : null}
 
@@ -128,11 +127,11 @@ export default async function AdminOverviewPage() {
           <section>
             <div className="flex items-end justify-between gap-4">
               <div>
-                <div className="text-sm font-semibold text-primary">Latest activity</div>
-                <h2 className="mt-1 text-3xl font-bold">Recent accounts</h2>
+                <div className="text-sm font-semibold text-primary">Najnowsza aktywność</div>
+                <h2 className="mt-1 text-3xl font-bold">Ostatnie konta</h2>
               </div>
               <Link href="/admin/users" className="text-sm font-semibold text-primary hover:underline">
-                View all
+                Zobacz wszystkie
               </Link>
             </div>
 
@@ -145,9 +144,9 @@ export default async function AdminOverviewPage() {
                     className="flex flex-col gap-3 border-b border-line px-5 py-4 last:border-b-0 hover:bg-primary-soft/40 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
-                      <div className="font-semibold">{user.full_name || user.email || "Unnamed account"}</div>
+                      <div className="font-semibold">{user.full_name || user.email || "Konto bez nazwy"}</div>
                       <div className="mt-1 text-sm text-muted">
-                        {accountLabel(user)} | Joined {formatDate(user.created_at)}
+                        {accountLabel(user)} | Dołączył/a {formatDate(user.created_at)}
                       </div>
                     </div>
                     <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold capitalize ${reviewClass(user.review_status)}`}>
@@ -156,30 +155,29 @@ export default async function AdminOverviewPage() {
                   </Link>
                 ))
               ) : (
-                <div className="p-6 text-sm text-muted">No accounts available yet.</div>
+                <div className="p-6 text-sm text-muted">Brak kont do wyświetlenia.</div>
               )}
             </div>
           </section>
 
           <aside className="grid h-fit gap-5">
             <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-              <div className="text-sm font-semibold text-primary">Privacy boundary</div>
-              <h2 className="mt-1 text-2xl font-bold">Operational data only</h2>
+              <div className="text-sm font-semibold text-primary">Granica prywatności</div>
+              <h2 className="mt-1 text-2xl font-bold">Tylko dane operacyjne</h2>
               <p className="mt-3 text-sm leading-6 text-muted">
-                This workspace exposes counts, account details, public profiles, and
-                public projects. Message bodies and private reference photos remain
-                outside the admin dashboard.
+                Ten panel pokazuje liczniki, dane kont, profile publiczne i projekty publiczne.
+                Treści prywatnych wiadomości i prywatne zdjęcia referencyjne pozostają poza panelem admina.
               </p>
             </section>
 
             <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-              <div className="text-sm font-semibold text-primary">Content operations</div>
+              <div className="text-sm font-semibold text-primary">Treści</div>
               <h2 className="mt-1 text-2xl font-bold">Inspiration Hub</h2>
               <p className="mt-3 text-sm leading-6 text-muted">
-                Create drafts, publish articles, and manage featured inspiration from the protected editor.
+                Twórz szkice, publikuj artykuły i zarządzaj wyróżnionymi inspiracjami z chronionego edytora.
               </p>
               <Link href="/admin/content" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
-                Manage content
+                Zarządzaj treściami
               </Link>
             </section>
           </aside>

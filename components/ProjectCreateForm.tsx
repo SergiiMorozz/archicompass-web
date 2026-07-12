@@ -109,7 +109,7 @@ export default function ProjectCreateForm() {
       </label>
       <label className="block text-sm font-semibold">
         Link do projektu <span className="font-normal text-muted">opcjonalna strona zewnętrzna</span>
-        <input name="project_url" type="url" placeholder="https://your-studio.com/projects/..." className={fieldClass} />
+        <input name="project_url" type="url" placeholder="https://twoja-pracownia.pl/projekty/..." className={fieldClass} />
       </label>
       <label className="block text-sm font-semibold">
         Opis

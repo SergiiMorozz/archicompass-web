@@ -71,8 +71,8 @@ async function sendParticipantMessage(formData: FormData) {
   const body = textValue(formData, "body");
   if (!inquiryId || !isUuid(inquiryId)) redirect("/account/inquiries");
   const files = attachmentFiles(formData);
-  if (!body && !files.length) redirect(`/account/inquiries/${inquiryId}?error=Write%20a%20message%20or%20attach%20a%20file`);
-  if ((body?.length ?? 0) > 4000) redirect(`/account/inquiries/${inquiryId}?error=Message%20is%20too%20long`);
+  if (!body && !files.length) redirect(`/account/inquiries/${inquiryId}?error=Wpisz%20wiadomo%C5%9B%C4%87%20albo%20dodaj%20plik`);
+  if ((body?.length ?? 0) > 4000) redirect(`/account/inquiries/${inquiryId}?error=Wiadomo%C5%9B%C4%87%20jest%20zbyt%20d%C5%82uga`);
 
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -93,7 +93,7 @@ async function sendParticipantMessage(formData: FormData) {
   const { data: insertedMessage, error } = await supabase.from("inquiry_messages").insert({
     inquiry_id: inquiryId,
     sender_id: user.id,
-    body: body || "Shared attachments",
+    body: body || "Udostępniono załączniki",
     attachment_names: upload.names,
     attachment_paths: upload.paths,
     attachment_types: upload.types,
@@ -167,6 +167,14 @@ function statusClass(status: string) {
   return "bg-primary-soft text-primary";
 }
 
+function statusLabel(status: string) {
+  if (status === "accepted") return "Zaakceptowane";
+  if (status === "declined") return "Odrzucone";
+  if (status === "reviewing") return "W trakcie";
+  if (status === "sent") return "Nowe";
+  return status;
+}
+
 export default async function AccountConversationPage({
   params,
   searchParams,
@@ -220,25 +228,25 @@ export default async function AccountConversationPage({
   const other = profileData as Profile | null;
   const studio = studioData as Studio | null;
   const otherName = studio?.name || other?.full_name || studio?.email || other?.email || "Projektant wnętrz";
-  const originalAuthor = "You";
+  const originalAuthor = "Ty";
 
   return (
     <main>
       <section className="border-b border-line bg-card px-4 py-8 sm:px-6">
         <div className="mx-auto max-w-6xl">
           <Link href="/client/messages" className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary">
-            Back to messages
+            Wróć do wiadomości
           </Link>
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-sm font-semibold text-primary">Conversation with {otherName}</div>
+              <div className="text-sm font-semibold text-primary">Rozmowa z: {otherName}</div>
               <h1 className="mt-2 text-4xl font-bold">{inquiry.subject}</h1>
               <Link href={studio ? `/studios/${studio.id}` : `/designers/${inquiry.designer_id}`} className="mt-3 inline-flex text-sm font-bold text-primary hover:underline">
-                Open {studio ? "studio" : "designer"} profile
+                {studio ? "Otwórz profil pracowni" : "Otwórz profil projektanta"}
               </Link>
             </div>
             <span className={`w-fit rounded-full px-3 py-1 text-sm font-semibold capitalize ${statusClass(inquiry.status)}`}>
-              {inquiry.status}
+              {statusLabel(inquiry.status)}
             </span>
           </div>
         </div>
@@ -248,7 +256,7 @@ export default async function AccountConversationPage({
         <section className="rounded-lg border border-line bg-card p-5 shadow-sm sm:p-6">
           {sp.sent ? (
             <div className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-              Message sent.
+              Wiadomość została wysłana.
             </div>
           ) : null}
           {sp.error ? (
@@ -258,11 +266,11 @@ export default async function AccountConversationPage({
           ) : null}
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-2xl font-bold">Messages</h2>
+            <h2 className="text-2xl font-bold">Wiadomości</h2>
             <div className="flex flex-wrap items-center gap-3">
               <ConversationAutoRefresh />
               <Link href={`/account/inquiries/${inquiry.id}`} className="text-sm font-semibold text-primary hover:underline">
-                Refresh
+                Odśwież
               </Link>
             </div>
           </div>
@@ -273,7 +281,7 @@ export default async function AccountConversationPage({
                 "max-w-[85%] rounded-lg p-4",
                 inquiry.client_id === user.id ? "ml-auto bg-primary text-white" : "mr-auto bg-background",
               ].join(" ")}>
-                <div className="text-xs font-semibold opacity-70">{originalAuthor} · original note</div>
+                <div className="text-xs font-semibold opacity-70">{originalAuthor} · pierwsza wiadomość</div>
                 <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{inquiry.message}</p>
               </div>
             ) : null}
@@ -286,13 +294,13 @@ export default async function AccountConversationPage({
                   mine ? "ml-auto rounded-br-sm bg-primary text-white" : "mr-auto rounded-bl-sm bg-background",
                 ].join(" ")}>
                   <div className="text-xs font-semibold opacity-70">
-                    {mine ? "You" : otherName} · {formatDate(message.created_at)}
+                    {mine ? "Ty" : otherName} · {formatDate(message.created_at)}
                   </div>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{message.body}</p>
                   <MessageAttachments attachments={attachmentsByMessage.get(message.id) ?? []} inverted={mine} />
                   {mine ? (
                     <div className="mt-2 text-right text-[11px] font-semibold opacity-70">
-                      {message.read_at ? "Read" : "Sent"}
+                      {message.read_at ? "Przeczytano" : "Wysłano"}
                     </div>
                   ) : null}
                 </div>

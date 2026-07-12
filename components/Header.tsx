@@ -127,11 +127,12 @@ export default function Header() {
           .maybeSingle(),
       ]);
 
+      const isAdmin = Boolean(adminRole);
       const isProfessional =
         accountRole?.role === "designer" ||
         (!accountRole && isProfessionalProfile(profile));
       let unreadCount = 0;
-      if (isProfessional) {
+      if (isProfessional || isAdmin) {
         const { data: membershipData } = await supabase
           .from("studio_members")
           .select("studio_id")
@@ -174,7 +175,7 @@ export default function Header() {
       if (active) {
         setAccount({
           id: userId,
-          isAdmin: Boolean(adminRole),
+          isAdmin,
           isProfessional,
           unreadCount,
         });
@@ -194,13 +195,13 @@ export default function Header() {
 
   const workspaceItems = account
     ? [
-        ...(account.isProfessional
-          ? []
-          : [{ href: "/client", label: "Strefa klienta" }]),
-        ...(account.isProfessional
+        ...(!account.isProfessional || account.isAdmin
+          ? [{ href: "/client", label: "Strefa klienta" }]
+          : []),
+        ...(account.isProfessional || account.isAdmin
           ? [{ href: "/studio", label: "Studio projektanta" }]
           : []),
-        ...(account.isAdmin ? [{ href: "/admin", label: "Administracja" }] : []),
+        ...(account.isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
       ]
     : [];
   return (

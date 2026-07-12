@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import ClientNav from "@/components/ClientNav";
+import { getActiveAdminRole } from "@/lib/admin";
 import { currentRequestPath } from "@/lib/request-path";
 import { getExplicitAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
 export const metadata: Metadata = {
-  title: "Client Workspace",
+  title: "Strefa klienta | ArchiCompass",
   robots: { index: false, follow: false, nocache: true },
 };
 
@@ -17,9 +18,12 @@ export default async function ClientLayout({ children }: { children: React.React
   const user = userData.user;
   const requestedPath = await currentRequestPath("/client");
   if (!user) redirect(`/login?next=${encodeURIComponent(requestedPath)}`);
-  const accountRole = await getExplicitAccountRole(supabase, user.id);
-  if (!accountRole) redirect(`/onboarding?next=${encodeURIComponent(requestedPath)}`);
-  if (accountRole !== "client") redirect("/studio");
+  const [accountRole, adminRole] = await Promise.all([
+    getExplicitAccountRole(supabase, user.id),
+    getActiveAdminRole(supabase, user.id),
+  ]);
+  if (!accountRole && !adminRole) redirect(`/onboarding?next=${encodeURIComponent(requestedPath)}`);
+  if (accountRole !== "client" && !adminRole) redirect("/studio");
 
   const [{ data: profile }, { data: inquiries }] = await Promise.all([
     supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
@@ -38,7 +42,7 @@ export default async function ClientLayout({ children }: { children: React.React
   return (
     <div className="min-h-screen bg-background">
       <ClientNav
-        accountName={profile?.full_name || user.email || "Your project workspace"}
+        accountName={profile?.full_name || user.email || "Twoja strefa projektu"}
         unreadCount={unreadCount ?? 0}
       />
       {children}

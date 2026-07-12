@@ -19,11 +19,19 @@ type Profile = {
 };
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("pl-PL", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   }).format(new Date(value));
+}
+
+function statusLabel(status: string) {
+  if (status === "accepted") return "Zaakceptowane";
+  if (status === "declined") return "Odrzucone";
+  if (status === "reviewing") return "W trakcie";
+  if (status === "sent") return "Nowe";
+  return status;
 }
 
 function statusClass(status: string) {
@@ -100,16 +108,16 @@ export default async function ClientOverviewPage({
             <div className="text-sm font-semibold text-primary">Twój projekt wnętrza</div>
             <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Pulpit klienta</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-              Keep inspiration, project briefs, favorite professionals, and every
-              conversation together from first idea to designer selection.
+              Trzymaj inspiracje, briefy, ulubionych specjalistów i wszystkie rozmowy
+              w jednym miejscu: od pierwszego pomysłu do wyboru projektanta.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link href="/project-compass" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-              Create a brief
+              Utwórz brief
             </Link>
             <Link href="/designers" className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
-              Find designers
+              Znajdź projektanta
             </Link>
           </div>
         </div>
@@ -118,7 +126,7 @@ export default async function ClientOverviewPage({
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         {sp.profileUpdated ? (
           <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-900">
-            Account details updated.
+            Dane konta zostały zaktualizowane.
           </div>
         ) : null}
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -157,7 +165,7 @@ export default async function ClientOverviewPage({
                           </div>
                         </div>
                         <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusClass(inquiry.status)}`}>
-                          {inquiry.status === "sent" ? "New" : inquiry.status}
+                          {statusLabel(inquiry.status)}
                         </span>
                       </div>
                     </Link>
@@ -168,10 +176,11 @@ export default async function ClientOverviewPage({
               <div className="mt-5 rounded-lg border border-dashed border-line bg-card p-8">
                 <h3 className="text-xl font-bold">Nie masz jeszcze rozmów z projektantami</h3>
                 <p className="mt-2 max-w-xl leading-7 text-muted">
-                  Create a Project Compass brief, save it, and send it to a designer whose work fits the project.
+                  Utwórz brief w Project Compass, zapisz go i wyślij do projektanta,
+                  którego portfolio pasuje do Twojego projektu.
                 </p>
                 <Link href="/project-compass" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
-                  Start Project Compass
+                  Uruchom Project Compass
                 </Link>
               </div>
             )}

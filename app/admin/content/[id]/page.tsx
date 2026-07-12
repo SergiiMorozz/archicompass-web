@@ -74,9 +74,9 @@ async function updateArticle(formData: FormData) {
   const title = textValue(formData, "title");
   const slug = slugValue(textValue(formData, "slug"));
   const status = textValue(formData, "status");
-  if (title.length < 3) editorError(id, "Enter an article title.");
-  if (!slug) editorError(id, "Enter a valid URL slug.");
-  if (status !== "draft" && status !== "published") editorError(id, "Choose draft or published status.");
+  if (title.length < 3) editorError(id, "Podaj tytuł artykułu.");
+  if (!slug) editorError(id, "Podaj poprawny adres URL.");
+  if (status !== "draft" && status !== "published") editorError(id, "Wybierz status szkicu albo publikacji.");
 
   const { data: current } = await supabase
     .from("inspiration_articles")
@@ -91,10 +91,10 @@ async function updateArticle(formData: FormData) {
 
   if (imageFile instanceof File && imageFile.size > 0) {
     if (!allowedImageTypes.includes(imageFile.type)) {
-      editorError(id, "Upload a JPEG, PNG, or WebP cover image.");
+      editorError(id, "Prześlij okładkę JPEG, PNG albo WebP.");
     }
     if (imageFile.size > maxImageSize) {
-      editorError(id, "The cover image must be smaller than 10 MB.");
+      editorError(id, "Okładka musi mieć mniej niż 10 MB.");
     }
 
     uploadedPath = `${user.id}/inspiration/${id}/${crypto.randomUUID()}.${extensionFor(imageFile)}`;
@@ -105,7 +105,7 @@ async function updateArticle(formData: FormData) {
         upsert: false,
       });
 
-    if (uploadError) editorError(id, `Cover upload failed: ${uploadError.message}`);
+    if (uploadError) editorError(id, `Nie udało się przesłać okładki: ${uploadError.message}`);
     imageUrl = supabase.storage.from(articleImagesBucket).getPublicUrl(uploadedPath).data.publicUrl;
   }
 
@@ -131,7 +131,7 @@ async function updateArticle(formData: FormData) {
 
   if (error || !data) {
     if (uploadedPath) await supabase.storage.from(articleImagesBucket).remove([uploadedPath]);
-    editorError(id, error?.message || "Article could not be updated.");
+    editorError(id, error?.message || "Nie udało się zaktualizować artykułu.");
   }
 
   const previousImagePath = ownedArticleImagePath(current.image_url, user.id);
@@ -160,11 +160,11 @@ async function deleteArticle(formData: FormData) {
   if (!article) notFound();
 
   if (textValue(formData, "confirmation") !== article.title) {
-    editorError(id, "Type the full article title to confirm deletion.");
+    editorError(id, "Wpisz pełny tytuł artykułu, aby potwierdzić usunięcie.");
   }
 
   const { error } = await supabase.from("inspiration_articles").delete().eq("id", id);
-  if (error) editorError(id, `Article could not be deleted: ${error.message}`);
+  if (error) editorError(id, `Nie udało się usunąć artykułu: ${error.message}`);
 
   const imagePath = ownedArticleImagePath(article.image_url, user.id);
   if (imagePath) await supabase.storage.from(articleImagesBucket).remove([imagePath]);
@@ -199,16 +199,16 @@ export default async function AdminArticleEditorPage({
       <section className="border-b border-line bg-card px-4 py-8 sm:px-6">
         <div className="mx-auto max-w-5xl">
           <Link href="/admin/content" className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted">
-            Back to content
+            Wróć do treści
           </Link>
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-sm font-semibold text-primary">Article editor</div>
+              <div className="text-sm font-semibold text-primary">Edytor artykułu</div>
               <h1 className="mt-2 text-4xl font-bold">{article.title}</h1>
             </div>
             {article.status === "published" ? (
               <Link href={`/inspiration/${article.slug}`} className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white">
-                View published article
+                Zobacz opublikowany artykuł
               </Link>
             ) : null}
           </div>
@@ -218,7 +218,7 @@ export default async function AdminArticleEditorPage({
       <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
         {sp.created || sp.updated ? (
           <div className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-            {sp.created ? "Draft created." : "Article updated."}
+            {sp.created ? "Szkic został utworzony." : "Artykuł został zaktualizowany."}
           </div>
         ) : null}
         {sp.error ? (
@@ -232,25 +232,25 @@ export default async function AdminArticleEditorPage({
           <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="text-sm font-semibold sm:col-span-2">
-                Title
+                Tytuł
                 <input name="title" required minLength={3} defaultValue={article.title} className={fieldClass} />
               </label>
               <label className="text-sm font-semibold">
-                URL slug
+                Adres URL
                 <input name="slug" required defaultValue={article.slug} className={fieldClass} />
               </label>
               <label className="text-sm font-semibold">
-                Category
+                Kategoria
                 <input name="category" required defaultValue={article.category} className={fieldClass} />
               </label>
               <label className="text-sm font-semibold sm:col-span-2">
-                Excerpt
+                Lead
                 <textarea name="excerpt" maxLength={700} rows={3} defaultValue={article.excerpt} className={fieldClass} />
               </label>
               <label className="text-sm font-semibold sm:col-span-2">
-                Article body
+                Treść artykułu
                 <textarea name="body" maxLength={50000} rows={18} defaultValue={article.body} className={fieldClass} />
-                <span className="mt-2 block text-xs font-normal text-muted">Separate paragraphs with an empty line.</span>
+                <span className="mt-2 block text-xs font-normal text-muted">Oddzielaj akapity pustą linią.</span>
               </label>
             </div>
           </section>
@@ -259,17 +259,17 @@ export default async function AdminArticleEditorPage({
             <div className="grid gap-5 sm:grid-cols-2">
               {article.image_url ? (
                 <div className="sm:col-span-2">
-                  <div className="mb-2 text-sm font-semibold">Current cover</div>
+                  <div className="mb-2 text-sm font-semibold">Aktualna okładka</div>
                   <div
                     className="aspect-[16/7] w-full rounded-lg bg-cover bg-center"
                     style={{ backgroundImage: `url(${article.image_url})` }}
                     role="img"
-                    aria-label={`Cover preview for ${article.title}`}
+                    aria-label={`Podgląd okładki artykułu ${article.title}`}
                   />
                 </div>
               ) : null}
               <label className="text-sm font-semibold sm:col-span-2">
-                Upload a new cover
+                Prześlij nową okładkę
                 <input
                   name="image_file"
                   type="file"
@@ -277,57 +277,59 @@ export default async function AdminArticleEditorPage({
                   className={`${fieldClass} file:mr-4 file:rounded-lg file:border-0 file:bg-primary-soft file:px-4 file:py-2 file:font-semibold file:text-primary`}
                 />
                 <span className="mt-2 block text-xs font-normal text-muted">
-                  JPEG, PNG, or WebP up to 10 MB. A new upload replaces the current cover.
+                  JPEG, PNG albo WebP do 10 MB. Nowy plik zastąpi aktualną okładkę.
                 </span>
               </label>
               <label className="text-sm font-semibold sm:col-span-2">
-                Or use an external cover URL
+                Albo użyj zewnętrznego adresu okładki
                 <input name="image_url" type="url" defaultValue={article.image_url ?? ""} placeholder="https://" className={fieldClass} />
               </label>
               <label className="text-sm font-semibold">
-                Author
+                Autor
                 <input name="author_name" defaultValue={article.author_name ?? ""} className={fieldClass} />
               </label>
               <label className="text-sm font-semibold">
                 Status
                 <select name="status" defaultValue={article.status} className={fieldClass}>
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
+                  <option value="draft">Szkic</option>
+                  <option value="published">Opublikowany</option>
                 </select>
               </label>
               <label className="flex items-center gap-3 text-sm font-semibold sm:col-span-2">
                 <input name="featured" type="checkbox" defaultChecked={article.featured} className="h-5 w-5 accent-primary" />
-                Feature this article in Inspiration Hub
+                Wyróżnij artykuł w Inspiration Hub
               </label>
             </div>
           </section>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="text-sm text-muted">
-              {article.published_at ? `First published ${new Date(article.published_at).toLocaleDateString("en")}` : "Not published yet"}
+              {article.published_at
+                ? `Pierwsza publikacja ${new Date(article.published_at).toLocaleDateString("pl-PL")}`
+                : "Jeszcze nieopublikowany"}
             </div>
             <button className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white">
-              Save article
+              Zapisz artykuł
             </button>
           </div>
         </form>
 
         <section className="mt-10 rounded-lg border border-red-200 bg-red-50 p-6">
-          <div className="text-sm font-semibold text-red-700">Danger zone</div>
-          <h2 className="mt-1 text-2xl font-bold">Delete article</h2>
+          <div className="text-sm font-semibold text-red-700">Strefa ostrożności</div>
+          <h2 className="mt-1 text-2xl font-bold">Usuń artykuł</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-red-800">
-            This permanently removes the article from Inspiration Hub. Type the exact title
-            <strong> {article.title}</strong> to confirm.
+            To trwale usunie artykuł z Inspiration Hub. Wpisz dokładny tytuł
+            <strong> {article.title}</strong>, aby potwierdzić.
           </p>
           <form action={deleteArticle} className="mt-5 flex flex-col gap-3 sm:flex-row">
             <input type="hidden" name="id" value={article.id} />
             <input
               name="confirmation"
-              aria-label="Article title confirmation"
+              aria-label="Potwierdzenie tytułu artykułu"
               className="min-h-12 flex-1 rounded-xl border border-red-200 bg-white px-4 outline-none focus:border-red-500"
             />
             <button className="rounded-xl bg-red-700 px-5 py-3 text-sm font-semibold text-white">
-              Delete permanently
+              Usuń trwale
             </button>
           </form>
         </section>

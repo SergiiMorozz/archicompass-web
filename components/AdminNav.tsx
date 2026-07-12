@@ -18,7 +18,7 @@ export default function AdminNav({ accountName, role }: { accountName: string; r
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <div className="text-xs font-semibold uppercase text-primary">Panel administratora</div>
+            <div className="text-xs font-semibold uppercase text-primary">Admin</div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <span className="text-xl font-bold">{accountName}</span>
               <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold capitalize text-primary">

@@ -39,12 +39,20 @@ type Studio = {
 };
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("pl-PL", {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
+}
+
+function statusLabel(status: string) {
+  if (status === "accepted") return "Zaakceptowane";
+  if (status === "declined") return "Odrzucone";
+  if (status === "reviewing") return "W trakcie";
+  if (status === "sent") return "Nowe";
+  return status;
 }
 
 function statusClass(status: string) {
@@ -126,7 +134,8 @@ export default async function ClientMessagesPage({
           <div className="text-sm font-semibold text-primary">Komunikacja z projektantami</div>
           <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Wiadomości</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-            Continue every designer conversation beside the exact brief and references you sent.
+            Prowadź rozmowy z projektantami obok dokładnego briefu i referencji,
+            które zostały wysłane.
           </p>
         </div>
       </section>
@@ -141,7 +150,7 @@ export default async function ClientMessagesPage({
               selectedView === "all" ? "bg-primary text-white" : "border border-line bg-card text-muted",
             ].join(" ")}
           >
-            All conversations {inquiries.length}
+            Wszystkie rozmowy {inquiries.length}
           </Link>
           <Link
             href="/client/messages?view=unread"
@@ -150,13 +159,13 @@ export default async function ClientMessagesPage({
               selectedView === "unread" ? "bg-primary text-white" : "border border-line bg-card text-muted",
             ].join(" ")}
           >
-            Unread {totalUnread}
+            Nieprzeczytane {totalUnread}
           </Link>
           </div>
           <ConversationAutoRefresh />
         </div>
         {error ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">Messages could not be loaded: {error.message}</div>
+          <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">Nie udało się wczytać wiadomości: {error.message}</div>
         ) : visibleInquiries.length ? (
           <div className="grid gap-4">
             {visibleInquiries.map((inquiry) => {
@@ -171,21 +180,21 @@ export default async function ClientMessagesPage({
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusClass(inquiry.status)}`}>
-                          {inquiry.status === "sent" ? "New" : inquiry.status}
+                          {statusLabel(inquiry.status)}
                         </span>
-                        {unread ? <span className="rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-white">{unread} unread</span> : null}
+                        {unread ? <span className="rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-white">{unread} nowe</span> : null}
                       </div>
                       <h2 className="mt-3 text-2xl font-bold">{inquiry.subject}</h2>
                       <div className="mt-2 text-sm text-muted">
                         {recipientName}
-                        {studio ? " · Design studio" : profile?.profession_type ? ` · ${profile.profession_type}` : ""}
+                        {studio ? " · Pracownia projektowa" : profile?.profession_type ? ` · ${profile.profession_type}` : ""}
                         {studio?.location || profile?.location ? ` · ${studio?.location || profile?.location}` : ""}
                       </div>
                       <div className="mt-4 rounded-lg bg-background p-4 text-sm leading-6 text-muted">
                         <div className="font-semibold text-foreground">
                           {latest
                             ? latest.sender_id === user.id
-                              ? "You"
+                              ? "Ty"
                               : recipientName
                             : "Twoja wiadomość wprowadzająca"}
                         </div>
@@ -198,7 +207,7 @@ export default async function ClientMessagesPage({
                         {unread ? "Przeczytaj wiadomość" : "Otwórz rozmowę"}
                       </Link>
                       <Link href={studio ? `/studios/${studio.id}` : `/designers/${inquiry.designer_id}`} className="rounded-xl border border-line bg-background px-5 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">
-                        Review {studio ? "studio" : "designer"} profile
+                        {studio ? "Zobacz profil pracowni" : "Zobacz profil projektanta"}
                       </Link>
                     </div>
                   </div>

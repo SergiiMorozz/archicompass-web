@@ -43,8 +43,8 @@ async function createArticle(formData: FormData) {
   const category = textValue(formData, "category") || "Design";
   const slug = slugValue(textValue(formData, "slug") || title);
 
-  if (title.length < 3) contentError("Enter an article title.");
-  if (!slug) contentError("The article needs a valid URL slug.");
+  if (title.length < 3) contentError("Podaj tytuł artykułu.");
+  if (!slug) contentError("Artykuł potrzebuje poprawnego adresu URL.");
 
   const { data, error } = await supabase
     .from("inspiration_articles")
@@ -62,14 +62,14 @@ async function createArticle(formData: FormData) {
     .select("id")
     .single();
 
-  if (error || !data) contentError(error?.message || "Article could not be created.");
+  if (error || !data) contentError(error?.message || "Nie udało się utworzyć artykułu.");
   revalidatePath("/admin/content");
   redirect(`/admin/content/${data.id}?created=1`);
 }
 
 function formatDate(value: string | null) {
-  if (!value) return "Not published";
-  return new Intl.DateTimeFormat("en", {
+  if (!value) return "Nieopublikowany";
+  return new Intl.DateTimeFormat("pl-PL", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -100,10 +100,10 @@ export default async function AdminContentPage({
     <main>
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="text-sm font-semibold text-primary">Content operations</div>
+          <div className="text-sm font-semibold text-primary">Treści platformy</div>
           <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Inspiration Hub</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-            Create, review, and publish articles without changing the public application code.
+            Twórz, sprawdzaj i publikuj artykuły bez zmian w kodzie publicznej aplikacji.
           </p>
         </div>
       </section>
@@ -112,7 +112,7 @@ export default async function AdminContentPage({
         <div>
           {sp.deleted ? (
             <div className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-              Article deleted.
+              Artykuł został usunięty.
             </div>
           ) : null}
           {sp.error ? (
@@ -122,15 +122,15 @@ export default async function AdminContentPage({
           ) : null}
           {error ? (
             <div className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-              Content could not be loaded. Apply the Inspiration Content migration first.
+              Nie udało się wczytać treści. Najpierw zastosuj migrację Inspiration Content.
             </div>
           ) : null}
 
           <div className="flex gap-2 overflow-x-auto pb-2">
             {[
-              ["all", `All ${allArticles.length}`],
-              ["published", `Published ${publishedCount}`],
-              ["draft", `Drafts ${draftCount}`],
+              ["all", `Wszystkie ${allArticles.length}`],
+              ["published", `Opublikowane ${publishedCount}`],
+              ["draft", `Szkice ${draftCount}`],
             ].map(([status, label]) => (
               <Link
                 key={status}
@@ -159,7 +159,7 @@ export default async function AdminContentPage({
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-semibold">{article.title}</span>
                       {article.featured ? (
-                        <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary">Featured</span>
+                        <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary">Wyróżniony</span>
                       ) : null}
                     </div>
                     <div className="mt-1 text-sm text-muted">
@@ -172,34 +172,34 @@ export default async function AdminContentPage({
                       ? "bg-emerald-50 text-emerald-800"
                       : "bg-[#fff3df] text-[#8a5a00]",
                   ].join(" ")}>
-                    {article.status}
+                    {article.status === "published" ? "Opublikowany" : "Szkic"}
                   </span>
                 </Link>
               ))
             ) : (
-              <div className="p-6 text-sm text-muted">No articles in this view.</div>
+              <div className="p-6 text-sm text-muted">Brak artykułów w tym widoku.</div>
             )}
           </div>
         </div>
 
         <aside className="h-fit rounded-lg border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
-          <div className="text-sm font-semibold text-primary">New draft</div>
-          <h2 className="mt-1 text-2xl font-bold">Create article</h2>
+          <div className="text-sm font-semibold text-primary">Nowy szkic</div>
+          <h2 className="mt-1 text-2xl font-bold">Utwórz artykuł</h2>
           <form action={createArticle} className="mt-5 grid gap-4">
             <label className="text-sm font-semibold">
-              Title
+              Tytuł
               <input name="title" required minLength={3} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
             <label className="text-sm font-semibold">
-              Category
+              Kategoria
               <input name="category" defaultValue="Design" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
             <label className="text-sm font-semibold">
-              URL slug <span className="font-normal text-muted">optional</span>
-              <input name="slug" placeholder="generated-from-title" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
+              Adres URL <span className="font-normal text-muted">opcjonalnie</span>
+              <input name="slug" placeholder="generowany-z-tytulu" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
             <button className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-              Create draft
+              Utwórz szkic
             </button>
           </form>
         </aside>

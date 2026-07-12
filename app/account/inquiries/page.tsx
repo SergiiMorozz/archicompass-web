@@ -265,16 +265,16 @@ function InquiryCard({
               }
               className="mt-2 w-full rounded-xl border border-line bg-card px-4 py-3 font-normal text-foreground outline-none transition focus:border-primary"
             >
-              <option value="reviewing">Reviewing</option>
-              <option value="accepted">Accepted</option>
-              <option value="declined">Declined</option>
+              <option value="reviewing">W trakcie</option>
+              <option value="accepted">Zaakceptowane</option>
+              <option value="declined">Odrzucone</option>
             </select>
           </label>
           <button
             type="submit"
             className="self-end rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
           >
-            Update status
+            Zaktualizuj status
           </button>
         </form>
       ) : null}
@@ -282,12 +282,12 @@ function InquiryCard({
       {mode === "sent" ? (
         <details className="mt-5 overflow-hidden rounded-xl border border-red-200 bg-red-50">
           <summary className="block cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-red-700">
-            Cancel request
+            Anuluj zapytanie
           </summary>
           <div className="border-t border-red-200 p-4">
             <p className="text-sm leading-6 text-red-700">
-              This removes the request from ArchiCompass. Your saved brief stays available
-              in Project Compass.
+              To usunie zapytanie z ArchiCompass. Zapisany brief pozostanie dostępny
+              w Project Compass.
             </p>
             <form action={cancelSentInquiry} className="mt-4">
               <input type="hidden" name="inquiry_id" value={inquiry.id} />
@@ -295,7 +295,7 @@ function InquiryCard({
                 type="submit"
                 className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white hover:bg-red-700"
               >
-                Cancel this request
+                Anuluj to zapytanie
               </button>
             </form>
           </div>
@@ -525,23 +525,23 @@ export default async function InquiriesPage({
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-line bg-card p-6 text-sm leading-6 text-muted">
-              <div className="text-lg font-bold text-foreground">No incoming requests yet</div>
+              <div className="text-lg font-bold text-foreground">Nie ma jeszcze zapytań</div>
               <p className="mt-2">
-                When someone sends a saved brief to your profile, it will appear here.
-                Keep your public profile ready for that first useful request.
+                Gdy klient wyśle zapisany brief do Twojego profilu, pojawi się tutaj.
+                Utrzymuj profil publiczny w gotowości na pierwsze wartościowe zapytanie.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 <Link
                   href={`/designers/${user.id}`}
                   className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                 >
-                  View public profile
+                  Zobacz profil publiczny
                 </Link>
                 <Link
                   href="/account/profile"
                   className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
                 >
-                  Edit profile
+                  Edytuj profil
                 </Link>
               </div>
             </div>

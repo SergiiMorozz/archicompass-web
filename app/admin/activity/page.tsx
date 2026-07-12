@@ -15,7 +15,7 @@ type AuditItem = {
 };
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("pl-PL", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -25,11 +25,14 @@ function formatDate(value: string) {
 }
 
 function actionLabel(value: string) {
-  return value
-    .split("_")
-    .filter(Boolean)
-    .map((word) => word[0].toUpperCase() + word.slice(1))
-    .join(" ");
+  const labels: Record<string, string> = {
+    admin_access_granted: "Nadano dostęp administratora",
+    admin_access_revoked: "Odebrano dostęp administratora",
+    content_visibility_updated: "Zmieniono widoczność treści",
+    user_review_updated: "Zmieniono status weryfikacji użytkownika",
+  };
+
+  return labels[value] ?? value.replaceAll("_", " ");
 }
 
 export default async function AdminActivityPage() {
@@ -41,10 +44,10 @@ export default async function AdminActivityPage() {
     <main>
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="text-sm font-semibold text-primary">Accountability</div>
-          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Admin activity</h1>
+          <div className="text-sm font-semibold text-primary">Dziennik działań</div>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Aktywność admina</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-            Review sensitive administrative actions with their actor, target, and time.
+            Sprawdzaj wrażliwe działania administracyjne razem z osobą wykonującą, celem i czasem operacji.
           </p>
         </div>
       </section>
@@ -52,7 +55,7 @@ export default async function AdminActivityPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         {error ? (
           <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-sm text-red-700">
-            Activity could not be loaded: {error.message}
+            Nie udało się wczytać aktywności: {error.message}
           </div>
         ) : activity.length ? (
           <div className="overflow-hidden rounded-lg border border-line bg-card shadow-sm">
@@ -69,12 +72,12 @@ export default async function AdminActivityPage() {
                   </div>
                   {typeof item.metadata?.status === "string" ? (
                     <div className="mt-2 text-xs font-semibold capitalize text-primary">
-                      Status: {item.metadata.status.replace("_", " ")}
+                      Status: {String(item.metadata.status).replace("_", " ")}
                     </div>
                   ) : null}
                   {typeof item.metadata?.visibility === "string" ? (
                     <div className="mt-2 text-xs font-semibold capitalize text-primary">
-                      Visibility: {item.metadata.visibility}
+                      Widoczność: {item.metadata.visibility === "hidden" ? "ukryte" : "widoczne"}
                     </div>
                   ) : null}
                 </div>
@@ -84,10 +87,10 @@ export default async function AdminActivityPage() {
           </div>
         ) : (
           <div className="rounded-lg border border-dashed border-line bg-card p-8">
-            <h2 className="text-2xl font-bold">No admin actions yet</h2>
-            <p className="mt-2 text-muted">Review and moderation changes will appear here.</p>
+            <h2 className="text-2xl font-bold">Brak działań administracyjnych</h2>
+            <p className="mt-2 text-muted">Zmiany weryfikacji i moderacji pojawią się tutaj.</p>
             <Link href="/admin/users" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
-              Open users
+              Otwórz użytkowników
             </Link>
           </div>
         )}

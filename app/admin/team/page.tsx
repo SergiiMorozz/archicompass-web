@@ -10,8 +10,18 @@ type StaffMember = {
   full_name: string | null;
   role: "owner" | "admin";
   active: boolean;
+  permissions: string[] | null;
   created_at: string;
 };
+
+const permissionOptions = [
+  ["users", "Użytkownicy"],
+  ["moderation", "Moderacja"],
+  ["content", "Treści"],
+  ["analytics", "Statystyki"],
+  ["team", "Zespół admin"],
+  ["finance", "Finanse"],
+] as const;
 
 function textValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -29,12 +39,16 @@ async function setStaffAccess(formData: FormData) {
   if (role !== "owner") redirect("/admin");
   const email = textValue(formData, "email").toLowerCase();
   const action = textValue(formData, "access_action");
-  if (!email || !email.includes("@")) teamError("Enter a valid ArchiCompass account email.");
-  if (action !== "grant" && action !== "revoke") teamError("Choose a valid access action.");
+  const permissions = formData
+    .getAll("permissions")
+    .filter((value): value is string => typeof value === "string");
+  if (!email || !email.includes("@")) teamError("Wpisz prawidłowy e-mail konta ArchiCompass.");
+  if (action !== "grant" && action !== "revoke") teamError("Wybierz prawidłową akcję dostępu.");
 
   const { error } = await supabase.rpc("admin_set_staff_access", {
     target_active: action === "grant",
     target_email: email,
+    target_permissions: action === "grant" ? permissions : [],
   });
   if (error) teamError(error.message);
 
@@ -44,7 +58,7 @@ async function setStaffAccess(formData: FormData) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("pl-PL", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -66,11 +80,11 @@ export default async function AdminTeamPage({
     <main>
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="text-sm font-semibold text-primary">Access control</div>
-          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Admin team</h1>
+          <div className="text-sm font-semibold text-primary">Kontrola dostępu</div>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Zespół admin</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-            Grant trusted employees access to users, moderation, content, statistics, and
-            administrative activity.
+            Nadawaj zaufanym osobom dostęp do użytkowników, moderacji, treści,
+            statystyk, finansów i aktywności administracyjnej.
           </p>
         </div>
       </section>
@@ -79,7 +93,7 @@ export default async function AdminTeamPage({
         <div>
           {sp.granted || sp.revoked ? (
             <div className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-              {sp.granted ? "Administrator access granted." : "Administrator access revoked."}
+              {sp.granted ? "Dostęp administratora został nadany." : "Dostęp administratora został cofnięty."}
             </div>
           ) : null}
           {sp.error ? (
@@ -89,7 +103,7 @@ export default async function AdminTeamPage({
           ) : null}
           {error ? (
             <div className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-              Team access could not be loaded. Apply the Admin Team database migration first.
+              Nie udało się wczytać dostępu zespołu. Najpierw zastosuj migrację Admin Team.
             </div>
           ) : null}
 
@@ -98,7 +112,7 @@ export default async function AdminTeamPage({
               <article key={member.user_id} className="flex flex-col gap-4 border-b border-line p-5 last:border-0 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold">{member.full_name || member.email || "Unnamed account"}</span>
+                    <span className="font-semibold">{member.full_name || member.email || "Konto bez nazwy"}</span>
                     <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold capitalize text-primary">
                       {member.role}
                     </span>
@@ -106,11 +120,18 @@ export default async function AdminTeamPage({
                       "rounded-full px-2.5 py-1 text-xs font-semibold",
                       member.active ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700",
                     ].join(" ")}>
-                      {member.active ? "Active" : "Revoked"}
+                      {member.active ? "Aktywny" : "Cofnięty"}
                     </span>
                   </div>
                   <div className="mt-1 text-sm text-muted">
-                    {member.email || "No email"} | Added {formatDate(member.created_at)}
+                    {member.email || "Brak e-maila"} | Dodano {formatDate(member.created_at)}
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {(member.permissions?.length ? member.permissions : ["users", "moderation", "content", "analytics", "team", "finance"]).map((permission) => (
+                      <span key={permission} className="rounded-full border border-line bg-background px-2.5 py-1 text-xs font-semibold text-muted">
+                        {permissionOptions.find(([value]) => value === permission)?.[1] ?? permission}
+                      </span>
+                    ))}
                   </div>
                 </div>
                 {member.role === "admin" && member.active && member.email ? (
@@ -118,7 +139,7 @@ export default async function AdminTeamPage({
                     <input type="hidden" name="email" value={member.email} />
                     <input type="hidden" name="access_action" value="revoke" />
                     <button className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700">
-                      Revoke access
+                      Cofnij dostęp
                     </button>
                   </form>
                 ) : member.role === "admin" && member.email ? (
@@ -126,38 +147,55 @@ export default async function AdminTeamPage({
                     <input type="hidden" name="email" value={member.email} />
                     <input type="hidden" name="access_action" value="grant" />
                     <button className="rounded-xl border border-line bg-background px-4 py-2.5 text-sm font-semibold text-primary">
-                      Restore access
+                      Przywróć dostęp
                     </button>
                   </form>
                 ) : null}
               </article>
             )) : (
-              <div className="p-6 text-sm text-muted">No administrative accounts found.</div>
+              <div className="p-6 text-sm text-muted">Nie znaleziono kont administracyjnych.</div>
             )}
           </div>
         </div>
 
         <aside className="h-fit rounded-lg border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
-          <div className="text-sm font-semibold text-primary">Add administrator</div>
-          <h2 className="mt-1 text-2xl font-bold">Grant full access</h2>
+          <div className="text-sm font-semibold text-primary">Dodaj administratora</div>
+          <h2 className="mt-1 text-2xl font-bold">Nadaj dostęp</h2>
           <p className="mt-3 text-sm leading-6 text-muted">
-            The employee must first create an ArchiCompass account. Full administrators can
-            access user records, moderation, content tools, statistics, and the activity log.
+            Osoba musi najpierw utworzyć konto ArchiCompass. Wybierz zakresy dostępu,
+            które mają być przypisane do jej roli admin.
           </p>
           <form action={setStaffAccess} className="mt-5 grid gap-4">
             <input type="hidden" name="access_action" value="grant" />
             <label className="text-sm font-semibold">
-              Account email
+              E-mail konta
               <input
                 name="email"
                 type="email"
                 required
-                placeholder="employee@company.com"
+                placeholder="admin@archicompass.pl"
                 className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary"
               />
             </label>
+            <fieldset>
+              <legend className="text-sm font-semibold">Zakres dostępu</legend>
+              <div className="mt-3 grid gap-2">
+                {permissionOptions.map(([value, label]) => (
+                  <label key={value} className="flex items-center gap-3 rounded-xl border border-line bg-background px-3 py-2 text-sm font-semibold">
+                    <input
+                      type="checkbox"
+                      name="permissions"
+                      value={value}
+                      defaultChecked
+                      className="h-4 w-4 accent-primary"
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
             <button className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-              Grant administrator access
+              Nadaj dostęp administratora
             </button>
           </form>
         </aside>

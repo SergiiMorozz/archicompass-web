@@ -122,13 +122,14 @@ export default async function ClientFavoritesPage() {
           <div className="text-sm font-semibold text-primary">Twoja krótka lista</div>
           <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Ulubione</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-            Compare designers, projects, and inspiration without losing what feels right for your space.
+            Porównuj projektantów, pracownie, projekty i inspiracje bez gubienia tego,
+            co naprawdę pasuje do Twojej przestrzeni.
           </p>
         </div>
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6">
-        {error ? <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">Favorites could not be loaded: {error.message}</div> : null}
+        {error ? <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">Nie udało się wczytać ulubionych: {error.message}</div> : null}
 
         <section>
           <div className="flex items-end justify-between gap-4">
@@ -172,7 +173,7 @@ export default async function ClientFavoritesPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <Link href={`/studios/${studio.id}`} className="text-xl font-bold hover:text-primary">{studio.name}</Link>
-                      <div className="mt-1 text-sm text-muted">Design studio{studio.location ? ` · ${studio.location}` : ""}</div>
+                      <div className="mt-1 text-sm text-muted">Pracownia projektowa{studio.location ? ` · ${studio.location}` : ""}</div>
                     </div>
                     <FavoriteButton compact entityType="studio" entityKey={studio.id} initialSaved refreshOnChange />
                   </div>

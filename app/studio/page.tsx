@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { countLabel } from "@/lib/count-label";
 import { getStudioMemberships, inquiryRecipientFilter } from "@/lib/studios";
 import { profileReadinessScore } from "@/lib/profile-readiness";
 
@@ -23,7 +22,7 @@ type ClientProfile = {
 };
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("pl-PL", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -42,6 +41,14 @@ function statusClass(status: string) {
   if (status === "declined") return "bg-red-50 text-red-700";
   if (status === "reviewing") return "bg-[#fff3df] text-[#8a5a00]";
   return "bg-primary-soft text-primary";
+}
+
+function statusLabel(status: string) {
+  if (status === "accepted") return "Zaakceptowane";
+  if (status === "declined") return "Odrzucone";
+  if (status === "reviewing") return "W trakcie";
+  if (status === "sent") return "Nowe";
+  return status;
 }
 
 export default async function StudioOverviewPage() {
@@ -127,10 +134,10 @@ export default async function StudioOverviewPage() {
               Otwórz zapytania
             </Link>
               <Link href="/account/projects" className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
-                Add project
+                Dodaj projekt
               </Link>
               <Link href="/studio/team" className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
-                Studio and team
+                Pracownia i zespół
               </Link>
           </div>
         </div>
@@ -181,7 +188,7 @@ export default async function StudioOverviewPage() {
                           <h3 className="mt-1 text-xl font-bold">{inquiry.subject}</h3>
                         </div>
                         <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${statusClass(inquiry.status)}`}>
-                          {inquiry.status}
+                          {statusLabel(inquiry.status)}
                         </span>
                       </div>
                       <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted">
@@ -222,7 +229,7 @@ export default async function StudioOverviewPage() {
                 Edytuj profil
               </Link>
               <Link href="/account/projects" className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">
-                Manage {countLabel(projects.length, "project")}
+                Zarządzaj projektami ({projects.length})
               </Link>
               <Link href="/studio/analytics" className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">
                 Otwórz statystyki

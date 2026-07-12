@@ -46,12 +46,21 @@ function statusClass(status: string) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("pl-PL", {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
+}
+
+function statusLabel(status: string) {
+  if (status === "all") return "Wszystkie";
+  if (status === "accepted") return "Zaakceptowane";
+  if (status === "declined") return "Odrzucone";
+  if (status === "reviewing") return "W trakcie";
+  if (status === "sent") return "Nowe";
+  return status;
 }
 
 function snapshotValue(snapshot: Record<string, unknown> | null, key: string) {
@@ -157,7 +166,7 @@ export default async function StudioInboxPage({
                 : "border border-line bg-card text-muted hover:border-primary hover:text-primary",
             ].join(" ")}
           >
-            Unread {totalUnread}
+            Nieprzeczytane {totalUnread}
           </Link>
           {statusFilters.map((status) => {
             const count =
@@ -175,7 +184,7 @@ export default async function StudioInboxPage({
                     : "border border-line bg-card text-muted hover:border-primary hover:text-primary",
                 ].join(" ")}
               >
-                {status === "sent" ? "New" : status} {count}
+                {statusLabel(status)} {count}
               </Link>
             );
           })}
@@ -199,11 +208,11 @@ export default async function StudioInboxPage({
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusClass(inquiry.status)}`}>
-                          {inquiry.status === "sent" ? "New" : inquiry.status}
+                          {statusLabel(inquiry.status)}
                         </span>
                         {unread ? (
                           <span className="rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-white">
-                            {unread} unread
+                            {unread} nowe
                           </span>
                         ) : null}
                         <span className="rounded-full border border-line bg-background px-3 py-1 text-xs font-semibold text-muted">

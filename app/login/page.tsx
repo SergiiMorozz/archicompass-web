@@ -56,6 +56,15 @@ function LoginContent() {
         : intent;
       return `/onboarding?intent=${onboardingIntent}`;
     }
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("full_name, phone, location")
+      .eq("id", userId)
+      .maybeSingle();
+    const needsProfileSetup = !profileData?.full_name || !profileData?.phone || !profileData?.location;
+    if (needsProfileSetup && (requestedNext === "/account" || requestedNext.startsWith("/onboarding"))) {
+      return "/account/profile?onboarding=1";
+    }
     if (requestedNext.startsWith("/onboarding") || requestedNext === "/account") {
       return roleData.role === "designer" ? "/studio" : "/client";
     }
@@ -91,7 +100,7 @@ function LoginContent() {
       return;
     }
 
-    const next = `/onboarding?intent=${intent}`;
+    const next = `/account/profile?onboarding=1`;
     const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,
@@ -106,12 +115,21 @@ function LoginContent() {
       return;
     }
     if (data.session) {
+      await supabase.rpc("set_my_account_role", { new_role: intent });
+      await supabase.from("profiles").upsert(
+        {
+          id: data.session.user.id,
+          email: data.session.user.email ?? cleanEmail,
+          user_type: intent === "designer" ? "professional" : "client",
+        },
+        { onConflict: "id" }
+      );
       window.location.assign(next);
       return;
     }
     setStatus({
       type: "success",
-      message: "Konto zostało utworzone. Otwórz wiadomość potwierdzającą, a następnie zaloguj się tym adresem e-mail i hasłem.",
+      message: "Konto zostało utworzone. Otwórz wiadomość potwierdzającą e-mail, a następnie wrócisz do uzupełnienia profilu. Jeśli jej nie widzisz, sprawdź też folder Spam lub Oferty.",
     });
   }
 

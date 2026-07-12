@@ -20,6 +20,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { publicTextError } from "@/lib/content-moderation";
 import { fetchGooglePlaceSummary } from "@/lib/google-places";
 import { profileReadinessScore } from "@/lib/profile-readiness";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const revalidate = 0;
 
@@ -259,7 +260,7 @@ async function deleteProfessionalProfile(formData: FormData) {
   if (!user) redirect("/login");
 
   if (textValue(formData, "confirm_delete") !== "DELETE") {
-    redirect("/account/profile?error=Type%20DELETE%20to%20confirm%20profile%20deletion.");
+    redirect("/account/profile?error=Wpisz%20DELETE%2C%20aby%20potwierdzi%C4%87%20usuni%C4%99cie%20profilu.");
   }
 
   const { data: projectData } = await supabase
@@ -304,10 +305,33 @@ async function deleteProfessionalProfile(formData: FormData) {
   redirect("/account?profileDeleted=1");
 }
 
+async function deleteClientAccount(formData: FormData) {
+  "use server";
+
+  const supabase = await createSupabaseServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData.user;
+  if (!user) redirect("/login");
+
+  const accountRole = await getExplicitAccountRole(supabase, user.id);
+  if (accountRole !== "client") redirect("/account/profile?error=Usuni%C4%99cie%20konta%20jest%20dost%C4%99pne%20tutaj%20dla%20kont%20klienta.");
+
+  if (textValue(formData, "confirm_delete_account") !== "DELETE") {
+    redirect("/account/profile?error=Wpisz%20DELETE%2C%20aby%20potwierdzi%C4%87%20usuni%C4%99cie%20konta.");
+  }
+
+  const admin = createSupabaseAdminClient();
+  const { error } = await admin.auth.admin.deleteUser(user.id);
+  if (error) redirect(`/account/profile?error=${encodeURIComponent(error.message)}`);
+
+  await supabase.auth.signOut();
+  redirect("/login?accountDeleted=1");
+}
+
 export default async function EditProfilePage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string; notice?: string }>;
+  searchParams?: Promise<{ error?: string; notice?: string; onboarding?: string }>;
 }) {
   const sp = (await searchParams) ?? {};
   const supabase = await createSupabaseServerClient();
@@ -332,6 +356,7 @@ export default async function EditProfilePage({
   const score = profileReadinessScore(p, isProfessional);
   const specialtyCount = p.specialties?.length ?? 0;
   const backHref = isProfessional ? "/account" : "/client";
+  const isOnboarding = sp.onboarding === "1";
 
   return (
     <main className="bg-background">
@@ -368,7 +393,7 @@ export default async function EditProfilePage({
                     href={`/designers/${user.id}`}
                     className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                   >
-                    View profile
+                    Zobacz profil
                   </Link>
                 ) : null}
               </div>
@@ -389,6 +414,16 @@ export default async function EditProfilePage({
           ) : sp.notice ? (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
               {sp.notice}
+            </div>
+          ) : null}
+
+          {isOnboarding ? (
+            <div className="rounded-2xl border border-primary/30 bg-primary-soft p-5 text-sm leading-6 text-foreground">
+              <div className="font-bold text-primary">Pierwszy krok po rejestracji</div>
+              <p className="mt-1 text-muted">
+                Uzupełnij imię, telefon i lokalizację. Te dane pomagają prowadzić rozmowy
+                i poprawnie przypisywać briefy do Twojego konta.
+              </p>
             </div>
           ) : null}
 
@@ -621,7 +656,7 @@ export default async function EditProfilePage({
               <fieldset>
                 <legend className="text-sm font-semibold">Dostępne usługi</legend>
                 <p className="mt-1 text-sm leading-6 text-muted">
-                  These are used when Project Compass explains why a brief may fit.
+                  Te informacje pomagają Project Compass wyjaśnić, dlaczego dany brief pasuje do Twoich usług.
                 </p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   {serviceCapabilities.map((capability) => (
@@ -665,7 +700,7 @@ export default async function EditProfilePage({
               href={hasProfile && isProfessional ? `/designers/${user.id}` : backHref}
               className="rounded-xl border border-line bg-card px-6 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
             >
-              Cancel
+              Anuluj
             </Link>
           </div>
         </form>
@@ -698,7 +733,7 @@ export default async function EditProfilePage({
               <div className="font-semibold">Specjalizacje</div>
               <p className="mt-2 leading-6 text-muted">
                 {specialtyCount
-                  ? `${specialtyCount} specialties are ready to show.`
+                  ? `${specialtyCount} specjalizacje są gotowe do pokazania.`
                   : "Dodaj kilka specjalizacji, aby klienci szybko ocenili dopasowanie."}
               </p>
             </div> : null}
@@ -714,18 +749,17 @@ export default async function EditProfilePage({
           {isProfessional && hasProfile ? (
             <details className="mt-6 overflow-hidden rounded-xl border border-red-200 bg-red-50">
               <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-red-700">
-                Delete professional profile
+                Usuń profil projektanta
               </summary>
               <div className="border-t border-red-200 p-4">
                 <p className="text-sm leading-6 text-red-700">
-                  This permanently removes your public designer profile, all portfolio
-                  projects, project images, favorites pointing to them, and profile
-                  analytics. Your login, saved conversations, and studio memberships stay
-                  active.
+                  Ta operacja trwale usuwa publiczny profil projektanta, portfolio,
+                  zdjęcia projektów, powiązane ulubione oraz statystyki profilu.
+                  Login, zapisane rozmowy i członkostwa w pracowniach pozostaną aktywne.
                 </p>
                 <form action={deleteProfessionalProfile} className="mt-4 grid gap-3">
                   <label className="text-sm font-semibold text-red-800">
-                    Type DELETE to confirm
+                    Wpisz DELETE, aby potwierdzić
                     <input
                       name="confirm_delete"
                       required
@@ -738,7 +772,39 @@ export default async function EditProfilePage({
                     type="submit"
                     className="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700"
                   >
-                    Permanently delete profile
+                    Usuń profil publiczny
+                  </button>
+                </form>
+              </div>
+            </details>
+          ) : null}
+
+          {!isProfessional ? (
+            <details className="mt-6 overflow-hidden rounded-xl border border-red-200 bg-red-50">
+              <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-red-700">
+                Usuń konto klienta
+              </summary>
+              <div className="border-t border-red-200 p-4">
+                <p className="text-sm leading-6 text-red-700">
+                  Ta operacja trwale usuwa konto klienta, zapisane briefy, ulubione
+                  elementy oraz dostęp do rozmów. Nie będzie można jej cofnąć.
+                </p>
+                <form action={deleteClientAccount} className="mt-4 grid gap-3">
+                  <label className="text-sm font-semibold text-red-800">
+                    Wpisz DELETE, aby potwierdzić
+                    <input
+                      name="confirm_delete_account"
+                      required
+                      pattern="DELETE"
+                      autoComplete="off"
+                      className="mt-2 w-full rounded-xl border border-red-300 bg-white px-4 py-3 font-normal text-foreground outline-none focus:border-red-600"
+                    />
+                  </label>
+                  <button
+                    type="submit"
+                    className="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700"
+                  >
+                    Usuń konto
                   </button>
                 </form>
               </div>

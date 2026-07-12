@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import StudioNav from "@/components/StudioNav";
+import { getActiveAdminRole } from "@/lib/admin";
 import { currentRequestPath } from "@/lib/request-path";
 import {
   getExplicitAccountRole,
@@ -30,11 +31,14 @@ export default async function StudioLayout({ children }: { children: React.React
     .eq("id", user.id)
     .maybeSingle();
 
-  const accountRole = await getExplicitAccountRole(supabase, user.id);
+  const [accountRole, adminRole] = await Promise.all([
+    getExplicitAccountRole(supabase, user.id),
+    getActiveAdminRole(supabase, user.id),
+  ]);
 
-  if (!accountRole) redirect(`/onboarding?next=${encodeURIComponent(requestedPath)}`);
+  if (!accountRole && !adminRole) redirect(`/onboarding?next=${encodeURIComponent(requestedPath)}`);
 
-  if (accountRole !== "designer") {
+  if (accountRole !== "designer" && !adminRole) {
     return (
       <main className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
         <div className="rounded-lg border border-line bg-card p-8 shadow-sm">
@@ -80,7 +84,7 @@ export default async function StudioLayout({ children }: { children: React.React
     <div className="min-h-screen bg-background">
       <StudioNav
         profileId={profile ? user.id : null}
-        profileName={profile?.full_name || user.email || "Professional profile"}
+        profileName={profile?.full_name || user.email || "Profil projektanta"}
         unreadCount={(unreadCount ?? 0) + newRequestCount}
       />
       {children}

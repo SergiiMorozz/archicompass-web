@@ -200,7 +200,7 @@ export default async function StudioAnalyticsPage() {
               </p>
               <div className="mt-5 grid gap-3">
                 <Link href="/account/projects" className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white">
-                  Manage projects
+                  Zarządzaj projektami
                 </Link>
                 <Link href={`/designers/${user.id}`} className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">
                   Otwórz profil publiczny

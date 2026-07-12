@@ -30,7 +30,7 @@ export default function SignOutButton({ className = "" }: { className?: string }
         "rounded-xl border px-4 py-2 text-sm hover:bg-zinc-50 disabled:opacity-60"
       }
     >
-      {loading ? "Signing out..." : "Sign out"}
+      {loading ? "Wylogowywanie..." : "Wyloguj się"}
     </button>
   );
 }

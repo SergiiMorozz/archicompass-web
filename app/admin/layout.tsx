@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/admin";
 
 export const revalidate = 0;
 export const metadata: Metadata = {
-  title: "Administration",
+  title: "Admin | ArchiCompass",
   robots: { index: false, follow: false, nocache: true },
 };
 

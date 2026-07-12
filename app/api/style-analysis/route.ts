@@ -44,6 +44,54 @@ const allowedStyles = [
   "Not sure yet",
 ];
 
+const polishStyleNames: Record<string, string> = {
+  "Warm minimalism": "Ciepły minimalizm",
+  Scandinavian: "Styl skandynawski",
+  "Modern classic": "Modern classic",
+  Industrial: "Styl industrialny",
+  Japandi: "Japandi",
+  Contemporary: "Styl współczesny",
+  "Mid-century modern": "Mid-century modern",
+  "Art Deco": "Art déco",
+  Mediterranean: "Styl śródziemnomorski",
+  Bohemian: "Boho",
+  Eclectic: "Styl eklektyczny",
+  "Rustic / organic": "Styl rustykalny / organiczny",
+  Traditional: "Styl tradycyjny",
+  "Luxury contemporary": "Współczesny luksus",
+  "Not sure yet": "Kierunek do doprecyzowania",
+};
+
+const polishKnownTerms: Record<string, string> = {
+  "Natural wood": "naturalne drewno",
+  "Bright neutral palette": "jasna neutralna paleta",
+  "Hidden storage": "ukryte przechowywanie",
+  "Bold color accents": "wyraziste akcenty kolorystyczne",
+  "Dark contrast": "ciemny kontrast",
+  "Luxury details": "luksusowe detale",
+  "Eco materials": "materiały ekologiczne",
+  "Smart home": "smart home",
+  "Compact solutions": "rozwiązania do małych przestrzeni",
+  "Soft curves": "miękkie linie",
+  Cream: "kremowy",
+  "Off-white": "złamana biel",
+  Beige: "beż",
+  Greige: "greige",
+  "Warm beige": "ciepły beż",
+  "Light oak": "jasny dąb",
+  Oak: "dąb",
+  Walnut: "orzech",
+  Stone: "kamień",
+  "Natural stone": "naturalny kamień",
+  Marble: "marmur",
+  Brass: "mosiądz",
+  Rattan: "rattan",
+  "Textured plaster": "tynk strukturalny",
+  "Light wood": "jasne drewno",
+  "Dark wood": "ciemne drewno",
+  "Bouclé fabric": "tkanina boucle",
+};
+
 type StyleAnalysis = {
   primaryStyle: string;
   styleDirection: string;
@@ -184,6 +232,17 @@ function arrayOfStrings(value: unknown, fallback: string[] = []) {
     : fallback;
 }
 
+function polishKnownTerm(value: string) {
+  const trimmed = value.trim();
+  return polishKnownTerms[trimmed] ?? trimmed;
+}
+
+function cleanUserTextList(value: unknown, maxItems: number) {
+  return arrayOfStrings(value)
+    .map(polishKnownTerm)
+    .slice(0, maxItems);
+}
+
 function cleanAnalysis(value: unknown): StyleAnalysis {
   const data = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
   const styleDirection =
@@ -201,17 +260,17 @@ function cleanAnalysis(value: unknown): StyleAnalysis {
   return {
     primaryStyle:
       typeof data.primaryStyle === "string" && data.primaryStyle.trim()
-        ? data.primaryStyle.trim()
-        : styleDirection,
+        ? (polishStyleNames[data.primaryStyle.trim()] ?? data.primaryStyle.trim())
+        : polishStyleNames[styleDirection],
     styleDirection,
     confidence,
     summary:
       typeof data.summary === "string" && data.summary.trim()
         ? data.summary.trim()
         : "Zdjęcia wskazują na spójny kierunek wnętrza, ale do precyzyjnego określenia stylu potrzeba nieco więcej kontekstu.",
-    colorPalette: arrayOfStrings(data.colorPalette).slice(0, 6),
-    materials: arrayOfStrings(data.materials).slice(0, 6),
-    styleClues: arrayOfStrings(data.styleClues).slice(0, 6),
+    colorPalette: cleanUserTextList(data.colorPalette, 6),
+    materials: cleanUserTextList(data.materials, 6),
+    styleClues: cleanUserTextList(data.styleClues, 6),
     visualCues: visualCues.slice(0, 5),
     searchSpecialty:
       typeof data.searchSpecialty === "string" ? data.searchSpecialty.trim() : "",
@@ -219,7 +278,7 @@ function cleanAnalysis(value: unknown): StyleAnalysis {
       typeof data.designerPrompt === "string" && data.designerPrompt.trim()
         ? data.designerPrompt.trim()
         : "Szukaj projektantów, których portfolio pokazuje podobny nastrój, materiały i sposób pracy ze światłem.",
-    watchOuts: arrayOfStrings(data.watchOuts).slice(0, 4),
+    watchOuts: cleanUserTextList(data.watchOuts, 4),
   };
 }
 

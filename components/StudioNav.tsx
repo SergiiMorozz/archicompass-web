@@ -8,8 +8,8 @@ const studioLinks = [
   { href: "/studio/inbox", label: "Zapytania" },
   { href: "/studio/analytics", label: "Statystyki" },
   { href: "/studio/team", label: "Pracownia i zespół" },
-  { href: "/account/profile", label: "Edytuj profil" },
-  { href: "/account/projects", label: "Projekty" },
+  { href: "/account/profile", label: "Profil i dane" },
+  { href: "/account/projects", label: "Portfolio" },
 ];
 
 export default function StudioNav({

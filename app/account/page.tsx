@@ -43,7 +43,7 @@ type DesignerInquiry = {
 };
 
 function profileName(profile: Partial<Profile>, email?: string) {
-  return profile.full_name || email || "Twoje konto ArchiCompass";
+  return profile.full_name || "Uzupełnij profil";
 }
 
 export default async function AccountPage({
@@ -110,9 +110,12 @@ export default async function AccountPage({
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
             <div>
               <div className="text-sm font-semibold text-primary">Panel konta</div>
-              <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
+              <h1 className="mt-2 break-words text-4xl font-bold tracking-tight sm:text-6xl">
                 {profileName(profile, user.email ?? undefined)}
               </h1>
+              <div className="mt-3 break-all text-sm font-semibold text-muted">
+                {user.email}
+              </div>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
                 {isProfessional
                   ? "Zarządzaj profilem, portfolio, pracowniami i zapytaniami przypisanymi do konta projektanta."
@@ -141,7 +144,7 @@ export default async function AccountPage({
                   href="/studio"
                   className="rounded-xl bg-foreground px-4 py-3 text-sm font-semibold text-white"
                 >
-                  Designer Studio
+                  Studio projektanta
                 </Link>
               ) : null}
               {hasPublicProfile ? (
@@ -149,7 +152,7 @@ export default async function AccountPage({
                   href={`/designers/${myProfileId}`}
                   className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                 >
-                  View public profile
+                  Zobacz profil publiczny
                 </Link>
               ) : null}
               <SignOutButton className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary disabled:opacity-60" />
@@ -164,14 +167,14 @@ export default async function AccountPage({
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900">
               <div className="font-semibold">Profil profesjonalisty został usunięty</div>
               <p className="mt-1">
-                The public profile and portfolio were removed. Your designer account,
-                conversations, and studio memberships remain active.
+                Publiczny profil i portfolio zostały usunięte. Konto projektanta,
+                rozmowy i członkostwa w pracowniach pozostają aktywne.
               </p>
             </div>
           ) : null}
           {sp.profileUpdated ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
-              Account profile updated.
+              Dane profilu zostały zaktualizowane.
             </div>
           ) : null}
           <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -192,7 +195,7 @@ export default async function AccountPage({
                 <div className="h-full rounded-full bg-primary" style={{ width: `${score}%` }} />
               </div>
               <div className="mt-3 text-sm font-semibold text-muted">
-                {score}% profile readiness
+                {score}% kompletności profilu
               </div>
             </Link>
 
@@ -204,8 +207,8 @@ export default async function AccountPage({
                 <div className="text-sm font-semibold text-primary">Zarządzanie portfolio</div>
                 <h2 className="mt-2 text-2xl font-bold">Zarządzaj projektami</h2>
                 <p className="mt-3 text-sm leading-6 text-muted">
-                  Add project cards that turn your personal profile into a visual
-                  portfolio and also appear in connected studios.
+                  Dodawaj karty projektów, które budują wiarygodność profilu publicznego
+                  i mogą pojawiać się również w powiązanych pracowniach.
                 </p>
                 <div className="mt-6 grid grid-cols-2 gap-3">
                   <div className="rounded-xl border border-line bg-background p-3">
@@ -230,8 +233,8 @@ export default async function AccountPage({
                 <div className="text-sm font-semibold text-primary">Profil pracowni</div>
                 <h2 className="mt-2 text-2xl font-bold">Pracownia i zespół</h2>
                 <p className="mt-3 text-sm leading-6 text-muted">
-                  Create a studio, invite designers, and share one team inbox and
-                  aggregated portfolio.
+                  Utwórz pracownię, zaproś projektantów i korzystaj ze wspólnej skrzynki
+                  zapytań oraz połączonego portfolio zespołu.
                 </p>
                 <div className="mt-6 rounded-xl border border-line bg-background p-3">
                   <div className="text-sm text-muted">Aktywne pracownie</div>
@@ -309,14 +312,14 @@ export default async function AccountPage({
                 href="/designers"
                 className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
               >
-                Browse marketplace
+                Przeglądaj projektantów
               </Link>
             </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-3">
               <div className="rounded-2xl border border-line bg-background p-5">
                 <div className="font-bold">
-                  {isProfessional ? "1. Complete basics" : "1. Build a clear brief"}
+                  {isProfessional ? "1. Uzupełnij podstawy" : "1. Stwórz jasny brief"}
                 </div>
                 <p className="mt-2 text-sm leading-6 text-muted">
                   {isProfessional
@@ -326,17 +329,17 @@ export default async function AccountPage({
               </div>
               <div className="rounded-2xl border border-line bg-background p-5">
                 <div className="font-bold">
-                  {isProfessional ? "2. Add one project" : "2. Compare professionals"}
+                  {isProfessional ? "2. Dodaj pierwszy projekt" : "2. Porównaj specjalistów"}
                 </div>
                 <p className="mt-2 text-sm leading-6 text-muted">
                   {isProfessional
-                    ? "A single strong portfolio card already makes the public page much more credible."
+                    ? "Już jedna mocna karta portfolio sprawia, że publiczny profil wygląda znacznie bardziej wiarygodnie."
                     : "Porównaj niezależnych projektantów i pracownie, zanim wyślesz brief."}
                 </p>
               </div>
               <div className="rounded-2xl border border-line bg-background p-5">
                 <div className="font-bold">
-                  {isProfessional ? "3. Review public view" : "3. Continue in messages"}
+                  {isProfessional ? "3. Sprawdź widok publiczny" : "3. Kontynuuj w wiadomościach"}
                 </div>
                 <p className="mt-2 text-sm leading-6 text-muted">
                   {isProfessional

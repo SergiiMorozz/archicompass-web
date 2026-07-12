@@ -31,7 +31,15 @@ async function completeOnboarding(formData: FormData) {
   if (!user) redirect("/login?next=/onboarding");
 
   const existingRole = await getExplicitAccountRole(supabase, user.id);
-  if (existingRole) redirect(existingRole === "designer" ? "/studio" : "/client");
+  if (existingRole) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, phone, location")
+      .eq("id", user.id)
+      .maybeSingle();
+    const needsProfileSetup = !profile?.full_name || !profile?.phone || !profile?.location;
+    redirect(needsProfileSetup ? "/account/profile?onboarding=1" : existingRole === "designer" ? "/studio" : "/client");
+  }
 
   const role = formValue(formData, "role");
   const designerMode = formValue(formData, "designer_mode");
@@ -65,10 +73,7 @@ async function completeOnboarding(formData: FormData) {
     redirect(`/onboarding?${params.toString()}`);
   }
 
-  if (role === "client") {
-    redirect(next.startsWith("/account/briefs") ? next : "/client");
-  }
-  redirect(designerMode === "studio" ? "/studio/team?onboarding=1" : "/account/profile?onboarding=1");
+  redirect("/account/profile?onboarding=1");
 }
 
 export default async function OnboardingPage({
@@ -91,7 +96,15 @@ export default async function OnboardingPage({
   }
 
   const existingRole = await getExplicitAccountRole(supabase, user.id);
-  if (existingRole) redirect(existingRole === "designer" ? "/studio" : "/client");
+  if (existingRole) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, phone, location")
+      .eq("id", user.id)
+      .maybeSingle();
+    const needsProfileSetup = !profile?.full_name || !profile?.phone || !profile?.location;
+    redirect(needsProfileSetup ? "/account/profile?onboarding=1" : existingRole === "designer" ? "/studio" : "/client");
+  }
 
   return (
     <main className="min-h-[calc(100vh-80px)] bg-background px-4 py-12 sm:px-6">
@@ -106,8 +119,8 @@ export default async function OnboardingPage({
                 : "Wybierz typ konta"}
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-muted">
-            Jedno konto ma jedną rolę, dzięki czemu briefy i zapytania zawsze trafiają
-            do właściwej strefy.
+            Najpierw wybierz rolę, a potem uzupełnij dane kontaktowe. Dzięki temu od razu
+            trafisz do właściwej strefy platformy.
           </p>
         </div>
 
@@ -137,20 +150,30 @@ export default async function OnboardingPage({
             </Link>
           </div>
         ) : intent === "client" ? (
-          <form action={completeOnboarding} className="mx-auto mt-10 max-w-2xl rounded-2xl border border-line bg-card p-7 shadow-sm">
+          <form action={completeOnboarding} className="mx-auto mt-10 max-w-2xl overflow-hidden rounded-2xl border border-primary/30 bg-card shadow-sm">
             <input type="hidden" name="role" value="client" />
             <input type="hidden" name="next" value={next} />
-            <div className="text-sm font-semibold text-primary">Strefa klienta</div>
-            <h2 className="mt-2 text-3xl font-bold">Wszystko, czego potrzebujesz do wyboru projektanta</h2>
-            <p className="mt-3 leading-7 text-muted">
-              W tej strefie znajdziesz zapisane briefy, ulubionych projektantów, projekty
-              i rozmowy. Konto klienta nie otrzymuje zapytań przeznaczonych dla projektantów.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="bg-primary-soft p-7">
+              <div className="inline-flex rounded-full bg-white px-3 py-1 text-sm font-semibold text-primary shadow-sm">
+                Strefa klienta
+              </div>
+              <h2 className="mt-4 text-3xl font-bold">Wszystko, czego potrzebujesz do wyboru projektanta</h2>
+              <p className="mt-3 leading-7 text-muted">
+                W tej strefie znajdziesz zapisane briefy, ulubionych projektantów, projekty
+                i rozmowy. Konto klienta nie otrzymuje zapytań przeznaczonych dla projektantów.
+              </p>
+            </div>
+            <div className="p-7">
+              <p className="rounded-xl border border-line bg-background p-4 text-sm leading-6 text-muted">
+                Następny krok: uzupełnienie imienia, telefonu i lokalizacji, żeby projektanci
+                mogli odpowiadać na briefy bez zgadywania podstawowych informacji.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3 px-7 pb-7">
               <button type="submit" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-                Utwórz strefę klienta
+                Przejdź do uzupełnienia profilu
               </button>
-              <Link href={stepHref("designer", next)} className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold">
+              <Link href={stepHref("designer", next)} className="px-2 py-3 text-sm font-semibold text-muted underline">
                 Zamiast tego wybierz projektanta
               </Link>
             </div>
