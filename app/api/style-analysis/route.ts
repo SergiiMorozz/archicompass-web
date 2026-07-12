@@ -300,13 +300,15 @@ function analysisPrompt({
   return [
     "Przeanalizuj te zdjęcia referencyjne wnętrz dla ArchiCompass.",
     "Przygotuj praktyczne wskazówki stylistyczne dla klienta, który chce znaleźć właściwego projektanta wnętrz.",
-    `Project type: ${projectType}.`,
-    `Client-selected style before analysis: ${currentStyle}.`,
-    `Client-selected visual cues before analysis: ${currentCues}.`,
-    "Wszystkie treści przeznaczone dla użytkownika zwróć po polsku: primaryStyle, summary, colorPalette, materials, styleClues, designerPrompt i watchOuts.",
+    `Typ inwestycji: ${projectType}.`,
+    `Styl wybrany przez klienta przed analizą: ${currentStyle}.`,
+    `Cechy wizualne wybrane przez klienta przed analizą: ${currentCues}.`,
+    "Wszystkie treści przeznaczone dla użytkownika zwróć wyłącznie po polsku: primaryStyle, summary, colorPalette, materials, styleClues, designerPrompt i watchOuts.",
+    "Jeśli w analizie pojawi się angielski opis materiału, koloru, stylu lub wskazówki, przetłumacz go na naturalny polski przed zwróceniem JSON.",
     "Pisz naturalnym, profesjonalnym językiem polskim. Bądź konkretny, ale nie sugeruj pewności, jeśli zdjęcia są niespójne.",
     `styleDirection must be one of: ${allowedStyles.join(", ")}.`,
     `visualCues must only use these values: ${allowedVisualCues.join(", ")}.`,
+    "Tylko pola techniczne styleDirection, visualCues i searchSpecialty mogą używać angielskich wartości enum.",
     "searchSpecialty should be one short marketplace keyword such as minimalist, scandinavian, modern, industrial, luxury, eco-friendly, smart home, or an empty string.",
   ].join("\n");
 }

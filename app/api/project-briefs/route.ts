@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
   if (!user) {
     return NextResponse.json(
-      { error: "Please sign in to save this brief.", code: "AUTH_REQUIRED" },
+      { error: "Zaloguj się, aby zapisać brief.", code: "AUTH_REQUIRED" },
       { status: 401 }
     );
   }
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
   if (!accountRole) {
     return NextResponse.json(
       {
-        error: "Choose an account type before saving a project brief.",
+        error: "Wybierz typ konta przed zapisaniem briefu projektowego.",
         code: "ONBOARDING_REQUIRED",
       },
       { status: 403 }
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
   if (accountRole !== "client") {
     return NextResponse.json(
       {
-        error: "Designer accounts receive briefs and cannot save client project requests.",
+        error: "Konta projektantów otrzymują briefy i nie mogą zapisywać zapytań jako klient.",
         code: "CLIENT_ROLE_REQUIRED",
       },
       { status: 403 }
@@ -85,13 +85,13 @@ export async function POST(request: Request) {
   const briefText = textValue(formData, "brief_text");
 
   if (!briefText) {
-    return NextResponse.json({ error: "Brief text is required." }, { status: 400 });
+    return NextResponse.json({ error: "Treść briefu jest wymagana." }, { status: 400 });
   }
 
   const referencePhotos = fileValues(formData, "reference_photos");
   if (referencePhotos.length > maxReferencePhotos) {
     return NextResponse.json(
-      { error: `Please upload up to ${maxReferencePhotos} reference photos.` },
+      { error: `Możesz przesłać maksymalnie ${maxReferencePhotos} zdjęć referencyjnych.` },
       { status: 400 }
     );
   }
@@ -99,14 +99,14 @@ export async function POST(request: Request) {
   for (const photo of referencePhotos) {
     if (!allowedImageTypes.includes(photo.type)) {
       return NextResponse.json(
-        { error: "Reference photos must be JPEG, PNG, or WebP files." },
+        { error: "Zdjęcia referencyjne muszą być plikami JPEG, PNG lub WebP." },
         { status: 400 }
       );
     }
 
     if (photo.size > maxImageSize) {
       return NextResponse.json(
-        { error: "Each reference photo must be smaller than 10 MB." },
+        { error: "Każde zdjęcie referencyjne musi mieć mniej niż 10 MB." },
         { status: 400 }
       );
     }
@@ -129,7 +129,7 @@ export async function POST(request: Request) {
       }
 
       return NextResponse.json(
-        { error: `Reference photo upload failed: ${error.message}` },
+        { error: `Nie udało się przesłać zdjęcia referencyjnego: ${error.message}` },
         { status: 500 }
       );
     }
@@ -139,14 +139,14 @@ export async function POST(request: Request) {
   }
 
   const titleParts = [
-    textValue(formData, "project_type") ?? "Project",
+    textValue(formData, "project_type") ?? "Projekt",
     textValue(formData, "location") ?? null,
   ].filter(Boolean);
 
   const { error } = await supabase.from("project_briefs").insert({
     id: briefId,
     user_id: user.id,
-    title: titleParts.join(" in "),
+    title: titleParts.join(" w "),
     project_type: textValue(formData, "project_type"),
     goal: textValue(formData, "goal"),
     style_direction: textValue(formData, "style_direction"),

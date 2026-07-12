@@ -427,6 +427,10 @@ function styleLabels(value: string) {
     .join(" / ");
 }
 
+function confidenceLabel(confidence: StyleAnalysis["confidence"]) {
+  return confidence === "high" ? "wysoka" : confidence === "medium" ? "średnia" : "niska";
+}
+
 function styleValues(value: string) {
   const values = value.split(" | ").filter(Boolean);
   return values.length ? values : ["Not sure yet"];
@@ -587,7 +591,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
     view: "list",
     projectType,
     goal,
-    style: styleAnalysis?.primaryStyle || style,
+    style: styleAnalysis?.styleDirection || style,
     support: scope,
     budget,
     timeline,
@@ -624,7 +628,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
           : "Zdjęcia referencyjne: jeszcze nie dodano",
         styleAnalysis
           ? [
-              `Analiza stylu AI: ${styleAnalysis.primaryStyle} (pewność: ${styleAnalysis.confidence})`,
+              `Analiza stylu AI: ${styleAnalysis.primaryStyle} (pewność: ${confidenceLabel(styleAnalysis.confidence)})`,
               `Podsumowanie AI: ${styleAnalysis.summary}`,
               styleAnalysis.colorPalette.length
                 ? `Paleta kolorów AI: ${styleAnalysis.colorPalette.join(", ")}`
@@ -752,9 +756,14 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
     setAnalysisError(null);
 
     const formData = new FormData();
-    formData.set("project_type", projectType);
-    formData.set("style_direction", primaryStyleValue(style));
-    formData.set("visual_cues", selectedVisualCues.join(", "));
+    formData.set("project_type", optionLabel(projectTypes, projectType));
+    formData.set("style_direction", styleLabels(primaryStyleValue(style)));
+    formData.set(
+      "visual_cues",
+      selectedVisualCues.length
+        ? selectedVisualCues.map((item) => optionLabel(visualCues, item)).join(", ")
+        : "Brak wybranych cech"
+    );
 
     referencePhotos.slice(0, maxAnalysisPhotos).forEach((photo) => {
       formData.append("reference_photos", photo.file, photo.name);
@@ -1192,7 +1201,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                       </div>
                     </div>
                     <span className="w-fit rounded-full bg-card px-3 py-1 text-xs font-semibold text-primary">
-                      pewność: {styleAnalysis.confidence === "high" ? "wysoka" : styleAnalysis.confidence === "medium" ? "średnia" : "niska"}
+                      pewność: {confidenceLabel(styleAnalysis.confidence)}
                     </span>
                   </div>
 
