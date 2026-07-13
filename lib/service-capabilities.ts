@@ -38,7 +38,7 @@ export function requiredServiceCapabilities(
     required.push("3D visualization");
   }
 
-  if (supervisionNeed === "Consultations / site visits") {
+  if (supportNeed === "Consultation" || supervisionNeed === "Consultations / site visits") {
     required.push("Site consultations");
   } else if (supervisionNeed === "Author's supervision") {
     required.push("Author's supervision");
@@ -49,6 +49,8 @@ export function requiredServiceCapabilities(
   if (supportNeed === "Technical design") {
     required.push("Technical documentation");
   } else if (supportNeed === "End-to-end support") {
+    required.push("Full project coordination");
+    required.push("Technical documentation");
     required.push("Sourcing and procurement");
   }
 

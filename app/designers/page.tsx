@@ -692,6 +692,7 @@ export default async function DesignersPage({
         supervision,
         location,
         cues,
+        searchSpecialty: specialty,
       }
     : null;
   const view = selectedView(first(sp.view));
@@ -1012,6 +1013,7 @@ export default async function DesignersPage({
         ["visualization", visualization],
         ["supervision", supervision],
         ["cues", cues.join(",")],
+        ["specialty", specialty],
       ].filter((entry) => entry[1])
     : [];
 
