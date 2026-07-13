@@ -291,7 +291,7 @@ export function scoreProfessionalMatch(
     const local =
       contains(normalize(professionalLocation), brief.location) ||
       contains(normalize(brief.location), professionalLocation) ||
-      distance !== null && distance <= 25;
+      distance === 0;
     const nearby = !local && distance !== null && distance <= 80;
     const remote = (professional.work_modes ?? []).some((mode) => mode === "Remote" || mode === "Hybrid");
     points += local ? 12 : nearby ? 10 : remote ? 7 : 2;
