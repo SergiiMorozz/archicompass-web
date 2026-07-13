@@ -21,6 +21,7 @@ function intentFromNext(next: string): Intent {
 
 function authErrorMessage(message: string) {
   if (message === "Invalid login credentials") return "Nieprawidłowy adres e-mail lub hasło. Poniżej możesz zresetować hasło.";
+  if (message.toLowerCase().includes("email not confirmed")) return "Potwierdź adres e-mail, korzystając z linku w wiadomości rejestracyjnej. Jeśli go nie widzisz, wyślij link ponownie.";
   if (message.toLowerCase().includes("email rate limit")) return "Wysłano zbyt wiele wiadomości. Odczekaj kilka minut i spróbuj ponownie.";
   if (message.toLowerCase().includes("already registered")) return "Konto z tym adresem e-mail już istnieje. Zaloguj się lub zresetuj hasło.";
   return message;
@@ -38,7 +39,14 @@ function LoginContent() {
   const [intent, setIntent] = useState<Intent>(() => intentFromNext(requestedNext));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmationEmail, setConfirmationEmail] = useState<string | null>(null);
+  const [isResendingConfirmation, setIsResendingConfirmation] = useState(false);
   const [status, setStatus] = useState<Status>({ type: "idle" });
+
+  function confirmationRedirectTo() {
+    const next = "/account/profile?onboarding=1";
+    return `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+  }
 
   async function destinationAfterSignIn() {
     const { data: userData } = await supabase.auth.getUser();
@@ -100,8 +108,8 @@ function LoginContent() {
       return;
     }
 
-    const next = `/account/profile?onboarding=1`;
-    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+    const next = "/account/profile?onboarding=1";
+    const redirectTo = confirmationRedirectTo();
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,
       password,
@@ -127,14 +135,38 @@ function LoginContent() {
       window.location.assign(next);
       return;
     }
+    setConfirmationEmail(cleanEmail);
     setStatus({
       type: "success",
-      message: "Konto zostało utworzone. Otwórz wiadomość potwierdzającą e-mail, a następnie wrócisz do uzupełnienia profilu. Jeśli jej nie widzisz, sprawdź też folder Spam lub Oferty.",
+      message: "Konto zostało utworzone. Otwórz wiadomość potwierdzającą e-mail - po potwierdzeniu przejdziesz od razu do uzupełnienia profilu. Jeśli jej nie widzisz, sprawdź folder Spam lub Oferty.",
+    });
+  }
+
+  async function resendConfirmation() {
+    const address = confirmationEmail || email.trim().toLowerCase();
+    if (!address) return;
+
+    setIsResendingConfirmation(true);
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: address,
+      options: { emailRedirectTo: confirmationRedirectTo() },
+    });
+    setIsResendingConfirmation(false);
+
+    if (error) {
+      setStatus({ type: "error", message: authErrorMessage(error.message) });
+      return;
+    }
+    setStatus({
+      type: "success",
+      message: "Wysłaliśmy nowy link potwierdzający. Otwórz najnowszą wiadomość, a po potwierdzeniu przejdziesz do uzupełnienia profilu.",
     });
   }
 
   function switchMode(nextMode: Mode) {
     setMode(nextMode);
+    setConfirmationEmail(null);
     setStatus({ type: "idle" });
   }
 
@@ -197,7 +229,21 @@ function LoginContent() {
               {status.type === "loading" ? "Proszę czekać..." : mode === "signup" ? `Utwórz konto: ${intent === "client" ? "klient" : "projektant"}` : "Zaloguj się"}
             </button>
 
-            {status.type === "success" ? <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">{status.message}</div> : null}
+            {status.type === "success" ? (
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
+                <p>{status.message}</p>
+                {mode === "signup" && confirmationEmail ? (
+                  <button
+                    type="button"
+                    onClick={resendConfirmation}
+                    disabled={isResendingConfirmation}
+                    className="mt-3 inline-flex rounded-lg border border-emerald-300 bg-white px-3 py-2 text-xs font-bold text-emerald-900 disabled:opacity-60"
+                  >
+                    {isResendingConfirmation ? "Wysyłanie..." : "Wyślij link ponownie"}
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
             {status.type === "error" ? <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">{status.message}</div> : null}
           </form>
 
