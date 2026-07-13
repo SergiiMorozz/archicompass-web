@@ -104,6 +104,15 @@ export default async function AccountPage({
   const isProfessional = accountRole === "designer";
   const score = profileReadinessScore(profile, isProfessional);
   const hasPublicProfile = isProfessional && Boolean(profileData);
+  const compassHref = isProfessional ? "/project-compass" : "/client/briefs";
+  const compassTitle = isProfessional ? "Analizuj inspiracje" : "Zapisane briefy";
+  const compassDescription = isProfessional
+    ? "Uruchom analizę AI zdjęć referencyjnych, aby rozpoznać styl, materiały i język projektu. Projektanci mogą korzystać z narzędzia, ale nie wysyłają briefów jako klienci."
+    : "Przejrzyj briefy z inspiracjami, budżetem i zakresem przed kontaktem z projektantem lub pracownią.";
+  const nextActionHref = isProfessional ? "/studio" : "/designers";
+  const nextActionLabel = isProfessional
+    ? "Otwórz Studio projektanta"
+    : "Przeglądaj projektantów";
 
   return (
     <main className="bg-background">
@@ -246,26 +255,28 @@ export default async function AccountPage({
             ) : null}
 
             <Link
-              href="/account/briefs"
+              href={compassHref}
               className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
             >
-              <div className="text-sm font-semibold text-primary">Project Compass</div>
-              <h2 className="mt-2 text-2xl font-bold">
-                {isProfessional ? "Historia briefów" : "Zapisane briefy"}
-              </h2>
+              <div className="text-sm font-semibold text-primary">
+                {isProfessional ? "AI Project Compass" : "Project Compass"}
+              </div>
+              <h2 className="mt-2 text-2xl font-bold">{compassTitle}</h2>
               <p className="mt-3 text-sm leading-6 text-muted">
-                {isProfessional
-                  ? "Wcześniejsze briefy klienta pozostają w historii. Konto projektanta nie może wysyłać nowych zapytań."
-                  : "Przejrzyj briefy z inspiracjami, budżetem i zakresem przed kontaktem z projektantem lub pracownią."}
+                {compassDescription}
               </p>
               <div className="mt-6 grid grid-cols-2 gap-3">
                 <div className="rounded-xl border border-line bg-background p-3">
-                  <div className="text-sm text-muted">Briefy</div>
+                  <div className="text-sm text-muted">
+                    {isProfessional ? "Analizy w historii" : "Briefy"}
+                  </div>
                   <div className="mt-1 text-xl font-bold">{briefs.length}</div>
                 </div>
                 <div className="rounded-xl border border-line bg-background p-3">
                   <div className="text-sm text-muted">Narzędzie</div>
-                  <div className="mt-1 text-xl font-bold">Aktywne</div>
+                  <div className="mt-1 text-xl font-bold">
+                    {isProfessional ? "Analiza AI" : "Aktywne"}
+                  </div>
                 </div>
               </div>
             </Link>
@@ -311,10 +322,10 @@ export default async function AccountPage({
                 </h2>
               </div>
               <Link
-                href="/designers"
+                href={nextActionHref}
                 className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
               >
-                Przeglądaj projektantów
+                {nextActionLabel}
               </Link>
             </div>
 

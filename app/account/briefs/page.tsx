@@ -407,6 +407,8 @@ export default async function SavedBriefsPage({
       : "";
   const designersById = new Map(designers.map((designer) => [designer.id, designer]));
   const studiosById = new Map(studios.map((studio) => [studio.id, studio]));
+  const workspaceHref = canSendBriefs ? "/account/inquiries" : "/studio/inbox";
+  const workspaceLabel = canSendBriefs ? "Zobacz wysłane zapytania" : "Otwórz Studio projektanta";
 
   return (
     <main className="bg-background">
@@ -423,17 +425,19 @@ export default async function SavedBriefsPage({
             <div>
               <div className="text-sm font-semibold text-primary">Project Compass</div>
               <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
-                Zapisane briefy
+                {canSendBriefs ? "Zapisane briefy" : "Historia analiz"}
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
                 {canSendBriefs
                   ? "Przejrzyj briefy utworzone w Project Compass i wyślij jeden do projektanta lub pracowni jako czytelne pierwsze zapytanie."
-                  : "Wcześniejsze briefy klienta pozostają dostępne jako historia. Konta projektantów nie mogą wysyłać nowych zapytań."}
+                  : "Wróć do wcześniejszych analiz inspiracji. Projektanci korzystają z AI Project Compass, ale nie wysyłają briefów jako klienci."}
               </p>
             </div>
 
             <div className="rounded-2xl border border-line bg-background p-5 shadow-sm">
-              <div className="text-sm font-semibold text-muted">Zapisane briefy</div>
+              <div className="text-sm font-semibold text-muted">
+                {canSendBriefs ? "Zapisane briefy" : "Analizy w historii"}
+              </div>
               <div className="mt-2 text-3xl font-bold text-primary">{briefs.length}</div>
               {canSendBriefs ? (
                 <Link
@@ -442,12 +446,19 @@ export default async function SavedBriefsPage({
                 >
                   <span className="w-full">Utwórz nowy brief</span>
                 </Link>
-              ) : null}
+              ) : (
+                <Link
+                  href="/project-compass"
+                  className="mt-4 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
+                >
+                  <span className="w-full">Analizuj inspiracje</span>
+                </Link>
+              )}
               <Link
-                href="/account/inquiries"
+                href={workspaceHref}
                 className="mt-3 flex rounded-xl border border-line bg-card px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
               >
-                <span className="w-full">Zobacz zapytania</span>
+                <span className="w-full">{workspaceLabel}</span>
               </Link>
             </div>
           </div>
@@ -459,8 +470,14 @@ export default async function SavedBriefsPage({
           <div className="mb-5 rounded-2xl border border-line bg-card p-5 text-sm leading-6 text-muted">
             <div className="font-semibold text-foreground">Tryb konta projektanta</div>
             <p className="mt-1">
-              To konto otrzymuje zapytania projektowe. Wysyłanie nowych briefów jest zarezerwowane dla kont klientów.
+              To konto otrzymuje zapytania projektowe w Studio. Możesz analizować inspiracje w AI Project Compass, ale wysyłanie briefów jest zarezerwowane dla kont klientów.
             </p>
+            <Link
+              href="/project-compass"
+              className="mt-4 inline-flex rounded-xl border border-line bg-background px-4 py-2.5 font-semibold text-primary hover:border-primary"
+            >
+              Otwórz AI Project Compass
+            </Link>
           </div>
         ) : null}
         {sp.sent ? (
@@ -574,10 +591,13 @@ export default async function SavedBriefsPage({
                   />
 
                   <div className="mt-5 rounded-2xl border border-line bg-background p-4">
-                    <div className="text-sm font-semibold">Wyślij ten brief</div>
+                    <div className="text-sm font-semibold">
+                      {canSendBriefs ? "Wyślij ten brief" : "Brief do analizy"}
+                    </div>
                     <p className="mt-1 text-sm leading-6 text-muted">
-                      Wybierz projektanta lub pracownię i dodaj krótką wiadomość.
-                      Pełny brief zostanie zapisany razem z zapytaniem.
+                      {canSendBriefs
+                        ? "Wybierz projektanta lub pracownię i dodaj krótką wiadomość. Pełny brief zostanie zapisany razem z zapytaniem."
+                        : "Ten zapis pozostaje prywatną historią analizy. Zapytania od klientów znajdziesz w Studio projektanta."}
                     </p>
 
                     {canSendBriefs && (designers.length || studios.length) ? (
