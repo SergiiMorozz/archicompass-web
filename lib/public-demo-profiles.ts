@@ -143,39 +143,39 @@ const demoProjectCopy: Record<
   Array<{ category: string; description: string; title: string }>
 > = {
   "d0000000-0000-4000-8000-000000000001": [
-    { category: "Apartment", title: "Rodzinne mieszkanie na Mokotowie", description: "Mieszkanie 118 m² z dużą kuchnią, elastyczną strefą dzienną, dębową stolarką i spokojną paletą naturalnych materiałów." },
-    { category: "House", title: "Dom z ogrodem w Wilanowie", description: "Nowy dom z konsekwentną paletą naturalnych materiałów, zabudowami na trzech kondygnacjach i dopracowanym światłem." },
-    { category: "Apartment", title: "Soft minimalizm na Żoliborzu", description: "Powściągliwy remont z zachowanym parkietem, cieplejszymi tynkami, lnem i miękkimi przejściami między pomieszczeniami." },
+    { category: "Mieszkanie", title: "Rodzinne mieszkanie na Mokotowie", description: "Mieszkanie 118 m² z dużą kuchnią, elastyczną strefą dzienną, dębową stolarką i spokojną paletą naturalnych materiałów." },
+    { category: "Dom", title: "Dom z ogrodem w Wilanowie", description: "Nowy dom z konsekwentną paletą naturalnych materiałów, zabudowami na trzech kondygnacjach i dopracowanym światłem." },
+    { category: "Mieszkanie", title: "Soft minimalizm na Żoliborzu", description: "Powściągliwy remont z zachowanym parkietem, cieplejszymi tynkami, lnem i miękkimi przejściami między pomieszczeniami." },
   ],
   "d0000000-0000-4000-8000-000000000002": [
-    { category: "Apartment", title: "Kolor na Kazimierzu", description: "Remont kamienicy łączący odrestaurowane drzwi, sztukaterie, kobaltową zabudowę i polską sztukę współczesną." },
-    { category: "Apartment", title: "Art déco na Salwatorze", description: "Kompaktowe mieszkanie inspirowane geometrią art déco, orzechem, ryflowanym szkłem i kontrolowaną kolorystyką." },
-    { category: "Commercial or hospitality", title: "Butikowy apartament na Starym Mieście", description: "Gościnne wnętrze z paletą głębokiej zieleni, terakoty i postarzanego mosiądzu." },
+    { category: "Mieszkanie", title: "Kolor na Kazimierzu", description: "Remont kamienicy łączący odrestaurowane drzwi, sztukaterie, kobaltową zabudowę i polską sztukę współczesną." },
+    { category: "Mieszkanie", title: "Art déco na Salwatorze", description: "Kompaktowe mieszkanie inspirowane geometrią art déco, orzechem, ryflowanym szkłem i kontrolowaną kolorystyką." },
+    { category: "Komercyjne i hotelarskie", title: "Butikowy apartament na Starym Mieście", description: "Gościnne wnętrze z paletą głębokiej zieleni, terakoty i postarzanego mosiądzu." },
   ],
   "d0000000-0000-4000-8000-000000000003": [
-    { category: "Apartment", title: "Nadmorskie mieszkanie w Oliwie", description: "Szare drewno, jasny kamień i len tworzą spokojne wnętrze, którego długie osie widokowe nawiązują do otaczającego parku." },
-    { category: "Apartment", title: "Spokojny apartament w Sopocie", description: "Weekendowe mieszkanie z zabudowanym siedziskiem, ukrytymi funkcjami i paletą, która pozostaje jasna także zimą." },
-    { category: "House", title: "Dom nad wodą w Gdyni", description: "Rodzinny dom z trwałym dębem, panelami akustycznymi i zintegrowanym smart home, który nie dominuje wizualnie." },
+    { category: "Mieszkanie", title: "Nadmorskie mieszkanie w Oliwie", description: "Szare drewno, jasny kamień i len tworzą spokojne wnętrze, którego długie osie widokowe nawiązują do otaczającego parku." },
+    { category: "Mieszkanie", title: "Spokojny apartament w Sopocie", description: "Weekendowe mieszkanie z zabudowanym siedziskiem, ukrytymi funkcjami i paletą, która pozostaje jasna także zimą." },
+    { category: "Dom", title: "Dom nad wodą w Gdyni", description: "Rodzinny dom z trwałym dębem, panelami akustycznymi i zintegrowanym smart home, który nie dominuje wizualnie." },
   ],
   "d0000000-0000-4000-8000-000000000004": [
-    { category: "Apartment", title: "Mikromieszkanie na Nadodrzu", description: "Na 29 m² powstały podest do spania, pełna zabudowa i kuchnia znikająca za składanymi frontami." },
-    { category: "Rental or investment property", title: "Mieszkanie na wynajem na Ołbinie", description: "Szybki remont skoncentrowany na świetle, trwałej łazience i spójnym zestawie wyposażenia gotowym do montażu." },
-    { category: "Home office", title: "Gabinet nad rzeką", description: "Gabinet i pokój gościnny z zasłonami akustycznymi, składanym łóżkiem i biurkiem wykorzystującym widok na rzekę." },
+    { category: "Mieszkanie", title: "Mikromieszkanie na Nadodrzu", description: "Na 29 m² powstały podest do spania, pełna zabudowa i kuchnia znikająca za składanymi frontami." },
+    { category: "Nieruchomość inwestycyjna", title: "Mieszkanie na wynajem na Ołbinie", description: "Szybki remont skoncentrowany na świetle, trwałej łazience i spójnym zestawie wyposażenia gotowym do montażu." },
+    { category: "Gabinet domowy", title: "Gabinet nad rzeką", description: "Gabinet i pokój gościnny z zasłonami akustycznymi, składanym łóżkiem i biurkiem wykorzystującym widok na rzekę." },
   ],
   "d0000000-0000-4000-8000-000000000005": [
-    { category: "Apartment", title: "Quiet luxury na Jeżycach", description: "Wyrafinowane mieszkanie z symetrycznie łączonym kamieniem, przydymionym dębem i miękko odbijającym światło tynkiem." },
-    { category: "House", title: "Willa na Sołaczu", description: "Willa z lat 30. otrzymała nowe instalacje przy zachowaniu schodów, proporcji i relacji z ogrodem." },
-    { category: "Apartment", title: "Penthouse przy Starym Browarze", description: "Penthouse dla sztuki, spotkań i panoramicznych widoków z oświetleniem galeryjnym oraz dyskretną kuchnią pomocniczą." },
+    { category: "Mieszkanie", title: "Quiet luxury na Jeżycach", description: "Wyrafinowane mieszkanie z symetrycznie łączonym kamieniem, przydymionym dębem i miękko odbijającym światło tynkiem." },
+    { category: "Dom", title: "Willa na Sołaczu", description: "Willa z lat 30. otrzymała nowe instalacje przy zachowaniu schodów, proporcji i relacji z ogrodem." },
+    { category: "Mieszkanie", title: "Penthouse przy Starym Browarze", description: "Penthouse dla sztuki, spotkań i panoramicznych widoków z oświetleniem galeryjnym oraz dyskretną kuchnią pomocniczą." },
   ],
   "d0000000-0000-4000-8000-000000000006": [
-    { category: "Apartment", title: "Loft na Księżym Młynie", description: "Dawny loft fabryczny, w którym naprawy cegły, stali i drewna pozostają widoczne obok precyzyjnej kuchni." },
-    { category: "Apartment", title: "Mieszkanie vintage przy Piotrkowskiej", description: "Remont rozpoczął się od katalogowania oryginalnych detali, do których dodano współczesne łazienki i elastyczne światło." },
-    { category: "Commercial or hospitality", title: "Kreatywne biuro na Fabrycznej", description: "Kompaktowe biuro wykorzystuje wtórne szklane ścianki, odnowione lampy industrialne i modułowe stoły." },
+    { category: "Mieszkanie", title: "Loft na Księżym Młynie", description: "Dawny loft fabryczny, w którym naprawy cegły, stali i drewna pozostają widoczne obok precyzyjnej kuchni." },
+    { category: "Mieszkanie", title: "Mieszkanie vintage przy Piotrkowskiej", description: "Remont rozpoczął się od katalogowania oryginalnych detali, do których dodano współczesne łazienki i elastyczne światło." },
+    { category: "Komercyjne i hotelarskie", title: "Kreatywne biuro na Fabrycznej", description: "Kompaktowe biuro wykorzystuje wtórne szklane ścianki, odnowione lampy industrialne i modułowe stoły." },
   ],
   "d0000000-0000-4000-8000-000000000007": [
-    { category: "House", title: "Rodzinny dom na Sadybie", description: "Ciepły dom z centralną kuchnią, przechowywaniem przy wejściu i elastycznymi strefami zabawy rosnącymi razem z dziećmi." },
-    { category: "Apartment", title: "Zrównoważone mieszkanie na Ursynowie", description: "Niskoemisyjny remont z certyfikowanym drewnem, farbami mineralnymi i odnowionymi meblami." },
-    { category: "Apartment", title: "Mieszkanie przyjazne dzieciom na Pradze", description: "Zaokrąglone detale, zmywalne powierzchnie i przechowywanie na różnych wysokościach wspierają samodzielność dzieci." },
+    { category: "Dom", title: "Rodzinny dom na Sadybie", description: "Ciepły dom z centralną kuchnią, przechowywaniem przy wejściu i elastycznymi strefami zabawy rosnącymi razem z dziećmi." },
+    { category: "Mieszkanie", title: "Zrównoważone mieszkanie na Ursynowie", description: "Niskoemisyjny remont z certyfikowanym drewnem, farbami mineralnymi i odnowionymi meblami." },
+    { category: "Mieszkanie", title: "Mieszkanie przyjazne dzieciom na Pradze", description: "Zaokrąglone detale, zmywalne powierzchnie i przechowywanie na różnych wysokościach wspierają samodzielność dzieci." },
   ],
 };
 

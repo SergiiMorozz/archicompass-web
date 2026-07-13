@@ -43,7 +43,9 @@ type DesignerInquiry = {
 };
 
 function profileName(profile: Partial<Profile>, email?: string) {
-  return profile.full_name || "Uzupełnij profil";
+  const name = profile.full_name?.trim();
+  if (!name || name.toLowerCase() === email?.toLowerCase()) return "Twoje konto ArchiCompass";
+  return name;
 }
 
 export default async function AccountPage({
@@ -109,7 +111,7 @@ export default async function AccountPage({
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
             <div>
-              <div className="text-sm font-semibold text-primary">Panel konta</div>
+              <div className="text-sm font-semibold text-primary">Ustawienia konta</div>
               <h1 className="mt-2 break-words text-4xl font-bold tracking-tight sm:text-6xl">
                 {profileName(profile, user.email ?? undefined)}
               </h1>
@@ -118,8 +120,8 @@ export default async function AccountPage({
               </div>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
                 {isProfessional
-                  ? "Zarządzaj profilem, portfolio, pracowniami i zapytaniami przypisanymi do konta projektanta."
-                  : "Twórz briefy, kontaktuj się z projektantami i pracowniami oraz prowadź rozmowy w jednym miejscu."}
+                  ? "Tutaj aktualizujesz dane konta i profil publiczny. Codzienna praca z briefami, portfolio i zespołem jest w Studio projektanta."
+                  : "Tutaj aktualizujesz dane konta. Briefy, ulubione i rozmowy znajdziesz w Strefie klienta."}
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
@@ -144,7 +146,7 @@ export default async function AccountPage({
                   href="/studio"
                   className="rounded-xl bg-foreground px-4 py-3 text-sm font-semibold text-white"
                 >
-                  Studio projektanta
+                  Przejdź do Studio
                 </Link>
               ) : null}
               {hasPublicProfile ? (
@@ -182,14 +184,14 @@ export default async function AccountPage({
               href="/account/profile"
               className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
             >
-              <div className="text-sm font-semibold text-primary">Edycja profilu</div>
+              <div className="text-sm font-semibold text-primary">Dane i widoczność</div>
               <h2 className="mt-2 text-2xl font-bold">
-                {isProfessional ? "Edytuj profil publiczny" : "Edytuj profil konta"}
+                {isProfessional ? "Profil publiczny" : "Dane kontaktowe"}
               </h2>
               <p className="mt-3 text-sm leading-6 text-muted">
                 {isProfessional
                   ? "Aktualizuj dane, specjalizacje, ceny, kontakt i podejście projektowe."
-                  : "Dbaj o aktualne dane klienta używane w briefach i rozmowach."}
+                  : "Imię, telefon i lokalizacja pojawią się przy briefach i pomogą projektantom sprawnie odpowiedzieć."}
               </p>
               <div className="mt-6 h-2 overflow-hidden rounded-full bg-primary-soft">
                 <div className="h-full rounded-full bg-primary" style={{ width: `${score}%` }} />
@@ -352,20 +354,25 @@ export default async function AccountPage({
         </div>
 
         <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
-          <div className="text-sm font-semibold text-primary">Zalogowano</div>
-          <h2 className="mt-2 text-2xl font-bold">Dane konta</h2>
+          <div className="text-sm font-semibold text-primary">Twoje konto</div>
+          <h2 className="mt-2 text-2xl font-bold">Dostęp i dane</h2>
           <div className="mt-5 grid gap-4 text-sm">
             <div>
-              <div className="text-muted">Email</div>
+              <div className="text-muted">E-mail</div>
               <div className="mt-1 break-words font-semibold">{user.email}</div>
             </div>
             <div>
-              <div className="text-muted">Identyfikator użytkownika</div>
-              <code className="mt-1 block break-all rounded-xl bg-background p-3 text-xs">
-                {user.id}
-              </code>
+              <div className="text-muted">Typ konta</div>
+              <div className="mt-1 font-semibold">{isProfessional ? "Projektant" : "Klient"}</div>
             </div>
           </div>
+
+          <Link
+            href={isProfessional ? "/studio" : "/client"}
+            className="mt-6 flex rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
+          >
+            <span className="w-full">{isProfessional ? "Otwórz Studio projektanta" : "Otwórz Strefę klienta"}</span>
+          </Link>
 
           {hasPublicProfile ? (
             <div className="mt-6 border-t border-line pt-6">

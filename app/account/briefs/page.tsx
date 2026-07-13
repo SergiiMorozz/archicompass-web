@@ -116,25 +116,25 @@ async function sendBriefInquiry(formData: FormData) {
   if (!user) redirect("/login");
 
   if ((await getAccountRole(supabase, user.id)) !== "client") {
-    errorRedirect("Designer accounts receive briefs and cannot send client requests.");
+    errorRedirect("Konto projektanta może otrzymywać briefy, ale nie może wysyłać zapytań jako klient.");
   }
 
   const briefId = textValue(formData, "brief_id");
   const recipientKey = textValue(formData, "recipient_key");
   const message = textValue(formData, "message");
 
-  if (!briefId) errorRedirect("Choose a saved brief first.");
-  if (!recipientKey) errorRedirect("Choose a designer or studio before sending the brief.");
+  if (!briefId) errorRedirect("Najpierw wybierz zapisany brief.");
+  if (!recipientKey) errorRedirect("Przed wysłaniem briefu wybierz projektanta lub pracownię.");
   const [recipientType, recipientId] = recipientKey.split(":");
   if (!recipientId || !["designer", "studio"].includes(recipientType)) {
-    errorRedirect("Choose a valid designer or studio.");
+    errorRedirect("Wybierz prawidłowy profil projektanta lub pracowni.");
   }
 
   let designerId = recipientId;
   let studioId: string | null = null;
   let designer: Designer;
 
-  if (designerId === user.id) errorRedirect("Choose another designer, not your own profile.");
+  if (designerId === user.id) errorRedirect("Wybierz innego projektanta, a nie własny profil.");
 
   const { data: briefData, error: briefError } = await supabase
     .from("project_briefs")
@@ -146,7 +146,7 @@ async function sendBriefInquiry(formData: FormData) {
     .single();
 
   if (briefError || !briefData) {
-    errorRedirect("This saved brief could not be found.");
+    errorRedirect("Nie znaleziono wybranego zapisanego briefu.");
   }
 
   const brief = briefData as ProjectBrief;

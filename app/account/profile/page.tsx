@@ -204,6 +204,13 @@ async function updateProfile(formData: FormData) {
     phone: textValue(formData, "phone"),
     email: textValue(formData, "email") ?? user.email ?? null,
   };
+  if (!commonProfile.full_name || !commonProfile.location || !commonProfile.phone) {
+    redirect(
+      `/account/profile?onboarding=1&error=${encodeURIComponent(
+        "Uzupełnij imię i nazwisko lub nazwę, telefon oraz lokalizację."
+      )}`
+    );
+  }
   const payload = isProfessional
     ? {
         ...commonProfile,
@@ -355,7 +362,7 @@ export default async function EditProfilePage({
   const hasProfile = Boolean(profile);
   const score = profileReadinessScore(p, isProfessional);
   const specialtyCount = p.specialties?.length ?? 0;
-  const backHref = isProfessional ? "/account" : "/client";
+  const backHref = isProfessional ? "/studio" : "/client";
   const isOnboarding = sp.onboarding === "1";
 
   return (
@@ -366,14 +373,16 @@ export default async function EditProfilePage({
             href={backHref}
             className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
           >
-            {isProfessional ? "Wróć do konta" : "Wróć do strefy klienta"}
+            {isProfessional ? "Wróć do Studio projektanta" : "Wróć do Strefy klienta"}
           </Link>
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
-              <div className="text-sm font-semibold text-primary">Edycja profilu</div>
+              <div className="text-sm font-semibold text-primary">
+                {isProfessional ? "Profil publiczny" : "Dane kontaktowe"}
+              </div>
               <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
-                {isProfessional ? "Edytuj profil publiczny" : "Ustawienia konta"}
+                {isProfessional ? "Edytuj profil publiczny" : "Uzupełnij dane konta"}
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
                 {isProfessional
@@ -418,12 +427,21 @@ export default async function EditProfilePage({
           ) : null}
 
           {isOnboarding ? (
-            <div className="rounded-2xl border border-primary/30 bg-primary-soft p-5 text-sm leading-6 text-foreground">
-              <div className="font-bold text-primary">Pierwszy krok po rejestracji</div>
-              <p className="mt-1 text-muted">
-                Uzupełnij imię, telefon i lokalizację. Te dane pomagają prowadzić rozmowy
-                i poprawnie przypisywać briefy do Twojego konta.
+            <div className="rounded-2xl border border-primary/30 bg-primary-soft p-6 text-foreground shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="font-bold text-primary">Pierwszy krok po rejestracji</div>
+                <span className="rounded-full bg-card px-3 py-1 text-xs font-bold text-primary">Krok 1 z 1</span>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-muted">
+                Uzupełnij trzy podstawowe dane. Dzięki nim briefy i rozmowy od razu trafiają do właściwego konta.
               </p>
+              <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                {["Imię i nazwisko", "Telefon", "Lokalizacja"].map((item) => (
+                  <div key={item} className="rounded-xl border border-primary/20 bg-card px-3 py-2 text-sm font-semibold">
+                    {item}
+                  </div>
+                ))}
+              </div>
             </div>
           ) : null}
 
@@ -440,12 +458,13 @@ export default async function EditProfilePage({
 
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
               <Field label={isProfessional ? "Imię i nazwisko / nazwa" : "Imię i nazwisko"}>
-                <input name="full_name" defaultValue={p.full_name ?? ""} className={fieldClass} />
+                <input name="full_name" required defaultValue={p.full_name ?? ""} className={fieldClass} />
               </Field>
 
               <Field label="Lokalizacja" hint="miasto lub obszar działania">
                 <input
                   name="location"
+                  required
                   defaultValue={p.location ?? ""}
                   placeholder="Warszawa"
                   className={fieldClass}
@@ -473,7 +492,7 @@ export default async function EditProfilePage({
                 </>
               ) : (
                 <>
-                  <Field label="Email">
+                  <Field label="E-mail">
                     <input
                       name="email"
                       type="email"
@@ -481,8 +500,8 @@ export default async function EditProfilePage({
                       className={fieldClass}
                     />
                   </Field>
-                  <Field label="Telefon" hint="opcjonalnie">
-                    <input name="phone" defaultValue={p.phone ?? ""} className={fieldClass} />
+                  <Field label="Telefon">
+                    <input name="phone" required defaultValue={p.phone ?? ""} className={fieldClass} />
                   </Field>
                 </>
               )}
@@ -530,7 +549,7 @@ export default async function EditProfilePage({
                 <input name="minimum_project_budget" defaultValue={p.minimum_project_budget ?? ""} inputMode="numeric" placeholder="30000" className={fieldClass} />
               </Field>
 
-              <Field label="Email">
+              <Field label="E-mail">
                 <input
                   name="email"
                   type="email"
@@ -540,7 +559,7 @@ export default async function EditProfilePage({
               </Field>
 
               <Field label="Telefon">
-                <input name="phone" defaultValue={p.phone ?? ""} className={fieldClass} />
+                <input name="phone" required defaultValue={p.phone ?? ""} className={fieldClass} />
               </Field>
 
               <div className="sm:col-span-2">
@@ -648,7 +667,7 @@ export default async function EditProfilePage({
                 <input
                   name="specialties"
                   defaultValue={p.specialties?.join(", ") ?? ""}
-                  placeholder="modern interiors, small apartments, premium"
+                  placeholder="wnętrza nowoczesne, małe mieszkania, segment premium"
                   className={fieldClass}
                 />
               </Field>

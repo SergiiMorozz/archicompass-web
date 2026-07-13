@@ -2,16 +2,26 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { AdminPermission } from "@/lib/admin";
 
-const adminLinks = [
+const adminLinks: Array<{ href: string; label: string; permission?: AdminPermission }> = [
   { href: "/admin", label: "Pulpit" },
-  { href: "/admin/users", label: "Użytkownicy" },
-  { href: "/admin/content", label: "Treści" },
-  { href: "/admin/activity", label: "Aktywność" },
+  { href: "/admin/users", label: "Użytkownicy", permission: "users" },
+  { href: "/admin/content", label: "Treści", permission: "content" },
+  { href: "/admin/activity", label: "Aktywność", permission: "analytics" },
 ];
 
-export default function AdminNav({ accountName, role }: { accountName: string; role: string }) {
+export default function AdminNav({
+  accountName,
+  role,
+  permissions,
+}: {
+  accountName: string;
+  role: string;
+  permissions: AdminPermission[];
+}) {
   const pathname = usePathname();
+  const visibleLinks = adminLinks.filter((item) => !item.permission || permissions.includes(item.permission));
 
   return (
     <section className="border-b border-line bg-card">
@@ -27,7 +37,7 @@ export default function AdminNav({ accountName, role }: { accountName: string; r
             </div>
           </div>
           <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Panel administratora">
-            {[...adminLinks, ...(role === "owner" ? [{ href: "/admin/team", label: "Zespół" }] : [])].map((item) => {
+            {[...visibleLinks, ...(role === "owner" ? [{ href: "/admin/team", label: "Zespół" }] : [])].map((item) => {
               const active =
                 pathname === item.href ||
                 (item.href !== "/admin" && pathname.startsWith(item.href));

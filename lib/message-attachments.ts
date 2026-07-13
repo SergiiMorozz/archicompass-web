@@ -43,7 +43,7 @@ export async function uploadMessageAttachments({
   userId: string;
 }) {
   if (files.length > maxFiles) {
-    return { error: `Attach up to ${maxFiles} files per message.`, names: [], paths: [], types: [] };
+    return { error: `Do jednej wiadomości możesz dodać maksymalnie ${maxFiles} plików.`, names: [], paths: [], types: [] };
   }
   const names: string[] = [];
   const paths: string[] = [];
@@ -52,12 +52,12 @@ export async function uploadMessageAttachments({
   for (const file of files) {
     if (file.size > maxFileSize) {
       if (paths.length) await supabase.storage.from(bucket).remove(paths);
-      return { error: `${file.name} is larger than 20 MB.`, names: [], paths: [], types: [] };
+      return { error: `Plik ${file.name} ma więcej niż 20 MB.`, names: [], paths: [], types: [] };
     }
     const ext = extension(file);
     if (!allowedExtensions.has(ext)) {
       if (paths.length) await supabase.storage.from(bucket).remove(paths);
-      return { error: `${file.name} has an unsupported file type.`, names: [], paths: [], types: [] };
+      return { error: `Plik ${file.name} ma nieobsługiwany format.`, names: [], paths: [], types: [] };
     }
     const path = `${inquiryId}/${userId}/${crypto.randomUUID()}-${safeName(file.name)}`;
     const { error } = await supabase.storage.from(bucket).upload(path, file, {
@@ -66,7 +66,7 @@ export async function uploadMessageAttachments({
     });
     if (error) {
       if (paths.length) await supabase.storage.from(bucket).remove(paths);
-      return { error: `Attachment upload failed: ${error.message}`, names: [], paths: [], types: [] };
+      return { error: `Nie udało się przesłać załącznika: ${error.message}`, names: [], paths: [], types: [] };
     }
     names.push(file.name.slice(0, 200));
     paths.push(path);

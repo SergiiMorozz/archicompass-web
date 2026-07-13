@@ -120,14 +120,14 @@ async function sendParticipantMessage(formData: FormData) {
         : Promise.resolve({ data: null }),
     ]);
   const notification = await sendConversationNotificationEmail({
-    body: body || `Shared ${upload.names.join(", ")}`,
+    body: body || `Udostępniono załączniki: ${upload.names.join(", ")}`,
     inquiryId,
     recipient: {
       email: studio?.email || designerProfile?.email || null,
       name: studio?.name || designerProfile?.full_name || null,
       role: "designer",
     },
-    senderName: senderProfile?.full_name || user.email || "Client",
+    senderName: senderProfile?.full_name || user.email || "Klient",
     subject: inquiry.subject,
   });
   if (notification.error) {
@@ -152,7 +152,7 @@ async function sendParticipantMessage(formData: FormData) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("pl-PL", {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
@@ -311,25 +311,25 @@ export default async function AccountConversationPage({
           <form action={sendParticipantMessage} className="sticky bottom-3 z-10 mt-6 rounded-xl border border-line bg-card p-4 shadow-lg">
             <input type="hidden" name="inquiry_id" value={inquiry.id} />
             <label className="block text-sm font-semibold">
-              Reply
-              <textarea name="body" maxLength={4000} rows={5} placeholder="Write your message..." className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
+              Odpowiedź
+              <textarea name="body" maxLength={4000} rows={5} placeholder="Napisz wiadomość..." className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
             <label className="mt-3 block text-sm font-semibold">
-              Attach plans or documents <span className="font-normal text-muted">up to 5 files, 20 MB each</span>
+              Dodaj plany lub dokumenty <span className="font-normal text-muted">maksymalnie 5 plików, do 20 MB każdy</span>
               <input name="attachments" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.dwg,.dxf,.zip,.txt" className="mt-2 block w-full rounded-xl border border-dashed border-line bg-background px-4 py-3 text-sm font-normal text-muted" />
             </label>
             <PendingSubmitButton
               className="mt-3 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"
-              idleLabel="Send message"
-              pendingLabel="Sending..."
+              idleLabel="Wyślij wiadomość"
+              pendingLabel="Wysyłanie..."
             />
           </form>
         </section>
 
         <aside className="grid h-fit gap-5 lg:sticky lg:top-24">
-          <ReferencePhotoGrid photos={photos} title="Brief reference photos" />
+          <ReferencePhotoGrid photos={photos} title="Zdjęcia referencyjne z briefu" />
           <details className="rounded-lg border border-line bg-card p-5 shadow-sm">
-            <summary className="cursor-pointer font-semibold">Open full brief</summary>
+            <summary className="cursor-pointer font-semibold">Otwórz pełną treść briefu</summary>
             <pre className="mt-4 max-h-80 overflow-auto whitespace-pre-wrap rounded-lg bg-[#1f172a] p-4 text-xs leading-6 text-white/80">
               {inquiry.brief_text}
             </pre>

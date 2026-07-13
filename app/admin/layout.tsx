@@ -9,11 +9,11 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { role, user } = await requireAdmin();
+  const { role, permissions, user } = await requireAdmin();
 
   return (
     <div className="min-h-screen bg-background">
-      <AdminNav accountName={user.email || "ArchiCompass administrator"} role={role} />
+      <AdminNav accountName={user.email || "Administrator ArchiCompass"} role={role} permissions={permissions} />
       {children}
     </div>
   );

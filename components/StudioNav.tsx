@@ -8,7 +8,7 @@ const studioLinks = [
   { href: "/studio/inbox", label: "Zapytania" },
   { href: "/studio/analytics", label: "Statystyki" },
   { href: "/studio/team", label: "Pracownia i zespół" },
-  { href: "/account/profile", label: "Profil i dane" },
+  { href: "/account/profile", label: "Profil publiczny" },
   { href: "/account/projects", label: "Portfolio" },
 ];
 

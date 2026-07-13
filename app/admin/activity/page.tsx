@@ -36,7 +36,7 @@ function actionLabel(value: string) {
 }
 
 export default async function AdminActivityPage() {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("analytics");
   const { data, error } = await supabase.rpc("admin_activity_feed", { page_limit: 100 });
   const activity = (data ?? []) as AuditItem[];
 

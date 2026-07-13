@@ -244,7 +244,7 @@ export default function Header() {
                 href="/account"
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
               >
-                Konto
+                Ustawienia
               </Link>
             </div>
           ) : (
@@ -313,7 +313,7 @@ export default function Header() {
                   onClick={() => setIsOpen(false)}
                   className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white"
                 >
-                  Konto
+                  Ustawienia
                 </Link>
               </div>
             ) : (

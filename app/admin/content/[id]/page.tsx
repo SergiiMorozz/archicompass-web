@@ -70,7 +70,7 @@ async function updateArticle(formData: FormData) {
 
   const id = textValue(formData, "id");
   if (!isUuid(id)) redirect("/admin/content");
-  const { supabase, user } = await requireAdmin();
+  const { supabase, user } = await requireAdmin("content");
   const title = textValue(formData, "title");
   const slug = slugValue(textValue(formData, "slug"));
   const status = textValue(formData, "status");
@@ -151,7 +151,7 @@ async function deleteArticle(formData: FormData) {
 
   const id = textValue(formData, "id");
   if (!isUuid(id)) redirect("/admin/content");
-  const { supabase, user } = await requireAdmin();
+  const { supabase, user } = await requireAdmin("content");
   const { data: article } = await supabase
     .from("inspiration_articles")
     .select("title, slug, image_url")
@@ -185,7 +185,7 @@ export default async function AdminArticleEditorPage({
   const { id } = await params;
   const sp = (await searchParams) ?? {};
   if (!isUuid(id)) notFound();
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("content");
   const { data } = await supabase
     .from("inspiration_articles")
     .select("id, slug, title, excerpt, body, category, image_url, author_name, status, featured, published_at")

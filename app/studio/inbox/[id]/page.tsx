@@ -127,7 +127,7 @@ async function sendMessage(formData: FormData) {
     supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
   ]);
   const notification = await sendConversationNotificationEmail({
-    body: body || `Shared ${upload.names.join(", ")}`,
+    body: body || `Udostępniono załączniki: ${upload.names.join(", ")}`,
     inquiryId,
     recipient: {
       email: clientProfile?.email || null,
@@ -183,7 +183,7 @@ async function updateStatus(formData: FormData) {
       .maybeSingle(),
     supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
   ]);
-  if (!inquiry) actionError(inquiryId, "This conversation is not available.");
+  if (!inquiry) actionError(inquiryId, "Ta rozmowa nie jest dostępna.");
   if (inquiry.status === status) redirect(`/studio/inbox/${inquiryId}`);
 
   const { error } = await supabase.rpc("update_inquiry_status_with_message", {
@@ -223,7 +223,7 @@ async function updateStatus(formData: FormData) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("pl-PL", {
     day: "2-digit",
     month: "short",
     hour: "2-digit",

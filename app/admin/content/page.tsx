@@ -38,7 +38,7 @@ function contentError(message: string): never {
 async function createArticle(formData: FormData) {
   "use server";
 
-  const { supabase, user } = await requireAdmin();
+  const { supabase, user } = await requireAdmin("content");
   const title = textValue(formData, "title");
   const category = textValue(formData, "category") || "Design";
   const slug = slugValue(textValue(formData, "slug") || title);
@@ -83,7 +83,7 @@ export default async function AdminContentPage({
 }) {
   const sp = (await searchParams) ?? {};
   const selectedStatus = sp.status === "draft" || sp.status === "published" ? sp.status : "all";
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("content");
   const query = supabase
     .from("inspiration_articles")
     .select("id, slug, title, category, status, featured, published_at, updated_at")

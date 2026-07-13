@@ -23,7 +23,7 @@ function dayKey(value: Date) {
 }
 
 function shortDay(value: Date) {
-  return new Intl.DateTimeFormat("en", { day: "2-digit", month: "short" }).format(value);
+  return new Intl.DateTimeFormat("pl-PL", { day: "2-digit", month: "short" }).format(value);
 }
 
 export default async function StudioAnalyticsPage() {
@@ -160,7 +160,7 @@ export default async function StudioAnalyticsPage() {
                     <div
                       className="w-full rounded-t-md bg-primary"
                       style={{ height: `${Math.max(day.views ? 8 : 2, (day.views / maxDaily) * 100)}%` }}
-                      title={`${day.views} views, ${day.inquiries} requests`}
+                      title={`${day.views} wyświetleń, ${day.inquiries} zapytań`}
                     />
                   </div>
                   <div className="text-[10px] text-muted">{shortDay(day.date)}</div>
@@ -171,7 +171,7 @@ export default async function StudioAnalyticsPage() {
 
           <aside className="grid h-fit gap-5">
             <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-              <div className="text-sm font-semibold text-primary">90-day funnel</div>
+              <div className="text-sm font-semibold text-primary">Lejek z ostatnich 90 dni</div>
               <h2 className="mt-1 text-2xl font-bold">Od wyświetlenia do współpracy</h2>
               <div className="mt-6 grid gap-4">
                 {[

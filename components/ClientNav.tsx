@@ -8,7 +8,7 @@ const clientLinks = [
   { href: "/client/messages", label: "Wiadomości" },
   { href: "/client/briefs", label: "Zapisane briefy" },
   { href: "/client/favorites", label: "Ulubione" },
-  { href: "/account/profile", label: "Profil i dane" },
+  { href: "/account/profile", label: "Dane kontaktowe" },
 ];
 
 export default function ClientNav({

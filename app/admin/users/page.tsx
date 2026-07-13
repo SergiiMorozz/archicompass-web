@@ -103,7 +103,7 @@ export default async function AdminUsersPage({
   const review = selectedValue(sp.review, reviewStatuses);
   const visibility = selectedValue(sp.visibility, visibilityStatuses);
   const page = safePage(sp.page);
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("users");
   const { data, error } = await supabase.rpc("admin_user_directory", {
     account_type: type,
     page_limit: pageSize,

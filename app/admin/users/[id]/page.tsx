@@ -100,7 +100,7 @@ async function updateUserReview(formData: FormData) {
     redirect(`/admin/users/${userId}?error=Nieprawid%C5%82owy%20status%20weryfikacji`);
   }
 
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("moderation");
   const { error } = await supabase.rpc("admin_set_user_review", {
     review_note: note || null,
     review_status: status,
@@ -132,7 +132,7 @@ async function updateContentVisibility(formData: FormData) {
     redirect(`/admin/users/${userId}?error=Nieprawid%C5%82owa%20widoczno%C5%9B%C4%87`);
   }
 
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin("moderation");
   const { error } = await supabase.rpc("admin_set_content_visibility", {
     moderation_reason: reason || null,
     target_entity_id: entityId,
@@ -162,7 +162,7 @@ export default async function AdminUserDetailPage({
   const sp = (await searchParams) ?? {};
   if (!isUuid(id)) notFound();
 
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireAdmin(["users", "moderation"]);
   const { data, error } = await supabase.rpc("admin_user_detail", { target_user_id: id });
   if (error || !data) notFound();
 
@@ -278,7 +278,7 @@ export default async function AdminUserDetailPage({
               {profile.bio ? <p className="mt-5 text-sm leading-7 text-muted">{profile.bio}</p> : null}
             </section>
 
-            <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
+            {professional ? <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
               <div className="text-sm font-semibold text-primary">Treści publiczne</div>
               <h2 className="mt-1 text-3xl font-bold">Projekty portfolio</h2>
               {projects.length ? (
@@ -336,11 +336,19 @@ export default async function AdminUserDetailPage({
               ) : (
                 <p className="mt-4 text-sm text-muted">Brak publicznych projektów portfolio.</p>
               )}
-            </section>
+            </section> : (
+              <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
+                <div className="text-sm font-semibold text-primary">Widoczność publiczna</div>
+                <h2 className="mt-2 text-2xl font-bold">Brak profilu publicznego</h2>
+                <p className="mt-3 text-sm leading-6 text-muted">
+                  To konto nie ma aktywnego profilu projektanta ani pracowni, więc nie ma treści do ukrycia w katalogu.
+                </p>
+              </section>
+            )}
           </div>
 
           <aside className="grid h-fit gap-5 lg:sticky lg:top-40">
-            <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
+            {professional ? <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
               <div className="flex items-center justify-between gap-3">
                 <div className="text-sm font-semibold text-primary">Widoczność publiczna</div>
                 <span className={[
@@ -383,7 +391,15 @@ export default async function AdminUserDetailPage({
                   Zaktualizuj widoczność
                 </button>
               </form>
-            </section>
+            </section> : (
+              <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
+                <div className="text-sm font-semibold text-primary">Widoczność publiczna</div>
+                <h2 className="mt-2 text-2xl font-bold">Brak profilu publicznego</h2>
+                <p className="mt-3 text-sm leading-6 text-muted">
+                  To konto nie ma profilu projektanta ani pracowni, więc nie ma treści do ukrycia w katalogu.
+                </p>
+              </section>
+            )}
 
             <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
               <div className="text-sm font-semibold text-primary">Weryfikacja wewnętrzna</div>
