@@ -345,6 +345,7 @@ export default async function StudioTeamPage({
     invitation?: string;
     invited?: string;
     removed?: string;
+    setup?: string;
     studio?: string;
     updated?: string;
   }>;
@@ -410,6 +411,15 @@ export default async function StudioTeamPage({
         {sp.error ? (
           <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-sm text-red-700">
             {sp.error}
+          </div>
+        ) : null}
+        {sp.setup === "1" && !activeStudios.length ? (
+          <div className="rounded-lg border border-primary/30 bg-primary-soft p-5 text-sm leading-6 text-foreground">
+            <div className="font-bold text-primary">Krok 2 z 2: utwórz pracownię</div>
+            <p className="mt-1 text-muted">
+              Właściciel został już skonfigurowany. Dodaj teraz wspólny profil pracowni,
+              a po zapisaniu zaprosisz do niej pozostałych projektantów.
+            </p>
           </div>
         ) : null}
         {sp.created || sp.updated || sp.invited || sp.removed || sp.invitation ? (
@@ -608,7 +618,7 @@ export default async function StudioTeamPage({
           );
         })}
 
-        <details className="rounded-lg border border-line bg-card p-6 shadow-sm" open={!activeStudios.length}>
+        <details className="rounded-lg border border-line bg-card p-6 shadow-sm" open={sp.setup === "1" || !activeStudios.length}>
           <summary className="cursor-pointer text-2xl font-bold">Utwórz pracownię projektową</summary>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
             Zacznij od tożsamości pracowni. Po utworzeniu zaprosisz projektantów

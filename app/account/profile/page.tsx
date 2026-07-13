@@ -167,6 +167,10 @@ async function updateProfile(formData: FormData) {
   const accountRole = await getExplicitAccountRole(supabase, user.id);
   if (!accountRole) redirect("/onboarding?next=%2Faccount%2Fprofile");
   const isProfessional = accountRole === "designer";
+  const onboardingDestination =
+    isProfessional && textValue(formData, "onboarding_destination") === "/studio/team?setup=1"
+      ? "/studio/team?setup=1"
+      : null;
 
   const { data: currentProfile } = await supabase
     .from("profiles")
@@ -255,7 +259,7 @@ async function updateProfile(formData: FormData) {
   if (isProfessional && google.error) {
     redirect(`/account/profile?notice=${encodeURIComponent(google.error)}`);
   }
-  redirect(isProfessional ? `/designers/${user.id}` : "/client?profileUpdated=1");
+  redirect(onboardingDestination ?? (isProfessional ? `/designers/${user.id}` : "/client?profileUpdated=1"));
 }
 
 async function deleteProfessionalProfile(formData: FormData) {
@@ -338,7 +342,7 @@ async function deleteClientAccount(formData: FormData) {
 export default async function EditProfilePage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string; notice?: string; onboarding?: string }>;
+  searchParams?: Promise<{ error?: string; notice?: string; onboarding?: string; studio?: string }>;
 }) {
   const sp = (await searchParams) ?? {};
   const supabase = await createSupabaseServerClient();
@@ -364,6 +368,7 @@ export default async function EditProfilePage({
   const specialtyCount = p.specialties?.length ?? 0;
   const backHref = isProfessional ? "/studio" : "/client";
   const isOnboarding = sp.onboarding === "1";
+  const isStudioOnboarding = isOnboarding && isProfessional && sp.studio === "1";
 
   return (
     <main className="bg-background">
@@ -416,6 +421,11 @@ export default async function EditProfilePage({
 
       <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <form action={updateProfile} className="grid gap-7">
+          <input
+            type="hidden"
+            name="onboarding_destination"
+            value={isStudioOnboarding ? "/studio/team?setup=1" : ""}
+          />
           {sp.error ? (
             <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
               {sp.error}
@@ -430,10 +440,14 @@ export default async function EditProfilePage({
             <div className="rounded-2xl border border-primary/30 bg-primary-soft p-6 text-foreground shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="font-bold text-primary">Pierwszy krok po rejestracji</div>
-                <span className="rounded-full bg-card px-3 py-1 text-xs font-bold text-primary">Krok 1 z 1</span>
+                <span className="rounded-full bg-card px-3 py-1 text-xs font-bold text-primary">
+                  {isStudioOnboarding ? "Krok 1 z 2" : "Krok 1 z 1"}
+                </span>
               </div>
               <p className="mt-2 text-sm leading-6 text-muted">
-                Uzupełnij trzy podstawowe dane. Dzięki nim briefy i rozmowy od razu trafiają do właściwego konta.
+                {isStudioOnboarding
+                  ? "Najpierw uzupełnij dane właściciela. Po zapisaniu przejdziesz bezpośrednio do utworzenia profilu pracowni i zaproszenia zespołu."
+                  : "Uzupełnij trzy podstawowe dane. Dzięki nim briefy i rozmowy od razu trafiają do właściwego konta."}
               </p>
               <div className="mt-4 grid gap-2 sm:grid-cols-3">
                 {["Imię i nazwisko", "Telefon", "Lokalizacja"].map((item) => (

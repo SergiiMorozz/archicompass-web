@@ -73,7 +73,8 @@ async function completeOnboarding(formData: FormData) {
     redirect(`/onboarding?${params.toString()}`);
   }
 
-  redirect("/account/profile?onboarding=1");
+  const studioSetup = role === "designer" && designerMode === "studio";
+  redirect(`/account/profile?onboarding=1${studioSetup ? "&studio=1" : ""}`);
 }
 
 export default async function OnboardingPage({
