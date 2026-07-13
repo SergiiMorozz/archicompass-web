@@ -3,6 +3,7 @@ import Link from "next/link";
 import FavoriteButton from "@/components/FavoriteButton";
 import GoogleRating from "@/components/GoogleRating";
 import JsonLd from "@/components/JsonLd";
+import { briefLabel, briefStyleLabel } from "@/lib/brief-labels";
 import { countLabel, polishCountLabel } from "@/lib/count-label";
 import {
   type MatchBrief,
@@ -393,10 +394,13 @@ function DesignerCard({
     ""
   );
   const requestedStyle = briefContext?.style || requestedSpecialty;
+  const requestedStyleLabel = briefContext?.style
+    ? briefStyleLabel(briefContext.style)
+    : briefLabel(requestedSpecialty);
   const styleMatch = requestedStyle && requestedSpecialtyText && specialtyText.includes(requestedSpecialtyText)
-    ? `Wysokie · ${requestedStyle}`
+    ? `Wysokie · ${requestedStyleLabel}`
     : requestedStyle
-      ? `Porównaj · ${requestedStyle}`
+      ? `Porównaj · ${requestedStyleLabel}`
       : demo?.bestFor || specialties[0] || type;
   const locationMatches = requestedLocation
     ? normalizeSearchText(location).includes(normalizeSearchText(requestedLocation))
@@ -413,7 +417,7 @@ function DesignerCard({
   );
   const fallbackMatchItems = [
     [briefContext ? "Dopasowanie stylu" : "Styl / specjalizacja", styleMatch],
-    ["Typ projektu", briefContext?.projectType || demo?.projectFit || "Sprawdź w portfolio podobne pomieszczenia i typy projektów"],
+    ["Typ projektu", briefContext?.projectType ? briefLabel(briefContext.projectType) : demo?.projectFit || "Sprawdź w portfolio podobne pomieszczenia i typy projektów"],
     [
       "Lokalizacja",
       requestedLocation
@@ -422,14 +426,14 @@ function DesignerCard({
           : `Sprawdź możliwość współpracy zdalnej · ${location}`
         : location,
     ],
-    ["Zakres wsparcia", briefContext?.support ? `Do potwierdzenia: ${briefContext.support.toLowerCase()}` : "Sprawdź dostępne usługi"],
+    ["Zakres wsparcia", briefContext?.support ? `Do potwierdzenia: ${briefLabel(briefContext.support).toLowerCase()}` : "Sprawdź dostępne usługi"],
     ...(briefContext?.visualization && briefContext.visualization !== "Not needed"
-      ? [["Wizualizacje 3D", availableCapabilities.includes("3D visualization") ? "Dostępne" : `Do potwierdzenia · ${briefContext.visualization}`]]
+      ? [["Wizualizacje 3D", availableCapabilities.includes("3D visualization") ? "Dostępne" : `Do potwierdzenia · ${briefLabel(briefContext.visualization)}`]]
       : []),
     ...(briefContext?.supervision && briefContext.supervision !== "Not needed"
-      ? [["Nadzór", confirmedCapabilities.some((capability) => capability !== "3D visualization") ? "Dostępny" : `Do potwierdzenia · ${briefContext.supervision}`]]
+      ? [["Nadzór", confirmedCapabilities.some((capability) => capability !== "3D visualization") ? "Dostępny" : `Do potwierdzenia · ${briefLabel(briefContext.supervision)}`]]
       : []),
-    ["Budżet", briefContext?.budget ? `${briefContext.budget} · wycena po analizie briefu` : "Wycena po analizie briefu"],
+    ["Budżet", briefContext?.budget ? `${briefLabel(briefContext.budget)} · wycena po analizie briefu` : "Wycena po analizie briefu"],
     ["Portfolio", polishCountLabel(portfolioCount, "publiczny projekt", "publiczne projekty", "publicznych projektów")],
   ];
   const matchItems = matchResult
@@ -1122,18 +1126,18 @@ export default async function DesignersPage({
             </div>
             <div className="mt-5 flex flex-wrap gap-2">
               {[
-                briefContext.style,
-                briefContext.projectType,
+                briefStyleLabel(briefContext.style),
+                briefLabel(briefContext.projectType),
                 briefContext.location,
-                briefContext.budget,
-                briefContext.support,
-                briefContext.timeline,
+                briefLabel(briefContext.budget),
+                briefLabel(briefContext.support),
+                briefLabel(briefContext.timeline),
                 briefContext.area ? `${briefContext.area} m²` : "",
                 briefContext.roomCount ? `${briefContext.roomCount} pom.` : "",
-                briefContext.propertyStatus,
-                briefContext.visualization,
-                briefContext.supervision,
-                ...briefContext.cues.slice(0, 3),
+                briefLabel(briefContext.propertyStatus),
+                briefLabel(briefContext.visualization),
+                briefLabel(briefContext.supervision),
+                ...briefContext.cues.slice(0, 3).map((cue) => briefLabel(cue)),
               ]
                 .filter(Boolean)
                 .map((item) => (

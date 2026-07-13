@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import ConversationAutoRefresh from "@/components/ConversationAutoRefresh";
 import UnreadPageTitle from "@/components/UnreadPageTitle";
+import { briefSnapshotLabel } from "@/lib/brief-labels";
 import { professionalUnreadByInquiry, unreadTotal } from "@/lib/inquiry-unread";
 import { getStudioMemberships, inquiryRecipientFilter } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -64,10 +65,7 @@ function statusLabel(status: string) {
 }
 
 function snapshotValue(snapshot: Record<string, unknown> | null, key: string) {
-  const value = snapshot?.[key];
-  if (typeof value === "number") return String(value);
-  if (Array.isArray(value)) return value.filter((item) => typeof item === "string").join(", ") || "Nie podano";
-  return typeof value === "string" && value.trim() ? value : "Nie podano";
+  return briefSnapshotLabel(snapshot, key);
 }
 
 export default async function StudioInboxPage({

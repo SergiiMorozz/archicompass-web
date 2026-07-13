@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { briefLabel, briefListLabel, briefStyleLabel } from "@/lib/brief-labels";
 import { polishCountLabel } from "@/lib/count-label";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -84,7 +85,7 @@ export default async function ClientBriefsPage() {
               <article key={brief.id} className="rounded-lg border border-line bg-card p-6 shadow-sm">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <div className="text-sm font-semibold text-primary">{brief.project_type || "Brief projektowy"}</div>
+                    <div className="text-sm font-semibold text-primary">{briefLabel(brief.project_type) || "Brief projektowy"}</div>
                     <h2 className="mt-1 text-2xl font-bold">{brief.title || "Brief bez tytułu"}</h2>
                     <div className="mt-2 text-sm text-muted">Zapisano {formatDate(brief.created_at)}</div>
                   </div>
@@ -95,16 +96,16 @@ export default async function ClientBriefsPage() {
 
                 <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
                   {[
-                    ["Cel", brief.goal],
-                    ["Styl", brief.style_direction],
-                    ["Wsparcie", brief.support_scope],
-                    ["Budżet", brief.budget_signal],
-                    ["Termin", brief.timeline],
+                    ["Cel", briefLabel(brief.goal)],
+                    ["Styl", briefStyleLabel(brief.style_direction)],
+                    ["Wsparcie", briefLabel(brief.support_scope)],
+                    ["Budżet", briefLabel(brief.budget_signal)],
+                    ["Termin", briefLabel(brief.timeline)],
                     ["Powierzchnia", brief.area_m2 ? `${brief.area_m2} m²` : null],
-                    ["Pomieszczenia", brief.room_types?.join(", ") || (brief.room_count ? String(brief.room_count) : null)],
-                    ["Nieruchomość", brief.property_status],
-                    ["3D", brief.visualization_need],
-                    ["Nadzór", brief.supervision_need],
+                    ["Pomieszczenia", briefListLabel(brief.room_types) || (brief.room_count ? String(brief.room_count) : null)],
+                    ["Nieruchomość", briefLabel(brief.property_status)],
+                    ["3D", briefLabel(brief.visualization_need)],
+                    ["Nadzór", briefLabel(brief.supervision_need)],
                     ["Lokalizacja", brief.location],
                   ].map(([label, value]) => (
                     <div key={label} className="rounded-xl border border-line bg-background p-3">

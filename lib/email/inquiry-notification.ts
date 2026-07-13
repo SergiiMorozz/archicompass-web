@@ -1,4 +1,5 @@
 import { sendTransactionalEmail } from "@/lib/email/send-transactional-email";
+import { briefLabel, briefListLabel, briefStyleLabel } from "@/lib/brief-labels";
 import { polishVisualCues } from "@/lib/visual-cues";
 
 type BriefForEmail = {
@@ -54,7 +55,7 @@ function briefLine(label: string, value: string | null | undefined) {
 }
 
 function emailSubject(brief: BriefForEmail) {
-  return `Nowe zapytanie ArchiCompass: ${brief.title || brief.project_type || "brief projektowy"}`;
+  return `Nowe zapytanie ArchiCompass: ${brief.title || briefLabel(brief.project_type) || "brief projektowy"}`;
 }
 
 function emailText({
@@ -74,18 +75,18 @@ function emailText({
     clientEmail ? `E-mail klienta: ${clientEmail}` : null,
     message ? `Wiadomość klienta: ${message}` : null,
     "",
-    briefLine("Projekt", brief.project_type),
-    briefLine("Cel", brief.goal),
-    briefLine("Style", brief.style_direction),
-    briefLine("Zakres wsparcia", brief.support_scope),
-    briefLine("Budżet", brief.budget_signal),
-    briefLine("Termin", brief.timeline),
+    briefLine("Projekt", briefLabel(brief.project_type)),
+    briefLine("Cel", briefLabel(brief.goal)),
+    briefLine("Style", briefStyleLabel(brief.style_direction)),
+    briefLine("Zakres wsparcia", briefLabel(brief.support_scope)),
+    briefLine("Budżet", briefLabel(brief.budget_signal)),
+    briefLine("Termin", briefLabel(brief.timeline)),
     briefLine("Powierzchnia", brief.area_m2 ? `${brief.area_m2} m²` : null),
     briefLine("Liczba pomieszczeń", brief.room_count ? String(brief.room_count) : null),
-    brief.room_types?.length ? `Pomieszczenia: ${brief.room_types.join(", ")}` : null,
-    briefLine("Status nieruchomości", brief.property_status),
-    briefLine("Wizualizacja 3D", brief.visualization_need),
-    briefLine("Nadzór", brief.supervision_need),
+    brief.room_types?.length ? `Pomieszczenia: ${briefListLabel(brief.room_types)}` : null,
+    briefLine("Status nieruchomości", briefLabel(brief.property_status)),
+    briefLine("Wizualizacja 3D", briefLabel(brief.visualization_need)),
+    briefLine("Nadzór", briefLabel(brief.supervision_need)),
     briefLine("Lokalizacja", brief.location),
     brief.visual_cues?.length ? `Wskazówki wizualne: ${polishVisualCues(brief.visual_cues).join(", ")}` : null,
     `Zdjęcia referencyjne: ${brief.reference_photo_names?.length ?? 0}`,
@@ -113,18 +114,18 @@ function emailHtml({
   message: string | null;
 }) {
   const rows: Array<[string, string | null | undefined]> = [
-    ["Projekt", brief.project_type],
-    ["Cel", brief.goal],
-    ["Style", brief.style_direction],
-    ["Zakres wsparcia", brief.support_scope],
-    ["Budżet", brief.budget_signal],
-    ["Termin", brief.timeline],
+    ["Projekt", briefLabel(brief.project_type)],
+    ["Cel", briefLabel(brief.goal)],
+    ["Style", briefStyleLabel(brief.style_direction)],
+    ["Zakres wsparcia", briefLabel(brief.support_scope)],
+    ["Budżet", briefLabel(brief.budget_signal)],
+    ["Termin", briefLabel(brief.timeline)],
     ["Powierzchnia", brief.area_m2 ? `${brief.area_m2} m²` : null],
     ["Liczba pomieszczeń", brief.room_count ? String(brief.room_count) : null],
-    ["Pomieszczenia", brief.room_types?.join(", ")],
-    ["Status nieruchomości", brief.property_status],
-    ["Wizualizacja 3D", brief.visualization_need],
-    ["Nadzór", brief.supervision_need],
+    ["Pomieszczenia", briefListLabel(brief.room_types)],
+    ["Status nieruchomości", briefLabel(brief.property_status)],
+    ["Wizualizacja 3D", briefLabel(brief.visualization_need)],
+    ["Nadzór", briefLabel(brief.supervision_need)],
     ["Lokalizacja", brief.location],
     ["Wskazówki wizualne", polishVisualCues(brief.visual_cues).join(", ")],
     ["Zdjęcia referencyjne", String(brief.reference_photo_names?.length ?? 0)],

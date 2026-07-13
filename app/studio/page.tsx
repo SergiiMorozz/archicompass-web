@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { briefSnapshotLabel } from "@/lib/brief-labels";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getStudioMemberships, inquiryRecipientFilter } from "@/lib/studios";
 import { profileReadinessScore } from "@/lib/profile-readiness";
@@ -30,10 +31,7 @@ function formatDate(value: string) {
 }
 
 function snapshotValue(snapshot: Record<string, unknown> | null, key: string) {
-  const value = snapshot?.[key];
-  if (typeof value === "number") return String(value);
-  if (Array.isArray(value)) return value.filter((item) => typeof item === "string").join(", ") || "Nie podano";
-  return typeof value === "string" && value.trim() ? value : "Nie podano";
+  return briefSnapshotLabel(snapshot, key);
 }
 
 function statusClass(status: string) {

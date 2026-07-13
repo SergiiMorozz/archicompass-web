@@ -2,6 +2,7 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import ReferencePhotoGrid from "@/components/ReferencePhotoGrid";
+import { briefLabel, briefListLabel, briefStyleLabel } from "@/lib/brief-labels";
 import { polishCountLabel } from "@/lib/count-label";
 import { sendInquiryNotificationEmail } from "@/lib/email/inquiry-notification";
 import {
@@ -185,7 +186,7 @@ async function sendBriefInquiry(formData: FormData) {
     }
     designer = designerData as Designer;
   }
-  const subject = `Zapytanie projektowe: ${brief.title || brief.project_type || "brief projektowy"}`;
+  const subject = `Zapytanie projektowe: ${brief.title || briefLabel(brief.project_type) || "brief projektowy"}`;
   let duplicateQuery = supabase
     .from("designer_inquiries")
     .select("id")
@@ -519,7 +520,7 @@ export default async function SavedBriefsPage({
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <div className="text-sm font-semibold text-primary">
-                        {brief.project_type || "Brief projektowy"}
+                        {briefLabel(brief.project_type) || "Brief projektowy"}
                       </div>
                       <h2 className="mt-1 text-2xl font-bold">
                         {brief.title || "Brief bez tytułu"}
@@ -542,17 +543,17 @@ export default async function SavedBriefsPage({
 
                   <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
                     {[
-                      ["Cel", brief.goal],
-                      ["Style", brief.style_direction],
-                      ["Zakres", brief.support_scope],
-                      ["Budżet", brief.budget_signal],
-                      ["Termin", brief.timeline],
+                      ["Cel", briefLabel(brief.goal)],
+                      ["Style", briefStyleLabel(brief.style_direction)],
+                      ["Zakres", briefLabel(brief.support_scope)],
+                      ["Budżet", briefLabel(brief.budget_signal)],
+                      ["Termin", briefLabel(brief.timeline)],
                       ["Powierzchnia", brief.area_m2 ? `${brief.area_m2} m²` : null],
                       ["Liczba pomieszczeń", brief.room_count ? String(brief.room_count) : null],
-                      ["Pomieszczenia", brief.room_types?.join(", ") || null],
-                      ["Status nieruchomości", brief.property_status],
-                      ["Wizualizacja 3D", brief.visualization_need],
-                      ["Nadzór", brief.supervision_need],
+                      ["Pomieszczenia", briefListLabel(brief.room_types) || null],
+                      ["Status nieruchomości", briefLabel(brief.property_status)],
+                      ["Wizualizacja 3D", briefLabel(brief.visualization_need)],
+                      ["Nadzór", briefLabel(brief.supervision_need)],
                       ["Lokalizacja", brief.location],
                       ["Wskazówki wizualne", polishVisualCues(brief.visual_cues).join(", ") || "Brak tagów"],
                     ].map(([label, value]) => (

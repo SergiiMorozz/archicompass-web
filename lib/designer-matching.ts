@@ -1,5 +1,7 @@
 import { requiredServiceCapabilities } from "@/lib/service-capabilities";
 import { distanceBetweenLocations } from "@/lib/location-distance";
+import { briefLabel, briefStyleLabel } from "@/lib/brief-labels";
+import { availabilityLabel } from "@/lib/profile-pricing";
 
 export type MatchBrief = {
   projectType: string;
@@ -195,10 +197,10 @@ export function scoreProfessionalMatch(
     reasons.push({
       label: "Styl",
       value: styleMatch
-        ? `${matchedStyles.length ? matchedStyles.join(" / ") : brief.searchSpecialty} pojawia się w profilu lub portfolio`
+        ? `${matchedStyles.length ? briefStyleLabel(matchedStyles.join("|")) : briefLabel(brief.searchSpecialty)} pojawia się w profilu lub portfolio`
         : cueMatches.length
           ? `Dopasowano ${cueMatches.length} ${cueMatches.length === 1 ? "cechę wizualną" : "cechy wizualne"}`
-          : `${styleValues.join(" / ") || "Kierunek wizualny"} wymaga sprawdzenia portfolio`,
+          : `${briefStyleLabel(styleValues.join("|")) || "Kierunek wizualny"} wymaga sprawdzenia portfolio`,
       status: styleMatch ? "strong" : cueMatches.length ? "partial" : "check",
     });
   }
@@ -277,7 +279,9 @@ export function scoreProfessionalMatch(
     points += supportMatch ? 8 : 2;
     reasons.push({
       label: "Wsparcie",
-      value: supportMatch ? `W profilu widać doświadczenie: ${brief.support}` : `Do potwierdzenia: ${brief.support}`,
+      value: supportMatch
+        ? `W profilu widać doświadczenie: ${briefLabel(brief.support)}`
+        : `Do potwierdzenia: ${briefLabel(brief.support)}`,
       status: supportMatch ? "strong" : "check",
     });
   }
@@ -316,7 +320,7 @@ export function scoreProfessionalMatch(
       points += 6;
       reasons.push({
         label: "Budżet",
-        value: `${brief.budget} · wycena wymaga potwierdzenia`,
+        value: `${briefLabel(brief.budget)} · wycena wymaga potwierdzenia`,
         status: "check",
       });
     } else if (minimum <= clientBudget.max) {
@@ -325,8 +329,8 @@ export function scoreProfessionalMatch(
       reasons.push({
         label: "Budżet",
         value: partlyAbove
-          ? `Zakres cen częściowo pokrywa się z budżetem: ${brief.budget}`
-          : `Poziom startowy mieści się w budżecie: ${brief.budget}`,
+          ? `Zakres cen częściowo pokrywa się z budżetem: ${briefLabel(brief.budget)}`
+          : `Poziom startowy mieści się w budżecie: ${briefLabel(brief.budget)}`,
         status: partlyAbove ? "partial" : "strong",
       });
     } else {
@@ -356,7 +360,7 @@ export function scoreProfessionalMatch(
     points += availabilityPoints;
     reasons.push({
       label: "Termin",
-      value: `${brief.timeline} · ${availability || "dostępność do potwierdzenia"}`,
+      value: `${briefLabel(brief.timeline)} · ${availability ? availabilityLabel(availability) : "dostępność do potwierdzenia"}`,
       status: availabilityPoints >= 7 ? "strong" : availabilityPoints >= 3 ? "partial" : "check",
     });
   }
