@@ -1,4 +1,5 @@
 import { sendTransactionalEmail } from "@/lib/email/send-transactional-email";
+import { polishVisualCues } from "@/lib/visual-cues";
 
 type BriefForEmail = {
   title: string | null;
@@ -86,7 +87,7 @@ function emailText({
     briefLine("Wizualizacja 3D", brief.visualization_need),
     briefLine("Nadzór", brief.supervision_need),
     briefLine("Lokalizacja", brief.location),
-    brief.visual_cues?.length ? `Wskazówki wizualne: ${brief.visual_cues.join(", ")}` : null,
+    brief.visual_cues?.length ? `Wskazówki wizualne: ${polishVisualCues(brief.visual_cues).join(", ")}` : null,
     `Zdjęcia referencyjne: ${brief.reference_photo_names?.length ?? 0}`,
     "",
     "Brief:",
@@ -125,7 +126,7 @@ function emailHtml({
     ["Wizualizacja 3D", brief.visualization_need],
     ["Nadzór", brief.supervision_need],
     ["Lokalizacja", brief.location],
-    ["Wskazówki wizualne", brief.visual_cues?.join(", ")],
+    ["Wskazówki wizualne", polishVisualCues(brief.visual_cues).join(", ")],
     ["Zdjęcia referencyjne", String(brief.reference_photo_names?.length ?? 0)],
   ];
 

@@ -10,6 +10,7 @@ import {
 } from "@/lib/reference-photos";
 import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { polishVisualCues } from "@/lib/visual-cues";
 
 export const revalidate = 0;
 
@@ -553,7 +554,7 @@ export default async function SavedBriefsPage({
                       ["Wizualizacja 3D", brief.visualization_need],
                       ["Nadzór", brief.supervision_need],
                       ["Lokalizacja", brief.location],
-                      ["Wskazówki wizualne", brief.visual_cues?.join(", ") || "Brak tagów"],
+                      ["Wskazówki wizualne", polishVisualCues(brief.visual_cues).join(", ") || "Brak tagów"],
                     ].map(([label, value]) => (
                       <div key={label} className="rounded-xl border border-line bg-background p-3">
                         <div className="text-muted">{label}</div>

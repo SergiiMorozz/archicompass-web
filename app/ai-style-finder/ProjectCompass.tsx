@@ -829,7 +829,10 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
     formData.set("supervision_need", supervisionNeed);
     formData.set("location", location);
     formData.set("notes", notes);
-    formData.set("visual_cues", JSON.stringify(selectedVisualCues));
+    formData.set(
+      "visual_cues",
+      JSON.stringify(selectedVisualCues.map((item) => optionLabel(visualCues, item)))
+    );
     formData.set("brief_text", briefText);
     formData.set("designer_search_href", designerHref);
 
