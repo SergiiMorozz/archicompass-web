@@ -243,16 +243,17 @@ function cleanUserTextList(value: unknown, maxItems: number) {
     .slice(0, maxItems);
 }
 
-function cleanAnalysis(value: unknown): StyleAnalysis {
+function cleanAnalysis(value: unknown, imageCount: number): StyleAnalysis {
   const data = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
   const styleDirection =
     typeof data.styleDirection === "string" && allowedStyles.includes(data.styleDirection)
       ? data.styleDirection
       : "Not sure yet";
-  const confidence =
+  const reportedConfidence =
     data.confidence === "high" || data.confidence === "medium" || data.confidence === "low"
       ? data.confidence
       : "medium";
+  const confidence = imageCount < 2 && reportedConfidence === "high" ? "medium" : reportedConfidence;
   const visualCues = arrayOfStrings(data.visualCues).filter((cue) =>
     allowedVisualCues.includes(cue)
   );
@@ -355,16 +356,21 @@ function analysisPrompt({
   currentCues,
   currentStyle,
   projectType,
-}: Pick<AnalysisInput, "currentCues" | "currentStyle" | "projectType">) {
+  images,
+}: AnalysisInput) {
   return [
     "Przeanalizuj te zdjęcia referencyjne wnętrz dla ArchiCompass.",
     "Przygotuj praktyczne wskazówki stylistyczne dla klienta, który chce znaleźć właściwego projektanta wnętrz.",
+    `Liczba zdjęć referencyjnych: ${images.length}.`,
     `Typ inwestycji: ${projectType}.`,
     `Styl wybrany przez klienta przed analizą: ${currentStyle}.`,
     `Cechy wizualne wybrane przez klienta przed analizą: ${currentCues}.`,
     "Wszystkie treści przeznaczone dla użytkownika zwróć wyłącznie po polsku: primaryStyle, summary, colorPalette, materials, styleClues, designerPrompt i watchOuts.",
     "Jeśli w analizie pojawi się angielski opis materiału, koloru, stylu lub wskazówki, przetłumacz go na naturalny polski przed zwróceniem JSON.",
     "Pisz naturalnym, profesjonalnym językiem polskim. Bądź konkretny, ale nie sugeruj pewności, jeśli zdjęcia są niespójne.",
+    "Nie klasyfikuj wnętrza jako Japandi wyłącznie na podstawie jasnego drewna i neutralnej palety. Wybierz Japandi tylko wtedy, gdy wyraźnie widać połączenie japońskiej powściągliwości, spokojnej kompozycji i skandynawskiej miękkości. W przeciwnym razie wybierz bardziej ogólny, trafny kierunek, np. Contemporary.",
+    "Przy jednym zdjęciu używaj confidence: medium lub low. Zaznacz ograniczenie w summary, gdy bez dodatkowych ujęć nie da się potwierdzić pełnego stylu.",
+    "Opisuj wyłącznie materiały i detale widoczne na zdjęciu. Nie zgaduj gatunku drewna, technologii ani materiału, jeśli nie są jednoznaczne.",
     `styleDirection must be one of: ${allowedStyles.join(", ")}.`,
     `visualCues must only use these values: ${allowedVisualCues.join(", ")}.`,
     "Tylko pola techniczne styleDirection, visualCues i searchSpecialty mogą używać angielskich wartości enum.",
@@ -442,7 +448,7 @@ async function analyzeWithOpenAi(input: AnalysisInput) {
   }
 
   try {
-    return NextResponse.json({ analysis: cleanAnalysis(JSON.parse(text)) });
+    return NextResponse.json({ analysis: cleanAnalysis(JSON.parse(text), input.images.length) });
   } catch {
     return NextResponse.json(
       { error: "Usługa AI zwróciła nieczytelny wynik analizy." },
@@ -543,7 +549,7 @@ async function analyzeWithGemini(input: AnalysisInput) {
   }
 
   try {
-    return NextResponse.json({ analysis: cleanAnalysis(JSON.parse(text)) });
+    return NextResponse.json({ analysis: cleanAnalysis(JSON.parse(text), input.images.length) });
   } catch {
     return NextResponse.json(
       { error: "Usługa AI zwróciła nieczytelny wynik analizy." },
