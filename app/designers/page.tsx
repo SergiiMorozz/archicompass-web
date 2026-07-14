@@ -1152,7 +1152,6 @@ export default async function DesignersPage({
             ))}
           </div>
           </div>
-          </div>
           <div className="relative hidden min-h-full overflow-hidden lg:block">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
