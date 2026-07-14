@@ -41,6 +41,7 @@ export const metadata: Metadata = pageMetadata({
 type Profile = {
   id: string;
   avatar_url: string | null;
+  profile_logo_path: string | null;
   full_name: string | null;
   bio: string | null;
   location: string | null;
@@ -68,6 +69,7 @@ type Profile = {
 type Studio = {
   id: string;
   name: string;
+  profile_logo_path: string | null;
   bio: string | null;
   location: string | null;
   specialties: string[] | null;
@@ -191,20 +193,6 @@ function selectedSort(value: string) {
     : "recommended";
 }
 
-function initials(name: string) {
-  const parts = name
-    .split(" ")
-    .map((part) => part.trim())
-    .filter(Boolean);
-
-  if (!parts.length) return "AC";
-  return parts
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
-}
-
 function profileTitle(profile: Profile) {
   return profile.full_name || "Profil bez nazwy";
 }
@@ -252,6 +240,7 @@ function StudioCard({
   matchResult,
   memberCount,
   studio,
+  identityImage,
 }: {
   briefContext: BriefMatchContext | null;
   briefId: string;
@@ -260,6 +249,7 @@ function StudioCard({
   matchResult: ProfessionalMatch | null;
   memberCount: number;
   studio: Studio;
+  identityImage: string | null;
 }) {
   const requestedCapabilities = briefContext
     ? requiredServiceCapabilities(
@@ -285,7 +275,13 @@ function StudioCard({
           Pracownia projektowa
         </span>
         <div className="absolute bottom-4 left-4 text-white">
-          <div className="text-2xl font-bold">{studio.name}</div>
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 overflow-hidden rounded-xl border-2 border-white bg-white shadow">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={identityImage || coverImages[1]} alt={`${studio.name} logo`} className="h-full w-full object-cover" />
+            </div>
+            <div className="text-2xl font-bold">{studio.name}</div>
+          </div>
           <div className="mt-1 text-sm text-white/75">{studio.location || "Pracownia pracująca zdalnie"}</div>
         </div>
       </Link>
@@ -367,6 +363,7 @@ function DesignerCard({
   initialSaved,
   portfolioCount,
   portfolioCover,
+  identityImage,
   view,
 }: {
   briefContext: BriefMatchContext | null;
@@ -380,6 +377,7 @@ function DesignerCard({
   initialSaved: boolean;
   portfolioCount: number;
   portfolioCover: string | null;
+  identityImage: string | null;
   view: "grid" | "list";
 }) {
   const title = profileTitle(profile);
@@ -453,8 +451,9 @@ function DesignerCard({
             style={{ backgroundImage: `url(${cover})` }}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-[#1f172a]/72 to-transparent" />
-            <div className="absolute bottom-4 left-4 grid h-14 w-14 place-items-center rounded-2xl border-2 border-white bg-primary text-xl font-bold text-white shadow">
-              {initials(title)}
+            <div className="absolute bottom-4 left-4 h-14 w-14 overflow-hidden rounded-2xl border-2 border-white bg-primary shadow">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={identityImage || cover} alt={`${title} zdjęcie profilowe`} className="h-full w-full object-cover" />
             </div>
             <div className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-sm font-semibold text-foreground shadow-sm">
               {profile.is_demo ? "Profil demonstracyjny" : "Profil specjalisty"}
@@ -563,8 +562,9 @@ function DesignerCard({
         <div className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-sm font-semibold text-foreground shadow-sm">
           {profile.is_demo ? "Profil demonstracyjny" : "Specjalista"}
         </div>
-        <div className="absolute bottom-4 left-4 grid h-14 w-14 place-items-center rounded-2xl border-2 border-white bg-primary text-xl font-bold text-white shadow">
-          {initials(title)}
+        <div className="absolute bottom-4 left-4 h-14 w-14 overflow-hidden rounded-2xl border-2 border-white bg-primary shadow">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={identityImage || cover} alt={`${title} zdjęcie profilowe`} className="h-full w-full object-cover" />
         </div>
       </Link>
 
@@ -718,7 +718,7 @@ export default async function DesignersPage({
   const query = supabase
     .from("profiles")
     .select(
-      "id, avatar_url, full_name, bio, location, profession_type, user_type, specialties, service_categories, languages, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at"
+      "id, avatar_url, profile_logo_path, full_name, bio, location, profession_type, user_type, specialties, service_categories, languages, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at"
     )
     .eq("user_type", "professional")
     .order("created_at", { ascending: false })
@@ -727,7 +727,7 @@ export default async function DesignersPage({
   const { data, error } = await query;
   const { data: studioData } = await supabase
     .from("studios")
-    .select("id, name, bio, location, specialties, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at")
+    .select("id, name, profile_logo_path, bio, location, specialties, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at")
     .eq("published", true)
     .order("created_at", { ascending: false })
     .limit(30);
@@ -752,6 +752,17 @@ export default async function DesignersPage({
     (favoriteData ?? [])
       .filter((item) => item.entity_type === "studio")
       .map((item) => item.entity_key)
+  );
+  const profileMediaUrl = (path: string | null) =>
+    path ? supabase.storage.from("profile-media").getPublicUrl(path).data.publicUrl : null;
+  const designerIdentityImages = new Map(
+    ((data ?? []) as Profile[]).map((profile) => [
+      profile.id,
+      profileMediaUrl(profile.profile_logo_path) || profile.avatar_url,
+    ])
+  );
+  const studioIdentityImages = new Map(
+    ((studioData ?? []) as Studio[]).map((studio) => [studio.id, profileMediaUrl(studio.profile_logo_path)])
   );
   const normalizedQuery = normalizeSearchText(q);
   const normalizedLocation = normalizeSearchText(location);
@@ -1461,6 +1472,7 @@ export default async function DesignersPage({
                     memberCount={studioMemberCounts.get(studio.id) ?? 0}
                     initialSaved={savedStudioIds.has(studio.id)}
                     canSendBrief={canSendBrief}
+                    identityImage={studioIdentityImages.get(studio.id) ?? null}
                   />
                 ))}
               </div>
@@ -1562,6 +1574,7 @@ export default async function DesignersPage({
                   initialSaved={savedDesignerIds.has(profile.id)}
                   portfolioCount={portfolioCounts.get(profile.id) ?? 0}
                   portfolioCover={portfolioCovers.get(profile.id) ?? null}
+                  identityImage={designerIdentityImages.get(profile.id) ?? null}
                   view={view}
                 />
               ))}
@@ -1582,6 +1595,7 @@ export default async function DesignersPage({
                   initialSaved={savedDesignerIds.has(profile.id)}
                   portfolioCount={portfolioCounts.get(profile.id) ?? 0}
                   portfolioCover={portfolioCovers.get(profile.id) ?? null}
+                  identityImage={designerIdentityImages.get(profile.id) ?? null}
                   view={view}
                 />
               ))}
