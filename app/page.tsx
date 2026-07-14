@@ -129,11 +129,7 @@ export default async function Home() {
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(27,17,38,0.96)_0%,rgba(52,24,74,0.82)_48%,rgba(27,17,38,0.30)_100%)]" />
         <div className="relative mx-auto flex min-h-[700px] max-w-7xl items-center px-4 py-16 sm:px-6">
           <div className="max-w-4xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/12 px-4 py-2 text-sm font-semibold backdrop-blur">
-              <span className="h-2 w-2 rounded-full bg-[#48d9c7]" />
-              {homeCopy.hero.eyebrow}
-            </div>
-            <h1 className="mt-6 max-w-4xl text-4xl font-bold leading-[1.05] sm:text-6xl">
+            <h1 className="max-w-4xl text-4xl font-bold leading-[1.05] sm:text-6xl">
               {homeCopy.hero.headline}
             </h1>
             <p className="mt-6 max-w-2xl text-lg font-medium leading-8 text-white sm:text-xl">
@@ -148,7 +144,6 @@ export default async function Home() {
                 href="/project-compass"
                 className="group rounded-lg border border-[#a57aff] bg-[#7c3aed] px-6 py-5 text-center font-bold text-white shadow-[0_18px_45px_rgba(86,35,168,0.38)] transition hover:bg-[#8b4cf0]"
               >
-                <span className="mr-2 rounded-full bg-white px-2 py-1 text-xs font-bold text-primary">AI</span>
                 {homeCopy.hero.primaryCta}
                 <span className="ml-2 transition group-hover:translate-x-1">&#8594;</span>
               </Link>
@@ -171,23 +166,6 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="absolute bottom-10 right-6 hidden w-72 overflow-hidden rounded-lg border border-white/25 bg-[#261631]/70 shadow-[0_22px_55px_rgba(12,6,20,0.34)] backdrop-blur lg:block">
-            <div className="flex items-center justify-between border-b border-white/15 px-5 py-4">
-              <span className="text-xs font-bold uppercase tracking-[0.16em] text-[#68ead9]">AI insight</span>
-              <span className="rounded-full bg-[#7c3aed] px-2.5 py-1 text-[10px] font-bold text-white">Dopasowanie</span>
-            </div>
-            <div className="p-5">
-              <p className="text-sm font-semibold text-white/70">Kierunek stylistyczny</p>
-              <p className="mt-1 text-2xl font-bold text-white">Ciepłe japandi</p>
-              <div className="mt-5 flex gap-2" aria-label="Przykładowa paleta kolorów">
-                <span className="h-8 w-8 rounded-full border border-white/25 bg-[#f3ead9]" />
-                <span className="h-8 w-8 rounded-full border border-white/25 bg-[#cbb18b]" />
-                <span className="h-8 w-8 rounded-full border border-white/25 bg-[#9c7858]" />
-                <span className="h-8 w-8 rounded-full border border-white/25 bg-[#3d332e]" />
-              </div>
-              <p className="mt-5 text-sm leading-6 text-white/75">Styl, zakres i budżet łączą się w jeden czytelny brief.</p>
-            </div>
-          </div>
         </div>
       </section>
 

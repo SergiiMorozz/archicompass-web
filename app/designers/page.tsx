@@ -1114,6 +1114,12 @@ export default async function DesignersPage({
             <p className="mt-4 text-lg leading-8 text-muted">
               Porównuj profile według stylu, lokalizacji, usług i dopasowania do Twojej inwestycji.
             </p>
+            <Link
+              href="/project-compass"
+              className="mt-6 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white shadow-[0_12px_28px_rgba(104,40,200,0.25)] transition hover:bg-primary/90"
+            >
+              Stwórz brief z AI Project Compass &#8594;
+            </Link>
           </div>
 
           <form action="/designers" className="mt-9 max-w-4xl">
@@ -1268,9 +1274,12 @@ export default async function DesignersPage({
               </select>
             </label>
 
-            <details className="group rounded-xl border border-line bg-background px-4 py-3">
+            <details
+              className="group rounded-xl border border-line bg-background px-4 py-3"
+              open={Boolean(availability || workMode || pricingModel || minRateRaw || maxRateRaw)}
+            >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold">
-                Filtry szczegółowe
+                Współpraca i cena
                 <span className="text-lg text-primary transition-transform group-open:rotate-180">⌄</span>
               </summary>
               <div className="mt-5 grid gap-6">
@@ -1330,6 +1339,15 @@ export default async function DesignersPage({
               </div>
             </div>
 
+              </div>
+            </details>
+
+            <details className="group rounded-xl border border-line bg-background px-4 py-3" open={selectedStyles.length > 0 || selectedProjectCategories.length > 0}>
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold">
+                Styl i typ projektu
+                <span className="text-lg text-primary transition-transform group-open:rotate-180">⌄</span>
+              </summary>
+              <div className="mt-5 grid gap-6">
             <div>
               <div className="text-sm font-semibold">Style wnętrz</div>
               <p className="mt-1 text-xs leading-5 text-muted">Wybierz jeden lub kilka stylów.</p>
@@ -1369,6 +1387,15 @@ export default async function DesignersPage({
               </div>
             </div>
 
+              </div>
+            </details>
+
+            <details className="group rounded-xl border border-line bg-background px-4 py-3" open={selectedServices.length > 0 || selectedFocus.length > 0 || Boolean(minExperienceRaw || maxProjectBudgetRaw)}>
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold">
+                Usługi i doświadczenie
+                <span className="text-lg text-primary transition-transform group-open:rotate-180">⌄</span>
+              </summary>
+              <div className="mt-5 grid gap-6">
             <div>
               <div className="text-sm font-semibold">Usługi</div>
               <div className="mt-3 grid gap-3">
