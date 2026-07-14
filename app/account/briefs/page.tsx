@@ -423,13 +423,13 @@ export default async function SavedBriefsPage({
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
-              <div className="text-sm font-semibold text-primary">Project Compass</div>
+              <div className="text-sm font-semibold text-primary">AI Project Compass</div>
               <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
                 {canSendBriefs ? "Zapisane briefy" : "Historia analiz"}
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
                 {canSendBriefs
-                  ? "Przejrzyj briefy utworzone w Project Compass i wyślij jeden do projektanta lub pracowni jako czytelne pierwsze zapytanie."
+                  ? "Przejrzyj briefy utworzone w AI Project Compass i wyślij jeden do projektanta lub pracowni jako czytelne pierwsze zapytanie."
                   : "Wróć do wcześniejszych analiz inspiracji. Projektanci korzystają z AI Project Compass, ale nie wysyłają briefów jako klienci."}
               </p>
             </div>
@@ -511,7 +511,7 @@ export default async function SavedBriefsPage({
           <div className="rounded-2xl border border-dashed border-line bg-card p-8 text-center shadow-sm">
             <h2 className="text-2xl font-bold">Nie masz jeszcze zapisanych briefów</h2>
             <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted">
-              Utwórz brief Project Compass z kierunkiem stylistycznym, wskazówkami wizualnymi
+              Utwórz brief AI Project Compass z kierunkiem stylistycznym, wskazówkami wizualnymi
               i zdjęciami referencyjnymi, a następnie zapisz go tutaj.
             </p>
             {canSendBriefs ? (
@@ -639,7 +639,7 @@ export default async function SavedBriefsPage({
                             name="message"
                             rows={4}
                             className={areaClass}
-                            placeholder="Dzień dobry, przygotowałem brief Project Compass i chciałbym sprawdzić, czy ten projekt pasuje do Państwa zakresu pracy."
+                            placeholder="Dzień dobry, przygotowałem brief AI Project Compass i chciałbym sprawdzić, czy ten projekt pasuje do Państwa zakresu pracy."
                           />
                         </label>
 

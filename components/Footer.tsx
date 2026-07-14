@@ -4,8 +4,8 @@ import { siteCopy } from "@/content/pl/copy";
 
 const navigation = [
   { href: "/", label: "Strona główna" },
-  { href: "/project-compass", label: "Project Compass" },
-  { href: "/designers", label: "Znajdź projektanta" },
+  { href: "/project-compass", label: "AI Project Compass" },
+  { href: "/designers", label: "Katalog Projektantów" },
   { href: "/inspiration", label: "Inspiration Hub" },
   { href: "/get-started", label: "Dołącz do ArchiCompass" },
 ];

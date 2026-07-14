@@ -145,7 +145,7 @@ export default async function InteriorDesignersLocationPage({
         data={[
           breadcrumbJsonLd([
             { name: "Strona główna", path: "/" },
-            { name: "Znajdź projektanta", path: "/designers" },
+            { name: "Katalog Projektantów", path: "/designers" },
             { name: location.country, path: `/interior-designers/${location.countrySlug}/${location.citySlug}` },
             { name: location.city, path },
           ]),

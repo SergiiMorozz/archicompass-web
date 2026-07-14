@@ -269,7 +269,7 @@ export default async function StudioInboxPage({
             <p className="mt-2 max-w-xl leading-7 text-muted">
               {selectedView === "unread"
                 ? "Nowe odpowiedzi klientów pojawią się tutaj oraz w liczniku zapytań."
-                : "Nowe briefy z Project Compass pojawią się tutaj razem z inspiracjami, zakresem, budżetem i wiadomością klienta."}
+                : "Nowe briefy z AI Project Compass pojawią się tutaj razem z inspiracjami, zakresem, budżetem i wiadomością klienta."}
             </p>
             <Link href={selectedView === "unread" ? "/studio/inbox" : "/account/profile"} className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
               {selectedView === "unread" ? "Zobacz wszystkie zapytania" : "Ulepsz profil publiczny"}

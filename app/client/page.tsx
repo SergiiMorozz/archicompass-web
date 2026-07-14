@@ -117,7 +117,7 @@ export default async function ClientOverviewPage({
               Utwórz brief
             </Link>
             <Link href="/designers" className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
-              Znajdź projektanta
+              Otwórz Katalog Projektantów
             </Link>
           </div>
         </div>
@@ -176,11 +176,11 @@ export default async function ClientOverviewPage({
               <div className="mt-5 rounded-lg border border-dashed border-line bg-card p-8">
                 <h3 className="text-xl font-bold">Nie masz jeszcze rozmów z projektantami</h3>
                 <p className="mt-2 max-w-xl leading-7 text-muted">
-                  Utwórz brief w Project Compass, zapisz go i wyślij do projektanta,
+                  Utwórz brief w AI Project Compass, zapisz go i wyślij do projektanta,
                   którego portfolio pasuje do Twojego projektu.
                 </p>
                 <Link href="/project-compass" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
-                  Uruchom Project Compass
+                  Uruchom AI Project Compass
                 </Link>
               </div>
             )}

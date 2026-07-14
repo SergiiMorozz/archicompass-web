@@ -97,7 +97,7 @@ export default function PrivacyPage() {
       <p className="mt-3 text-sm text-muted">Obowiązuje od: 6 lipca 2026 r.</p>
       <p className="mt-6 max-w-3xl text-lg leading-8 text-muted">
         Niniejsza polityka wyjaśnia, jak ArchiCompass przetwarza dane osobowe w kontach
-        klientów, profilach profesjonalistów, Project Compass, zapytaniach, wiadomościach
+        klientów, profilach profesjonalistów, AI Project Compass, zapytaniach, wiadomościach
         i pozostałych usługach platformy.
       </p>
 

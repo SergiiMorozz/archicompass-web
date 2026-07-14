@@ -285,7 +285,7 @@ function InquiryCard({
           <div className="border-t border-red-200 p-4">
             <p className="text-sm leading-6 text-red-700">
               To usunie zapytanie z ArchiCompass. Zapisany brief pozostanie dostępny
-              w Project Compass.
+              w AI Project Compass.
             </p>
             <form action={cancelSentInquiry} className="mt-4">
               <input type="hidden" name="inquiry_id" value={inquiry.id} />
@@ -484,7 +484,7 @@ export default async function InquiriesPage({
             <div className="rounded-2xl border border-dashed border-line bg-card p-6 text-sm leading-6 text-muted">
               <div className="text-lg font-bold text-foreground">Nie masz jeszcze wysłanych zapytań</div>
               <p className="mt-2">
-                Wyślij zapisany brief Project Compass, gdy będziesz gotowy do kontaktu
+                Wyślij zapisany brief AI Project Compass, gdy będziesz gotowy do kontaktu
                 z projektantem.
               </p>
               <Link

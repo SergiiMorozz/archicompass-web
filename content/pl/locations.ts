@@ -66,11 +66,10 @@ export const cityDirectoryCopy = {
       "Podaj typ i status nieruchomości, metraż, pomieszczenia objęte projektem, lokalizację, budżet, planowany termin oraz informację o wizualizacjach 3D i nadzorze.",
     bodyRight:
       "Dodaj kilka zdjęć inspiracji i krótko wyjaśnij, co dokładnie Ci się w nich podoba. ArchiCompass rozpozna powtarzające się cechy i zapisze wynik w tym samym briefie.",
-    cta: "Uruchom Project Compass",
+    cta: "Uruchom AI Project Compass",
   },
   heroLeadSuffix:
     "Sprawdź portfolio, zakres usług, specjalizacje i dostępność, zanim wyślesz dobrze przygotowany brief.",
   localDirectoryEyebrow: "Lokalny katalog",
   moreLocationsTitle: "Więcej projektantów w Polsce",
 };
-

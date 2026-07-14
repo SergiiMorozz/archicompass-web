@@ -121,7 +121,7 @@ export default async function StudioAnalyticsPage() {
           <div className="text-sm font-semibold text-primary">Skuteczność profilu</div>
           <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Statystyki</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-            Zobacz rzeczywiste wizyty profilu, zapytania z Project Compass, zaakceptowane
+            Zobacz rzeczywiste wizyty profilu, zapytania z AI Project Compass, zaakceptowane
             dopasowania i zmierzony czas odpowiedzi.
           </p>
         </div>

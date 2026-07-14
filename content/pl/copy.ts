@@ -13,17 +13,19 @@ export const siteCopy = {
 
 export const homeCopy = {
   metadata: {
-    title: "Znajdź projektanta wnętrz z pomocą AI",
+    title: "Katalog Projektantów wnętrz z pomocą AI",
     description:
       "Znajdź projektantów wnętrz i pracownie projektowe według lokalizacji, stylu, usług i portfolio. Stwórz precyzyjny brief na podstawie zdjęć inspiracji.",
   },
   hero: {
-    eyebrow: "Dopasowanie projektanta wnętrz wspierane przez AI",
-    headline: "Znajdź projektanta wnętrz idealnie dopasowanego do Twojego projektu.",
+    eyebrow: "AI Project Compass",
+    headline: "Inteligentne dopasowanie projektanta wnętrz z wykorzystaniem AI",
+    lead:
+      "Znajdź projektanta idealnie dopasowanego do Twojej inwestycji. Zamień zdjęcia inspiracji w profesjonalny brief projektowy.",
     body:
-      "Zamień zdjęcia inspiracji w konkretny brief, odkryj swój styl i porównaj specjalistów dopasowanych do zakresu prac, budżetu i charakteru inwestycji.",
-    primaryCta: "Poznaj swój styl i stwórz brief",
-    secondaryCta: "Znajdź projektanta",
+      "AI rozpozna Twój styl i zarekomenduje projektantów najlepiej dopasowanych do zakresu prac, budżetu, estetyki oraz charakteru inwestycji.",
+    primaryCta: "Otwórz AI Project Compass",
+    secondaryCta: "Przeglądaj Katalog Projektantów",
     designerCta: "Jesteś projektantem lub architektem? Utwórz swój profil",
     benefits: ["Sprawdzone portfolio", "Bezpośredni kontakt", "Bezpłatny start"],
   },
@@ -173,7 +175,7 @@ export const inspirationCopy = {
   },
   featured: {
     title: "Polecane inspiracje",
-    findDesignerCta: "Znajdź projektanta",
+    findDesignerCta: "Otwórz Katalog Projektantów",
     readCta: "Czytaj artykuł",
     noResultsTitle: "Nie znaleziono artykułów",
     noResultsBody: "Spróbuj innego wyszukiwania lub wróć do wszystkich inspiracji.",
@@ -247,4 +249,3 @@ export const projectCompassCopy = {
       "Dodaj zdjęcia inspiracji, rozpoznaj styl, paletę kolorów i materiały dzięki AI, a następnie utwórz szczegółowy brief i znajdź dopasowanego projektanta wnętrz.",
   },
 };
-

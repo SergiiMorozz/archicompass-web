@@ -70,7 +70,7 @@ function emailText({
   message: string | null;
 }) {
   return [
-    "Otrzymujesz nowe zapytanie Project Compass w ArchiCompass.",
+    "Otrzymujesz nowe zapytanie AI Project Compass w ArchiCompass.",
     "",
     clientEmail ? `E-mail klienta: ${clientEmail}` : null,
     message ? `Wiadomość klienta: ${message}` : null,
@@ -136,7 +136,7 @@ function emailHtml({
   <body style="margin:0;background:#f7f3ee;color:#1f172a;font-family:Arial,sans-serif;">
     <div style="max-width:680px;margin:0 auto;padding:28px;">
       <div style="font-size:14px;font-weight:700;color:#8b5e34;">ArchiCompass</div>
-      <h1 style="margin:12px 0 8px;font-size:28px;line-height:1.2;">Nowe zapytanie Project Compass</h1>
+      <h1 style="margin:12px 0 8px;font-size:28px;line-height:1.2;">Nowe zapytanie AI Project Compass</h1>
       <p style="margin:0 0 20px;color:#665f68;line-height:1.6;">
         ${escapeHtml(designer.full_name || "Dzień dobry")}, klient wysłał zapisany brief projektowy.
       </p>

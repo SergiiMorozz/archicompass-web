@@ -66,7 +66,7 @@ export default async function ClientBriefsPage() {
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="text-sm font-semibold text-primary">Biblioteka Project Compass</div>
+            <div className="text-sm font-semibold text-primary">Biblioteka AI Project Compass</div>
             <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Zapisane briefy</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
               Twoje zapisane briefy pozostają tutaj razem z zakresem prac, budżetem, terminem i zdjęciami referencyjnymi.
@@ -125,7 +125,7 @@ export default async function ClientBriefsPage() {
         ) : (
           <div className="rounded-lg border border-dashed border-line bg-card p-8">
             <h2 className="text-2xl font-bold">Nie masz jeszcze zapisanych briefów</h2>
-            <p className="mt-2 max-w-xl leading-7 text-muted">Project Compass zamieni zdjęcia referencyjne i praktyczne potrzeby w brief, który możesz wielokrotnie wykorzystać.</p>
+            <p className="mt-2 max-w-xl leading-7 text-muted">AI Project Compass zamieni zdjęcia referencyjne i praktyczne potrzeby w brief, który możesz wielokrotnie wykorzystać.</p>
             <Link href="/project-compass" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">Utwórz brief projektowy</Link>
           </div>
         )}

@@ -212,7 +212,7 @@ export default async function ProjectDetailPage({
         data={[
           breadcrumbJsonLd([
             { name: "Strona główna", path: "/" },
-            { name: "Znajdź projektanta", path: "/designers" },
+            { name: "Katalog Projektantów", path: "/designers" },
             { name: designerName, path: `/designers/${project.profile_id}` },
             { name: title, path: `/projects/${project.id}` },
           ]),

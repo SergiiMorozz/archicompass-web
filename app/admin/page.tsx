@@ -78,7 +78,7 @@ export default async function AdminOverviewPage() {
     ["Specjaliści", numberValue(stats.professionals), "Podaż profili"],
     ["Klienci", numberValue(stats.clients), `${numberValue(stats.active_30)} aktywnych kont`],
     ["Projekty portfolio", numberValue(stats.projects), "Prace publiczne"],
-    ["Zapisane briefy", briefCount, "Wynik Project Compass"],
+    ["Zapisane briefy", briefCount, "Wynik AI Project Compass"],
     ["Zapytania", inquiryCount, "W całej platformie"],
     ["Artykuły Inspiration Hub", contentRows.length, `${publishedArticles} opublikowanych`],
     ["Ukryte treści", numberValue(stats.hidden_profiles) + numberValue(stats.hidden_projects), `${numberValue(stats.hidden_profiles)} profili, ${numberValue(stats.hidden_projects)} projektów`],

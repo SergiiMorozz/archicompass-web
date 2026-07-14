@@ -9,8 +9,8 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const navItems = [
   { href: "/", label: "Strona główna" },
-  { href: "/project-compass", label: "Project Compass", featured: true },
-  { href: "/designers", label: "Znajdź projektanta" },
+  { href: "/project-compass", label: "AI Project Compass", featured: true },
+  { href: "/designers", label: "Katalog Projektantów" },
   { href: "/inspiration", label: "Inspiration Hub" },
 ];
 

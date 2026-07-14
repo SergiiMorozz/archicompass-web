@@ -172,7 +172,7 @@ export async function GET(request: Request) {
     const designer = profiles.get(inquiry.designer_id);
     const client = profiles.get(inquiry.client_id);
     const result = await sendConversationNotificationEmail({
-      body: inquiry.message || inquiry.brief_text || "A Project Compass request is waiting for review.",
+      body: inquiry.message || inquiry.brief_text || "An AI Project Compass request is waiting for review.",
       inquiryId: inquiry.id,
       kind: "unread_reminder",
       recipient: {

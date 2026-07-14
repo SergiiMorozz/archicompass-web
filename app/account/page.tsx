@@ -259,7 +259,7 @@ export default async function AccountPage({
               className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
             >
               <div className="text-sm font-semibold text-primary">
-                {isProfessional ? "AI Project Compass" : "Project Compass"}
+                AI Project Compass
               </div>
               <h2 className="mt-2 text-2xl font-bold">{compassTitle}</h2>
               <p className="mt-3 text-sm leading-6 text-muted">

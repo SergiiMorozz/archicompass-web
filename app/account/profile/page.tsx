@@ -689,7 +689,7 @@ export default async function EditProfilePage({
               <fieldset>
                 <legend className="text-sm font-semibold">Dostępne usługi</legend>
                 <p className="mt-1 text-sm leading-6 text-muted">
-                  Te informacje pomagają Project Compass wyjaśnić, dlaczego dany brief pasuje do Twoich usług.
+                  Te informacje pomagają AI Project Compass wyjaśnić, dlaczego dany brief pasuje do Twoich usług.
                 </p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   {serviceCapabilities.map((capability) => (

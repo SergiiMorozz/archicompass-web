@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import CatalogFiltersPanel from "@/components/CatalogFiltersPanel";
 import FavoriteButton from "@/components/FavoriteButton";
 import GoogleRating from "@/components/GoogleRating";
 import JsonLd from "@/components/JsonLd";
@@ -22,7 +23,7 @@ import {
 } from "@/lib/professional-options";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { locationPath, seoLocations } from "@/lib/seo-locations";
-import { distanceBetweenLocations } from "@/lib/location-distance";
+import { distanceBetweenLocations, distanceMapFromLocation } from "@/lib/location-distance";
 import {
   applyDemoProfilePresentation,
   getDemoProfilePresentation,
@@ -754,18 +755,36 @@ export default async function DesignersPage({
   );
   const normalizedQuery = normalizeSearchText(q);
   const normalizedLocation = normalizeSearchText(location);
-  const exactLocationExists = !normalizedLocation || [
+  const allProfileLocations = [
     ...((data ?? []) as Profile[]).map((profile) => profile.location),
     ...((studioData ?? []) as Studio[]).map((studio) => studio.location),
-  ].some((candidate) => normalizeSearchText(candidate ?? "").includes(normalizedLocation));
+  ];
+  const exactLocationExists = !normalizedLocation || allProfileLocations.some((candidate) =>
+    normalizeSearchText(candidate ?? "").includes(normalizedLocation)
+  );
   const nearbyFallback = Boolean(normalizedLocation && !exactLocationExists);
+  const locationDistances = normalizedLocation
+    ? await distanceMapFromLocation(location, allProfileLocations)
+    : new Map<string, number>();
+  const distanceForLocation = (candidate: string | null) =>
+    candidate
+      ? locationDistances.get(normalizeSearchText(candidate)) ?? distanceBetweenLocations(location, candidate)
+      : null;
+  const nearestAvailableDistance = Math.min(
+    ...[...locationDistances.values(), ...allProfileLocations.map(distanceForLocation)].filter(
+      (distance): distance is number => distance !== null
+    )
+  );
+  const nearbyRadius = Number.isFinite(nearestAvailableDistance)
+    ? Math.min(400, Math.max(80, nearestAvailableDistance + 75))
+    : 250;
 
   const locationMatches = (candidate: string | null) => {
     if (matchingMode || !normalizedLocation) return true;
     if (normalizeSearchText(candidate ?? "").includes(normalizedLocation)) return true;
     if (!nearbyFallback || !candidate) return false;
-    const distance = distanceBetweenLocations(location, candidate);
-    return distance !== null && distance <= 250;
+    const distance = distanceForLocation(candidate);
+    return distance !== null && distance <= nearbyRadius;
   };
 
   let profiles = ((data ?? []) as Profile[])
@@ -958,7 +977,7 @@ export default async function DesignersPage({
     studios = studios.sort((a, b) => (b.years_experience ?? 0) - (a.years_experience ?? 0));
   } else if (nearbyFallback && location) {
     const distance = (candidate: string | null) =>
-      candidate ? distanceBetweenLocations(location, candidate) ?? Number.MAX_SAFE_INTEGER : Number.MAX_SAFE_INTEGER;
+      distanceForLocation(candidate) ?? Number.MAX_SAFE_INTEGER;
     profiles = profiles.sort((a, b) => distance(a.location) - distance(b.location));
     studios = studios.sort((a, b) => distance(a.location) - distance(b.location));
   }
@@ -1000,6 +1019,22 @@ export default async function DesignersPage({
   const gridHref = "/designers" + qs({ ...base, view: "grid" });
   const listHref = "/designers" + qs({ ...base, view: "list" });
   const hasFilters = Boolean(q || location || selectedStyles.length || selectedServices.length || selectedProjectCategories.length || selectedFocus.length || availability || workMode || minExperienceRaw || maxProjectBudgetRaw || profileType !== "all" || minRateRaw || maxRateRaw || pricingModel);
+  const activeFilterCount = [
+    Boolean(q),
+    Boolean(location),
+    selectedStyles.length > 0,
+    selectedServices.length > 0,
+    selectedProjectCategories.length > 0,
+    selectedFocus.length > 0,
+    Boolean(availability),
+    Boolean(workMode),
+    Boolean(minExperienceRaw),
+    Boolean(maxProjectBudgetRaw),
+    profileType !== "all",
+    Boolean(minRateRaw),
+    Boolean(maxRateRaw),
+    Boolean(pricingModel),
+  ].filter(Boolean).length;
   const matchingQueryEntries = briefContext
     ? [
         ["match", "brief"],
@@ -1027,7 +1062,7 @@ export default async function DesignersPage({
         data={[
           breadcrumbJsonLd([
             { name: "Strona główna", path: "/" },
-            { name: "Znajdź projektanta", path: "/designers" },
+            { name: "Katalog Projektantów", path: "/designers" },
           ]),
           {
             "@context": "https://schema.org",
@@ -1057,19 +1092,20 @@ export default async function DesignersPage({
         ]}
       />
       <section className="border-b border-primary/15 bg-primary-soft px-4 py-14 sm:px-6">
-        <div className="mx-auto max-w-7xl">
-          <div className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-7xl overflow-hidden rounded-3xl border border-primary/15 bg-card shadow-[0_20px_60px_rgba(104,40,200,0.12)]">
+          <div className="grid lg:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="p-7 sm:p-10">
+          <div className="max-w-3xl">
             <span className="inline-flex rounded-full bg-accent px-3 py-1 text-xs font-bold text-white">
-              Wyszukiwanie projektantów
+              Katalog Projektantów
             </span>
-            <h1 className="mt-3 text-5xl font-bold tracking-tight">Znajdź projektanta wnętrz lub pracownię</h1>
+            <h1 className="mt-3 text-5xl font-bold tracking-tight">Projektanci wnętrz i pracownie</h1>
             <p className="mt-4 text-lg leading-8 text-muted">
-              Przeglądaj profile projektantów, architektów i pracowni według stylu,
-              lokalizacji oraz dopasowania do projektu.
+              Porównuj profile według stylu, lokalizacji, usług i dopasowania do Twojej inwestycji.
             </p>
           </div>
 
-          <form action="/designers" className="mx-auto mt-9 max-w-4xl">
+          <form action="/designers" className="mt-9 max-w-4xl">
             <input type="hidden" name="view" value={view} />
             <input type="hidden" name="sort" value={sort} />
             {briefContext && location ? <input type="hidden" name="location" value={location} /> : null}
@@ -1090,7 +1126,7 @@ export default async function DesignersPage({
             </div>
           </form>
 
-          <div className="mt-7 flex flex-wrap justify-center gap-2">
+          <div className="mt-7 flex flex-wrap gap-2">
             <span className="rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold">
               Popularne
             </span>
@@ -1104,6 +1140,29 @@ export default async function DesignersPage({
               </Link>
             ))}
           </div>
+          </div>
+          </div>
+          <div className="relative hidden min-h-full overflow-hidden lg:block">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=85"
+              alt="Jasne, nowoczesne wnętrze"
+              width="900"
+              height="1100"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-primary/35" />
+            <div className="absolute inset-x-6 bottom-6 rounded-2xl border border-white/30 bg-black/30 p-5 text-white backdrop-blur-sm">
+              <div className="flex items-center justify-between gap-3 text-sm font-semibold">
+                <span>Dopasowanie do inwestycji</span>
+                <span className="rounded-full bg-white px-3 py-1 text-xs text-primary">AI</span>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-white/90">
+                Styl, zakres, budżet i lokalizacja w jednym miejscu.
+              </p>
+            </div>
+          </div>
+          </div>
         </div>
       </section>
 
@@ -1112,7 +1171,7 @@ export default async function DesignersPage({
           <div className="mx-auto max-w-7xl">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <div className="text-sm font-semibold text-primary">Dopasowanie na podstawie Project Compass</div>
+                <div className="text-sm font-semibold text-primary">Dopasowanie na podstawie AI Project Compass</div>
                 <h2 className="mt-1 text-2xl font-bold">Specjaliści dopasowani do Twojego briefu</h2>
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
                   Wyniki uwzględniają styl, zakres, pomieszczenia, usługi, budżet,
@@ -1151,6 +1210,10 @@ export default async function DesignersPage({
       ) : null}
 
       <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-[290px_1fr]">
+        <CatalogFiltersPanel
+          activeFilters={activeFilterCount}
+          resultCount={polishCountLabel(profiles.length + studios.length, "wynik", "wyniki", "wyników")}
+        >
         <aside className="h-fit max-h-[72vh] overflow-y-auto rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)]">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -1195,6 +1258,12 @@ export default async function DesignersPage({
               </select>
             </label>
 
+            <details className="group rounded-xl border border-line bg-background px-4 py-3">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold">
+                Filtry szczegółowe
+                <span className="text-lg text-primary transition-transform group-open:rotate-180">⌄</span>
+              </summary>
+              <div className="mt-5 grid gap-6">
             <div>
               <div className="text-sm font-semibold">Dostępność i forma współpracy</div>
               <select
@@ -1354,16 +1423,20 @@ export default async function DesignersPage({
               </label>
             </div>
 
+              </div>
+            </details>
+
             <button className="sticky bottom-0 z-10 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-lg">
               Zastosuj filtry
             </button>
           </form>
         </aside>
+        </CatalogFiltersPanel>
 
         <div>
           {nearbyFallback && (profiles.length || studios.length) ? (
             <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-              Nie znaleziono profili dokładnie w lokalizacji <strong>{location}</strong>. Pokazujemy specjalistów z najbliższych rozpoznanych miast w Polsce, w promieniu do 250 km.
+              Nie znaleziono profili dokładnie w lokalizacji <strong>{location}</strong>. Pokazujemy specjalistów z najbliższych dostępnych miejscowości, uporządkowanych według odległości.
             </div>
           ) : null}
           {studios.length ? (
@@ -1470,7 +1543,7 @@ export default async function DesignersPage({
                 href="/designers"
                 className="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"
               >
-                Pokaż wszystkich projektantów
+                Pokaż cały katalog
               </Link>
             </div>
           ) : view === "grid" ? (
@@ -1519,7 +1592,7 @@ export default async function DesignersPage({
       <section className="border-t border-line bg-card px-4 py-12 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <p className="text-sm font-bold uppercase text-accent">Szukaj według lokalizacji</p>
-          <h2 className="mt-2 text-3xl font-bold">Znajdź projektanta wnętrz w pobliżu inwestycji</h2>
+          <h2 className="mt-2 text-3xl font-bold">Projektanci wnętrz w pobliżu inwestycji</h2>
           <p className="mt-3 max-w-3xl leading-7 text-muted">
             Przeglądaj katalogi miejskie i porównuj specjalistów według portfolio,
             usług, dopasowania do projektu, dostępności oraz połączonych opinii Google.

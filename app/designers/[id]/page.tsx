@@ -439,7 +439,7 @@ export default async function DesignerProfilePage({
         data={[
           breadcrumbJsonLd([
             { name: "Strona główna", path: "/" },
-            { name: "Znajdź projektanta", path: "/designers" },
+            { name: "Katalog Projektantów", path: "/designers" },
             { name: title, path: `/designers/${profile.id}` },
           ]),
           {

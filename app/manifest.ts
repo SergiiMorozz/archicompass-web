@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "ArchiCompass – znajdź projektanta wnętrz",
     short_name: "ArchiCompass",
     description:
-      "Znajdź projektanta wnętrz i zamień zdjęcia inspiracji w precyzyjny brief projektowy.",
+      "Katalog Projektantów wnętrz i AI Project Compass do tworzenia precyzyjnych briefów projektowych.",
     lang: "pl",
     start_url: "/",
     display: "standalone",

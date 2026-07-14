@@ -8,7 +8,7 @@ import { absoluteUrl, siteUrl } from "@/lib/seo";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: "Znajdź projektanta wnętrz z pomocą AI | ArchiCompass",
+    default: "Katalog Projektantów wnętrz z pomocą AI | ArchiCompass",
     template: "%s | ArchiCompass",
   },
   description:
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     locale: "pl_PL",
     siteName: "ArchiCompass",
     url: siteUrl(),
-    title: "Znajdź projektanta wnętrz z pomocą AI | ArchiCompass",
+    title: "Katalog Projektantów wnętrz z pomocą AI | ArchiCompass",
     description:
       "Stwórz precyzyjny brief na podstawie zdjęć inspiracji i znajdź specjalistów dopasowanych do Twojego projektu.",
     images: [
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Znajdź projektanta wnętrz z pomocą AI | ArchiCompass",
+    title: "Katalog Projektantów wnętrz z pomocą AI | ArchiCompass",
     description:
       "Stwórz precyzyjny brief i poznaj specjalistów dopasowanych do Twojego projektu.",
     images: [

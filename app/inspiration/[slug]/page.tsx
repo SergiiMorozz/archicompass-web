@@ -151,7 +151,7 @@ export default async function InspirationArticlePage({ params }: { params: Promi
           <div className="text-sm font-semibold text-primary">Zamień pomysły w projekt</div>
           <h2 className="mt-1 text-2xl font-bold">Stwórz brief na podstawie swoich inspiracji</h2>
           <div className="mt-5 flex flex-wrap gap-3">
-            <Link href="/project-compass" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">Otwórz Project Compass</Link>
+            <Link href="/project-compass" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">Otwórz AI Project Compass</Link>
             <Link href="/designers" className="rounded-xl border border-line bg-card px-5 py-3 text-sm font-semibold">Znajdź projektantów</Link>
           </div>
         </section>

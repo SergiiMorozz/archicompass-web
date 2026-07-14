@@ -15,7 +15,7 @@ const sections = [
   },
   {
     title: "Preferencje i zapisywanie stanu pracy",
-    body: "Przeglądarka może zapisywać język, ustawienia interfejsu, stan Project Compass, podgląd przesyłanych plików i formularzy, aby nawigacja działała spójnie. Część danych tymczasowych jest usuwana po zamknięciu karty lub zakończeniu sesji.",
+    body: "Przeglądarka może zapisywać język, ustawienia interfejsu, stan AI Project Compass, podgląd przesyłanych plików i formularzy, aby nawigacja działała spójnie. Część danych tymczasowych jest usuwana po zamknięciu karty lub zakończeniu sesji.",
   },
   {
     title: "Ograniczone statystyki",
