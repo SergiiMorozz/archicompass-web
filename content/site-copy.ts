@@ -100,6 +100,55 @@ export type SiteCopy = {
     cookies: string;
     contact: string;
   };
+  auth: {
+    metadata: { getStartedTitle: string; getStartedDescription: string };
+    securityBadge: string;
+    signIn: { headline: string; description: string };
+    signUp: { headline: string; description: string };
+    audienceCards: Array<{ title: string; description: string }>;
+    getStarted: {
+      title: string;
+      intro: string;
+      clientTitle: string;
+      clientDescription: string;
+      clientCta: string;
+      designerTitle: string;
+      designerDescription: string;
+      designerCta: string;
+    };
+    form: {
+      homeLink: string;
+      signInTab: string;
+      signUpTab: string;
+      joinAs: string;
+      client: string;
+      designer: string;
+      roleNotice: string;
+      emailLabel: string;
+      passwordLabel: string;
+      passwordPlaceholder: string;
+      waiting: string;
+      submitClient: string;
+      submitDesigner: string;
+      resendSending: string;
+      resend: string;
+      forgotPassword: string;
+      termsPrefix: string;
+      terms: string;
+      and: string;
+      privacy: string;
+      confirmationCreated: string;
+      confirmationResent: string;
+      errors: {
+        emailRequired: string;
+        passwordTooShort: string;
+        invalidCredentials: string;
+        emailNotConfirmed: string;
+        emailRateLimit: string;
+        alreadyRegistered: string;
+      };
+    };
+  };
   home: HomeCopy;
 };
 
@@ -157,6 +206,61 @@ const pl: SiteCopy = {
     terms: "Regulamin",
     cookies: "Polityka plików cookie",
     contact: "Kontakt",
+  },
+  auth: {
+    metadata: {
+      getStartedTitle: "Dołącz do ArchiCompass jako klient lub projektant",
+      getStartedDescription: "Utwórz konto ArchiCompass, aby zaplanować wnętrze, zapisywać projektantów albo opublikować profesjonalny profil i portfolio.",
+    },
+    securityBadge: "Bezpieczne logowanie e-mailem i hasłem",
+    signIn: { headline: "Witaj ponownie w ArchiCompass", description: "Zaloguj się adresem e-mail i ustalonym hasłem. Nie potrzebujesz linku do logowania." },
+    signUp: { headline: "Utwórz konto ArchiCompass", description: "Wybierz jedną rolę konta. Po rejestracji strefa klienta i studio projektanta pozostają oddzielne." },
+    audienceCards: [
+      { title: "Dla klientów", description: "Zapisuj briefy, porównuj projektantów i prowadź rozmowy." },
+      { title: "Dla projektantów", description: "Publikuj portfolio i otrzymuj zapytania od klientów." },
+    ],
+    getStarted: {
+      title: "Dołącz do ArchiCompass",
+      intro: "Wybierz właściwą ścieżkę i utwórz konto za pomocą adresu e-mail oraz hasła.",
+      clientTitle: "Planuję projekt wnętrza",
+      clientDescription: "Zapisuj projektantów i realizacje, przygotuj brief oraz prowadź rozmowy w jednym miejscu.",
+      clientCta: "Kontynuuj jako klient",
+      designerTitle: "Jestem projektantem",
+      designerDescription: "Zarządzaj profilem, portfolio, zapytaniami od klientów, rozmowami i wynikami w Studio projektanta.",
+      designerCta: "Kontynuuj jako specjalista",
+    },
+    form: {
+      homeLink: "Przejdź do strony głównej",
+      signInTab: "Zaloguj się",
+      signUpTab: "Utwórz konto",
+      joinAs: "Dołączam jako",
+      client: "Klient",
+      designer: "Projektant",
+      roleNotice: "Jeden adres e-mail ma jedną rolę. Projektanci otrzymują briefy, a klienci je wysyłają.",
+      emailLabel: "Adres e-mail",
+      passwordLabel: "Hasło",
+      passwordPlaceholder: "Co najmniej 8 znaków",
+      waiting: "Proszę czekać...",
+      submitClient: "Utwórz konto: klient",
+      submitDesigner: "Utwórz konto: projektant",
+      resendSending: "Wysyłanie...",
+      resend: "Wyślij link ponownie",
+      forgotPassword: "Nie pamiętasz hasła?",
+      termsPrefix: "Tworząc konto, akceptujesz",
+      terms: "Regulamin",
+      and: "i",
+      privacy: "Politykę prywatności",
+      confirmationCreated: "Konto zostało utworzone. Otwórz wiadomość potwierdzającą e-mail - po potwierdzeniu przejdziesz od razu do uzupełnienia profilu. Jeśli jej nie widzisz, sprawdź folder Spam lub Oferty.",
+      confirmationResent: "Wysłaliśmy nowy link potwierdzający. Otwórz najnowszą wiadomość, a po potwierdzeniu przejdziesz do uzupełnienia profilu.",
+      errors: {
+        emailRequired: "Wpisz adres e-mail.",
+        passwordTooShort: "Hasło musi mieć co najmniej 8 znaków.",
+        invalidCredentials: "Nieprawidłowy adres e-mail lub hasło. Poniżej możesz zresetować hasło.",
+        emailNotConfirmed: "Potwierdź adres e-mail, korzystając z linku w wiadomości rejestracyjnej. Jeśli go nie widzisz, wyślij link ponownie.",
+        emailRateLimit: "Wysłano zbyt wiele wiadomości. Odczekaj kilka minut i spróbuj ponownie.",
+        alreadyRegistered: "Konto z tym adresem e-mail już istnieje. Zaloguj się lub zresetuj hasło.",
+      },
+    },
   },
   home: {
     metadata: {
@@ -265,6 +369,61 @@ const en: SiteCopy = {
     terms: "Terms of Service",
     cookies: "Cookie Policy",
     contact: "Contact",
+  },
+  auth: {
+    metadata: {
+      getStartedTitle: "Join ArchiCompass as a client or designer",
+      getStartedDescription: "Create an ArchiCompass account to plan your interior, save designers, or publish a professional profile and portfolio.",
+    },
+    securityBadge: "Secure sign-in with email and password",
+    signIn: { headline: "Welcome back to ArchiCompass", description: "Sign in with your email address and password. You do not need a magic link." },
+    signUp: { headline: "Create your ArchiCompass account", description: "Choose one account role. After registration, the client workspace and designer studio stay separate." },
+    audienceCards: [
+      { title: "For clients", description: "Save briefs, compare designers, and keep your conversations in one place." },
+      { title: "For designers", description: "Publish a portfolio and receive enquiries from clients." },
+    ],
+    getStarted: {
+      title: "Join ArchiCompass",
+      intro: "Choose the right path and create an account with your email address and password.",
+      clientTitle: "I am planning an interior project",
+      clientDescription: "Save designers and projects, create a brief, and manage conversations in one place.",
+      clientCta: "Continue as a client",
+      designerTitle: "I am a designer",
+      designerDescription: "Manage your profile, portfolio, client enquiries, conversations, and results in Designer Studio.",
+      designerCta: "Continue as a professional",
+    },
+    form: {
+      homeLink: "Go to the homepage",
+      signInTab: "Sign in",
+      signUpTab: "Create account",
+      joinAs: "I am joining as",
+      client: "Client",
+      designer: "Designer",
+      roleNotice: "One email address has one role. Designers receive briefs and clients send them.",
+      emailLabel: "Email address",
+      passwordLabel: "Password",
+      passwordPlaceholder: "At least 8 characters",
+      waiting: "Please wait...",
+      submitClient: "Create account: client",
+      submitDesigner: "Create account: designer",
+      resendSending: "Sending...",
+      resend: "Resend confirmation link",
+      forgotPassword: "Forgot your password?",
+      termsPrefix: "By creating an account, you accept the",
+      terms: "Terms of Service",
+      and: "and the",
+      privacy: "Privacy Policy",
+      confirmationCreated: "Your account has been created. Open the email confirmation message and you will go directly to complete your profile. If you cannot see it, check Spam or Promotions.",
+      confirmationResent: "We sent a new confirmation link. Open the newest email, then you will go directly to complete your profile.",
+      errors: {
+        emailRequired: "Enter your email address.",
+        passwordTooShort: "Your password must be at least 8 characters.",
+        invalidCredentials: "Incorrect email address or password. You can reset your password below.",
+        emailNotConfirmed: "Confirm your email address using the link in the registration email. If you cannot see it, send the link again.",
+        emailRateLimit: "Too many emails have been sent. Wait a few minutes and try again.",
+        alreadyRegistered: "An account with this email address already exists. Sign in or reset your password.",
+      },
+    },
   },
   home: {
     metadata: {

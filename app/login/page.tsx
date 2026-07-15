@@ -3,8 +3,10 @@
 import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { authCopy } from "@/content/pl/copy";
+import { getSiteCopy } from "@/content/site-copy";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
+const authCopy = getSiteCopy().auth;
 
 type Mode = "signin" | "signup";
 type Intent = "client" | "designer";
@@ -20,10 +22,10 @@ function intentFromNext(next: string): Intent {
 }
 
 function authErrorMessage(message: string) {
-  if (message === "Invalid login credentials") return "Nieprawidłowy adres e-mail lub hasło. Poniżej możesz zresetować hasło.";
-  if (message.toLowerCase().includes("email not confirmed")) return "Potwierdź adres e-mail, korzystając z linku w wiadomości rejestracyjnej. Jeśli go nie widzisz, wyślij link ponownie.";
-  if (message.toLowerCase().includes("email rate limit")) return "Wysłano zbyt wiele wiadomości. Odczekaj kilka minut i spróbuj ponownie.";
-  if (message.toLowerCase().includes("already registered")) return "Konto z tym adresem e-mail już istnieje. Zaloguj się lub zresetuj hasło.";
+  if (message === "Invalid login credentials") return authCopy.form.errors.invalidCredentials;
+  if (message.toLowerCase().includes("email not confirmed")) return authCopy.form.errors.emailNotConfirmed;
+  if (message.toLowerCase().includes("email rate limit")) return authCopy.form.errors.emailRateLimit;
+  if (message.toLowerCase().includes("already registered")) return authCopy.form.errors.alreadyRegistered;
   return message;
 }
 
@@ -83,11 +85,11 @@ function LoginContent() {
     event.preventDefault();
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail) {
-      setStatus({ type: "error", message: "Wpisz adres e-mail." });
+      setStatus({ type: "error", message: authCopy.form.errors.emailRequired });
       return;
     }
     if (password.length < 8) {
-      setStatus({ type: "error", message: "Hasło musi mieć co najmniej 8 znaków." });
+      setStatus({ type: "error", message: authCopy.form.errors.passwordTooShort });
       return;
     }
 
@@ -138,7 +140,7 @@ function LoginContent() {
     setConfirmationEmail(cleanEmail);
     setStatus({
       type: "success",
-      message: "Konto zostało utworzone. Otwórz wiadomość potwierdzającą e-mail - po potwierdzeniu przejdziesz od razu do uzupełnienia profilu. Jeśli jej nie widzisz, sprawdź folder Spam lub Oferty.",
+      message: authCopy.form.confirmationCreated,
     });
   }
 
@@ -160,7 +162,7 @@ function LoginContent() {
     }
     setStatus({
       type: "success",
-      message: "Wysłaliśmy nowy link potwierdzający. Otwórz najnowszą wiadomość, a po potwierdzeniu przejdziesz do uzupełnienia profilu.",
+      message: authCopy.form.confirmationResent,
     });
   }
 
@@ -192,41 +194,41 @@ function LoginContent() {
               </div>
             ))}
           </div>
-          <Link href="/" className="mt-7 inline-flex text-sm font-bold text-primary hover:underline">Przejdź do strony głównej</Link>
+          <Link href="/" className="mt-7 inline-flex text-sm font-bold text-primary hover:underline">{authCopy.form.homeLink}</Link>
         </section>
 
         <section className="rounded-lg border border-line bg-card p-6 shadow-[0_18px_50px_rgba(54,31,73,0.10)] sm:p-8">
           <div className="grid grid-cols-2 rounded-lg bg-background p-1">
-            <button type="button" onClick={() => switchMode("signin")} className={`rounded-md px-4 py-3 text-sm font-bold ${mode === "signin" ? "bg-primary text-white" : "text-muted"}`}>Zaloguj się</button>
-            <button type="button" onClick={() => switchMode("signup")} className={`rounded-md px-4 py-3 text-sm font-bold ${mode === "signup" ? "bg-primary text-white" : "text-muted"}`}>Utwórz konto</button>
+            <button type="button" onClick={() => switchMode("signin")} className={`rounded-md px-4 py-3 text-sm font-bold ${mode === "signin" ? "bg-primary text-white" : "text-muted"}`}>{authCopy.form.signInTab}</button>
+            <button type="button" onClick={() => switchMode("signup")} className={`rounded-md px-4 py-3 text-sm font-bold ${mode === "signup" ? "bg-primary text-white" : "text-muted"}`}>{authCopy.form.signUpTab}</button>
           </div>
 
           <form onSubmit={onSubmit} className="mt-6 grid gap-5">
             {mode === "signup" ? (
               <fieldset>
-                <legend className="text-sm font-bold">Dołączam jako</legend>
+                <legend className="text-sm font-bold">{authCopy.form.joinAs}</legend>
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   {(["client", "designer"] as Intent[]).map((role) => (
                     <button key={role} type="button" aria-pressed={intent === role} onClick={() => setIntent(role)} className={`rounded-lg border px-4 py-4 text-left text-sm font-bold capitalize ${intent === role ? "border-primary bg-primary-soft text-primary" : "border-line bg-background"}`}>
-                      {role === "client" ? "Klient" : "Projektant"}
+                      {role === "client" ? authCopy.form.client : authCopy.form.designer}
                     </button>
                   ))}
                 </div>
-                <p className="mt-2 text-xs leading-5 text-muted">Jeden adres e-mail ma jedną rolę. Projektanci otrzymują briefy, a klienci je wysyłają.</p>
+                <p className="mt-2 text-xs leading-5 text-muted">{authCopy.form.roleNotice}</p>
               </fieldset>
             ) : null}
 
             <label className="text-sm font-bold">
-              Adres e-mail
+              {authCopy.form.emailLabel}
               <input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
             <label className="text-sm font-bold">
-              Hasło
-              <input type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Co najmniej 8 znaków" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
+              {authCopy.form.passwordLabel}
+              <input type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} placeholder={authCopy.form.passwordPlaceholder} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
 
             <button type="submit" disabled={status.type === "loading"} className="rounded-xl bg-primary px-5 py-3.5 text-sm font-bold text-white disabled:opacity-60">
-              {status.type === "loading" ? "Proszę czekać..." : mode === "signup" ? `Utwórz konto: ${intent === "client" ? "klient" : "projektant"}` : "Zaloguj się"}
+              {status.type === "loading" ? authCopy.form.waiting : mode === "signup" ? intent === "client" ? authCopy.form.submitClient : authCopy.form.submitDesigner : authCopy.form.signInTab}
             </button>
 
             {status.type === "success" ? (
@@ -239,7 +241,7 @@ function LoginContent() {
                     disabled={isResendingConfirmation}
                     className="mt-3 inline-flex rounded-lg border border-emerald-300 bg-white px-3 py-2 text-xs font-bold text-emerald-900 disabled:opacity-60"
                   >
-                    {isResendingConfirmation ? "Wysyłanie..." : "Wyślij link ponownie"}
+                    {isResendingConfirmation ? authCopy.form.resendSending : authCopy.form.resend}
                   </button>
                 ) : null}
               </div>
@@ -248,9 +250,9 @@ function LoginContent() {
           </form>
 
           {mode === "signin" ? (
-            <Link href="/forgot-password" className="mt-5 inline-flex text-sm font-semibold text-primary hover:underline">Nie pamiętasz hasła?</Link>
+            <Link href="/forgot-password" className="mt-5 inline-flex text-sm font-semibold text-primary hover:underline">{authCopy.form.forgotPassword}</Link>
           ) : (
-            <p className="mt-5 text-xs leading-5 text-muted">Tworząc konto, akceptujesz <Link href="/terms" className="underline">Regulamin</Link> i <Link href="/privacy" className="underline">Politykę prywatności</Link>.</p>
+            <p className="mt-5 text-xs leading-5 text-muted">{authCopy.form.termsPrefix} <Link href="/terms" className="underline">{authCopy.form.terms}</Link> {authCopy.form.and} <Link href="/privacy" className="underline">{authCopy.form.privacy}</Link>.</p>
           )}
         </section>
       </div>

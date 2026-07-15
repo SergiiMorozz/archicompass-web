@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { authCopy } from "@/content/pl/copy";
+import { getSiteCopy } from "@/content/site-copy";
 import { pageMetadata } from "@/lib/seo";
+
+const authCopy = getSiteCopy().auth;
 
 export const metadata: Metadata = pageMetadata({
   title: authCopy.metadata.getStartedTitle,
