@@ -17,11 +17,13 @@ NEXT_PUBLIC_ENGLISH_SITE_URL=https://archicompass-web-en.vercel.app
 ## Shared layer
 
 - `lib/site-locale.ts` owns the locale, locale-specific hosts, and HTML/SEO locale metadata.
-- `content/site-copy.ts` owns the paired PL and EN contracts for the shared global UI and home page.
-- `Header`, `Footer`, root metadata, and the home page render from this shared content contract.
+- `content/site-copy.ts` owns the paired PL and EN contracts for the shared global UI, account entry flow, and Inspiration Hub.
+- `Header`, `Footer`, root metadata, home page, login, registration, password recovery, onboarding, Inspiration Hub, and article pages render from this shared content contract.
 
 Both entries in `content/site-copy.ts` must satisfy the same `SiteCopy` TypeScript type. Adding a field to one language without adding it to the other therefore fails type checking.
 
 ## Migration rule
 
 New pages must use shared React structure and a typed content object. Do not add a locale-specific page branch or a second copy of a component. Legacy page-local Polish copy in `content/pl/copy.ts` is migrated route by route until the whole platform uses the shared contract.
+
+Run `npm run verify:locales` before deployment. It type-checks both language contracts and rejects a Polish-only import in every route that has already been migrated.
