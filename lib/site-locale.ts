@@ -23,6 +23,13 @@ function normalizedUrl(value: string) {
   return value.replace(/\/$/, "");
 }
 
+function normalizedRoutePath(path = "/") {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  if (normalizedPath === "/en") return "/";
+  if (normalizedPath.startsWith("/en/")) return normalizedPath.slice(3) || "/";
+  return normalizedPath;
+}
+
 export function localeSiteUrl(locale: SiteLocale) {
   if (locale === "en") {
     return normalizedUrl(
@@ -34,11 +41,17 @@ export function localeSiteUrl(locale: SiteLocale) {
 }
 
 export function localePublicPath(locale: SiteLocale, path = "/") {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const normalizedPath = normalizedRoutePath(path);
   if (locale === "en") {
     return normalizedPath === "/" ? "/en" : `/en${normalizedPath}`;
   }
   return normalizedPath;
+}
+
+// Next.js adds basePath automatically for links rendered inside the English app.
+// Public URLs need /en, while internal Link targets must remain route-relative.
+export function localeAppPath(path = "/") {
+  return normalizedRoutePath(path);
 }
 
 export function localePublicUrl(locale: SiteLocale, path = "/") {

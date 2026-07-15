@@ -1,11 +1,11 @@
 import Link from "next/link";
 import BrandLogo from "@/components/BrandLogo";
 import { getSiteCopy } from "@/content/site-copy";
-import { localePublicPath, siteLocale } from "@/lib/site-locale";
+import { localeAppPath } from "@/lib/site-locale";
 
 export default function Footer() {
   const copy = getSiteCopy().footer;
-  const appHref = (path: string) => localePublicPath(siteLocale, path);
+  const appHref = (path: string) => localeAppPath(path);
 
   return (
     <footer className="border-t-4 border-accent bg-[#21152d] text-white">

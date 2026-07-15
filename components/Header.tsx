@@ -7,10 +7,10 @@ import BrandLogo from "@/components/BrandLogo";
 import { getSiteCopy } from "@/content/site-copy";
 import { isProfessionalProfile } from "@/lib/professional";
 import {
+  localeAppPath,
   localePublicPath,
   localePublicUrl,
   otherLocale,
-  siteLocale,
 } from "@/lib/site-locale";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -26,7 +26,7 @@ function NavLink({
   onClick?: () => void;
 }) {
   const pathname = usePathname();
-  const localizedHref = localePublicPath(siteLocale, href);
+  const localizedHref = localeAppPath(href);
   const currentPath = pathname?.replace(/^\/en(?=\/|$)/, "") || "/";
   const isActive = currentPath === href || (href !== "/" && currentPath.startsWith(href));
 
@@ -58,7 +58,7 @@ function NavLink({
 
 function Brand() {
   return (
-    <Link href={localePublicPath(siteLocale)} className="flex items-center" aria-label="ArchiCompass">
+    <Link href={localeAppPath()} className="flex items-center" aria-label="ArchiCompass">
       <BrandLogo className="h-9 w-[158px] sm:w-[174px]" />
     </Link>
   );
@@ -70,7 +70,7 @@ export default function Header() {
   const navItems = copy.header.nav;
   const currentPath = pathname?.replace(/^\/en(?=\/|$)/, "") || "/";
   const isGetStartedActive = currentPath === "/get-started";
-  const appHref = (path: string) => localePublicPath(siteLocale, path);
+  const appHref = (path: string) => localeAppPath(path);
   const alternateHref = (path: string, suffix = "") => {
     const targetLocale = otherLocale();
     const targetPath = localePublicPath(targetLocale, path);
