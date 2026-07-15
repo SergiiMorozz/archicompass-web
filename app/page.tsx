@@ -15,6 +15,12 @@ export const revalidate = 0;
 const heroImage =
   "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1800&q=85";
 
+const aiResultImages = [
+  "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=86",
+  "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=900&q=86",
+  "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=900&q=86",
+];
+
 const projectFallbacks = [
   "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=82",
   "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1000&q=82",
@@ -243,33 +249,106 @@ export default async function Home() {
       </section>
 
       <section className="border-y border-line bg-[#261631] text-white">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-          <div>
-            <span className="rounded-full bg-[#4fd8c7] px-3 py-1 text-xs font-bold text-[#173d39]">{homeCopy.aiProjectCompass.eyebrow}</span>
-            <h2 className="mt-5 text-4xl font-bold">{homeCopy.aiProjectCompass.headline}</h2>
-            <p className="mt-4 text-lg leading-8 text-white/72">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
+          <div className="max-w-xl">
+            <span className="inline-flex items-center gap-2 rounded-full bg-[#4fd8c7] px-3 py-1.5 text-xs font-bold text-[#173d39]">
+              <span className="grid h-4 w-4 place-items-center rounded-full bg-[#173d39]/12 text-[10px]" aria-hidden="true">AI</span>
+              {homeCopy.aiProjectCompass.eyebrow}
+            </span>
+            <h2 className="mt-5 text-4xl font-bold leading-tight sm:text-5xl">{homeCopy.aiProjectCompass.headline}</h2>
+            <p className="mt-5 text-lg leading-8 text-white/74">
               {homeCopy.aiProjectCompass.body}
             </p>
-            <Link href="/project-compass" className="mt-7 inline-flex rounded-lg bg-[#7c3aed] px-6 py-4 font-bold text-white shadow-lg shadow-[#7c3aed]/25">
-              {homeCopy.aiProjectCompass.cta} &#8594;
+            <div className="mt-7 flex flex-wrap gap-4 text-sm text-white/72">
+              <span className="inline-flex items-center gap-2"><b className="grid h-5 w-5 place-items-center rounded-full bg-[#4fd8c7]/16 text-xs text-[#5de1d1]">&#10003;</b> Styl i paleta</span>
+              <span className="inline-flex items-center gap-2"><b className="grid h-5 w-5 place-items-center rounded-full bg-[#4fd8c7]/16 text-xs text-[#5de1d1]">&#10003;</b> Sygnały do dopasowania</span>
+            </div>
+            <Link href="/project-compass" className="group mt-8 inline-flex min-h-[58px] items-center justify-center gap-3 rounded-xl border border-[#bfa0ff] bg-[#7c3aed] px-5 py-3.5 text-center font-bold text-white shadow-[0_16px_38px_rgba(111,51,236,0.32)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#8b4cf0] hover:shadow-[0_22px_48px_rgba(111,51,236,0.45)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-white/16 transition duration-300 group-hover:scale-110 group-hover:rotate-12" aria-hidden="true">✦</span>
+              {homeCopy.aiProjectCompass.cta}
+              <span className="text-lg transition group-hover:translate-x-1" aria-hidden="true">&#8594;</span>
             </Link>
           </div>
 
-          <div className="rounded-lg border border-white/15 bg-white p-6 text-foreground shadow-2xl">
-            <div className="flex items-start justify-between gap-4 border-b border-line pb-4">
-              <div>
-                <div className="text-xs font-bold uppercase text-primary">{homeCopy.aiProjectCompass.example.eyebrow}</div>
-                <div className="mt-1 text-3xl font-bold">{homeCopy.aiProjectCompass.example.style}</div>
-              </div>
-              <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-bold text-accent">{homeCopy.aiProjectCompass.example.status}</span>
-            </div>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {homeCopy.aiProjectCompass.example.items.map(([title, copy]) => (
-                <div key={title} className="rounded-lg border border-line bg-background p-4">
-                  <div className="text-xs font-bold uppercase text-muted">{title}</div>
-                  <div className="mt-2 font-semibold">{copy}</div>
+          <div className="relative">
+            <div className="absolute -inset-4 rounded-[2rem] bg-[#7c3aed]/20 blur-3xl" aria-hidden="true" />
+            <div className="relative overflow-hidden rounded-[1.5rem] border border-white/20 bg-[#fcfbff] p-3 text-foreground shadow-2xl sm:p-4">
+              <div className="grid gap-3 sm:grid-cols-[1.16fr_0.84fr]">
+                <figure className="group relative min-h-64 overflow-hidden rounded-xl bg-[#ded6cb] sm:min-h-[23rem]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={aiResultImages[0]}
+                    alt="Przykładowa inspiracja wnętrza w naturalnym, ciepłym stylu"
+                    width="1200"
+                    height="900"
+                    loading="lazy"
+                    className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#21162c]/85 via-[#21162c]/18 to-transparent p-4 text-white">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="rounded-full bg-white/18 px-3 py-1 text-xs font-bold backdrop-blur">Inspiracja 01</span>
+                      <span className="grid h-8 w-8 place-items-center rounded-full bg-[#4fd8c7] text-xs font-bold text-[#173d39] shadow-lg" aria-label="Analizowane przez AI">AI</span>
+                    </div>
+                    <p className="mt-3 text-sm font-semibold">AI rozpoznaje światło, materiały i proporcje.</p>
+                  </div>
+                </figure>
+
+                <div className="grid gap-3 sm:grid-rows-2">
+                  <figure className="relative min-h-36 overflow-hidden rounded-xl bg-[#d9d0c3] sm:min-h-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={aiResultImages[1]}
+                      alt="Druga inspiracja do analizy stylu wnętrza"
+                      width="900"
+                      height="650"
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                    />
+                    <span className="absolute left-3 top-3 rounded-full bg-[#21162c]/70 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur">Inspiracja 02</span>
+                  </figure>
+                  <figure className="relative min-h-36 overflow-hidden rounded-xl bg-[#e4dacd] sm:min-h-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={aiResultImages[2]}
+                      alt="Trzecia inspiracja do analizy stylu wnętrza"
+                      width="900"
+                      height="650"
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                    />
+                    <span className="absolute left-3 top-3 rounded-full bg-[#21162c]/70 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur">Inspiracja 03</span>
+                  </figure>
                 </div>
-              ))}
+              </div>
+
+              <div className="mt-3 rounded-xl border border-[#ded5eb] bg-white p-4 sm:p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <div className="text-xs font-bold uppercase text-primary">{homeCopy.aiProjectCompass.example.eyebrow}</div>
+                    <div className="mt-1 text-3xl font-bold sm:text-4xl">{homeCopy.aiProjectCompass.example.style}</div>
+                  </div>
+                  <span className="rounded-full bg-accent-soft px-3 py-1.5 text-xs font-bold text-accent">{homeCopy.aiProjectCompass.example.status}</span>
+                </div>
+
+                <div className="mt-4 flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <div className="text-[11px] font-bold uppercase text-muted">{homeCopy.aiProjectCompass.example.items[0][0]}</div>
+                    <div className="mt-1 text-sm font-semibold">{homeCopy.aiProjectCompass.example.items[0][1]}</div>
+                  </div>
+                  <div className="flex gap-2" aria-label="Przykładowa paleta kolorów">
+                    {['#f3eadb', '#d7c09a', '#b8835b', '#51473f'].map((color) => (
+                      <span key={color} className="h-8 w-8 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: color }} />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {homeCopy.aiProjectCompass.example.items.slice(1, 3).map(([title]) => (
+                    <span key={title} className="rounded-full bg-primary-soft px-3 py-1.5 text-xs font-bold text-primary">{title}</span>
+                  ))}
+                  <span className="rounded-full bg-warm-soft px-3 py-1.5 text-xs font-bold text-warm">Dopasowanie projektantów</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

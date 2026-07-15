@@ -65,12 +65,12 @@ export const homeCopy = {
   },
   aiProjectCompass: {
     eyebrow: "AI Project Compass",
-    headline: "Twoje zdjęcia stają się czymś więcej niż moodboardem.",
+    headline: "Z inspiracji powstaje konkretny kierunek.",
     body:
-      "Otrzymaj kierunek stylistyczny, paletę kolorów, propozycje materiałów i praktyczne wskazówki do dalszych decyzji. Rozwijaj ten sam brief bez zaczynania wszystkiego od nowa.",
-    cta: "Przeanalizuj zdjęcia inspiracji",
+      "AI odczytuje wspólne cechy zdjęć i zamienia je w styl, paletę, materiały oraz wskazówki, które pomagają wybrać właściwego projektanta.",
+    cta: "Zobacz swój wynik AI",
     example: {
-      eyebrow: "Przykładowy kierunek AI",
+      eyebrow: "Przykładowy wynik analizy",
       status: "Gotowe do briefu",
       style: "Ciepłe japandi",
       items: [
