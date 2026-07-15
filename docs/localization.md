@@ -1,6 +1,14 @@
 # One source, two languages
 
-ArchiCompass is built from one source branch. The production locale is selected when a Vercel project builds the application.
+ArchiCompass is being consolidated onto one source branch. The production locale is selected when a Vercel project builds the application.
+
+## Migration status
+
+The shared foundation, home page, global navigation, account entry flow, password recovery, onboarding, Inspiration Hub, and articles already render from the single typed contract in `main`.
+
+The English Vercel project must continue using the legacy `english` branch until the remaining route groups have been migrated: AI Project Compass, designer directory and profiles, legal pages, client workspace, Designer Studio, and Admin. Switching it to `main` before then would expose Polish legacy labels on English routes.
+
+When those route groups are complete, both Vercel projects will build the same `main` commit with only `NEXT_PUBLIC_SITE_LOCALE` changed.
 
 ## Required Vercel variables
 
