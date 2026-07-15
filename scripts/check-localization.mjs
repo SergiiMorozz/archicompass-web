@@ -29,6 +29,7 @@ const workspaceSourceFiles = [
   "app/admin/activity/page.tsx",
   "app/admin/team/page.tsx",
   "app/admin/users/page.tsx",
+  "app/admin/users/[id]/page.tsx",
   "components/AdminNav.tsx",
 ];
 

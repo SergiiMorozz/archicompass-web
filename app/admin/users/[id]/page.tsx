@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 
 export const revalidate = 0;
 
@@ -69,9 +70,9 @@ function formText(formData: FormData, key: string) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function formatDate(value: string | null) {
-  if (!value) return "Nigdy";
-  return new Intl.DateTimeFormat("pl-PL", {
+function formatDate(value: string | null, locale: string, never: string) {
+  if (!value) return never;
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -80,8 +81,8 @@ function formatDate(value: string | null) {
   }).format(new Date(value));
 }
 
-function displayValue(value: string | number | null | undefined) {
-  return value === null || value === undefined || value === "" ? "Nie podano" : String(value);
+function displayValue(value: string | number | null | undefined, fallback: string) {
+  return value === null || value === undefined || value === "" ? fallback : String(value);
 }
 
 function isProfessional(profile: UserProfile) {
@@ -91,13 +92,14 @@ function isProfessional(profile: UserProfile) {
 async function updateUserReview(formData: FormData) {
   "use server";
 
+  const copy = getWorkspaceCopy().adminUserDetail;
   const userId = formText(formData, "user_id");
   const status = formText(formData, "review_status");
   const note = formText(formData, "internal_note");
 
   if (!isUuid(userId)) redirect("/admin/users");
   if (!["clear", "needs_review", "priority"].includes(status)) {
-    redirect(`/admin/users/${userId}?error=Nieprawid%C5%82owy%20status%20weryfikacji`);
+    redirect(`/admin/users/${userId}?error=${encodeURIComponent(copy.errors.invalidReviewStatus)}`);
   }
 
   const { supabase } = await requireAdmin("moderation");
@@ -118,6 +120,7 @@ async function updateUserReview(formData: FormData) {
 async function updateContentVisibility(formData: FormData) {
   "use server";
 
+  const copy = getWorkspaceCopy().adminUserDetail;
   const userId = formText(formData, "user_id");
   const entityId = formText(formData, "entity_id");
   const entityType = formText(formData, "entity_type");
@@ -126,10 +129,10 @@ async function updateContentVisibility(formData: FormData) {
 
   if (!isUuid(userId) || !isUuid(entityId)) redirect("/admin/users");
   if (!["profile", "project"].includes(entityType)) {
-    redirect(`/admin/users/${userId}?error=Nieprawid%C5%82owy%20typ%20tre%C5%9Bci`);
+    redirect(`/admin/users/${userId}?error=${encodeURIComponent(copy.errors.invalidContentType)}`);
   }
   if (!["visible", "hidden"].includes(visibility)) {
-    redirect(`/admin/users/${userId}?error=Nieprawid%C5%82owa%20widoczno%C5%9B%C4%87`);
+    redirect(`/admin/users/${userId}?error=${encodeURIComponent(copy.errors.invalidVisibility)}`);
   }
 
   const { supabase } = await requireAdmin("moderation");
@@ -160,6 +163,7 @@ export default async function AdminUserDetailPage({
 }) {
   const { id } = await params;
   const sp = (await searchParams) ?? {};
+  const copy = getWorkspaceCopy().adminUserDetail;
   if (!isUuid(id)) notFound();
 
   const { supabase } = await requireAdmin(["users", "moderation"]);
@@ -170,7 +174,7 @@ export default async function AdminUserDetailPage({
   const profile = detail.profile ?? ({} as UserProfile);
   const counts = detail.counts ?? ({} as UserCounts);
   const projects = detail.projects ?? [];
-  const title = profile.full_name || detail.email || "Konto bez nazwy";
+  const title = profile.full_name || detail.email || copy.unnamedAccount;
   const professional = isProfessional(profile);
   const reviewUpdated = detail.review?.updated_at;
 
@@ -182,13 +186,13 @@ export default async function AdminUserDetailPage({
             href="/admin/users"
             className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
           >
-            Wróć do użytkowników
+            {copy.back}
           </Link>
           <div className="mt-7 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <div className="flex flex-wrap gap-2">
                 <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-                  {professional ? "Specjalista" : profile.user_type === "client" ? "Klient" : "Klient"}
+                  {professional ? copy.professional : copy.client}
                 </span>
                 {detail.admin_role ? (
                   <span className="rounded-full bg-foreground px-3 py-1 text-xs font-semibold capitalize text-white">
@@ -197,14 +201,14 @@ export default async function AdminUserDetailPage({
                 ) : null}
               </div>
               <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">{title}</h1>
-              <p className="mt-3 text-muted">{detail.email || "Brak e-maila konta"}</p>
+              <p className="mt-3 text-muted">{detail.email || copy.noAccountEmail}</p>
             </div>
             {professional ? (
               <Link
                 href={`/designers/${detail.user_id}`}
                 className="rounded-xl border border-line bg-background px-5 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
               >
-                Otwórz profil publiczny
+                {copy.publicProfile}
               </Link>
             ) : null}
           </div>
@@ -214,11 +218,11 @@ export default async function AdminUserDetailPage({
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         {sp.updated ? (
           <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
-            Status wewnętrznej weryfikacji został zapisany w dzienniku aktywności.
+            {copy.updatedReview}
           </div>
         ) : sp.visibilityUpdated ? (
           <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
-            Widoczność publiczna została zaktualizowana i zapisana w dzienniku aktywności.
+            {copy.updatedVisibility}
           </div>
         ) : sp.error ? (
           <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-5 text-sm text-red-700">
@@ -228,12 +232,12 @@ export default async function AdminUserDetailPage({
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
           {[
-            ["Projekty", counts.projects],
-            ["Briefy", counts.briefs],
-            ["Wysłane", counts.sent_inquiries],
-            ["Otrzymane", counts.received_inquiries],
-            ["Ulubione", counts.favorites],
-            ["Wyświetlenia", counts.profile_views],
+            [copy.stats[0], counts.projects],
+            [copy.stats[1], counts.briefs],
+            [copy.stats[2], counts.sent_inquiries],
+            [copy.stats[3], counts.received_inquiries],
+            [copy.stats[4], counts.favorites],
+            [copy.stats[5], counts.profile_views],
           ].map(([label, value]) => (
             <article key={String(label)} className="rounded-lg border border-line bg-card p-5 shadow-sm">
               <div className="text-sm font-semibold text-muted">{label}</div>
@@ -245,24 +249,24 @@ export default async function AdminUserDetailPage({
         <div className="mt-8 grid gap-7 lg:grid-cols-[minmax(0,1fr)_380px]">
           <div className="grid gap-7">
             <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-              <div className="text-sm font-semibold text-primary">Dane konta</div>
-              <h2 className="mt-1 text-3xl font-bold">Szczegóły profilu</h2>
+              <div className="text-sm font-semibold text-primary">{copy.accountEyebrow}</div>
+              <h2 className="mt-1 text-3xl font-bold">{copy.profileTitle}</h2>
               <div className="mt-6 grid gap-5 sm:grid-cols-2">
                 {[
-                  ["E-mail konta", detail.email],
-                  ["E-mail profilu", profile.email],
-                  ["Lokalizacja", profile.location],
-                  ["Zawód", profile.profession_type],
-                  ["Telefon", profile.phone],
-                  ["Strona", profile.website],
-                  ["Stawka godzinowa", profile.hourly_rate ? `${profile.hourly_rate} PLN` : null],
-                  ["Doświadczenie", profile.years_experience ? `${profile.years_experience} lat` : null],
-                  ["Dołączył/a", formatDate(detail.created_at)],
-                  ["Ostatnie logowanie", formatDate(detail.last_sign_in_at)],
+                  [copy.fields[0], detail.email],
+                  [copy.fields[1], profile.email],
+                  [copy.fields[2], profile.location],
+                  [copy.fields[3], profile.profession_type],
+                  [copy.fields[4], profile.phone],
+                  [copy.fields[5], profile.website],
+                  [copy.fields[6], profile.hourly_rate ? `${profile.hourly_rate} PLN` : null],
+                  [copy.fields[7], profile.years_experience ? `${profile.years_experience} ${copy.years}` : null],
+                  [copy.fields[8], formatDate(detail.created_at, copy.dateLocale, copy.never)],
+                  [copy.fields[9], formatDate(detail.last_sign_in_at, copy.dateLocale, copy.never)],
                 ].map(([label, value]) => (
                   <div key={String(label)} className="rounded-lg bg-background p-4">
                     <div className="text-xs font-semibold uppercase text-muted">{label}</div>
-                    <div className="mt-1 break-words font-semibold">{displayValue(value)}</div>
+                    <div className="mt-1 break-words font-semibold">{displayValue(value, copy.notSpecified)}</div>
                   </div>
                 ))}
               </div>
@@ -279,8 +283,8 @@ export default async function AdminUserDetailPage({
             </section>
 
             {professional ? <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-              <div className="text-sm font-semibold text-primary">Treści publiczne</div>
-              <h2 className="mt-1 text-3xl font-bold">Projekty portfolio</h2>
+              <div className="text-sm font-semibold text-primary">{copy.publicContentEyebrow}</div>
+              <h2 className="mt-1 text-3xl font-bold">{copy.portfolioTitle}</h2>
               {projects.length ? (
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
                   {projects.map((project) => (
@@ -291,9 +295,9 @@ export default async function AdminUserDetailPage({
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <div className="font-semibold">{project.title || "Projekt bez tytułu"}</div>
+                            <div className="font-semibold">{project.title || copy.untitledProject}</div>
                             <div className="mt-1 text-sm text-muted">
-                              {project.category || "Bez kategorii"} | {formatDate(project.created_at)}
+                              {project.category || copy.noCategory} | {formatDate(project.created_at, copy.dateLocale, copy.never)}
                             </div>
                           </div>
                           <span className={[
@@ -302,7 +306,7 @@ export default async function AdminUserDetailPage({
                               ? "bg-red-50 text-red-700"
                               : "bg-emerald-50 text-emerald-800",
                           ].join(" ")}>
-                            {project.visibility === "hidden" ? "Ukryty" : "Widoczny"}
+                            {project.visibility === "hidden" ? copy.hidden : copy.visible}
                           </span>
                         </div>
                       </Link>
@@ -318,7 +322,7 @@ export default async function AdminUserDetailPage({
                         <input
                           type="hidden"
                           name="moderation_reason"
-                          value={project.visibility === "hidden" ? "" : "Ukryte podczas moderacji admina"}
+                          value={project.visibility === "hidden" ? "" : copy.moderationTitle}
                         />
                         <button className={[
                           "rounded-xl px-4 py-2.5 text-sm font-semibold",
@@ -326,22 +330,22 @@ export default async function AdminUserDetailPage({
                             ? "bg-primary text-white"
                             : "border border-red-200 bg-red-50 text-red-700",
                         ].join(" ")}>
-                          {project.visibility === "hidden" ? "Przywróć projekt" : "Ukryj projekt"}
+                          {project.visibility === "hidden" ? copy.restoreProject : copy.hideProject}
                         </button>
-                        <span className="text-xs text-muted">Wpływa na publiczną stronę projektu.</span>
+                        <span className="text-xs text-muted">{copy.projectVisibilityInfo}</span>
                       </form>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="mt-4 text-sm text-muted">Brak publicznych projektów portfolio.</p>
+                <p className="mt-4 text-sm text-muted">{copy.noProjects}</p>
               )}
             </section> : (
               <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-                <div className="text-sm font-semibold text-primary">Widoczność publiczna</div>
-                <h2 className="mt-2 text-2xl font-bold">Brak profilu publicznego</h2>
+                <div className="text-sm font-semibold text-primary">{copy.visibilityEyebrow}</div>
+                <h2 className="mt-2 text-2xl font-bold">{copy.noPublicProfileTitle}</h2>
                 <p className="mt-3 text-sm leading-6 text-muted">
-                  To konto nie ma aktywnego profilu projektanta ani pracowni, więc nie ma treści do ukrycia w katalogu.
+                  {copy.noPublicProfileBody}
                 </p>
               </section>
             )}
@@ -350,94 +354,92 @@ export default async function AdminUserDetailPage({
           <aside className="grid h-fit gap-5 lg:sticky lg:top-40">
             {professional ? <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
               <div className="flex items-center justify-between gap-3">
-                <div className="text-sm font-semibold text-primary">Widoczność publiczna</div>
+                <div className="text-sm font-semibold text-primary">{copy.visibilityEyebrow}</div>
                 <span className={[
                   "rounded-full px-3 py-1 text-xs font-semibold capitalize",
                   detail.profile_visibility === "hidden"
                     ? "bg-red-50 text-red-700"
                     : "bg-emerald-50 text-emerald-800",
                 ].join(" ")}>
-                  {detail.profile_visibility === "hidden" ? "Ukryty" : "Widoczny"}
+                  {detail.profile_visibility === "hidden" ? copy.hidden : copy.visible}
                 </span>
               </div>
-              <h2 className="mt-2 text-2xl font-bold">Moderacja profilu</h2>
+              <h2 className="mt-2 text-2xl font-bold">{copy.moderationTitle}</h2>
               <p className="mt-3 text-sm leading-6 text-muted">
-                Ukryte profile znikają z wyszukiwarki projektantów i publicznych stron.
-                Właściciel zachowuje dostęp do konta, a istniejące rozmowy pozostają aktywne.
+                {copy.moderationBody}
               </p>
               <form action={updateContentVisibility} className="mt-5 grid gap-4">
                 <input type="hidden" name="user_id" value={detail.user_id} />
                 <input type="hidden" name="entity_id" value={detail.user_id} />
                 <input type="hidden" name="entity_type" value="profile" />
                 <label className="text-sm font-semibold">
-                  Widoczność
+                  {copy.visibilityLabel}
                   <select name="visibility" defaultValue={detail.profile_visibility || "visible"} className={fieldClass}>
-                    <option value="visible">Widoczny</option>
-                    <option value="hidden">Ukryty</option>
+                    <option value="visible">{copy.visible}</option>
+                    <option value="hidden">{copy.hidden}</option>
                   </select>
                 </label>
                 <label className="text-sm font-semibold">
-                  Powód moderacji
+                  {copy.moderationReason}
                   <textarea
                     name="moderation_reason"
                     defaultValue={detail.profile_visibility_reason || ""}
                     rows={3}
                     maxLength={1000}
-                    placeholder="Dlaczego profil jest ukryty"
+                    placeholder={copy.moderationPlaceholder}
                     className={fieldClass}
                   />
                 </label>
                 <button className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-                  Zaktualizuj widoczność
+                  {copy.updateVisibility}
                 </button>
               </form>
             </section> : (
               <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-                <div className="text-sm font-semibold text-primary">Widoczność publiczna</div>
-                <h2 className="mt-2 text-2xl font-bold">Brak profilu publicznego</h2>
+                <div className="text-sm font-semibold text-primary">{copy.visibilityEyebrow}</div>
+                <h2 className="mt-2 text-2xl font-bold">{copy.noPublicProfileTitle}</h2>
                 <p className="mt-3 text-sm leading-6 text-muted">
-                  To konto nie ma profilu projektanta ani pracowni, więc nie ma treści do ukrycia w katalogu.
+                  {copy.noPublicProfileBody}
                 </p>
               </section>
             )}
 
             <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-              <div className="text-sm font-semibold text-primary">Weryfikacja wewnętrzna</div>
-              <h2 className="mt-1 text-2xl font-bold">Notatka operacyjna</h2>
+              <div className="text-sm font-semibold text-primary">{copy.reviewEyebrow}</div>
+              <h2 className="mt-1 text-2xl font-bold">{copy.reviewTitle}</h2>
               <p className="mt-3 text-sm leading-6 text-muted">
-                Ten status służy wyłącznie pracy zespołu. Nie blokuje konta
-                i nie pokazuje notatki użytkownikowi.
+                {copy.reviewBody}
               </p>
               <form action={updateUserReview} className="mt-5 grid gap-4">
                 <input type="hidden" name="user_id" value={detail.user_id} />
                 <label className="text-sm font-semibold">
-                  Status weryfikacji
+                  {copy.reviewStatus}
                   <select name="review_status" defaultValue={detail.review?.status || "clear"} className={fieldClass}>
-                    <option value="clear">Czyste</option>
-                    <option value="needs_review">Do sprawdzenia</option>
-                    <option value="priority">Priorytet</option>
+                    <option value="clear">{copy.clear}</option>
+                    <option value="needs_review">{copy.needsReview}</option>
+                    <option value="priority">{copy.priority}</option>
                   </select>
                 </label>
                 <label className="text-sm font-semibold">
-                  Notatka wewnętrzna
+                  {copy.internalNote}
                   <textarea
                     name="internal_note"
                     defaultValue={detail.review?.internal_note || ""}
                     rows={6}
                     maxLength={4000}
-                    placeholder="Kontekst dla właściciela lub zespołu wsparcia"
+                    placeholder={copy.internalNotePlaceholder}
                     className={fieldClass}
                   />
                 </label>
                 <button className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-                  Zapisz weryfikację
+                  {copy.saveReview}
                 </button>
               </form>
               {reviewUpdated ? (
-                <div className="mt-4 text-xs text-muted">Ostatnia aktualizacja {formatDate(reviewUpdated)}</div>
+                <div className="mt-4 text-xs text-muted">{copy.lastUpdated(formatDate(reviewUpdated, copy.dateLocale, copy.never))}</div>
               ) : null}
               <div className="mt-5 border-t border-line pt-4 text-xs leading-5 text-muted">
-                Prywatne wiadomości i zdjęcia referencyjne są celowo niedostępne w tym panelu.
+                {copy.privacyNote}
               </div>
             </section>
           </aside>

@@ -304,6 +304,57 @@ type StudioTeamCopy = {
   };
 };
 
+type AdminUserDetailCopy = {
+  dateLocale: string;
+  never: string;
+  notSpecified: string;
+  professional: string;
+  client: string;
+  unnamedAccount: string;
+  noAccountEmail: string;
+  back: string;
+  publicProfile: string;
+  updatedReview: string;
+  updatedVisibility: string;
+  stats: [string, string, string, string, string, string];
+  accountEyebrow: string;
+  profileTitle: string;
+  fields: [string, string, string, string, string, string, string, string, string, string];
+  years: string;
+  publicContentEyebrow: string;
+  portfolioTitle: string;
+  untitledProject: string;
+  noCategory: string;
+  hidden: string;
+  visible: string;
+  restoreProject: string;
+  hideProject: string;
+  projectVisibilityInfo: string;
+  noProjects: string;
+  visibilityEyebrow: string;
+  noPublicProfileTitle: string;
+  noPublicProfileBody: string;
+  moderationTitle: string;
+  moderationBody: string;
+  visibilityLabel: string;
+  moderationReason: string;
+  moderationPlaceholder: string;
+  updateVisibility: string;
+  reviewEyebrow: string;
+  reviewTitle: string;
+  reviewBody: string;
+  reviewStatus: string;
+  clear: string;
+  needsReview: string;
+  priority: string;
+  internalNote: string;
+  internalNotePlaceholder: string;
+  saveReview: string;
+  lastUpdated: (value: string) => string;
+  privacyNote: string;
+  errors: { invalidReviewStatus: string; invalidContentType: string; invalidVisibility: string };
+};
+
 type WorkspaceCopy = {
   account: AccountCopy;
   clientOverview: ClientOverviewCopy;
@@ -471,6 +522,7 @@ type WorkspaceCopy = {
   adminActivity: AdminActivityCopy;
   studioConversation: StudioConversationCopy;
   studioTeam: StudioTeamCopy;
+  adminUserDetail: AdminUserDetailCopy;
   adminOverview: {
     dateLocale: string;
     accountLabels: { professional: string; client: string; noProfile: string };
@@ -926,6 +978,56 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       errors: {
         invalidMedia: (kind) => `${kind} musi być plikiem JPEG, PNG lub WebP mniejszym niż 5 MB.`, nameShort: "Nazwa pracowni musi mieć co najmniej dwa znaki.", google: "Google nie mógł zweryfikować tego profilu firmy.", designerOnly: "Tylko konto projektanta może utworzyć pracownię.", create: "Nie udało się utworzyć pracowni.", missingStudio: "Nie znaleziono pracowni.", managerOnly: "Tylko menedżer pracowni może edytować ten profil.", inviteEmail: "Wpisz e-mail projektanta w ArchiCompass.", missingInvitation: "Nie znaleziono zaproszenia do pracowni.", missingMember: "Nie znaleziono członka zespołu.",
       },
+    },
+    adminUserDetail: {
+      dateLocale: "pl-PL",
+      never: "Nigdy",
+      notSpecified: "Nie podano",
+      professional: "Specjalista",
+      client: "Klient",
+      unnamedAccount: "Konto bez nazwy",
+      noAccountEmail: "Brak e-maila konta",
+      back: "Wróć do użytkowników",
+      publicProfile: "Otwórz profil publiczny",
+      updatedReview: "Status wewnętrznej weryfikacji został zapisany w dzienniku aktywności.",
+      updatedVisibility: "Widoczność publiczna została zaktualizowana i zapisana w dzienniku aktywności.",
+      stats: ["Projekty", "Briefy", "Wysłane", "Otrzymane", "Ulubione", "Wyświetlenia"],
+      accountEyebrow: "Dane konta",
+      profileTitle: "Szczegóły profilu",
+      fields: ["E-mail konta", "E-mail profilu", "Lokalizacja", "Zawód", "Telefon", "Strona", "Stawka godzinowa", "Doświadczenie", "Dołączył/a", "Ostatnie logowanie"],
+      years: "lat",
+      publicContentEyebrow: "Treści publiczne",
+      portfolioTitle: "Projekty portfolio",
+      untitledProject: "Projekt bez tytułu",
+      noCategory: "Bez kategorii",
+      hidden: "Ukryty",
+      visible: "Widoczny",
+      restoreProject: "Przywróć projekt",
+      hideProject: "Ukryj projekt",
+      projectVisibilityInfo: "Wpływa na publiczną stronę projektu.",
+      noProjects: "Brak publicznych projektów portfolio.",
+      visibilityEyebrow: "Widoczność publiczna",
+      noPublicProfileTitle: "Brak profilu publicznego",
+      noPublicProfileBody: "To konto nie ma aktywnego profilu projektanta ani pracowni, więc nie ma treści do ukrycia w katalogu.",
+      moderationTitle: "Moderacja profilu",
+      moderationBody: "Ukryte profile znikają z Katalogu Projektantów i publicznych stron. Właściciel zachowuje dostęp do konta, a istniejące rozmowy pozostają aktywne.",
+      visibilityLabel: "Widoczność",
+      moderationReason: "Powód moderacji",
+      moderationPlaceholder: "Dlaczego profil jest ukryty",
+      updateVisibility: "Zaktualizuj widoczność",
+      reviewEyebrow: "Weryfikacja wewnętrzna",
+      reviewTitle: "Notatka operacyjna",
+      reviewBody: "Ten status służy wyłącznie pracy zespołu. Nie blokuje konta i nie pokazuje notatki użytkownikowi.",
+      reviewStatus: "Status weryfikacji",
+      clear: "Czyste",
+      needsReview: "Do sprawdzenia",
+      priority: "Priorytet",
+      internalNote: "Notatka wewnętrzna",
+      internalNotePlaceholder: "Kontekst dla właściciela lub zespołu wsparcia",
+      saveReview: "Zapisz weryfikację",
+      lastUpdated: (value) => `Ostatnia aktualizacja ${value}`,
+      privacyNote: "Prywatne wiadomości i zdjęcia referencyjne są celowo niedostępne w tym panelu.",
+      errors: { invalidReviewStatus: "Nieprawidłowy status weryfikacji", invalidContentType: "Nieprawidłowy typ treści", invalidVisibility: "Nieprawidłowa widoczność" },
     },
     adminNav: {
       dashboard: "Pulpit",
@@ -1389,6 +1491,56 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       errors: {
         invalidMedia: (kind) => `${kind} must be a JPEG, PNG, or WebP file smaller than 5 MB.`, nameShort: "Studio name must contain at least two characters.", google: "Google could not verify this business profile.", designerOnly: "Only a designer account can create a studio.", create: "Could not create the studio.", missingStudio: "Studio not found.", managerOnly: "Only a studio manager can edit this profile.", inviteEmail: "Enter the email of a designer in ArchiCompass.", missingInvitation: "Studio invitation not found.", missingMember: "Team member not found.",
       },
+    },
+    adminUserDetail: {
+      dateLocale: "en-GB",
+      never: "Never",
+      notSpecified: "Not specified",
+      professional: "Professional",
+      client: "Client",
+      unnamedAccount: "Unnamed account",
+      noAccountEmail: "No account email",
+      back: "Back to users",
+      publicProfile: "Open public profile",
+      updatedReview: "The internal review status was saved in the activity log.",
+      updatedVisibility: "Public visibility was updated and saved in the activity log.",
+      stats: ["Projects", "Briefs", "Sent", "Received", "Favorites", "Views"],
+      accountEyebrow: "Account details",
+      profileTitle: "Profile details",
+      fields: ["Account email", "Profile email", "Location", "Profession", "Phone", "Website", "Hourly rate", "Experience", "Joined", "Last sign-in"],
+      years: "years",
+      publicContentEyebrow: "Public content",
+      portfolioTitle: "Portfolio projects",
+      untitledProject: "Untitled project",
+      noCategory: "No category",
+      hidden: "Hidden",
+      visible: "Visible",
+      restoreProject: "Restore project",
+      hideProject: "Hide project",
+      projectVisibilityInfo: "Affects the public project page.",
+      noProjects: "No public portfolio projects.",
+      visibilityEyebrow: "Public visibility",
+      noPublicProfileTitle: "No public profile",
+      noPublicProfileBody: "This account has no active designer or studio profile, so there is no content to hide in the directory.",
+      moderationTitle: "Profile moderation",
+      moderationBody: "Hidden profiles disappear from the Designer Directory and public pages. The owner keeps account access and existing conversations remain active.",
+      visibilityLabel: "Visibility",
+      moderationReason: "Moderation reason",
+      moderationPlaceholder: "Why is this profile hidden?",
+      updateVisibility: "Update visibility",
+      reviewEyebrow: "Internal review",
+      reviewTitle: "Operational note",
+      reviewBody: "This status is only for the team. It does not block the account or show the note to the user.",
+      reviewStatus: "Review status",
+      clear: "Clear",
+      needsReview: "Needs review",
+      priority: "Priority",
+      internalNote: "Internal note",
+      internalNotePlaceholder: "Context for the owner or support team",
+      saveReview: "Save review",
+      lastUpdated: (value) => `Last updated ${value}`,
+      privacyNote: "Private messages and reference photos are deliberately unavailable in this panel.",
+      errors: { invalidReviewStatus: "Invalid review status", invalidContentType: "Invalid content type", invalidVisibility: "Invalid visibility" },
     },
     adminNav: {
       dashboard: "Dashboard",
