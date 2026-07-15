@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getSiteCopy } from "@/content/site-copy";
 import { getExplicitAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
 
 type Intent = "client" | "designer";
+
+const onboardingCopy = getSiteCopy().auth.onboarding;
 
 function formValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -46,10 +49,10 @@ async function completeOnboarding(formData: FormData) {
   const next = safePath(formValue(formData, "next"));
 
   if (role !== "client" && role !== "designer") {
-    redirect("/onboarding?error=Wybierz%20typ%20konta");
+    redirect(`/onboarding?error=${encodeURIComponent(onboardingCopy.roleError)}`);
   }
   if (role === "designer" && !["independent", "studio"].includes(designerMode)) {
-    redirect("/onboarding?intent=designer&error=Wybierz%20sposób%20pracy");
+    redirect(`/onboarding?intent=designer&error=${encodeURIComponent(onboardingCopy.designerModeError)}`);
   }
 
   const { error } = await supabase.rpc("set_my_account_role", { new_role: role });
@@ -111,17 +114,16 @@ export default async function OnboardingPage({
     <main className="min-h-[calc(100vh-80px)] bg-background px-4 py-12 sm:px-6">
       <section className="mx-auto max-w-5xl">
         <div className="text-center">
-          <div className="text-sm font-semibold text-primary">Witamy w ArchiCompass</div>
+          <div className="text-sm font-semibold text-primary">{onboardingCopy.welcome}</div>
           <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
             {intent === "designer"
-              ? "W jaki sposób pracujesz?"
+              ? onboardingCopy.titles.designer
               : intent === "client"
-                ? "Skonfiguruj strefę klienta"
-                : "Wybierz typ konta"}
+                ? onboardingCopy.titles.client
+                : onboardingCopy.titles.choose}
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-muted">
-            Najpierw wybierz rolę, a potem uzupełnij dane kontaktowe. Dzięki temu od razu
-            trafisz do właściwej strefy platformy.
+            {onboardingCopy.intro}
           </p>
         </div>
 
@@ -134,20 +136,20 @@ export default async function OnboardingPage({
         {!intent ? (
           <div className="mt-10 grid gap-5 md:grid-cols-2">
             <Link href={stepHref("client", next)} className="rounded-2xl border border-line bg-card p-7 shadow-sm transition hover:border-primary">
-              <div className="text-sm font-semibold text-primary">Klient</div>
-              <h2 className="mt-2 text-3xl font-bold">Planuję projekt wnętrza</h2>
+              <div className="text-sm font-semibold text-primary">{onboardingCopy.choice.clientBadge}</div>
+              <h2 className="mt-2 text-3xl font-bold">{onboardingCopy.choice.clientTitle}</h2>
               <p className="mt-3 leading-7 text-muted">
-                Twórz briefy, zapisuj projektantów i realizacje oraz prowadź rozmowy.
+                {onboardingCopy.choice.clientBody}
               </p>
-              <div className="mt-8 text-sm font-semibold text-primary">Wybierz konto klienta</div>
+              <div className="mt-8 text-sm font-semibold text-primary">{onboardingCopy.choice.clientCta}</div>
             </Link>
             <Link href={stepHref("designer", next)} className="rounded-2xl border border-primary bg-primary-soft p-7 shadow-sm transition hover:bg-card">
-              <div className="text-sm font-semibold text-primary">Projektant</div>
-              <h2 className="mt-2 text-3xl font-bold">Świadczę usługi projektowe</h2>
+              <div className="text-sm font-semibold text-primary">{onboardingCopy.choice.designerBadge}</div>
+              <h2 className="mt-2 text-3xl font-bold">{onboardingCopy.choice.designerTitle}</h2>
               <p className="mt-3 leading-7 text-muted">
-                Opublikuj profil, zarządzaj portfolio i otrzymuj dopasowane zapytania.
+                {onboardingCopy.choice.designerBody}
               </p>
-              <div className="mt-8 text-sm font-semibold text-primary">Wybierz konto projektanta</div>
+              <div className="mt-8 text-sm font-semibold text-primary">{onboardingCopy.choice.designerCta}</div>
             </Link>
           </div>
         ) : intent === "client" ? (
@@ -156,26 +158,24 @@ export default async function OnboardingPage({
             <input type="hidden" name="next" value={next} />
             <div className="bg-primary-soft p-7">
               <div className="inline-flex rounded-full bg-white px-3 py-1 text-sm font-semibold text-primary shadow-sm">
-                Strefa klienta
+                {onboardingCopy.clientPanel.badge}
               </div>
-              <h2 className="mt-4 text-3xl font-bold">Wszystko, czego potrzebujesz do wyboru projektanta</h2>
+              <h2 className="mt-4 text-3xl font-bold">{onboardingCopy.clientPanel.title}</h2>
               <p className="mt-3 leading-7 text-muted">
-                W tej strefie znajdziesz zapisane briefy, ulubionych projektantów, projekty
-                i rozmowy. Konto klienta nie otrzymuje zapytań przeznaczonych dla projektantów.
+                {onboardingCopy.clientPanel.body}
               </p>
             </div>
             <div className="p-7">
               <p className="rounded-xl border border-line bg-background p-4 text-sm leading-6 text-muted">
-                Następny krok: uzupełnienie imienia, telefonu i lokalizacji, żeby projektanci
-                mogli odpowiadać na briefy bez zgadywania podstawowych informacji.
+                {onboardingCopy.clientPanel.nextStep}
               </p>
             </div>
             <div className="flex flex-wrap gap-3 px-7 pb-7">
               <button type="submit" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-                Przejdź do uzupełnienia profilu
+                {onboardingCopy.clientPanel.submit}
               </button>
               <Link href={stepHref("designer", next)} className="px-2 py-3 text-sm font-semibold text-muted underline">
-                Zamiast tego wybierz projektanta
+                {onboardingCopy.clientPanel.alternative}
               </Link>
             </div>
           </form>
@@ -185,25 +185,25 @@ export default async function OnboardingPage({
             <input type="hidden" name="next" value={next} />
             <div className="grid gap-5 md:grid-cols-2">
               <button name="designer_mode" value="independent" className="rounded-2xl border border-line bg-card p-7 text-left shadow-sm transition hover:border-primary">
-                <span className="text-sm font-semibold text-primary">Niezależny projektant</span>
-                <span className="mt-2 block text-3xl font-bold">Mój własny profil</span>
+                <span className="text-sm font-semibold text-primary">{onboardingCopy.designerModes.independentBadge}</span>
+                <span className="mt-2 block text-3xl font-bold">{onboardingCopy.designerModes.independentTitle}</span>
                 <span className="mt-3 block leading-7 text-muted">
-                  Utwórz publiczny profil, portfolio, cennik i skrzynkę zapytań.
+                  {onboardingCopy.designerModes.independentBody}
                 </span>
-                <span className="mt-8 block text-sm font-semibold text-primary">Utwórz mój profil</span>
+                <span className="mt-8 block text-sm font-semibold text-primary">{onboardingCopy.designerModes.independentCta}</span>
               </button>
               <button name="designer_mode" value="studio" className="rounded-2xl border border-primary bg-primary-soft p-7 text-left shadow-sm transition hover:bg-card">
-                <span className="text-sm font-semibold text-primary">Pracownia projektowa</span>
-                <span className="mt-2 block text-3xl font-bold">Utwórz zespół lub dołącz do niego</span>
+                <span className="text-sm font-semibold text-primary">{onboardingCopy.designerModes.studioBadge}</span>
+                <span className="mt-2 block text-3xl font-bold">{onboardingCopy.designerModes.studioTitle}</span>
                 <span className="mt-3 block leading-7 text-muted">
-                  Skonfiguruj wspólny profil pracowni albo przyjmij istniejące zaproszenie do zespołu.
+                  {onboardingCopy.designerModes.studioBody}
                 </span>
-                <span className="mt-8 block text-sm font-semibold text-primary">Kontynuuj jako pracownia</span>
+                <span className="mt-8 block text-sm font-semibold text-primary">{onboardingCopy.designerModes.studioCta}</span>
               </button>
             </div>
             <div className="mt-6 text-center">
               <Link href={stepHref("client", next)} className="text-sm font-semibold text-muted underline">
-                Zamiast tego wybierz klienta
+                {onboardingCopy.designerModes.alternative}
               </Link>
             </div>
           </form>

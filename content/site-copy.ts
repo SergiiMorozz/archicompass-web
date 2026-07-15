@@ -193,6 +193,61 @@ export type SiteCopy = {
         alreadyRegistered: string;
       };
     };
+    passwordRecovery: {
+      badge: string;
+      forgotTitle: string;
+      forgotDescription: string;
+      emailLabel: string;
+      sending: string;
+      sendCta: string;
+      sent: string;
+      backToLogin: string;
+      resetTitle: string;
+      newPasswordLabel: string;
+      repeatPasswordLabel: string;
+      saving: string;
+      saveCta: string;
+      passwordTooShort: string;
+      passwordsMismatch: string;
+      updated: string;
+      openAccount: string;
+    };
+    onboarding: {
+      welcome: string;
+      titles: { choose: string; client: string; designer: string };
+      intro: string;
+      roleError: string;
+      designerModeError: string;
+      choice: {
+        clientBadge: string;
+        clientTitle: string;
+        clientBody: string;
+        clientCta: string;
+        designerBadge: string;
+        designerTitle: string;
+        designerBody: string;
+        designerCta: string;
+      };
+      clientPanel: {
+        badge: string;
+        title: string;
+        body: string;
+        nextStep: string;
+        submit: string;
+        alternative: string;
+      };
+      designerModes: {
+        independentBadge: string;
+        independentTitle: string;
+        independentBody: string;
+        independentCta: string;
+        studioBadge: string;
+        studioTitle: string;
+        studioBody: string;
+        studioCta: string;
+        alternative: string;
+      };
+    };
   };
   inspiration: InspirationCopy;
   home: HomeCopy;
@@ -305,6 +360,61 @@ const pl: SiteCopy = {
         emailNotConfirmed: "Potwierdź adres e-mail, korzystając z linku w wiadomości rejestracyjnej. Jeśli go nie widzisz, wyślij link ponownie.",
         emailRateLimit: "Wysłano zbyt wiele wiadomości. Odczekaj kilka minut i spróbuj ponownie.",
         alreadyRegistered: "Konto z tym adresem e-mail już istnieje. Zaloguj się lub zresetuj hasło.",
+      },
+    },
+    passwordRecovery: {
+      badge: "Odzyskiwanie konta",
+      forgotTitle: "Zresetuj hasło",
+      forgotDescription: "Wpisz adres e-mail przypisany do konta. Link służy wyłącznie do zmiany hasła.",
+      emailLabel: "Adres e-mail",
+      sending: "Wysyłanie...",
+      sendCta: "Wyślij wiadomość do zmiany hasła",
+      sent: "Wysłaliśmy wiadomość do zmiany hasła. Otwórz ją, aby ustawić nowe hasło.",
+      backToLogin: "Wróć do logowania",
+      resetTitle: "Ustaw nowe hasło",
+      newPasswordLabel: "Nowe hasło",
+      repeatPasswordLabel: "Powtórz hasło",
+      saving: "Zapisywanie...",
+      saveCta: "Zapisz nowe hasło",
+      passwordTooShort: "Hasło musi mieć co najmniej 8 znaków.",
+      passwordsMismatch: "Hasła nie są takie same.",
+      updated: "Hasło zostało zmienione. Możesz przejść do swojego konta.",
+      openAccount: "Otwórz konto",
+    },
+    onboarding: {
+      welcome: "Witamy w ArchiCompass",
+      titles: { choose: "Wybierz typ konta", client: "Skonfiguruj strefę klienta", designer: "W jaki sposób pracujesz?" },
+      intro: "Najpierw wybierz rolę, a potem uzupełnij dane kontaktowe. Dzięki temu od razu trafisz do właściwej strefy platformy.",
+      roleError: "Wybierz typ konta",
+      designerModeError: "Wybierz sposób pracy",
+      choice: {
+        clientBadge: "Klient",
+        clientTitle: "Planuję projekt wnętrza",
+        clientBody: "Twórz briefy, zapisuj projektantów i realizacje oraz prowadź rozmowy.",
+        clientCta: "Wybierz konto klienta",
+        designerBadge: "Projektant",
+        designerTitle: "Świadczę usługi projektowe",
+        designerBody: "Opublikuj profil, zarządzaj portfolio i otrzymuj dopasowane zapytania.",
+        designerCta: "Wybierz konto projektanta",
+      },
+      clientPanel: {
+        badge: "Strefa klienta",
+        title: "Wszystko, czego potrzebujesz do wyboru projektanta",
+        body: "W tej strefie znajdziesz zapisane briefy, ulubionych projektantów, projekty i rozmowy. Konto klienta nie otrzymuje zapytań przeznaczonych dla projektantów.",
+        nextStep: "Następny krok: uzupełnienie imienia, telefonu i lokalizacji, żeby projektanci mogli odpowiadać na briefy bez zgadywania podstawowych informacji.",
+        submit: "Przejdź do uzupełnienia profilu",
+        alternative: "Zamiast tego wybierz projektanta",
+      },
+      designerModes: {
+        independentBadge: "Niezależny projektant",
+        independentTitle: "Mój własny profil",
+        independentBody: "Utwórz publiczny profil, portfolio, cennik i skrzynkę zapytań.",
+        independentCta: "Utwórz mój profil",
+        studioBadge: "Pracownia projektowa",
+        studioTitle: "Utwórz zespół lub dołącz do niego",
+        studioBody: "Skonfiguruj wspólny profil pracowni albo przyjmij istniejące zaproszenie do zespołu.",
+        studioCta: "Kontynuuj jako pracownia",
+        alternative: "Zamiast tego wybierz klienta",
       },
     },
   },
@@ -514,6 +624,61 @@ const en: SiteCopy = {
         emailNotConfirmed: "Confirm your email address using the link in the registration email. If you cannot see it, send the link again.",
         emailRateLimit: "Too many emails have been sent. Wait a few minutes and try again.",
         alreadyRegistered: "An account with this email address already exists. Sign in or reset your password.",
+      },
+    },
+    passwordRecovery: {
+      badge: "Account recovery",
+      forgotTitle: "Reset your password",
+      forgotDescription: "Enter the account email. This link is only for changing the password, not for every sign-in.",
+      emailLabel: "Email",
+      sending: "Sending...",
+      sendCta: "Send reset email",
+      sent: "Password reset email sent. Open it once to choose a new password.",
+      backToLogin: "Back to sign in",
+      resetTitle: "Choose a new password",
+      newPasswordLabel: "New password",
+      repeatPasswordLabel: "Repeat password",
+      saving: "Saving...",
+      saveCta: "Save new password",
+      passwordTooShort: "Use at least 8 characters.",
+      passwordsMismatch: "Passwords do not match.",
+      updated: "Password updated. You can now continue to your account.",
+      openAccount: "Open account",
+    },
+    onboarding: {
+      welcome: "Welcome to ArchiCompass",
+      titles: { choose: "Choose your account type", client: "Set up your client workspace", designer: "How will you work?" },
+      intro: "Choose your role first, then add your contact details. This takes you directly to the right workspace.",
+      roleError: "Choose an account type",
+      designerModeError: "Choose how you will work",
+      choice: {
+        clientBadge: "Client",
+        clientTitle: "I am planning an interior project",
+        clientBody: "Create briefs, save designers and projects, and manage conversations.",
+        clientCta: "Choose client account",
+        designerBadge: "Designer",
+        designerTitle: "I provide design services",
+        designerBody: "Publish a profile, manage a portfolio, and receive relevant enquiries.",
+        designerCta: "Choose designer account",
+      },
+      clientPanel: {
+        badge: "Client workspace",
+        title: "Everything you need to choose a designer",
+        body: "Your workspace includes saved briefs, favorite designers, projects, and conversations. A client account does not receive designer enquiries.",
+        nextStep: "Next step: add your name, phone number, and location so designers can respond to briefs without guessing the basics.",
+        submit: "Continue to complete your profile",
+        alternative: "Choose designer instead",
+      },
+      designerModes: {
+        independentBadge: "Independent designer",
+        independentTitle: "My own profile",
+        independentBody: "Create a public profile, portfolio, pricing, and an enquiry inbox.",
+        independentCta: "Create my profile",
+        studioBadge: "Design studio",
+        studioTitle: "Create or join a team",
+        studioBody: "Set up a shared studio profile or accept an existing team invitation.",
+        studioCta: "Continue as a studio",
+        alternative: "Choose client instead",
       },
     },
   },
