@@ -3,13 +3,17 @@ import Link from "next/link";
 import Image from "next/image";
 import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
-import { applyPolishArticleCopy, inspirationCopy } from "@/content/pl/copy";
+import { applyPolishArticleCopy } from "@/content/pl/copy";
+import { getSiteCopy } from "@/content/site-copy";
+import { localizedCount } from "@/lib/localized-count";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
-import { polishCountLabel } from "@/lib/count-label";
 import { professionalOptionLabel } from "@/lib/professional-options";
 
 export const revalidate = 0;
+
+const siteCopy = getSiteCopy();
+const inspirationCopy = siteCopy.inspiration;
 
 export const metadata: Metadata = pageMetadata({
   title: inspirationCopy.metadata.title,
@@ -66,6 +70,15 @@ function categoryLabel(value: string) {
   return inspirationCopy.categoryLabels[value as keyof typeof inspirationCopy.categoryLabels] || value;
 }
 
+function localizedArticle<T extends { slug: string }>(article: T) {
+  return siteCopy.locale === "pl" ? applyPolishArticleCopy(article) : article;
+}
+
+function projectCategoryLabel(value: string) {
+  return siteCopy.home.projectCategories[value]
+    || (siteCopy.locale === "pl" ? professionalOptionLabel(value) : value);
+}
+
 export default async function InspirationPage({
   searchParams,
 }: {
@@ -81,7 +94,7 @@ export default async function InspirationPage({
     .eq("status", "published")
     .order("featured", { ascending: false })
     .order("published_at", { ascending: false });
-  const allArticles = ((data ?? []) as Article[]).map(applyPolishArticleCopy);
+  const allArticles = ((data ?? []) as Article[]).map(localizedArticle);
   const [{ data: newDesignerData }, { data: recentProjectData }] = await Promise.all([
     supabase
       .from("profiles")
@@ -119,8 +132,8 @@ export default async function InspirationPage({
       <JsonLd
         data={[
           breadcrumbJsonLd([
-            { name: "Strona główna", path: "/" },
-            { name: "Inspiration Hub", path: "/inspiration" },
+            { name: inspirationCopy.breadcrumbs.home, path: "/" },
+            { name: inspirationCopy.breadcrumbs.hub, path: "/inspiration" },
           ]),
           {
             "@context": "https://schema.org",
@@ -194,9 +207,9 @@ export default async function InspirationPage({
                         </div>
                         <FavoriteButton compact entityType="designer" entityKey={designer.id} initialSaved={savedKeys.has(`designer:${designer.id}`)} />
                       </div>
-                      <Link href={`/designers/${designer.id}`} className="mt-4 block text-lg font-bold hover:text-primary">{designer.full_name || "Projektant wnętrz"}</Link>
-                      <p className="mt-1 text-sm text-muted">{designer.profession_type === "Studio" ? "Pracownia projektowa" : "Projektant wnętrz"}{designer.location ? ` · ${designer.location}` : ""}</p>
-                      {designer.google_rating ? <p className="mt-3 text-sm font-semibold text-primary">Google {designer.google_rating.toFixed(1)} · {polishCountLabel(designer.google_review_count ?? 0, "opinia", "opinie", "opinii")}</p> : null}
+                      <Link href={`/designers/${designer.id}`} className="mt-4 block text-lg font-bold hover:text-primary">{designer.full_name || inspirationCopy.labels.designerFallback}</Link>
+                      <p className="mt-1 text-sm text-muted">{designer.profession_type === "Studio" ? inspirationCopy.labels.studio : inspirationCopy.labels.designer}{designer.location ? ` · ${designer.location}` : ""}</p>
+                      {designer.google_rating ? <p className="mt-3 text-sm font-semibold text-primary">Google {designer.google_rating.toFixed(1)} · {localizedCount(siteCopy.locale, designer.google_review_count ?? 0, inspirationCopy.labels.reviewCount)}</p> : null}
                     </article>
                   ))}
                 </div>
@@ -215,12 +228,12 @@ export default async function InspirationPage({
                     return (
                       <article key={project.id} className="overflow-hidden rounded-lg border border-line bg-card shadow-sm">
                         <Link href={`/projects/${project.id}`} className="block h-52 bg-card">
-                          {image ? <Image src={image} alt={project.title || "Projekt wnętrza"} width={900} height={600} unoptimized className="h-full w-full object-cover" /> : null}
+                          {image ? <Image src={image} alt={project.title || inspirationCopy.labels.untitledProject} width={900} height={600} unoptimized className="h-full w-full object-cover" /> : null}
                         </Link>
                         <div className="flex items-start justify-between gap-3 p-5">
                           <div>
-                            <div className="text-xs font-semibold uppercase text-primary">{project.category ? professionalOptionLabel(project.category) : "Portfolio"}</div>
-                            <Link href={`/projects/${project.id}`} className="mt-1 block text-lg font-bold hover:text-primary">{project.title || "Projekt bez tytułu"}</Link>
+                            <div className="text-xs font-semibold uppercase text-primary">{project.category ? projectCategoryLabel(project.category) : inspirationCopy.labels.portfolio}</div>
+                            <Link href={`/projects/${project.id}`} className="mt-1 block text-lg font-bold hover:text-primary">{project.title || inspirationCopy.labels.untitledProject}</Link>
                           </div>
                           <FavoriteButton compact entityType="project" entityKey={project.id} initialSaved={savedKeys.has(`project:${project.id}`)} />
                         </div>
@@ -239,7 +252,7 @@ export default async function InspirationPage({
           <div>
             <h2 className="text-3xl font-bold">{selectedCategory === "All" ? inspirationCopy.featured.title : categoryLabel(selectedCategory)}</h2>
             <p className="mt-2 text-muted">
-              {polishCountLabel(articles.length, "artykuł", "artykuły", "artykułów")}{q ? ` dla zapytania „${q}”` : ""}
+              {localizedCount(siteCopy.locale, articles.length, inspirationCopy.labels.articleCount)}{q ? ` ${inspirationCopy.labels.querySuffix} „${q}”` : ""}
             </p>
           </div>
           <Link href="/designers" className="text-sm font-semibold text-primary hover:underline">
@@ -249,7 +262,7 @@ export default async function InspirationPage({
 
         {error ? (
           <div className="mt-8 rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">
-            Treści inspiracyjne są chwilowo niedostępne.
+            {inspirationCopy.labels.unavailable}
           </div>
         ) : articles.length ? (
           <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -258,7 +271,7 @@ export default async function InspirationPage({
                 <Link
                   href={`/inspiration/${article.slug}`}
                   className="block h-60 overflow-hidden bg-primary-soft"
-                  aria-label={`Otwórz artykuł: ${article.title}`}
+                  aria-label={`${inspirationCopy.labels.openArticle}: ${article.title}`}
                 >
                   {article.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -284,7 +297,7 @@ export default async function InspirationPage({
                   </Link>
                   <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">{article.excerpt}</p>
                   <div className="mt-5 flex items-center justify-between gap-3 text-xs text-muted">
-                    <span>{article.author_name || "Redakcja ArchiCompass"}</span>
+                    <span>{article.author_name || inspirationCopy.labels.editorialTeam}</span>
                     <Link href={`/inspiration/${article.slug}`} className="font-semibold text-primary">{inspirationCopy.featured.readCta}</Link>
                   </div>
                 </div>

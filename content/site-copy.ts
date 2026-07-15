@@ -63,6 +63,51 @@ type HomeCopy = {
   projectCategories: Record<string, string>;
 };
 
+type CountWords = {
+  singular: string;
+  plural: string;
+  few?: string;
+};
+
+type InspirationCopy = {
+  metadata: { title: string; description: string };
+  breadcrumbs: { home: string; hub: string };
+  hero: { title: string; subtitle: string; searchPlaceholder: string; searchButton: string };
+  categoryLabels: Record<string, string>;
+  newDesigners: { eyebrow: string; title: string; seeAll: string };
+  latestProjects: { eyebrow: string; title: string };
+  featured: {
+    title: string;
+    findDesignerCta: string;
+    readCta: string;
+    noResultsTitle: string;
+    noResultsBody: string;
+    noResultsCta: string;
+  };
+  labels: {
+    designerFallback: string;
+    studio: string;
+    designer: string;
+    portfolio: string;
+    untitledProject: string;
+    articleCount: CountWords;
+    reviewCount: CountWords;
+    querySuffix: string;
+    unavailable: string;
+    openArticle: string;
+    editorialTeam: string;
+  };
+  article: {
+    notFoundTitle: string;
+    notFoundDescription: string;
+    backToHub: string;
+    ctaEyebrow: string;
+    ctaTitle: string;
+    ctaProjectCompass: string;
+    ctaDirectory: string;
+  };
+};
+
 export type SiteCopy = {
   locale: SiteLocale;
   seo: {
@@ -149,6 +194,7 @@ export type SiteCopy = {
       };
     };
   };
+  inspiration: InspirationCopy;
   home: HomeCopy;
 };
 
@@ -260,6 +306,52 @@ const pl: SiteCopy = {
         emailRateLimit: "Wysłano zbyt wiele wiadomości. Odczekaj kilka minut i spróbuj ponownie.",
         alreadyRegistered: "Konto z tym adresem e-mail już istnieje. Zaloguj się lub zresetuj hasło.",
       },
+    },
+  },
+  inspiration: {
+    metadata: {
+      title: "Inspiracje wnętrzarskie i praktyczne poradniki",
+      description: "Poznaj inspiracje wnętrzarskie, poradniki, materiały i praktyczne wskazówki. Zapisuj pomysły i zamieniaj je w konkretny brief projektowy.",
+    },
+    breadcrumbs: { home: "Strona główna", hub: "Inspiration Hub" },
+    hero: {
+      title: "Inspiration Hub",
+      subtitle: "Odkrywaj praktyczne porady, materiały, wnętrza i pomysły przygotowane przez redakcję ArchiCompass.",
+      searchPlaceholder: "Szukaj artykułów i inspiracji...",
+      searchButton: "Szukaj",
+    },
+    categoryLabels: { All: "Wszystkie", Inspiration: "Inspiracje", Trends: "Trendy", Guides: "Poradniki", Materials: "Materiały", Rooms: "Pomieszczenia", Sustainability: "Zrównoważone wnętrza" },
+    newDesigners: { eyebrow: "Nowości w ArchiCompass", title: "Projektanci, którzy niedawno dołączyli", seeAll: "Zobacz wszystkich" },
+    latestProjects: { eyebrow: "Najnowsze realizacje", title: "Nowe projekty od projektantów" },
+    featured: {
+      title: "Polecane inspiracje",
+      findDesignerCta: "Otwórz Katalog Projektantów",
+      readCta: "Czytaj artykuł",
+      noResultsTitle: "Nie znaleziono artykułów",
+      noResultsBody: "Spróbuj innego wyszukiwania lub wróć do wszystkich inspiracji.",
+      noResultsCta: "Zobacz wszystkie artykuły",
+    },
+    labels: {
+      designerFallback: "Projektant wnętrz",
+      studio: "Pracownia projektowa",
+      designer: "Projektant wnętrz",
+      portfolio: "Portfolio",
+      untitledProject: "Projekt bez tytułu",
+      articleCount: { singular: "artykuł", few: "artykuły", plural: "artykułów" },
+      reviewCount: { singular: "opinia", few: "opinie", plural: "opinii" },
+      querySuffix: "dla zapytania",
+      unavailable: "Treści inspiracyjne są chwilowo niedostępne.",
+      openArticle: "Otwórz artykuł",
+      editorialTeam: "Redakcja ArchiCompass",
+    },
+    article: {
+      notFoundTitle: "Nie znaleziono artykułu",
+      notFoundDescription: "Ten artykuł nie jest dostępny.",
+      backToHub: "Wróć do Inspiration Hub",
+      ctaEyebrow: "Zamień pomysły w projekt",
+      ctaTitle: "Stwórz brief na podstawie swoich inspiracji",
+      ctaProjectCompass: "Otwórz AI Project Compass",
+      ctaDirectory: "Znajdź projektantów",
     },
   },
   home: {
@@ -423,6 +515,52 @@ const en: SiteCopy = {
         emailRateLimit: "Too many emails have been sent. Wait a few minutes and try again.",
         alreadyRegistered: "An account with this email address already exists. Sign in or reset your password.",
       },
+    },
+  },
+  inspiration: {
+    metadata: {
+      title: "Interior design inspiration and practical guides",
+      description: "Explore interior design inspiration, guides, materials, and practical advice. Save ideas and turn them into a clear project brief.",
+    },
+    breadcrumbs: { home: "Home", hub: "Inspiration Hub" },
+    hero: {
+      title: "Inspiration Hub",
+      subtitle: "Explore practical advice, materials, interiors, and ideas curated by the ArchiCompass editorial team.",
+      searchPlaceholder: "Search articles and inspiration...",
+      searchButton: "Search",
+    },
+    categoryLabels: { All: "All", Inspiration: "Inspiration", Trends: "Trends", Guides: "Guides", Materials: "Materials", Rooms: "Rooms", Sustainability: "Sustainable interiors" },
+    newDesigners: { eyebrow: "New on ArchiCompass", title: "Designers who recently joined", seeAll: "See all" },
+    latestProjects: { eyebrow: "Latest projects", title: "New projects from designers" },
+    featured: {
+      title: "Featured inspiration",
+      findDesignerCta: "Open Designer Directory",
+      readCta: "Read article",
+      noResultsTitle: "No articles found",
+      noResultsBody: "Try another search or return to all inspiration.",
+      noResultsCta: "See all articles",
+    },
+    labels: {
+      designerFallback: "Interior designer",
+      studio: "Design studio",
+      designer: "Interior designer",
+      portfolio: "Portfolio",
+      untitledProject: "Untitled project",
+      articleCount: { singular: "article", plural: "articles" },
+      reviewCount: { singular: "review", plural: "reviews" },
+      querySuffix: "for",
+      unavailable: "Inspiration content is temporarily unavailable.",
+      openArticle: "Open article",
+      editorialTeam: "ArchiCompass editorial team",
+    },
+    article: {
+      notFoundTitle: "Article not found",
+      notFoundDescription: "This article is not available.",
+      backToHub: "Back to Inspiration Hub",
+      ctaEyebrow: "Turn ideas into a project",
+      ctaTitle: "Create a brief from your inspiration",
+      ctaProjectCompass: "Open AI Project Compass",
+      ctaDirectory: "Find designers",
     },
   },
   home: {
