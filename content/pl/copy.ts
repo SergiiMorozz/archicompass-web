@@ -20,12 +20,14 @@ export const homeCopy = {
   hero: {
     eyebrow: "AI Project Compass",
     headline: "Inteligentne dopasowanie projektanta wnętrz z wykorzystaniem AI",
-    lead:
-      "Znajdź projektanta idealnie dopasowanego do Twojej inwestycji. Zamień zdjęcia inspiracji w profesjonalny brief projektowy.",
+    lead: [
+      "Znajdź projektanta idealnie dopasowanego do Twojej inwestycji.",
+      "Zamień zdjęcia inspiracji w profesjonalny brief projektowy.",
+    ],
     body:
       "AI rozpozna Twój styl i zarekomenduje projektantów najlepiej dopasowanych do zakresu prac, budżetu, estetyki oraz charakteru inwestycji.",
-    primaryCta: "Otwórz AI Project Compass",
-    secondaryCta: "Przeglądaj Katalog Projektantów",
+    primaryCta: "Poznaj swój styl i znajdź projektanta z AI",
+    secondaryCta: "Katalog projektantów",
     designerCta: "Jesteś projektantem lub architektem? Utwórz swój profil",
     benefits: ["Sprawdzone portfolio", "Bezpośredni kontakt", "Bezpłatny start"],
   },
@@ -49,15 +51,15 @@ export const homeCopy = {
       },
       {
         number: "02",
-        title: "Doprecyzuj brief",
+        title: "AI analizuje styl i tworzy brief",
         body:
-          "Dodaj metraż, pomieszczenia, budżet, termin oraz informacje o tym, czy potrzebujesz wizualizacji 3D, projektu wykonawczego lub nadzoru autorskiego.",
+          "AI wskazuje wspólne cechy inspiracji, a Ty uzupełniasz metraż, pomieszczenia, budżet, termin i oczekiwany zakres współpracy.",
       },
       {
         number: "03",
-        title: "Poznaj właściwego specjalistę",
+        title: "Otrzymaj trafne dopasowania",
         body:
-          "Porównaj portfolio projektantów i wyślij uporządkowane zapytanie, które od razu pokazuje skalę i charakter Twojego projektu.",
+          "Otrzymujesz projektantów dopasowanych do stylu, zakresu, budżetu, lokalizacji i charakteru inwestycji - z portfolio, które możesz od razu porównać.",
       },
     ],
   },

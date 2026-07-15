@@ -132,36 +132,45 @@ export default async function Home() {
             <h1 className="max-w-4xl text-4xl font-bold leading-[1.05] sm:text-6xl">
               {homeCopy.hero.headline}
             </h1>
-            <p className="mt-6 max-w-2xl text-lg font-medium leading-8 text-white sm:text-xl">
-              {homeCopy.hero.lead}
-            </p>
+            <div className="mt-6 max-w-3xl space-y-2 text-lg font-medium leading-8 text-white sm:text-xl">
+              {homeCopy.hero.lead.map((sentence) => (
+                <p key={sentence}>{sentence}</p>
+              ))}
+            </div>
             <p className="mt-4 max-w-2xl text-base leading-7 text-white/78 sm:text-lg">
               {homeCopy.hero.body}
             </p>
 
-            <div className="mt-9 grid max-w-2xl gap-3 sm:grid-cols-[1.25fr_0.75fr]">
+            <div className="mt-9 grid max-w-3xl gap-3 sm:grid-cols-[1.25fr_0.75fr]">
               <Link
                 href="/project-compass"
-                className="group rounded-lg border border-[#a57aff] bg-[#7c3aed] px-6 py-5 text-center font-bold text-white shadow-[0_18px_45px_rgba(86,35,168,0.38)] transition hover:bg-[#8b4cf0]"
+                className="group inline-flex min-h-[68px] items-center justify-center gap-3 rounded-xl border border-[#c7a8ff] bg-[#7c3aed] px-5 py-4 text-center text-[15px] font-bold leading-5 text-white shadow-[0_18px_45px_rgba(86,35,168,0.38)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#8b4cf0] hover:shadow-[0_24px_55px_rgba(86,35,168,0.5)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:px-6 sm:text-base"
               >
-                {homeCopy.hero.primaryCta}
-                <span className="ml-2 transition group-hover:translate-x-1">&#8594;</span>
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/16 text-base transition duration-300 group-hover:scale-110 group-hover:rotate-12" aria-hidden="true">✦</span>
+                <span>{homeCopy.hero.primaryCta}</span>
+                <span className="shrink-0 text-lg transition duration-300 group-hover:translate-x-1" aria-hidden="true">&#8594;</span>
               </Link>
               <Link
                 href="/designers"
-                className="rounded-lg border border-white/55 bg-white/12 px-6 py-5 text-center font-semibold text-white backdrop-blur transition hover:bg-white/20"
+                className="group inline-flex min-h-[68px] items-center justify-center gap-2 rounded-xl border border-white/55 bg-white/12 px-5 py-4 text-center text-[15px] font-bold leading-5 text-white backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:border-white hover:bg-white/20 hover:shadow-[0_18px_45px_rgba(16,8,24,0.28)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:px-6 sm:text-base"
               >
-                {homeCopy.hero.secondaryCta}
+                <span className="whitespace-nowrap">{homeCopy.hero.secondaryCta}</span>
+                <span className="text-lg transition duration-300 group-hover:translate-x-1" aria-hidden="true">&#8594;</span>
               </Link>
             </div>
 
-            <Link href="/get-started" className="mt-5 inline-flex text-sm font-semibold text-white/80 hover:text-white">
-              {homeCopy.hero.designerCta} &#8594;
+            <Link href="/get-started" className="group mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white/80 transition hover:text-white">
+              <span className="grid h-6 w-6 place-items-center rounded-md border border-white/25 bg-white/10 text-xs" aria-hidden="true">+</span>
+              {homeCopy.hero.designerCta}
+              <span className="transition group-hover:translate-x-1" aria-hidden="true">&#8594;</span>
             </Link>
 
-            <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/78">
+            <div className="mt-9 flex flex-wrap gap-x-5 gap-y-3 text-sm text-white/82">
               {homeCopy.hero.benefits.map((benefit) => (
-                <span key={benefit}><b className="text-[#5de1d1]">&#10003;</b> {benefit}</span>
+                <span key={benefit} className="inline-flex items-center gap-2">
+                  <b className="grid h-5 w-5 place-items-center rounded-full bg-[#5de1d1]/16 text-xs text-[#5de1d1]">&#10003;</b>
+                  {benefit}
+                </span>
               ))}
             </div>
           </div>
@@ -184,7 +193,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
         <div className="max-w-3xl">
           <p className="text-sm font-bold uppercase text-accent">{homeCopy.howItWorks.eyebrow}</p>
           <h2 className="mt-3 text-4xl font-bold">{homeCopy.howItWorks.headline}</h2>
@@ -193,17 +202,43 @@ export default async function Home() {
           </p>
         </div>
 
-        <div className="mt-9 grid gap-5 lg:grid-cols-3">
+        <div className="mt-10 grid gap-4 lg:grid-cols-3">
           {homeCopy.howItWorks.steps.map(({ body, number, title }, index) => (
-            <article key={title} className="rounded-lg border border-line bg-card p-6 shadow-[0_14px_40px_rgba(54,31,73,0.07)]">
+            <article key={title} className="group relative overflow-hidden rounded-2xl border border-line bg-card p-6 shadow-[0_14px_40px_rgba(54,31,73,0.07)] transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_20px_48px_rgba(54,31,73,0.13)] sm:p-7">
               <div className={[
-                "grid h-11 w-11 place-items-center rounded-lg text-sm font-bold text-white",
+                "absolute right-0 top-0 h-24 w-24 rounded-bl-full opacity-10",
+                index === 0 ? "bg-primary" : index === 1 ? "bg-accent" : "bg-warm",
+              ].join(" ")} aria-hidden="true" />
+              <div className={[
+                "relative grid h-12 w-12 place-items-center rounded-xl text-sm font-bold text-white shadow-lg",
                 index === 0 ? "bg-primary" : index === 1 ? "bg-accent" : "bg-warm",
               ].join(" ")}>{number}</div>
-              <h3 className="mt-5 text-2xl font-bold">{title}</h3>
+              <div className="relative mt-6 flex items-center justify-between gap-4">
+                <h3 className="text-2xl font-bold">{title}</h3>
+                <span className={[
+                  "grid h-8 w-8 shrink-0 place-items-center rounded-full border text-sm font-bold transition group-hover:scale-110",
+                  index === 0 ? "border-primary/20 bg-primary-soft text-primary" : index === 1 ? "border-accent/20 bg-accent-soft text-accent" : "border-warm/20 bg-warm-soft text-warm",
+                ].join(" ")} aria-hidden="true">{index === 0 ? "+" : index === 1 ? "AI" : "→"}</span>
+              </div>
               <p className="mt-3 text-sm leading-6 text-muted">{body}</p>
             </article>
           ))}
+        </div>
+
+        <div className="mt-6 flex flex-col gap-5 rounded-2xl border border-primary/15 bg-primary-soft p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div className="flex items-start gap-4">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary text-sm font-bold text-white shadow-lg shadow-primary/20" aria-hidden="true">AI</span>
+            <div>
+              <h3 className="text-lg font-bold">Precyzyjne dopasowanie zamiast przypadkowego szukania</h3>
+              <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">
+                Z całej bazy projektantów w Polsce otrzymujesz osoby najlepiej dopasowane do Twojego stylu, zakresu prac, budżetu i lokalizacji.
+              </p>
+            </div>
+          </div>
+          <Link href="/project-compass" className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+            Zacznij z AI
+            <span className="text-base transition group-hover:translate-x-1" aria-hidden="true">&#8594;</span>
+          </Link>
         </div>
       </section>
 
