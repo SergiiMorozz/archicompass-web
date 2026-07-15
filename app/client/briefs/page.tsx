@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 import { briefLabel, briefListLabel, briefStyleLabel } from "@/lib/brief-labels";
-import { polishCountLabel } from "@/lib/count-label";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -27,8 +27,8 @@ type Brief = {
   created_at: string;
 };
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("pl-PL", {
+function formatDate(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -48,6 +48,7 @@ function matchingDesignersHref(brief: Brief) {
 }
 
 export default async function ClientBriefsPage() {
+  const copy = getWorkspaceCopy().clientBriefs;
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
@@ -66,67 +67,67 @@ export default async function ClientBriefsPage() {
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="text-sm font-semibold text-primary">Biblioteka AI Project Compass</div>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Zapisane briefy</h1>
+            <div className="text-sm font-semibold text-primary">{copy.eyebrow}</div>
+            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">{copy.title}</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-              Twoje zapisane briefy pozostają tutaj razem z zakresem prac, budżetem, terminem i zdjęciami referencyjnymi.
+              {copy.intro}
             </p>
           </div>
-          <Link href="/project-compass" className="w-fit rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">Utwórz kolejny brief</Link>
+          <Link href="/project-compass" className="w-fit rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">{copy.createAnother}</Link>
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         {error ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">Nie udało się wczytać briefów: {error.message}</div>
+          <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">{copy.loadError}: {error.message}</div>
         ) : briefs.length ? (
           <div className="grid gap-5 lg:grid-cols-2">
             {briefs.map((brief) => (
               <article key={brief.id} className="rounded-lg border border-line bg-card p-6 shadow-sm">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <div className="text-sm font-semibold text-primary">{briefLabel(brief.project_type) || "Brief projektowy"}</div>
-                    <h2 className="mt-1 text-2xl font-bold">{brief.title || "Brief bez tytułu"}</h2>
-                    <div className="mt-2 text-sm text-muted">Zapisano {formatDate(brief.created_at)}</div>
+                    <div className="text-sm font-semibold text-primary">{briefLabel(brief.project_type) || copy.defaultType}</div>
+                    <h2 className="mt-1 text-2xl font-bold">{brief.title || copy.untitled}</h2>
+                    <div className="mt-2 text-sm text-muted">{copy.savedOn} {formatDate(brief.created_at, copy.dateLocale)}</div>
                   </div>
                   <span className="w-fit rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
-                    {polishCountLabel(brief.reference_photo_names?.length ?? 0, "zdjęcie", "zdjęcia", "zdjęć")}
+                    {copy.photoLabel(brief.reference_photo_names?.length ?? 0)}
                   </span>
                 </div>
 
                 <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
                   {[
-                    ["Cel", briefLabel(brief.goal)],
-                    ["Styl", briefStyleLabel(brief.style_direction)],
-                    ["Wsparcie", briefLabel(brief.support_scope)],
-                    ["Budżet", briefLabel(brief.budget_signal)],
-                    ["Termin", briefLabel(brief.timeline)],
-                    ["Powierzchnia", brief.area_m2 ? `${brief.area_m2} m²` : null],
-                    ["Pomieszczenia", briefListLabel(brief.room_types) || (brief.room_count ? String(brief.room_count) : null)],
-                    ["Nieruchomość", briefLabel(brief.property_status)],
-                    ["3D", briefLabel(brief.visualization_need)],
-                    ["Nadzór", briefLabel(brief.supervision_need)],
-                    ["Lokalizacja", brief.location],
+                    [copy.fields[0], briefLabel(brief.goal)],
+                    [copy.fields[1], briefStyleLabel(brief.style_direction)],
+                    [copy.fields[2], briefLabel(brief.support_scope)],
+                    [copy.fields[3], briefLabel(brief.budget_signal)],
+                    [copy.fields[4], briefLabel(brief.timeline)],
+                    [copy.fields[5], brief.area_m2 ? `${brief.area_m2} m²` : null],
+                    [copy.fields[6], briefListLabel(brief.room_types) || (brief.room_count ? String(brief.room_count) : null)],
+                    [copy.fields[7], briefLabel(brief.property_status)],
+                    [copy.fields[8], briefLabel(brief.visualization_need)],
+                    [copy.fields[9], briefLabel(brief.supervision_need)],
+                    [copy.fields[10], brief.location],
                   ].map(([label, value]) => (
                     <div key={label} className="rounded-xl border border-line bg-background p-3">
                       <div className="text-muted">{label}</div>
-                      <div className="mt-1 font-semibold">{value || "Nie podano"}</div>
+                      <div className="mt-1 font-semibold">{value || copy.notSpecified}</div>
                     </div>
                   ))}
                 </div>
 
                 <div className="mt-5 flex flex-wrap gap-3">
-                  <Link href={`/account/briefs#${brief.id}`} className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">Wyślij lub zarządzaj briefem</Link>
-                  <Link href={matchingDesignersHref(brief)} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary">Znajdź dopasowanych projektantów</Link>
+                  <Link href={`/account/briefs#${brief.id}`} className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">{copy.manageCta}</Link>
+                  <Link href={matchingDesignersHref(brief)} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary">{copy.findMatchesCta}</Link>
                 </div>
               </article>
             ))}
           </div>
         ) : (
           <div className="rounded-lg border border-dashed border-line bg-card p-8">
-            <h2 className="text-2xl font-bold">Nie masz jeszcze zapisanych briefów</h2>
-            <p className="mt-2 max-w-xl leading-7 text-muted">AI Project Compass zamieni zdjęcia referencyjne i praktyczne potrzeby w brief, który możesz wielokrotnie wykorzystać.</p>
-            <Link href="/project-compass" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">Utwórz brief projektowy</Link>
+            <h2 className="text-2xl font-bold">{copy.emptyTitle}</h2>
+            <p className="mt-2 max-w-xl leading-7 text-muted">{copy.emptyBody}</p>
+            <Link href="/project-compass" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">{copy.emptyCta}</Link>
           </div>
         )}
       </section>
