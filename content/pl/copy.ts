@@ -73,6 +73,8 @@ export const homeCopy = {
       eyebrow: "Przykładowy wynik analizy",
       status: "Gotowe do briefu",
       style: "Ciepłe japandi",
+      summary:
+        "Twoje inspiracje łączą jasne drewno, miękkie światło i spokojne proporcje. Szukaj projektanta, który pracuje z naturalnymi materiałami i zabudowami na wymiar.",
       items: [
         ["Paleta", "Krem, glina, ciepły dąb"],
         ["Materiały", "Jasne drewno, len, kamień"],

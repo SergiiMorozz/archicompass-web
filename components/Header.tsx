@@ -33,7 +33,7 @@ function NavLink({
       href={href}
       onClick={onClick}
       className={[
-        "rounded-full px-3 py-2 text-sm font-medium transition",
+        "whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition",
         isActive
           ? "bg-primary text-white shadow-sm"
           : featured
@@ -49,25 +49,6 @@ function NavLink({
           AI
         </span>
       ) : null}
-      {children}
-    </Link>
-  );
-}
-
-function WorkspaceLink({ href, children }: { href: string; children: React.ReactNode }) {
-  const pathname = usePathname();
-  const isActive = pathname === href || pathname?.startsWith(`${href}/`);
-
-  return (
-    <Link
-      href={href}
-      className={[
-        "rounded-lg px-3 py-2 text-sm font-semibold transition",
-        isActive
-          ? "bg-primary-soft text-primary"
-          : "text-muted hover:bg-primary-soft hover:text-primary",
-      ].join(" ")}
-    >
       {children}
     </Link>
   );
@@ -204,6 +185,9 @@ export default function Header() {
         ...(account.isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
       ]
     : [];
+  const isWorkspaceActive = workspaceItems.some(
+    (item) => pathname === item.href || pathname?.startsWith(`${item.href}/`)
+  );
   return (
     <header className="sticky top-0 z-50 w-full border-b border-line/80 bg-card/95 shadow-[0_8px_30px_rgba(73,35,102,0.06)] backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
@@ -222,10 +206,10 @@ export default function Header() {
             EN
           </a>
           {account ? (
-            <div className="flex items-center gap-1 rounded-xl border border-line bg-card p-1 shadow-sm">
+            <div className="flex items-center gap-2">
               <Link
                 href={account.isProfessional ? "/studio/inbox" : "/client/messages"}
-                className="relative rounded-lg px-3 py-2 text-sm font-semibold text-muted transition hover:bg-primary-soft hover:text-primary"
+                className="relative whitespace-nowrap rounded-xl border border-line bg-card px-3 py-2 text-sm font-semibold text-muted transition hover:border-primary/25 hover:bg-primary-soft hover:text-primary"
               >
                 Wiadomości
                 {account.unreadCount ? (
@@ -234,18 +218,38 @@ export default function Header() {
                   </span>
                 ) : null}
               </Link>
-              {workspaceItems.map((item) => (
-                <WorkspaceLink key={item.href} href={item.href}>
-                  {item.label}
-                </WorkspaceLink>
-              ))}
-              <span aria-hidden="true" className="mx-1 h-6 w-px bg-line" />
-              <Link
-                href="/account"
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
-              >
-                Ustawienia
-              </Link>
+              <details className="group relative">
+                <summary
+                  className={[
+                    "flex cursor-pointer list-none items-center gap-2 rounded-xl border border-line bg-card px-3 py-2 text-sm font-semibold transition hover:border-primary/25 hover:bg-primary-soft hover:text-primary [&::-webkit-details-marker]:hidden",
+                    isWorkspaceActive ? "border-primary/25 bg-primary-soft text-primary" : "text-muted",
+                  ].join(" ")}
+                >
+                  Konto
+                  <span className="text-base leading-none transition group-open:rotate-180" aria-hidden="true">⌄</span>
+                </summary>
+                <div className="absolute right-0 top-full z-50 mt-2 w-64 rounded-xl border border-line bg-card p-2 shadow-[0_18px_45px_rgba(54,31,73,0.16)]">
+                  <div className="px-3 pb-2 pt-1 text-[11px] font-bold uppercase tracking-wide text-muted">Twoje strefy</div>
+                  {workspaceItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={[
+                        "block rounded-lg px-3 py-2.5 text-sm font-semibold transition",
+                        pathname === item.href || pathname?.startsWith(`${item.href}/`)
+                          ? "bg-primary-soft text-primary"
+                          : "text-muted hover:bg-primary-soft hover:text-primary",
+                      ].join(" ")}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                  <div className="my-2 h-px bg-line" />
+                  <Link href="/account" className="block rounded-lg bg-primary px-3 py-2.5 text-center text-sm font-bold text-white transition hover:opacity-90">
+                    Ustawienia konta
+                  </Link>
+                </div>
+              </details>
             </div>
           ) : (
             <>

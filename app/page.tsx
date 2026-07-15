@@ -17,8 +17,8 @@ const heroImage =
 
 const aiResultImages = [
   "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=86",
-  "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=900&q=86",
-  "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=900&q=86",
+  "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=900&q=86",
+  "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=900&q=86",
 ];
 
 const projectFallbacks = [
@@ -348,6 +348,11 @@ export default async function Home() {
                   ))}
                   <span className="rounded-full bg-warm-soft px-3 py-1.5 text-xs font-bold text-warm">Dopasowanie projektantów</span>
                 </div>
+
+                <p className="mt-4 rounded-lg bg-background px-3.5 py-3 text-sm leading-6 text-muted">
+                  <span className="font-bold text-foreground">Wniosek AI: </span>
+                  {homeCopy.aiProjectCompass.example.summary}
+                </p>
               </div>
             </div>
           </div>
