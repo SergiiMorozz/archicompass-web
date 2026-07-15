@@ -26,6 +26,12 @@ rewrite target and must not appear in language switches, canonical URLs, or
 `hreflang` links. `NEXT_PUBLIC_ENGLISH_SITE_URL` remains supported only as a
 temporary compatibility fallback for the rewrite target.
 
+The legacy English zone is built with Next.js `basePath: "/en"`. The Polish
+project therefore rewrites `/en` to `${ENGLISH_ZONE_URL}/en` and
+`/en/<route>` to `${ENGLISH_ZONE_URL}/en/<route>`. This keeps every Next `Link`,
+static asset, and English API request on the public `/en` namespace while the
+remaining route groups are still being migrated to the shared source.
+
 ## Shared layer
 
 - `lib/site-locale.ts` owns the locale, the public `/en` path, the internal rewrite host, and HTML/SEO locale metadata.
