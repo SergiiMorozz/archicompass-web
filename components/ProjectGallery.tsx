@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { polishCountLabel } from "@/lib/count-label";
+import { getPublicProfileCopy } from "@/content/public-profile-copy";
 
 type ProjectGalleryProps = {
   category?: string | null;
@@ -16,6 +16,8 @@ export default function ProjectGallery({
   images,
   title,
 }: ProjectGalleryProps) {
+  const publicCopy = getPublicProfileCopy();
+  const copy = publicCopy.gallery;
   const safeImages = images.filter(Boolean);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const activeImage = activeIndex === null ? null : safeImages[activeIndex];
@@ -50,7 +52,7 @@ export default function ProjectGallery({
           type="button"
           onClick={() => setActiveIndex(0)}
           className="group block h-full w-full text-left"
-          aria-label={`Otwórz galerię: ${title}`}
+          aria-label={copy.open(title)}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -61,11 +63,11 @@ export default function ProjectGallery({
           <div className="absolute inset-0 bg-gradient-to-t from-[#1f172a]/74 via-transparent to-transparent" />
           <div className="absolute bottom-4 left-4 right-4 text-white">
             <div className="text-xs font-semibold uppercase tracking-wide text-white/70">
-              {category || "Portfolio"}
+              {category || publicCopy.labels.portfolio}
             </div>
             <h3 className="mt-1 text-xl font-bold">{title}</h3>
             <div className="mt-3 inline-flex rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">
-              Zobacz {polishCountLabel(safeImages.length, "zdjęcie", "zdjęcia", "zdjęć")}
+              {copy.photoCount(safeImages.length)}
             </div>
           </div>
         </button>
@@ -78,7 +80,7 @@ export default function ProjectGallery({
             type="button"
             onClick={() => setActiveIndex(imageIndex)}
             className="aspect-square overflow-hidden rounded-xl bg-primary-soft"
-            aria-label={`Otwórz zdjęcie ${imageIndex + 1}: ${title}`}
+            aria-label={copy.openPhoto(imageIndex + 1, title)}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -101,7 +103,7 @@ export default function ProjectGallery({
               <div className="min-w-0">
                 <div className="truncate text-lg font-bold">{title}</div>
                 <div className="text-sm text-white/70">
-                  Zdjęcie {(activeIndex ?? 0) + 1} z {safeImages.length}
+                  {copy.photoPosition((activeIndex ?? 0) + 1, safeImages.length)}
                 </div>
               </div>
               <button
@@ -109,7 +111,7 @@ export default function ProjectGallery({
                 onClick={() => setActiveIndex(null)}
                 className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-foreground"
               >
-                Zamknij
+                {copy.close}
               </button>
             </div>
 
@@ -117,7 +119,7 @@ export default function ProjectGallery({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={activeImage}
-                alt={`${title} full size`}
+                alt={copy.fullSizeAlt(title)}
                 className="h-full w-full object-contain"
               />
 
@@ -134,7 +136,7 @@ export default function ProjectGallery({
                     }
                     className="absolute left-3 top-1/2 rounded-full bg-white px-4 py-3 text-sm font-bold text-foreground shadow"
                   >
-                    Poprzednie
+                    {copy.previous}
                   </button>
                   <button
                     type="button"
@@ -145,7 +147,7 @@ export default function ProjectGallery({
                     }
                     className="absolute right-3 top-1/2 rounded-full bg-white px-4 py-3 text-sm font-bold text-foreground shadow"
                   >
-                    Następne
+                    {copy.next}
                   </button>
                 </>
               ) : null}

@@ -11,21 +11,39 @@ const placeholderPatterns = [
 
 const repeatedLinkPattern = /(?:https?:\/\/|www\.)/gi;
 
-export function publicTextError(values: Array<string | null | undefined>) {
+const messages = {
+  pl: {
+    offensive: "Usuń obraźliwe słowa przed publikacją tekstu.",
+    placeholder: "Uzupełnij tekst docelową treścią zamiast placeholderów lub testowych wpisów.",
+    links: "Usuń nadmiarowe linki promocyjne przed publikacją tekstu.",
+  },
+  en: {
+    offensive: "Remove offensive language before publishing this text.",
+    placeholder: "Replace placeholders or test content with final text before publishing.",
+    links: "Remove excessive promotional links before publishing this text.",
+  },
+} as const;
+
+export function publicTextError(
+  values: Array<string | null | undefined>,
+  locale: SiteLocale = siteLocale
+) {
+  const copy = messages[locale];
   const text = values.filter(Boolean).join(" \n ");
   if (!text) return null;
 
   if (blockedPatterns.some((pattern) => pattern.test(text))) {
-    return "Usuń obraźliwe słowa przed publikacją tekstu.";
+    return copy.offensive;
   }
 
   if (placeholderPatterns.some((pattern) => pattern.test(text))) {
-    return "Uzupełnij tekst docelową treścią zamiast placeholderów lub testowych wpisów.";
+    return copy.placeholder;
   }
 
   if ((text.match(repeatedLinkPattern) ?? []).length > 3) {
-    return "Usuń nadmiarowe linki promocyjne przed publikacją tekstu.";
+    return copy.links;
   }
 
   return null;
 }
+import { siteLocale, type SiteLocale } from "@/lib/site-locale";

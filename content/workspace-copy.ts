@@ -200,6 +200,93 @@ type AccountProfileCopy = {
   };
 };
 
+export type AccountPortfolioCopy = {
+  back: string;
+  eyebrow: string;
+  title: string;
+  intro: string;
+  statusLabel: string;
+  status: {
+    extensive: string;
+    goodStart: string;
+    firstProject: string;
+    empty: string;
+  };
+  projects: string;
+  categories: string;
+  createdNotice: string;
+  updatedNotice: string;
+  imageDeletedNotice: string;
+  deletedNotice: string;
+  yourPortfolio: string;
+  publicProjects: string;
+  viewPublicPortfolio: string;
+  emptyTitle: string;
+  emptyBody: string;
+  noCategory: string;
+  untitledProject: string;
+  descriptionFallback: string;
+  viewProject: string;
+  openExternal: string;
+  manageImages: string;
+  imageAria: (title: string, index: number) => string;
+  deleteImage: string;
+  editProject: string;
+  fieldTitle: string;
+  fieldCategory: string;
+  categoryPlaceholder: string;
+  fieldDescription: string;
+  addImages: string;
+  imageUse: (count: number, max: number) => string;
+  projectLink: string;
+  projectLinkHint: string;
+  projectLinkPlaceholder: string;
+  replaceGallery: string;
+  replaceGalleryBody: string;
+  saveChanges: string;
+  deleteProject: string;
+  deleteProjectBody: string;
+  deleteThisProject: string;
+  addProject: string;
+  createCard: string;
+  createIntro: string;
+  createMediaNote: string;
+  create: {
+    titleRequired: string;
+    imageMaximum: (count: number) => string;
+    invalidImage: (name: string) => string;
+    unauthenticated: string;
+    uploadFailed: (name: string, message: string) => string;
+    createFailed: string;
+    title: string;
+    titlePlaceholder: string;
+    category: string;
+    categoryHint: string;
+    categoryPlaceholder: string;
+    images: string;
+    imagesHint: (count: number) => string;
+    link: string;
+    linkHint: string;
+    linkPlaceholder: string;
+    description: string;
+    descriptionPlaceholder: string;
+    busy: (current: number) => string;
+    submit: string;
+  };
+  errors: {
+    invalidImage: string;
+    imageTooLarge: string;
+    uploadFailed: (message: string) => string;
+    tooManyImages: (count: number) => string;
+    projectIdMissing: string;
+    titleRequired: string;
+    projectMissing: string;
+    imageSelectionInvalid: string;
+    projectLimit: (count: number, max: number) => string;
+    clientOnly: string;
+  };
+};
+
 type AdminUsersCopy = {
   dateLocale: string;
   never: string;
@@ -469,6 +556,7 @@ type AdminUserDetailCopy = {
 type WorkspaceCopy = {
   account: AccountCopy;
   accountProfile: AccountProfileCopy;
+  accountPortfolio: AccountPortfolioCopy;
   clientOverview: ClientOverviewCopy;
   clientMessages: {
     dateLocale: string;
@@ -849,6 +937,87 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
         clientOnly: "Usunięcie konta jest dostępne tutaj dla kont klienta.",
         confirmProfileDelete: "Wpisz DELETE, aby potwierdzić usunięcie profilu.",
         confirmAccountDelete: "Wpisz DELETE, aby potwierdzić usunięcie konta.",
+      },
+    },
+    accountPortfolio: {
+      back: "Wróć do konta",
+      eyebrow: "Zarządzanie portfolio",
+      title: "Zarządzaj projektami",
+      intro: "Dodaj realizacje, które pokażą charakter Twojej pracy i pomogą klientom zaufać profilowi.",
+      statusLabel: "Status portfolio",
+      status: { extensive: "Rozbudowane portfolio", goodStart: "Dobry początek", firstProject: "Pierwszy projekt opublikowany", empty: "Portfolio nie zostało rozpoczęte" },
+      projects: "Projekty",
+      categories: "Kategorie",
+      createdNotice: "Projekt został dodany i jest widoczny w profilu publicznym.",
+      updatedNotice: "Projekt został zaktualizowany. Galeria profilu publicznego jest już odświeżona.",
+      imageDeletedNotice: "Zdjęcie zostało usunięte z galerii projektu.",
+      deletedNotice: "Projekt został usunięty z publicznego portfolio.",
+      yourPortfolio: "Twoje portfolio",
+      publicProjects: "Projekty publiczne",
+      viewPublicPortfolio: "Zobacz publiczne portfolio",
+      emptyTitle: "Zacznij od jednego mocnego projektu",
+      emptyBody: "Dodaj tytuł, kategorię, zdjęcie i krótki opis. To wystarczy, aby publiczny profil zaczął pracować na Twoją wiarygodność.",
+      noCategory: "Bez kategorii",
+      untitledProject: "Projekt bez tytułu",
+      descriptionFallback: "Dodaj opis briefu, kierunku stylistycznego i rezultatu.",
+      viewProject: "Zobacz stronę projektu",
+      openExternal: "Otwórz stronę zewnętrzną",
+      manageImages: "Zarządzaj zdjęciami",
+      imageAria: (title, index) => `${title} — zdjęcie ${index}`,
+      deleteImage: "Usuń zdjęcie",
+      editProject: "Edytuj projekt",
+      fieldTitle: "Tytuł",
+      fieldCategory: "Kategoria",
+      categoryPlaceholder: "Mieszkanie, dom, biuro...",
+      fieldDescription: "Opis",
+      addImages: "Dodaj zdjęcia",
+      imageUse: (count, max) => `${count}/${max} wykorzystano`,
+      projectLink: "Link do projektu",
+      projectLinkHint: "opcjonalna strona zewnętrzna",
+      projectLinkPlaceholder: "https://twoja-pracownia.pl/projekty/...",
+      replaceGallery: "Zastąp obecną galerię",
+      replaceGalleryBody: "Pozostaw odznaczone, aby dodać wybrane zdjęcia do projektu.",
+      saveChanges: "Zapisz zmiany projektu",
+      deleteProject: "Usuń projekt",
+      deleteProjectBody: "Ta operacja usuwa projekt z publicznego portfolio oraz kasuje przesłane zdjęcia z pamięci.",
+      deleteThisProject: "Usuń ten projekt",
+      addProject: "Dodaj projekt",
+      createCard: "Utwórz kartę portfolio",
+      createIntro: "Pierwsza wersja może być prosta. Na początek wystarczą jasny tytuł i jedno dobre zdjęcie.",
+      createMediaNote: "Zdjęcia tworzą galerię w karcie projektu. Link do projektu służy do wskazania osobnej strony, którą chcesz udostępniać poza ArchiCompass.",
+      create: {
+        titleRequired: "Tytuł projektu jest wymagany.",
+        imageMaximum: (count) => `Wybierz maksymalnie ${count} zdjęć.`,
+        invalidImage: (name) => `${name} musi być plikiem JPEG, PNG lub WebP mniejszym niż 10 MB.`,
+        unauthenticated: "Zaloguj się, aby kontynuować.",
+        uploadFailed: (name, message) => `Nie udało się przesłać ${name}: ${message}`,
+        createFailed: "Nie udało się utworzyć projektu.",
+        title: "Tytuł",
+        titlePlaceholder: "Nowoczesne mieszkanie w Warszawie",
+        category: "Kategoria",
+        categoryHint: "rodzaj wnętrza lub inwestycji",
+        categoryPlaceholder: "Mieszkanie, dom, biuro...",
+        images: "Zdjęcia projektu",
+        imagesHint: (count) => `do ${count} plików JPEG, PNG lub WebP`,
+        link: "Link do projektu",
+        linkHint: "opcjonalna strona zewnętrzna",
+        linkPlaceholder: "https://twoja-pracownia.pl/projekty/...",
+        description: "Opis",
+        descriptionPlaceholder: "Opisz brief, kierunek projektowy i rezultat.",
+        busy: (current) => `Przesyłanie zdjęcia ${current}...`,
+        submit: "Dodaj projekt",
+      },
+      errors: {
+        invalidImage: "Prześlij zdjęcie JPEG, PNG lub WebP.",
+        imageTooLarge: "Prześlij zdjęcie mniejsze niż 10 MB.",
+        uploadFailed: (message) => `Nie udało się przesłać zdjęcia: ${message}`,
+        tooManyImages: (count) => `Prześlij maksymalnie ${count} zdjęć na projekt.`,
+        projectIdMissing: "Brakuje identyfikatora projektu.",
+        titleRequired: "Tytuł projektu jest wymagany.",
+        projectMissing: "Nie znaleziono projektu.",
+        imageSelectionInvalid: "Nieprawidłowy wybór zdjęcia.",
+        projectLimit: (count, max) => `Ten projekt miałby ${count} zdjęć. Limit to ${max}.`,
+        clientOnly: "Konto klienta nie może zarządzać portfolio projektanta.",
       },
     },
     clientOverview: {
@@ -1472,6 +1641,87 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
         clientOnly: "Account deletion is available here for client accounts.",
         confirmProfileDelete: "Type DELETE to confirm profile deletion.",
         confirmAccountDelete: "Type DELETE to confirm account deletion.",
+      },
+    },
+    accountPortfolio: {
+      back: "Back to account",
+      eyebrow: "Portfolio management",
+      title: "Manage projects",
+      intro: "Add completed projects that show the character of your work and help clients trust your profile.",
+      statusLabel: "Portfolio status",
+      status: { extensive: "Established portfolio", goodStart: "A good start", firstProject: "First project published", empty: "Your portfolio has not started yet" },
+      projects: "Projects",
+      categories: "Categories",
+      createdNotice: "The project has been added and is visible on your public profile.",
+      updatedNotice: "The project has been updated. Your public profile gallery is up to date.",
+      imageDeletedNotice: "The image has been removed from the project gallery.",
+      deletedNotice: "The project has been removed from your public portfolio.",
+      yourPortfolio: "Your portfolio",
+      publicProjects: "Public projects",
+      viewPublicPortfolio: "View public portfolio",
+      emptyTitle: "Start with one strong project",
+      emptyBody: "Add a title, category, photo, and short description. That is enough for your public profile to begin building trust.",
+      noCategory: "No category",
+      untitledProject: "Untitled project",
+      descriptionFallback: "Add a description of the brief, visual direction, and outcome.",
+      viewProject: "View project page",
+      openExternal: "Open external page",
+      manageImages: "Manage images",
+      imageAria: (title, index) => `${title} — image ${index}`,
+      deleteImage: "Delete image",
+      editProject: "Edit project",
+      fieldTitle: "Title",
+      fieldCategory: "Category",
+      categoryPlaceholder: "Apartment, house, office...",
+      fieldDescription: "Description",
+      addImages: "Add images",
+      imageUse: (count, max) => `${count}/${max} used`,
+      projectLink: "Project link",
+      projectLinkHint: "optional external page",
+      projectLinkPlaceholder: "https://your-studio.com/projects/...",
+      replaceGallery: "Replace the current gallery",
+      replaceGalleryBody: "Leave this unchecked to add the selected images to the project.",
+      saveChanges: "Save project changes",
+      deleteProject: "Delete project",
+      deleteProjectBody: "This removes the project from your public portfolio and deletes uploaded images from storage.",
+      deleteThisProject: "Delete this project",
+      addProject: "Add project",
+      createCard: "Create a portfolio card",
+      createIntro: "The first version can be simple. A clear title and one good image are enough to start.",
+      createMediaNote: "Images become the gallery on the project card. The project link points to a separate page you want to share outside ArchiCompass.",
+      create: {
+        titleRequired: "A project title is required.",
+        imageMaximum: (count) => `Select up to ${count} images.`,
+        invalidImage: (name) => `${name} must be a JPEG, PNG, or WebP file smaller than 10 MB.`,
+        unauthenticated: "Sign in to continue.",
+        uploadFailed: (name, message) => `Could not upload ${name}: ${message}`,
+        createFailed: "Could not create the project.",
+        title: "Title",
+        titlePlaceholder: "Contemporary apartment in Warsaw",
+        category: "Category",
+        categoryHint: "interior or project type",
+        categoryPlaceholder: "Apartment, house, office...",
+        images: "Project images",
+        imagesHint: (count) => `up to ${count} JPEG, PNG, or WebP files`,
+        link: "Project link",
+        linkHint: "optional external page",
+        linkPlaceholder: "https://your-studio.com/projects/...",
+        description: "Description",
+        descriptionPlaceholder: "Describe the brief, design direction, and outcome.",
+        busy: (current) => `Uploading image ${current}...`,
+        submit: "Add project",
+      },
+      errors: {
+        invalidImage: "Upload a JPEG, PNG, or WebP image.",
+        imageTooLarge: "Upload an image smaller than 10 MB.",
+        uploadFailed: (message) => `Could not upload the image: ${message}`,
+        tooManyImages: (count) => `Upload up to ${count} images per project.`,
+        projectIdMissing: "The project identifier is missing.",
+        titleRequired: "A project title is required.",
+        projectMissing: "The project could not be found.",
+        imageSelectionInvalid: "Invalid image selection.",
+        projectLimit: (count, max) => `This project would have ${count} images. The limit is ${max}.`,
+        clientOnly: "A client account cannot manage a designer portfolio.",
       },
     },
     clientOverview: {

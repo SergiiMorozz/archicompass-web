@@ -17,6 +17,7 @@ const sharedSourceFiles = [
 const workspaceSourceFiles = [
   "app/account/page.tsx",
   "app/account/profile/page.tsx",
+  "app/account/projects/page.tsx",
   "app/client/page.tsx",
   "app/client/messages/page.tsx",
   "app/client/favorites/page.tsx",
@@ -32,7 +33,10 @@ const workspaceSourceFiles = [
   "app/admin/users/page.tsx",
   "app/admin/users/[id]/page.tsx",
   "components/AdminNav.tsx",
+  "components/ProjectCreateForm.tsx",
 ];
+
+const publicProfileSourceFiles = ["components/ProjectGallery.tsx"];
 
 const failures = sharedSourceFiles.flatMap((file) => {
   const source = readFileSync(file, "utf8");
@@ -56,9 +60,16 @@ for (const file of workspaceSourceFiles) {
   }
 }
 
+for (const file of publicProfileSourceFiles) {
+  const source = readFileSync(file, "utf8");
+  if (!source.includes("@/content/public-profile-copy")) {
+    failures.push(`${file}: missing the public profile locale contract`);
+  }
+}
+
 if (failures.length) {
   console.error("Locale architecture check failed:\n- " + failures.join("\n- "));
   process.exit(1);
 }
 
-console.log(`Locale architecture check passed for ${sharedSourceFiles.length + workspaceSourceFiles.length} shared source files.`);
+console.log(`Locale architecture check passed for ${sharedSourceFiles.length + workspaceSourceFiles.length + publicProfileSourceFiles.length} shared source files.`);

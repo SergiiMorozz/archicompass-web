@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getAccountRole } from "@/lib/studios";
 import { publicTextError } from "@/lib/content-moderation";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 
 type CreateProjectBody = {
   title?: unknown;
@@ -17,19 +18,20 @@ function text(value: unknown, max: number) {
 }
 
 export async function POST(request: Request) {
+  const copy = getWorkspaceCopy().accountPortfolio;
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
-  if (!user) return NextResponse.json({ error: "Zaloguj się, aby kontynuować." }, { status: 401 });
+  if (!user) return NextResponse.json({ error: copy.create.unauthenticated }, { status: 401 });
   if ((await getAccountRole(supabase, user.id)) !== "designer") {
-    return NextResponse.json({ error: "Tylko konta projektantów mogą publikować projekty." }, { status: 403 });
+    return NextResponse.json({ error: copy.errors.clientOnly }, { status: 403 });
   }
 
   const body = (await request.json()) as CreateProjectBody;
   const title = text(body.title, 120);
   const category = text(body.category, 80);
   const description = text(body.description, 3000);
-  if (!title) return NextResponse.json({ error: "Tytuł projektu jest wymagany." }, { status: 400 });
+  if (!title) return NextResponse.json({ error: copy.errors.titleRequired }, { status: 400 });
   const moderationError = publicTextError([title, category, description]);
   if (moderationError) return NextResponse.json({ error: moderationError }, { status: 400 });
 
@@ -40,7 +42,7 @@ export async function POST(request: Request) {
     ? body.imageUrls.filter((value): value is string => typeof value === "string" && value.startsWith("https://")).slice(0, imagePaths.length)
     : [];
   if (imagePaths.length !== imageUrls.length) {
-    return NextResponse.json({ error: "Dane przesłanych zdjęć są niekompletne." }, { status: 400 });
+    return NextResponse.json({ error: copy.errors.imageSelectionInvalid }, { status: 400 });
   }
 
   const rawUrl = text(body.projectUrl, 500);

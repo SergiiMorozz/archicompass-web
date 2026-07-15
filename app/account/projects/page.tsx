@@ -7,6 +7,7 @@ import { getAccountRole } from "@/lib/studios";
 import ProjectGallery from "@/components/ProjectGallery";
 import ProjectCreateForm from "@/components/ProjectCreateForm";
 import { publicTextError } from "@/lib/content-moderation";
+import { getWorkspaceCopy, type AccountPortfolioCopy } from "@/content/workspace-copy";
 
 export const revalidate = 0;
 
@@ -103,11 +104,11 @@ function publicImageUrl(supabase: SupabaseServerClient, imagePath: string | null
   return data.publicUrl;
 }
 
-function projectStatus(projects: Project[]) {
-  if (projects.length >= 6) return "Rozbudowane portfolio";
-  if (projects.length >= 3) return "Dobry początek";
-  if (projects.length >= 1) return "Pierwszy projekt opublikowany";
-  return "Portfolio nie zostało rozpoczęte";
+function projectStatus(projects: Project[], copy: AccountPortfolioCopy) {
+  if (projects.length >= 6) return copy.status.extensive;
+  if (projects.length >= 3) return copy.status.goodStart;
+  if (projects.length >= 1) return copy.status.firstProject;
+  return copy.status.empty;
 }
 
 function Field({
@@ -133,9 +134,10 @@ async function uploadProjectImage(
   userId: string,
   file: File
 ) {
+  const copy = getWorkspaceCopy().accountPortfolio;
   if (!allowedImageTypes.includes(file.type)) {
     return {
-      error: "Prześlij zdjęcie JPEG, PNG lub WebP.",
+      error: copy.errors.invalidImage,
       path: null,
       publicUrl: null,
     };
@@ -143,7 +145,7 @@ async function uploadProjectImage(
 
   if (file.size > maxImageSize) {
     return {
-      error: "Prześlij zdjęcie mniejsze niż 10 MB.",
+      error: copy.errors.imageTooLarge,
       path: null,
       publicUrl: null,
     };
@@ -159,7 +161,7 @@ async function uploadProjectImage(
 
   if (error) {
     return {
-      error: `Nie udało się przesłać zdjęcia: ${error.message}`,
+      error: copy.errors.uploadFailed(error.message),
       path: null,
       publicUrl: null,
     };
@@ -177,9 +179,10 @@ async function uploadProjectImages(
   userId: string,
   imageFiles: File[]
 ) {
+  const copy = getWorkspaceCopy().accountPortfolio;
   if (imageFiles.length > maxProjectImages) {
     return {
-      error: `Prześlij maksymalnie ${maxProjectImages} zdjęć na projekt.`,
+      error: copy.errors.tooManyImages(maxProjectImages),
       uploadedPaths: [],
       uploadedUrls: [],
     };
@@ -218,6 +221,7 @@ async function uploadProjectImages(
 async function updateProject(formData: FormData) {
   "use server";
 
+  const copy = getWorkspaceCopy().accountPortfolio;
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getUser();
   const user = data.user;
@@ -227,8 +231,8 @@ async function updateProject(formData: FormData) {
   const projectId = textValue(formData, "project_id");
   const title = textValue(formData, "title");
 
-  if (!projectId) redirect("/account/projects?error=Brakuje%20identyfikatora%20projektu");
-  if (!title) redirect("/account/projects?error=Tytu%C5%82%20projektu%20jest%20wymagany");
+  if (!projectId) redirect(`/account/projects?error=${encodeURIComponent(copy.errors.projectIdMissing)}`);
+  if (!title) redirect(`/account/projects?error=${encodeURIComponent(copy.errors.titleRequired)}`);
   const category = textValue(formData, "category");
   const description = textValue(formData, "description");
   const moderationError = publicTextError([title, category, description]);
@@ -244,7 +248,7 @@ async function updateProject(formData: FormData) {
   if (currentError || !currentProject) {
     redirect(
       `/account/projects?error=${encodeURIComponent(
-        currentError?.message ?? "Nie znaleziono projektu."
+        currentError?.message ?? copy.errors.projectMissing
       )}`
     );
   }
@@ -292,7 +296,7 @@ async function updateProject(formData: FormData) {
     }
     redirect(
       `/account/projects?error=${encodeURIComponent(
-        `Ten projekt miałby ${nextUrls.length} zdjęć. Limit to ${maxProjectImages}.`
+        copy.errors.projectLimit(nextUrls.length, maxProjectImages)
       )}`
     );
   }
@@ -335,6 +339,7 @@ async function updateProject(formData: FormData) {
 async function deleteProjectImage(formData: FormData) {
   "use server";
 
+  const copy = getWorkspaceCopy().accountPortfolio;
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getUser();
   const user = data.user;
@@ -345,9 +350,9 @@ async function deleteProjectImage(formData: FormData) {
   const imageIndexValue = textValue(formData, "image_index");
   const imageIndex = imageIndexValue ? Number.parseInt(imageIndexValue, 10) : Number.NaN;
 
-  if (!projectId) redirect("/account/projects?error=Brakuje%20identyfikatora%20projektu");
+  if (!projectId) redirect(`/account/projects?error=${encodeURIComponent(copy.errors.projectIdMissing)}`);
   if (!Number.isInteger(imageIndex) || imageIndex < 0) {
-    redirect("/account/projects?error=Nieprawid%C5%82owy%20wyb%C3%B3r%20zdj%C4%99cia");
+    redirect(`/account/projects?error=${encodeURIComponent(copy.errors.imageSelectionInvalid)}`);
   }
 
   const { data: currentProject, error: currentError } = await supabase
@@ -360,7 +365,7 @@ async function deleteProjectImage(formData: FormData) {
   if (currentError || !currentProject) {
     redirect(
       `/account/projects?error=${encodeURIComponent(
-        currentError?.message ?? "Nie znaleziono projektu."
+        currentError?.message ?? copy.errors.projectMissing
       )}`
     );
   }
@@ -381,7 +386,7 @@ async function deleteProjectImage(formData: FormData) {
       : [];
 
   if (imageIndex >= currentUrls.length) {
-    redirect("/account/projects?error=Nieprawid%C5%82owy%20wyb%C3%B3r%20zdj%C4%99cia");
+    redirect(`/account/projects?error=${encodeURIComponent(copy.errors.imageSelectionInvalid)}`);
   }
 
   const pathToRemove = currentPaths[imageIndex] ?? null;
@@ -417,6 +422,7 @@ async function deleteProjectImage(formData: FormData) {
 async function deleteProject(formData: FormData) {
   "use server";
 
+  const copy = getWorkspaceCopy().accountPortfolio;
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getUser();
   const user = data.user;
@@ -424,7 +430,7 @@ async function deleteProject(formData: FormData) {
   if (!user) redirect("/login");
 
   const projectId = textValue(formData, "project_id");
-  if (!projectId) redirect("/account/projects?error=Brakuje%20identyfikatora%20projektu");
+  if (!projectId) redirect(`/account/projects?error=${encodeURIComponent(copy.errors.projectIdMissing)}`);
 
   const { data: currentProject, error: currentError } = await supabase
     .from("projects")
@@ -436,7 +442,7 @@ async function deleteProject(formData: FormData) {
   if (currentError || !currentProject) {
     redirect(
       `/account/projects?error=${encodeURIComponent(
-        currentError?.message ?? "Nie znaleziono projektu."
+        currentError?.message ?? copy.errors.projectMissing
       )}`
     );
   }
@@ -480,6 +486,7 @@ export default async function ManageProjectsPage({
     updated?: string;
   }>;
 }) {
+  const copy = getWorkspaceCopy().accountPortfolio;
   const sp = (await searchParams) ?? {};
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -491,7 +498,7 @@ export default async function ManageProjectsPage({
     getActiveAdminRole(supabase, user.id),
   ]);
   if (accountRole !== "designer" && !adminRole) {
-    redirect("/account/profile?error=Konto%20klienta%20nie%20mo%C5%BCe%20zarz%C4%85dza%C4%87%20portfolio%20projektanta.");
+    redirect(`/account/profile?error=${encodeURIComponent(copy.errors.clientOnly)}`);
   }
 
   const { data: projectsData, error } = await supabase
@@ -534,33 +541,32 @@ export default async function ManageProjectsPage({
             href="/account"
             className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
           >
-            Wróć do konta
+            {copy.back}
           </Link>
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
-              <div className="text-sm font-semibold text-primary">Zarządzanie portfolio</div>
+              <div className="text-sm font-semibold text-primary">{copy.eyebrow}</div>
               <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
-                Zarządzaj projektami
+                {copy.title}
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-                Dodaj realizacje, które pokażą charakter Twojej pracy i pomogą klientom
-                zaufać profilowi.
+                {copy.intro}
               </p>
             </div>
 
             <div className="rounded-2xl border border-line bg-background p-5 shadow-sm">
-              <div className="text-sm font-semibold text-muted">Status portfolio</div>
+              <div className="text-sm font-semibold text-muted">{copy.statusLabel}</div>
               <div className="mt-2 text-2xl font-bold text-primary">
-                {projectStatus(projects)}
+                {projectStatus(projects, copy)}
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-xl border border-line bg-card p-3">
-                  <div className="text-muted">Projekty</div>
+                  <div className="text-muted">{copy.projects}</div>
                   <div className="mt-1 text-xl font-bold">{projects.length}</div>
                 </div>
                 <div className="rounded-xl border border-line bg-card p-3">
-                  <div className="text-muted">Kategorie</div>
+                  <div className="text-muted">{copy.categories}</div>
                   <div className="mt-1 text-xl font-bold">{categories.length}</div>
                 </div>
               </div>
@@ -577,33 +583,33 @@ export default async function ManageProjectsPage({
             </div>
           ) : sp.created ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
-              Projekt został dodany i jest widoczny w profilu publicznym.
+              {copy.createdNotice}
             </div>
           ) : sp.updated ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
-              Projekt został zaktualizowany. Galeria profilu publicznego jest już odświeżona.
+              {copy.updatedNotice}
             </div>
           ) : sp.imageDeleted ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
-              Zdjęcie zostało usunięte z galerii projektu.
+              {copy.imageDeletedNotice}
             </div>
           ) : sp.deleted ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
-              Projekt został usunięty z publicznego portfolio.
+              {copy.deletedNotice}
             </div>
           ) : null}
 
           <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-sm font-semibold text-primary">Twoje portfolio</div>
-                <h2 className="mt-1 text-3xl font-bold">Projekty publiczne</h2>
+                <div className="text-sm font-semibold text-primary">{copy.yourPortfolio}</div>
+                <h2 className="mt-1 text-3xl font-bold">{copy.publicProjects}</h2>
               </div>
               <Link
                 href={`/designers/${user.id}#portfolio`}
                 className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
               >
-                Zobacz publiczne portfolio
+                {copy.viewPublicPortfolio}
               </Link>
             </div>
 
@@ -620,10 +626,9 @@ export default async function ManageProjectsPage({
                   }}
                 >
                   <div className="flex min-h-[260px] max-w-xl flex-col justify-end p-6 text-white">
-                    <h3 className="text-3xl font-bold">Zacznij od jednego mocnego projektu</h3>
+                    <h3 className="text-3xl font-bold">{copy.emptyTitle}</h3>
                     <p className="mt-3 text-sm leading-6 text-white/80">
-                      Dodaj tytuł, kategorię, zdjęcie i krótki opis. To wystarczy, aby
-                      publiczny profil zaczął pracować na Twoją wiarygodność.
+                      {copy.emptyBody}
                     </p>
                   </div>
                 </div>
@@ -636,10 +641,10 @@ export default async function ManageProjectsPage({
                     className="overflow-hidden rounded-2xl border border-line bg-background"
                   >
                     <ProjectGallery
-                      category={project.category || "Bez kategorii"}
+                      category={project.category || copy.noCategory}
                       description={project.description}
                       images={galleryFor(project, index)}
-                      title={project.title || "Projekt bez tytułu"}
+                      title={project.title || copy.untitledProject}
                     />
                     <div className="p-5">
                       {project.description ? (
@@ -648,7 +653,7 @@ export default async function ManageProjectsPage({
                         </p>
                       ) : (
                         <p className="text-sm leading-6 text-muted">
-                          Dodaj opis briefu, kierunku stylistycznego i rezultatu.
+                          {copy.descriptionFallback}
                         </p>
                       )}
                       <div className="mt-4 flex flex-wrap gap-3">
@@ -656,7 +661,7 @@ export default async function ManageProjectsPage({
                           href={`/projects/${project.id}`}
                           className="inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
                         >
-                          Zobacz stronę projektu
+                          {copy.viewProject}
                         </Link>
                         {project.project_url ? (
                           <a
@@ -665,14 +670,14 @@ export default async function ManageProjectsPage({
                             rel="noreferrer"
                             className="inline-flex rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
                           >
-                            Otwórz stronę zewnętrzną
+                            {copy.openExternal}
                           </a>
                         ) : null}
                       </div>
                       {actualImageItems(project).length ? (
                         <details className="mt-3 overflow-hidden rounded-xl border border-line bg-card">
                           <summary className="block cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-primary">
-                            Zarządzaj zdjęciami
+                            {copy.manageImages}
                           </summary>
                           <div className="grid grid-cols-2 gap-3 border-t border-line p-3">
                             {actualImageItems(project).map((image) => (
@@ -681,9 +686,7 @@ export default async function ManageProjectsPage({
                                 className="overflow-hidden rounded-xl border border-line bg-background"
                               >
                                 <div
-                                  aria-label={`${project.title || "Projekt"} zdjęcie ${
-                                    image.index + 1
-                                  }`}
+                                  aria-label={copy.imageAria(project.title || copy.untitledProject, image.index + 1)}
                                   className="h-28 w-full bg-cover bg-center"
                                   role="img"
                                   style={{ backgroundImage: `url(${image.url})` }}
@@ -699,7 +702,7 @@ export default async function ManageProjectsPage({
                                     type="submit"
                                     className="w-full rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100"
                                   >
-                                    Usuń zdjęcie
+                                    {copy.deleteImage}
                                   </button>
                                 </form>
                               </div>
@@ -709,12 +712,12 @@ export default async function ManageProjectsPage({
                       ) : null}
                       <details className="mt-3 overflow-hidden rounded-xl border border-line bg-card">
                         <summary className="block cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-primary">
-                          Edytuj projekt
+                          {copy.editProject}
                         </summary>
                         <form action={updateProject} className="grid gap-4 border-t border-line p-4">
                           <input type="hidden" name="project_id" value={project.id} />
 
-                          <Field label="Tytuł">
+                          <Field label={copy.fieldTitle}>
                             <input
                               name="title"
                               defaultValue={project.title ?? ""}
@@ -722,16 +725,16 @@ export default async function ManageProjectsPage({
                             />
                           </Field>
 
-                          <Field label="Kategoria">
+                          <Field label={copy.fieldCategory}>
                             <input
                               name="category"
                               defaultValue={project.category ?? ""}
-                              placeholder="Mieszkanie, dom, biuro..."
+                              placeholder={copy.categoryPlaceholder}
                               className={fieldClass}
                             />
                           </Field>
 
-                          <Field label="Opis">
+                          <Field label={copy.fieldDescription}>
                             <textarea
                               name="description"
                               defaultValue={project.description ?? ""}
@@ -741,8 +744,8 @@ export default async function ManageProjectsPage({
                           </Field>
 
                           <Field
-                            label="Dodaj zdjęcia"
-                            hint={`${galleryFor(project, index).length}/${maxProjectImages} wykorzystano`}
+                            label={copy.addImages}
+                            hint={copy.imageUse(galleryFor(project, index).length, maxProjectImages)}
                           >
                             <input
                               name="image_files"
@@ -753,11 +756,11 @@ export default async function ManageProjectsPage({
                             />
                           </Field>
 
-                          <Field label="Link do projektu" hint="opcjonalna strona zewnętrzna">
+                          <Field label={copy.projectLink} hint={copy.projectLinkHint}>
                             <input
                               name="project_url"
                               defaultValue={project.project_url ?? ""}
-                              placeholder="https://twoja-pracownia.pl/projekty/..."
+                              placeholder={copy.projectLinkPlaceholder}
                               className={fieldClass}
                             />
                           </Field>
@@ -769,9 +772,9 @@ export default async function ManageProjectsPage({
                               className="mt-1 h-4 w-4 accent-primary"
                             />
                             <span>
-                              <span className="font-semibold">Zastąp obecną galerię</span>
+                              <span className="font-semibold">{copy.replaceGallery}</span>
                               <span className="mt-1 block text-muted">
-                                Pozostaw odznaczone, aby dodać wybrane zdjęcia do projektu.
+                                {copy.replaceGalleryBody}
                               </span>
                             </span>
                           </label>
@@ -780,18 +783,17 @@ export default async function ManageProjectsPage({
                             type="submit"
                             className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90"
                           >
-                            Zapisz zmiany projektu
+                            {copy.saveChanges}
                           </button>
                         </form>
                       </details>
                       <details className="mt-3 overflow-hidden rounded-xl border border-red-200 bg-red-50">
                         <summary className="block cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-red-700">
-                          Usuń projekt
+                          {copy.deleteProject}
                         </summary>
                         <div className="border-t border-red-200 p-4">
                           <p className="text-sm leading-6 text-red-700">
-                            Ta operacja usuwa projekt z publicznego portfolio oraz kasuje
-                            przesłane zdjęcia z pamięci.
+                            {copy.deleteProjectBody}
                           </p>
                           <form action={deleteProject} className="mt-4">
                             <input type="hidden" name="project_id" value={project.id} />
@@ -799,7 +801,7 @@ export default async function ManageProjectsPage({
                               type="submit"
                               className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white hover:bg-red-700"
                             >
-                              Usuń ten projekt
+                              {copy.deleteThisProject}
                             </button>
                           </form>
                         </div>
@@ -813,17 +815,16 @@ export default async function ManageProjectsPage({
         </div>
 
         <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
-          <div className="text-sm font-semibold text-primary">Dodaj projekt</div>
-          <h2 className="mt-1 text-2xl font-bold">Utwórz kartę portfolio</h2>
+          <div className="text-sm font-semibold text-primary">{copy.addProject}</div>
+          <h2 className="mt-1 text-2xl font-bold">{copy.createCard}</h2>
           <p className="mt-3 text-sm leading-6 text-muted">
-            Pierwsza wersja może być prosta. Na początek wystarczą jasny tytuł i jedno dobre zdjęcie.
+            {copy.createIntro}
           </p>
 
           <ProjectCreateForm />
 
           <div className="mt-6 rounded-2xl border border-line bg-background p-4 text-sm leading-6 text-muted">
-            Zdjęcia tworzą galerię w karcie projektu. Link do projektu służy do wskazania
-            osobnej strony, którą chcesz udostępniać poza ArchiCompass.
+            {copy.createMediaNote}
           </div>
         </aside>
       </section>

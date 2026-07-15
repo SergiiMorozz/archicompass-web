@@ -4,11 +4,11 @@ ArchiCompass is being consolidated onto one source branch. The production locale
 
 ## Migration status
 
-The shared foundation, home page, global navigation, account entry flow, password recovery, onboarding, Inspiration Hub, public designer directory and profiles, client workspace, the main Designer Studio views, and the main Admin views render from typed locale contracts in one source tree.
+The shared foundation, home page, global navigation, account entry flow, password recovery, onboarding, Inspiration Hub, public designer directory and profiles, client workspace, account profile and portfolio management, the main Designer Studio views, and the main Admin views render from typed locale contracts in one source tree.
 
 The Polish and English deployment branches must always point to the same application commit. The two Vercel projects differ only by `NEXT_PUBLIC_SITE_LOCALE`; no feature or visual fix may be introduced in one language branch without being released from the same source commit to the other.
 
-The remaining route groups are being migrated into the shared contract route by route: AI Project Compass detail UI, account editing and project management, Studio team and individual conversation views, and the remaining Admin detail/content views.
+The remaining route groups are being migrated into the shared contract route by route: AI Project Compass detail UI, account briefs and enquiry history, remaining public city and studio details, and the remaining Admin content views.
 
 ## Required Vercel variables
 
@@ -36,10 +36,10 @@ remaining route groups are still being migrated to the shared source.
 
 - `lib/site-locale.ts` owns the locale, the public `/en` path, the internal rewrite host, and HTML/SEO locale metadata.
 - `content/site-copy.ts` owns the paired PL and EN contracts for the shared global UI, account entry flow, and Inspiration Hub.
-- `content/workspace-copy.ts` owns paired PL and EN contracts for the account dashboard, client workspace, main Designer Studio views, and Admin dashboard, users, team, and activity views.
+- `content/workspace-copy.ts` owns paired PL and EN contracts for the account dashboard, profile editor, portfolio management, client workspace, main Designer Studio views, and Admin dashboard, users, team, and activity views.
 - `content/public-profile-copy.ts` owns paired system labels visible on public profiles, including location, experience, price, availability, contact, and portfolio.
 - `lib/profile-system-labels.ts`, `lib/profile-pricing.ts`, `lib/professional-options.ts`, and `lib/service-capabilities.ts` translate stored platform values from their canonical database keys. They must not store language-specific values in a profile row.
-- `Header`, `Footer`, root metadata, home page, login, registration, password recovery, onboarding, Inspiration Hub, article pages, designer directory, client workspace, account dashboard, main Designer Studio views, and main Admin views render from shared content contracts.
+- `Header`, `Footer`, root metadata, home page, login, registration, password recovery, onboarding, Inspiration Hub, article pages, designer directory, client workspace, account dashboard, profile editor, portfolio management, main Designer Studio views, and main Admin views render from shared content contracts.
 
 Both entries in `content/site-copy.ts` must satisfy the same `SiteCopy` TypeScript type. Adding a field to one language without adding it to the other therefore fails type checking.
 
@@ -49,9 +49,11 @@ Both entries in `content/site-copy.ts` must satisfy the same `SiteCopy` TypeScri
 - English: `https://archicompass.pl/en/<route>`
 - Root English URL: `https://archicompass.pl/en`
 
-Use `localePublicPath()` for internal links and `localePublicUrl()` for canonical,
-Open Graph, JSON-LD, and alternate-language URLs. `localeSiteUrl()` is only for
-the internal deployment origin used by the `/en` rewrite.
+Use `localeAppPath()` for Next.js internal links in the current deployment and
+`localePublicPath()` only for a public cross-locale URL. Use `localePublicUrl()`
+for canonical, Open Graph, JSON-LD, and alternate-language URLs.
+`localeSiteUrl()` is only for the internal deployment origin used by the `/en`
+rewrite. This distinction prevents accidental `/en/en/...` links.
 
 ## Author-provided profile copy
 

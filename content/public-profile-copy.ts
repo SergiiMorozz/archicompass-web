@@ -20,6 +20,16 @@ type PublicProfileCopy = {
     notSpecified: string;
     demoContactUnavailable: string;
   };
+  gallery: {
+    open: (title: string) => string;
+    photoCount: (count: number) => string;
+    openPhoto: (index: number, title: string) => string;
+    fullSizeAlt: (title: string) => string;
+    photoPosition: (current: number, total: number) => string;
+    close: string;
+    previous: string;
+    next: string;
+  };
 };
 
 const publicProfileCopy: Record<SiteLocale, PublicProfileCopy> = {
@@ -43,6 +53,26 @@ const publicProfileCopy: Record<SiteLocale, PublicProfileCopy> = {
       notSpecified: "Nie określono",
       demoContactUnavailable: "Niedostępny w profilu demonstracyjnym",
     },
+    gallery: {
+      open: (title) => `Otwórz galerię: ${title}`,
+      photoCount: (count) => {
+        const absolute = Math.abs(count);
+        const lastTwo = absolute % 100;
+        const last = absolute % 10;
+        const label = absolute === 1
+          ? "zdjęcie"
+          : last >= 2 && last <= 4 && !(lastTwo >= 12 && lastTwo <= 14)
+            ? "zdjęcia"
+            : "zdjęć";
+        return `Zobacz ${count} ${label}`;
+      },
+      openPhoto: (index, title) => `Otwórz zdjęcie ${index}: ${title}`,
+      fullSizeAlt: (title) => `${title} w pełnym rozmiarze`,
+      photoPosition: (current, total) => `Zdjęcie ${current} z ${total}`,
+      close: "Zamknij",
+      previous: "Poprzednie",
+      next: "Następne",
+    },
   },
   en: {
     labels: {
@@ -63,6 +93,16 @@ const publicProfileCopy: Record<SiteLocale, PublicProfileCopy> = {
       toBeAgreed: "To be agreed",
       notSpecified: "Not specified",
       demoContactUnavailable: "Unavailable on a demo profile",
+    },
+    gallery: {
+      open: (title) => `Open gallery: ${title}`,
+      photoCount: (count) => `View ${count} ${count === 1 ? "photo" : "photos"}`,
+      openPhoto: (index, title) => `Open image ${index}: ${title}`,
+      fullSizeAlt: (title) => `${title} full size`,
+      photoPosition: (current, total) => `Image ${current} of ${total}`,
+      close: "Close",
+      previous: "Previous",
+      next: "Next",
     },
   },
 };

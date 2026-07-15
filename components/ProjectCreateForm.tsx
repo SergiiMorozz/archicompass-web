@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 
 const maxImages = 30;
 const maxImageSize = 10 * 1024 * 1024;
@@ -18,6 +19,7 @@ function extension(file: File) {
 }
 
 export default function ProjectCreateForm() {
+  const copy = getWorkspaceCopy().accountPortfolio.create;
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
@@ -32,16 +34,16 @@ export default function ProjectCreateForm() {
       .filter((value): value is File => value instanceof File && value.size > 0);
 
     if (!String(data.get("title") || "").trim()) {
-      setError("Tytuł projektu jest wymagany.");
+      setError(copy.titleRequired);
       return;
     }
     if (files.length > maxImages) {
-      setError(`Wybierz maksymalnie ${maxImages} zdjęć.`);
+      setError(copy.imageMaximum(maxImages));
       return;
     }
     const invalid = files.find((file) => !allowedTypes.has(file.type) || file.size > maxImageSize);
     if (invalid) {
-      setError(`${invalid.name} musi być plikiem JPEG, PNG lub WebP mniejszym niż 10 MB.`);
+      setError(copy.invalidImage(invalid.name));
       return;
     }
 
@@ -64,7 +66,7 @@ export default function ProjectCreateForm() {
         const { error: uploadError } = await supabase.storage
           .from("project-images")
           .upload(path, file, { contentType: file.type, upsert: false });
-        if (uploadError) throw new Error(`Nie udało się przesłać ${file.name}: ${uploadError.message}`);
+        if (uploadError) throw new Error(copy.uploadFailed(file.name, uploadError.message));
         paths.push(path);
         urls.push(supabase.storage.from("project-images").getPublicUrl(path).data.publicUrl);
         setProgress(index + 1);
@@ -83,11 +85,11 @@ export default function ProjectCreateForm() {
         }),
       });
       const payload = (await response.json()) as { error?: string };
-      if (!response.ok) throw new Error(payload.error || "Nie udało się utworzyć projektu.");
+      if (!response.ok) throw new Error(payload.error || copy.createFailed);
       window.location.assign("/account/projects?created=1");
     } catch (reason) {
       if (paths.length) await supabase.storage.from("project-images").remove(paths);
-      setError(reason instanceof Error ? reason.message : "Nie udało się utworzyć projektu.");
+      setError(reason instanceof Error ? reason.message : copy.createFailed);
       setBusy(false);
     }
   }
@@ -96,27 +98,27 @@ export default function ProjectCreateForm() {
     <form onSubmit={submit} className="mt-6 grid gap-5">
       {error ? <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div> : null}
       <label className="block text-sm font-semibold">
-        Tytuł
-        <input name="title" required placeholder="Nowoczesne mieszkanie w Warszawie" className={fieldClass} />
+        {copy.title}
+        <input name="title" required placeholder={copy.titlePlaceholder} className={fieldClass} />
       </label>
       <label className="block text-sm font-semibold">
-        Kategoria <span className="font-normal text-muted">rodzaj wnętrza lub inwestycji</span>
-        <input name="category" placeholder="Mieszkanie, dom, biuro..." className={fieldClass} />
+        {copy.category} <span className="font-normal text-muted">{copy.categoryHint}</span>
+        <input name="category" placeholder={copy.categoryPlaceholder} className={fieldClass} />
       </label>
       <label className="block text-sm font-semibold">
-        Zdjęcia projektu <span className="font-normal text-muted">do {maxImages} plików JPEG, PNG lub WebP</span>
+        {copy.images} <span className="font-normal text-muted">{copy.imagesHint(maxImages)}</span>
         <input name="image_files" type="file" accept="image/jpeg,image/png,image/webp" multiple className={fileClass} />
       </label>
       <label className="block text-sm font-semibold">
-        Link do projektu <span className="font-normal text-muted">opcjonalna strona zewnętrzna</span>
-        <input name="project_url" type="url" placeholder="https://twoja-pracownia.pl/projekty/..." className={fieldClass} />
+        {copy.link} <span className="font-normal text-muted">{copy.linkHint}</span>
+        <input name="project_url" type="url" placeholder={copy.linkPlaceholder} className={fieldClass} />
       </label>
       <label className="block text-sm font-semibold">
-        Opis
-        <textarea name="description" rows={5} placeholder="Opisz brief, kierunek projektowy i rezultat." className={fieldClass} />
+        {copy.description}
+        <textarea name="description" rows={5} placeholder={copy.descriptionPlaceholder} className={fieldClass} />
       </label>
       <button disabled={busy} type="submit" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-wait disabled:opacity-60">
-        {busy ? `Przesyłanie zdjęcia ${progress || 1}...` : "Dodaj projekt"}
+        {busy ? copy.busy(progress || 1) : copy.submit}
       </button>
     </form>
   );
