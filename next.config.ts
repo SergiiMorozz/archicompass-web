@@ -15,7 +15,20 @@ const nextConfig: NextConfig = {
     },
   },
   async redirects() {
-    if (!isEnglishZone) return [];
+    if (!isEnglishZone) {
+      return [
+        {
+          source: "/en/en",
+          destination: "/en",
+          permanent: true,
+        },
+        {
+          source: "/en/en/:path*",
+          destination: "/en/:path*",
+          permanent: true,
+        },
+      ];
+    }
 
     return [
       {
