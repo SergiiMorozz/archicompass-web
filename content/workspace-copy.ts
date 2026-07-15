@@ -168,6 +168,55 @@ type AdminActivityCopy = {
   openUsers: string;
 };
 
+type StudioConversationCopy = {
+  dateLocale: string;
+  client: string;
+  professional: string;
+  attachmentOnly: string;
+  attachmentNotice: (names: string) => string;
+  back: string;
+  conversationWith: (name: string) => string;
+  new: string;
+  statusLabel: string;
+  reviewing: string;
+  accepted: string;
+  declined: string;
+  update: string;
+  messageSent: string;
+  statusUpdated: string;
+  messagesEyebrow: string;
+  messagesTitle: string;
+  refresh: string;
+  openingMessage: string;
+  you: string;
+  studioTeam: string;
+  readByClient: string;
+  sent: string;
+  emptyMessages: string;
+  replyTo: (name: string) => string;
+  replyPlaceholder: string;
+  attachFiles: string;
+  attachmentLimit: string;
+  privacyNotice: string;
+  sendMessage: string;
+  sending: string;
+  matchEyebrow: string;
+  briefFields: [string, string, string, string, string, string, string, string, string, string, string];
+  contactEyebrow: string;
+  email: string;
+  phone: string;
+  notSpecified: string;
+  referencePhotos: string;
+  fullBrief: string;
+  errors: {
+    missingMessage: string;
+    messageTooLong: string;
+    unavailable: string;
+    invalidStatus: string;
+    statusPermission: string;
+  };
+};
+
 type WorkspaceCopy = {
   account: AccountCopy;
   clientOverview: ClientOverviewCopy;
@@ -333,6 +382,7 @@ type WorkspaceCopy = {
   adminUsers: AdminUsersCopy;
   adminTeam: AdminTeamCopy;
   adminActivity: AdminActivityCopy;
+  studioConversation: StudioConversationCopy;
   adminOverview: {
     dateLocale: string;
     accountLabels: { professional: string; client: string; noProfile: string };
@@ -690,6 +740,54 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       emptyTitle: "Brak działań administracyjnych",
       emptyBody: "Zmiany weryfikacji i moderacji pojawią się tutaj.",
       openUsers: "Otwórz użytkowników",
+    },
+    studioConversation: {
+      dateLocale: "pl-PL",
+      client: "Klient",
+      professional: "Projektant wnętrz",
+      attachmentOnly: "Udostępniono załączniki",
+      attachmentNotice: (names) => `Udostępniono załączniki: ${names}`,
+      back: "Wróć do zapytań",
+      conversationWith: (name) => `Rozmowa z: ${name}`,
+      new: "Nowe",
+      statusLabel: "Status zapytania",
+      reviewing: "W trakcie analizy",
+      accepted: "Zaakceptowane",
+      declined: "Odrzucone",
+      update: "Aktualizuj",
+      messageSent: "Wiadomość została wysłana. Klient widzi ją w historii zapytania.",
+      statusUpdated: "Status zapytania został zaktualizowany.",
+      messagesEyebrow: "Wiadomości",
+      messagesTitle: "Rozmowa z klientem",
+      refresh: "Odśwież",
+      openingMessage: "pierwsza wiadomość",
+      you: "Ty",
+      studioTeam: "Zespół pracowni",
+      readByClient: "Przeczytane przez klienta",
+      sent: "Wysłano",
+      emptyMessages: "Nie ma jeszcze wiadomości. Zacznij od konkretnego pytania o zakres, termin, budżet lub dostępność.",
+      replyTo: (name) => `Odpowiedz: ${name}`,
+      replyPlaceholder: "Zadaj pytanie, potwierdź dopasowanie lub zaproponuj następny krok...",
+      attachFiles: "Dodaj plany lub dokumenty",
+      attachmentLimit: "do 5 plików, po 20 MB",
+      privacyNotice: "Wiadomości widzi tylko ten klient oraz projektant lub aktywny zespół pracowni.",
+      sendMessage: "Wyślij wiadomość",
+      sending: "Wysyłanie...",
+      matchEyebrow: "Dopasowanie projektu",
+      briefFields: ["Projekt", "Cel", "Styl", "Wsparcie", "Budżet", "Powierzchnia", "Pomieszczenia", "Nieruchomość", "3D", "Nadzór", "Lokalizacja"],
+      contactEyebrow: "Kontakt z klientem",
+      email: "E-mail",
+      phone: "Telefon",
+      notSpecified: "Nie podano",
+      referencePhotos: "Zdjęcia referencyjne klienta",
+      fullBrief: "Otwórz pełną treść briefu",
+      errors: {
+        missingMessage: "Napisz wiadomość lub dodaj załącznik przed wysłaniem.",
+        messageTooLong: "Wiadomość może mieć maksymalnie 4000 znaków.",
+        unavailable: "Ta rozmowa nie jest dostępna.",
+        invalidStatus: "Wybierz prawidłowy status zapytania.",
+        statusPermission: "Tylko projektant lub zespół pracowni może zmienić status tego zapytania.",
+      },
     },
     adminNav: {
       dashboard: "Pulpit",
@@ -1055,6 +1153,54 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       emptyTitle: "No administrative activity yet",
       emptyBody: "Verification and moderation changes will appear here.",
       openUsers: "Open users",
+    },
+    studioConversation: {
+      dateLocale: "en-GB",
+      client: "Client",
+      professional: "Interior designer",
+      attachmentOnly: "Attachments shared",
+      attachmentNotice: (names) => `Attachments shared: ${names}`,
+      back: "Back to enquiries",
+      conversationWith: (name) => `Conversation with: ${name}`,
+      new: "New",
+      statusLabel: "Enquiry status",
+      reviewing: "In review",
+      accepted: "Accepted",
+      declined: "Declined",
+      update: "Update",
+      messageSent: "Message sent. The client can see it in the enquiry history.",
+      statusUpdated: "Enquiry status updated.",
+      messagesEyebrow: "Messages",
+      messagesTitle: "Conversation with client",
+      refresh: "Refresh",
+      openingMessage: "opening message",
+      you: "You",
+      studioTeam: "Studio team",
+      readByClient: "Read by client",
+      sent: "Sent",
+      emptyMessages: "There are no messages yet. Start with a focused question about the scope, timing, budget, or availability.",
+      replyTo: (name) => `Reply to: ${name}`,
+      replyPlaceholder: "Ask a question, confirm the fit, or suggest the next step...",
+      attachFiles: "Add plans or documents",
+      attachmentLimit: "up to 5 files, 20 MB each",
+      privacyNotice: "Messages are visible only to this client and the designer or active studio team.",
+      sendMessage: "Send message",
+      sending: "Sending...",
+      matchEyebrow: "Project match",
+      briefFields: ["Project", "Goal", "Style", "Support", "Budget", "Area", "Rooms", "Property", "3D", "Supervision", "Location"],
+      contactEyebrow: "Client contact",
+      email: "Email",
+      phone: "Phone",
+      notSpecified: "Not specified",
+      referencePhotos: "Client reference photos",
+      fullBrief: "Open full brief",
+      errors: {
+        missingMessage: "Write a message or add an attachment before sending.",
+        messageTooLong: "A message can contain up to 4,000 characters.",
+        unavailable: "This conversation is not available.",
+        invalidStatus: "Choose a valid enquiry status.",
+        statusPermission: "Only the designer or studio team can change this enquiry status.",
+      },
     },
     adminNav: {
       dashboard: "Dashboard",

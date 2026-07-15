@@ -22,6 +22,7 @@ const workspaceSourceFiles = [
   "app/client/briefs/page.tsx",
   "app/studio/page.tsx",
   "app/studio/inbox/page.tsx",
+  "app/studio/inbox/[id]/page.tsx",
   "app/studio/analytics/page.tsx",
   "app/admin/page.tsx",
   "app/admin/activity/page.tsx",
