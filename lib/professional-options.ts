@@ -90,6 +90,7 @@ const polishLabels: Record<string, string> = {
   Retail: "lokal handlowy",
 };
 
-export function professionalOptionLabel(value: string) {
-  return polishLabels[value] || value;
+export function professionalOptionLabel(value: string, locale: SiteLocale = siteLocale) {
+  return locale === "pl" ? polishLabels[value] || value : value;
 }
+import { siteLocale, type SiteLocale } from "@/lib/site-locale";

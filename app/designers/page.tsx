@@ -29,6 +29,7 @@ import {
   getDemoProfilePresentation,
 } from "@/lib/public-demo-profiles";
 import { localizeProfileContent } from "@/lib/localized-profile-content";
+import { profileExperienceLabel, profileLocationLabel, profileTypeLabel } from "@/lib/profile-system-labels";
 
 export const revalidate = 0;
 
@@ -203,33 +204,11 @@ function profileTitle(profile: Profile) {
 }
 
 function profileType(profile: Profile) {
-  const labels: Record<string, string> = {
-    "Interior architect": "Architekt wnętrz",
-    "Interior designer": "Projektant wnętrz",
-    "Interior design studio": "Pracownia projektowania wnętrz",
-    "Interior design practice": "Pracownia projektowania wnętrz",
-    "Interior architecture studio": "Pracownia architektury wnętrz",
-    professional: "Specjalista",
-  };
-  const value = profile.profession_type || profile.user_type || "professional";
-  return labels[value] || value;
+  return profileTypeLabel(profile.profession_type || profile.user_type || "professional");
 }
 
 function profileLocation(profile: Profile) {
-  if (!profile.location) return "Praca zdalna / lokalizacja do uzgodnienia";
-  return profile.location
-    .replace("Warsaw", "Warszawa")
-    .replace("Krakow", "Kraków")
-    .replace("Wroclaw", "Wrocław")
-    .replace("Gdansk", "Gdańsk")
-    .replace("Poznan", "Poznań")
-    .replace("Lodz", "Łódź")
-    .replace("Poland", "Polska");
-}
-
-function experienceLabel(value: number | null) {
-  if (!value) return "Brak informacji o doświadczeniu";
-  return `${value}+ ${value === 1 ? "rok" : value < 5 ? "lata" : "lat"} doświadczenia`;
+  return profileLocationLabel(profile.location);
 }
 
 function professionalHref(type: "designer" | "studio", id: string, briefId: string) {
@@ -336,7 +315,7 @@ function StudioCard({
         <div className="mt-4 grid gap-2 text-sm text-muted">
           <span className="font-semibold text-primary">{pricingLabel(studio)}</span>
           <span>{studio.availability_status ? availabilityLabel(studio.availability_status) : "Dostępność do potwierdzenia"}</span>
-          {studio.work_modes?.length ? <span>{studio.work_modes.map(workModeLabel).join(" · ")}</span> : null}
+          {studio.work_modes?.length ? <span>{studio.work_modes.map((mode) => workModeLabel(mode)).join(" · ")}</span> : null}
         </div>
         <div className="mt-4">
           <GoogleRating compact rating={studio.google_rating} count={studio.google_review_count} url={studio.google_business_url} />
@@ -490,9 +469,9 @@ function DesignerCard({
 
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted">
               <span>{location}</span>
-              <span>{experienceLabel(profile.years_experience)}</span>
+              <span>{profileExperienceLabel(profile.years_experience)}</span>
               <span>{profile.availability_status ? availabilityLabel(profile.availability_status) : "Dostępność do potwierdzenia"}</span>
-              {profile.work_modes?.length ? <span>{profile.work_modes.map(workModeLabel).join(" · ")}</span> : null}
+              {profile.work_modes?.length ? <span>{profile.work_modes.map((mode) => workModeLabel(mode)).join(" · ")}</span> : null}
             </div>
             <div className="mt-3">
               <GoogleRating compact rating={profile.google_rating} count={profile.google_review_count} url={profile.google_business_url} />
@@ -597,9 +576,9 @@ function DesignerCard({
 
         <div className="mt-4 grid gap-2 text-sm text-muted">
           <span>{location}</span>
-          <span>{experienceLabel(profile.years_experience)}</span>
+          <span>{profileExperienceLabel(profile.years_experience)}</span>
           <span>{profile.availability_status ? availabilityLabel(profile.availability_status) : "Dostępność do potwierdzenia"}</span>
-          {profile.work_modes?.length ? <span>{profile.work_modes.map(workModeLabel).join(" · ")}</span> : null}
+          {profile.work_modes?.length ? <span>{profile.work_modes.map((mode) => workModeLabel(mode)).join(" · ")}</span> : null}
         </div>
         <div className="mt-3">
           <GoogleRating compact rating={profile.google_rating} count={profile.google_review_count} url={profile.google_business_url} />

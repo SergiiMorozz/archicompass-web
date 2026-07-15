@@ -9,7 +9,6 @@ import ProfileViewTracker from "@/components/ProfileViewTracker";
 import GoogleRating from "@/components/GoogleRating";
 import JsonLd from "@/components/JsonLd";
 import SocialLinks, { socialSameAs } from "@/components/SocialLinks";
-import { polishCountLabel } from "@/lib/count-label";
 import { getAccountRole } from "@/lib/studios";
 import { availabilityLabel, pricingLabel, workModeLabel } from "@/lib/profile-pricing";
 import { professionalOptionLabel } from "@/lib/professional-options";
@@ -22,6 +21,15 @@ import {
   getDemoProjectPresentation,
 } from "@/lib/public-demo-profiles";
 import { localizeProfileContent, localizedProfileText } from "@/lib/localized-profile-content";
+import {
+  profileExperienceLabel,
+  profileLanguageLabel,
+  profileLocationLabel,
+  profileProjectCountLabel,
+  profileTypeLabel,
+} from "@/lib/profile-system-labels";
+import { siteLocale } from "@/lib/site-locale";
+import { getPublicProfileCopy } from "@/content/public-profile-copy";
 
 export const revalidate = 0;
 
@@ -111,20 +119,6 @@ const activeFilterClass =
 const inactiveFilterClass =
   "rounded-full border border-line bg-background px-3 py-1 text-sm font-semibold text-muted transition hover:border-primary hover:text-primary";
 
-const languageLabels: Record<string, string> = {
-  Polish: "polski",
-  English: "angielski",
-  German: "niemiecki",
-  French: "francuski",
-  Spanish: "hiszpański",
-  Ukrainian: "ukraiński",
-  Russian: "rosyjski",
-};
-
-function languageLabel(value: string) {
-  return languageLabels[value] || value;
-}
-
 function isUuid(v: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 }
@@ -180,28 +174,11 @@ function profileTitle(profile: Profile) {
 }
 
 function profileType(profile: Profile) {
-  const labels: Record<string, string> = {
-    "Interior architect": "Architekt wnętrz",
-    "Interior designer": "Projektant wnętrz",
-    "Interior design studio": "Pracownia projektowania wnętrz",
-    "Interior design practice": "Pracownia projektowania wnętrz",
-    "Interior architecture studio": "Pracownia architektury wnętrz",
-    professional: "Specjalista",
-  };
-  const value = profile.profession_type || profile.user_type || "professional";
-  return labels[value] || value;
+  return profileTypeLabel(profile.profession_type || profile.user_type || "professional");
 }
 
 function profileLocation(profile: Profile) {
-  if (!profile.location) return "Praca zdalna / lokalizacja do uzgodnienia";
-  return profile.location
-    .replace("Warsaw", "Warszawa")
-    .replace("Krakow", "Kraków")
-    .replace("Wroclaw", "Wrocław")
-    .replace("Gdansk", "Gdańsk")
-    .replace("Poznan", "Poznań")
-    .replace("Lodz", "Łódź")
-    .replace("Poland", "Polska");
+  return profileLocationLabel(profile.location);
 }
 
 function initials(name: string) {
@@ -245,11 +222,6 @@ function publicImageUrl(supabase: SupabaseServerClient, imagePath: string | null
 function profileMediaUrl(supabase: SupabaseServerClient, imagePath: string | null) {
   if (!imagePath) return null;
   return supabase.storage.from(profileMediaBucket).getPublicUrl(imagePath).data.publicUrl;
-}
-
-function experienceLabel(value: number | null) {
-  if (!value) return "Brak danych";
-  return `${value}+ ${value === 1 ? "rok" : value < 5 ? "lata" : "lat"}`;
 }
 
 function portfolioHref(profileId: string, briefId: string, category?: string) {
@@ -412,6 +384,7 @@ export default async function DesignerProfilePage({
     (favoriteData ?? []).map((item) => `${item.entity_type}:${item.entity_key}`)
   );
   const title = profileTitle(profile);
+  const profileCopy = getPublicProfileCopy();
   const type = profileType(profile);
   const location = profileLocation(profile);
   const specialties = profile.specialties?.filter(Boolean).slice(0, 10) ?? [];
@@ -437,8 +410,8 @@ export default async function DesignerProfilePage({
     ? projects.filter((project) => project.category === selectedCategory)
     : projects;
   const portfolioCountText = selectedCategory
-    ? `${visibleProjects.length} z ${polishCountLabel(projects.length, "projektu", "projektów", "projektów")}`
-    : polishCountLabel(projects.length, "projekt", "projekty", "projektów");
+    ? `${visibleProjects.length} ${siteLocale === "pl" ? "z" : "of"} ${profileProjectCountLabel(projects.length)}`
+    : profileProjectCountLabel(projects.length);
 
   return (
     <main className="bg-background pb-28 lg:pb-0">
@@ -589,29 +562,29 @@ export default async function DesignerProfilePage({
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-2xl border border-line bg-background p-4">
                 <div className="text-xs font-semibold uppercase tracking-wide text-muted">
-                  Lokalizacja
+                  {profileCopy.labels.location}
                 </div>
                 <div className="mt-1 font-semibold">{location}</div>
               </div>
               <div className="rounded-2xl border border-line bg-background p-4">
                 <div className="text-xs font-semibold uppercase tracking-wide text-muted">
-                  Doświadczenie
+                  {profileCopy.labels.experience}
                 </div>
                 <div className="mt-1 font-semibold">
-                  {experienceLabel(profile.years_experience)}
+                  {profileExperienceLabel(profile.years_experience)}
                 </div>
               </div>
               <div className="rounded-2xl border border-line bg-background p-4">
                 <div className="text-xs font-semibold uppercase tracking-wide text-muted">
-                  Portfolio
+                  {profileCopy.labels.portfolio}
                 </div>
                 <div className="mt-1 font-semibold">
-                  {polishCountLabel(projects.length, "projekt", "projekty", "projektów")}
+                  {profileProjectCountLabel(projects.length)}
                 </div>
               </div>
               <div className="rounded-2xl border border-line bg-background p-4">
                 <div className="text-xs font-semibold uppercase tracking-wide text-muted">
-                  Cena
+                  {profileCopy.labels.price}
                 </div>
                 <div className="mt-1 font-semibold">{pricingLabel(profile)}</div>
               </div>
@@ -644,29 +617,29 @@ export default async function DesignerProfilePage({
 
             <div className="mt-5 grid gap-3 text-sm">
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
-                <span className="text-muted">Odpowiedzi na platformie</span>
+                <span className="text-muted">{profileCopy.labels.platformResponses}</span>
                 <span className="text-right font-semibold">Mierzone od pierwszej odpowiedzi w aplikacji</span>
               </div>
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
-                <span className="text-muted">Kontakt</span>
-                <span className="truncate text-right font-semibold">{profile.is_demo ? "Niedostępny w profilu demonstracyjnym" : contactLabel(profile)}</span>
+                <span className="text-muted">{profileCopy.labels.contact}</span>
+                <span className="truncate text-right font-semibold">{profile.is_demo ? profileCopy.values.demoContactUnavailable : contactLabel(profile)}</span>
               </div>
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
-                <span className="text-muted">Dostępność</span>
-                <span className="text-right font-semibold">{profile.availability_status ? availabilityLabel(profile.availability_status) : "Do uzgodnienia"}</span>
+                <span className="text-muted">{profileCopy.labels.availability}</span>
+                <span className="text-right font-semibold">{profile.availability_status ? availabilityLabel(profile.availability_status) : profileCopy.values.toBeAgreed}</span>
               </div>
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
-                <span className="text-muted">Forma współpracy</span>
-                <span className="text-right font-semibold">{profile.work_modes?.map(workModeLabel).join(" · ") || "Do uzgodnienia"}</span>
+                <span className="text-muted">{profileCopy.labels.workMode}</span>
+                <span className="text-right font-semibold">{profile.work_modes?.map((mode) => workModeLabel(mode)).join(" · ") || profileCopy.values.toBeAgreed}</span>
               </div>
               <div className="flex items-center justify-between gap-4">
-                <span className="text-muted">Minimalny budżet projektu</span>
-                <span className="text-right font-semibold">{profile.minimum_project_budget ? `${profile.minimum_project_budget} PLN` : "Nie określono"}</span>
+                <span className="text-muted">{profileCopy.labels.minimumProjectBudget}</span>
+                <span className="text-right font-semibold">{profile.minimum_project_budget ? `${profile.minimum_project_budget} PLN` : profileCopy.values.notSpecified}</span>
               </div>
               <div className="flex items-center justify-between gap-4">
-                <span className="text-muted">Języki</span>
+                <span className="text-muted">{profileCopy.labels.languages}</span>
                 <span className="font-semibold">
-                  {profile.languages?.map(languageLabel).join(" / ") || "polski / angielski"}
+                  {profile.languages?.map((language) => profileLanguageLabel(language)).join(" / ") || (siteLocale === "pl" ? "polski / angielski" : "Polish / English")}
                 </span>
               </div>
             </div>
@@ -742,7 +715,7 @@ export default async function DesignerProfilePage({
           <div className="rounded-lg border border-line bg-card p-6 shadow-sm">
             <div className="text-sm font-semibold text-primary">Powiązane pracownie</div>
             <h2 className="mt-1 text-2xl font-bold">
-              {title} należy do: {polishCountLabel(studios.length, "pracowni", "pracowni", "pracowni")}
+              {siteLocale === "pl" ? `${title} należy do: ${studios.length} pracowni` : `${title} belongs to ${studios.length} studios`}
             </h2>
             <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {studios.map((studio) => (
@@ -757,7 +730,7 @@ export default async function DesignerProfilePage({
                   </div>
                   {studio.specialties?.length ? (
                     <div className="mt-3 text-sm font-semibold text-primary">
-                      {studio.specialties.slice(0, 3).map(professionalOptionLabel).join(" · ")}
+                      {studio.specialties.slice(0, 3).map((specialty) => professionalOptionLabel(specialty)).join(" · ")}
                     </div>
                   ) : null}
                 </Link>
@@ -1020,28 +993,28 @@ export default async function DesignerProfilePage({
         </div>
 
         <aside className="hidden h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24 lg:block">
-          <div className="text-sm font-semibold text-primary">Profil w skrócie</div>
+          <div className="text-sm font-semibold text-primary">{profileCopy.labels.profileSummary}</div>
           <div className="mt-4 grid gap-4">
             <div>
-              <div className="text-sm text-muted">Najlepsze dopasowanie</div>
+              <div className="text-sm text-muted">{profileCopy.labels.bestMatch}</div>
               <div className="mt-1 font-semibold">
                 {specialties[0] ? professionalOptionLabel(specialties[0]) : "Projekty wnętrz"}
               </div>
             </div>
             <div>
-              <div className="text-sm text-muted">Lokalizacja</div>
+              <div className="text-sm text-muted">{profileCopy.labels.location}</div>
               <div className="mt-1 font-semibold">{location}</div>
             </div>
             <div>
-              <div className="text-sm text-muted">Doświadczenie</div>
+              <div className="text-sm text-muted">{profileCopy.labels.experience}</div>
               <div className="mt-1 font-semibold">
-                {experienceLabel(profile.years_experience)}
+                {profileExperienceLabel(profile.years_experience)}
               </div>
             </div>
             <div>
-              <div className="text-sm text-muted">Portfolio</div>
+              <div className="text-sm text-muted">{profileCopy.labels.portfolio}</div>
               <div className="mt-1 font-semibold">
-                {polishCountLabel(projects.length, "publiczny projekt", "publiczne projekty", "publicznych projektów")}
+                {profileProjectCountLabel(projects.length)}
               </div>
             </div>
           </div>

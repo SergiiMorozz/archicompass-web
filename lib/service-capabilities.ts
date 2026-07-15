@@ -16,8 +16,8 @@ const polishServiceLabels: Record<string, string> = {
   "Sourcing and procurement": "dobór i zamawianie wyposażenia",
 };
 
-export function serviceCapabilityLabel(value: string) {
-  return polishServiceLabels[value] || value;
+export function serviceCapabilityLabel(value: string, locale: SiteLocale = siteLocale) {
+  return locale === "pl" ? polishServiceLabels[value] || value : value;
 }
 
 export function serviceCapabilityValues(formData: FormData) {
@@ -56,3 +56,4 @@ export function requiredServiceCapabilities(
 
   return Array.from(new Set(required));
 }
+import { siteLocale, type SiteLocale } from "@/lib/site-locale";

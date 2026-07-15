@@ -340,7 +340,7 @@ export default async function PublicStudioPage({
             <div className="mt-5 grid gap-3 text-sm">
               <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Cena</span><span className="text-right font-semibold">{pricingLabel(studio)}</span></div>
               <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Dostępność</span><span className="text-right font-semibold">{studio.availability_status ? availabilityLabel(studio.availability_status) : "Na zapytanie"}</span></div>
-              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Forma współpracy</span><span className="text-right font-semibold">{studio.work_modes?.map(workModeLabel).join(" · ") || "Na zapytanie"}</span></div>
+              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Forma współpracy</span><span className="text-right font-semibold">{studio.work_modes?.map((mode) => workModeLabel(mode)).join(" · ") || "Na zapytanie"}</span></div>
               <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Minimalny budżet</span><span className="text-right font-semibold">{studio.minimum_project_budget ? `${studio.minimum_project_budget} PLN` : "Nie podano"}</span></div>
               <div className="flex justify-between gap-4"><span className="text-muted">Kontakt</span><span className="truncate font-semibold">{studio.email || studio.phone || "Przez brief"}</span></div>
             </div>
