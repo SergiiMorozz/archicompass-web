@@ -36,6 +36,8 @@ remaining route groups are still being migrated to the shared source.
 
 - `lib/site-locale.ts` owns the locale, the public `/en` path, the internal rewrite host, and HTML/SEO locale metadata.
 - `content/site-copy.ts` owns the paired PL and EN contracts for the shared global UI, account entry flow, and Inspiration Hub.
+- `content/public-profile-copy.ts` owns paired system labels visible on public profiles, including location, experience, price, availability, contact, and portfolio.
+- `lib/profile-system-labels.ts`, `lib/profile-pricing.ts`, `lib/professional-options.ts`, and `lib/service-capabilities.ts` translate stored platform values from their canonical database keys. They must not store language-specific values in a profile row.
 - `Header`, `Footer`, root metadata, home page, login, registration, password recovery, onboarding, Inspiration Hub, and article pages render from this shared content contract.
 
 Both entries in `content/site-copy.ts` must satisfy the same `SiteCopy` TypeScript type. Adding a field to one language without adding it to the other therefore fails type checking.
