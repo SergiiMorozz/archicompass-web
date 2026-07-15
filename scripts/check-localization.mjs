@@ -22,6 +22,8 @@ const workspaceSourceFiles = [
   "app/studio/page.tsx",
   "app/studio/inbox/page.tsx",
   "app/studio/analytics/page.tsx",
+  "app/admin/page.tsx",
+  "components/AdminNav.tsx",
 ];
 
 const failures = sharedSourceFiles.flatMap((file) => {

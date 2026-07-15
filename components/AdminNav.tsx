@@ -2,14 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 import type { AdminPermission } from "@/lib/admin";
-
-const adminLinks: Array<{ href: string; label: string; permission?: AdminPermission }> = [
-  { href: "/admin", label: "Pulpit" },
-  { href: "/admin/users", label: "Użytkownicy", permission: "users" },
-  { href: "/admin/content", label: "Treści", permission: "content" },
-  { href: "/admin/activity", label: "Aktywność", permission: "analytics" },
-];
 
 export default function AdminNav({
   accountName,
@@ -20,7 +14,14 @@ export default function AdminNav({
   role: string;
   permissions: AdminPermission[];
 }) {
+  const copy = getWorkspaceCopy().adminNav;
   const pathname = usePathname();
+  const adminLinks: Array<{ href: string; label: string; permission?: AdminPermission }> = [
+    { href: "/admin", label: copy.dashboard },
+    { href: "/admin/users", label: copy.users, permission: "users" },
+    { href: "/admin/content", label: copy.content, permission: "content" },
+    { href: "/admin/activity", label: copy.activity, permission: "analytics" },
+  ];
   const visibleLinks = adminLinks.filter((item) => !item.permission || permissions.includes(item.permission));
 
   return (
@@ -36,8 +37,8 @@ export default function AdminNav({
               </span>
             </div>
           </div>
-          <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Panel administratora">
-            {[...visibleLinks, ...(role === "owner" ? [{ href: "/admin/team", label: "Zespół" }] : [])].map((item) => {
+          <nav className="flex gap-2 overflow-x-auto pb-1" aria-label={copy.ariaLabel}>
+            {[...visibleLinks, ...(role === "owner" ? [{ href: "/admin/team", label: copy.team }] : [])].map((item) => {
               const active =
                 pathname === item.href ||
                 (item.href !== "/admin" && pathname.startsWith(item.href));
@@ -61,7 +62,7 @@ export default function AdminNav({
               href="/"
               className="shrink-0 rounded-xl border border-line bg-background px-4 py-2.5 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
             >
-              Strona publiczna
+              {copy.publicSite}
             </Link>
           </nav>
         </div>

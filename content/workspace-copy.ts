@@ -179,6 +179,48 @@ type WorkspaceCopy = {
     manageProjectsCta: string;
     publicProfileCta: string;
   };
+  adminNav: {
+    dashboard: string;
+    users: string;
+    content: string;
+    activity: string;
+    team: string;
+    publicSite: string;
+    ariaLabel: string;
+  };
+  adminOverview: {
+    dateLocale: string;
+    accountLabels: { professional: string; client: string; noProfile: string };
+    cards: [string, string, string, string, string, string, string, string, string];
+    details: {
+      newIn30: (count: number) => string;
+      profileSupply: string;
+      activeAccounts: (count: number) => string;
+      publicWork: string;
+      aiResult: string;
+      entirePlatform: string;
+      published: (count: number) => string;
+      hidden: (profiles: number, projects: number) => string;
+      last30Days: string;
+    };
+    eyebrow: string;
+    title: string;
+    intro: string;
+    openUsersCta: string;
+    loadError: string;
+    activityEyebrow: string;
+    recentAccounts: string;
+    viewAll: string;
+    joined: string;
+    noAccounts: string;
+    privacyEyebrow: string;
+    privacyTitle: string;
+    privacyBody: string;
+    contentEyebrow: string;
+    contentTitle: string;
+    contentBody: string;
+    manageContentCta: string;
+  };
 };
 
 const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
@@ -359,6 +401,48 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       manageProjectsCta: "Zarządzaj projektami",
       publicProfileCta: "Otwórz profil publiczny",
     },
+    adminNav: {
+      dashboard: "Pulpit",
+      users: "Użytkownicy",
+      content: "Treści",
+      activity: "Aktywność",
+      team: "Zespół",
+      publicSite: "Strona publiczna",
+      ariaLabel: "Panel administratora",
+    },
+    adminOverview: {
+      dateLocale: "pl-PL",
+      accountLabels: { professional: "Specjalista", client: "Klient", noProfile: "Brak profilu" },
+      cards: ["Konta", "Specjaliści", "Klienci", "Projekty portfolio", "Zapisane briefy", "Zapytania", "Artykuły Inspiration Hub", "Ukryte treści", "Wyświetlenia profili"],
+      details: {
+        newIn30: (count) => `${count} nowych w 30 dni`,
+        profileSupply: "Podaż profili",
+        activeAccounts: (count) => `${count} aktywnych kont`,
+        publicWork: "Prace publiczne",
+        aiResult: "Wynik AI Project Compass",
+        entirePlatform: "W całej platformie",
+        published: (count) => `${count} opublikowanych`,
+        hidden: (profiles, projects) => `${profiles} profili, ${projects} projektów`,
+        last30Days: "Ostatnie 30 dni",
+      },
+      eyebrow: "Operacje platformy",
+      title: "Admin",
+      intro: "Monitoruj platformę, sprawdzaj konta i obserwuj, jak użytkownicy przechodzą od inspiracji do rozmowy z projektantem.",
+      openUsersCta: "Otwórz użytkowników",
+      loadError: "Nie udało się wczytać danych admina. Sprawdź migracje bazy oraz aktywną rolę owner/admin dla tego konta.",
+      activityEyebrow: "Najnowsza aktywność",
+      recentAccounts: "Ostatnie konta",
+      viewAll: "Zobacz wszystkie",
+      joined: "Dołączył/a",
+      noAccounts: "Brak kont do wyświetlenia.",
+      privacyEyebrow: "Granica prywatności",
+      privacyTitle: "Tylko dane operacyjne",
+      privacyBody: "Ten panel pokazuje liczniki, dane kont, profile publiczne i projekty publiczne. Treści prywatnych wiadomości i prywatne zdjęcia referencyjne pozostają poza panelem admina.",
+      contentEyebrow: "Treści",
+      contentTitle: "Inspiration Hub",
+      contentBody: "Twórz szkice, publikuj artykuły i zarządzaj wyróżnionymi inspiracjami z chronionego edytora.",
+      manageContentCta: "Zarządzaj treściami",
+    },
   },
   en: {
     clientOverview: {
@@ -536,6 +620,48 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       projectCount: (count) => `${count} ${count === 1 ? "public project" : "public projects"} available to clients before sending a brief.`,
       manageProjectsCta: "Manage projects",
       publicProfileCta: "Open public profile",
+    },
+    adminNav: {
+      dashboard: "Dashboard",
+      users: "Users",
+      content: "Content",
+      activity: "Activity",
+      team: "Team",
+      publicSite: "Public site",
+      ariaLabel: "Admin panel",
+    },
+    adminOverview: {
+      dateLocale: "en-GB",
+      accountLabels: { professional: "Professional", client: "Client", noProfile: "No profile" },
+      cards: ["Accounts", "Professionals", "Clients", "Portfolio projects", "Saved briefs", "Enquiries", "Inspiration Hub articles", "Hidden content", "Profile views"],
+      details: {
+        newIn30: (count) => `${count} new in 30 days`,
+        profileSupply: "Profile supply",
+        activeAccounts: (count) => `${count} active accounts`,
+        publicWork: "Public work",
+        aiResult: "AI Project Compass result",
+        entirePlatform: "Across the platform",
+        published: (count) => `${count} published`,
+        hidden: (profiles, projects) => `${profiles} profiles, ${projects} projects`,
+        last30Days: "Last 30 days",
+      },
+      eyebrow: "Platform operations",
+      title: "Admin",
+      intro: "Monitor the platform, review accounts, and see how users move from inspiration to a designer conversation.",
+      openUsersCta: "Open users",
+      loadError: "Could not load admin data. Check the database migrations and the active owner/admin role for this account.",
+      activityEyebrow: "Latest activity",
+      recentAccounts: "Recent accounts",
+      viewAll: "View all",
+      joined: "Joined",
+      noAccounts: "No accounts to display.",
+      privacyEyebrow: "Privacy boundary",
+      privacyTitle: "Operational data only",
+      privacyBody: "This panel shows counters, account data, public profiles, and public projects. Private message content and private reference photos remain outside the admin panel.",
+      contentEyebrow: "Content",
+      contentTitle: "Inspiration Hub",
+      contentBody: "Create drafts, publish articles, and manage featured inspiration from the protected editor.",
+      manageContentCta: "Manage content",
     },
   },
 };

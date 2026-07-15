@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 import { requireAdmin } from "@/lib/admin";
 
 export const revalidate = 0;
@@ -33,17 +34,17 @@ function numberValue(value: number | undefined) {
   return Number(value ?? 0);
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("pl-PL", {
+function formatDate(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
   }).format(new Date(value));
 }
 
-function accountLabel(user: AdminUser) {
-  if (user.profession_type || user.user_type === "professional") return "Specjalista";
-  return user.user_type === "client" ? "Klient" : "Brak profilu";
+function accountLabel(user: AdminUser, labels: { professional: string; client: string; noProfile: string }) {
+  if (user.profession_type || user.user_type === "professional") return labels.professional;
+  return user.user_type === "client" ? labels.client : labels.noProfile;
 }
 
 function reviewClass(status: string) {
@@ -53,6 +54,7 @@ function reviewClass(status: string) {
 }
 
 export default async function AdminOverviewPage() {
+  const copy = getWorkspaceCopy().adminOverview;
   const { supabase } = await requireAdmin();
   const [statsResult, usersResult, contentResult] = await Promise.all([
     supabase.rpc("admin_dashboard_stats"),
@@ -74,15 +76,15 @@ export default async function AdminOverviewPage() {
   const contentRows = contentResult.data ?? [];
   const publishedArticles = contentRows.filter((article) => article.status === "published").length;
   const cards = [
-    ["Konta", numberValue(stats.users), `${numberValue(stats.signups_30)} nowych w 30 dni`],
-    ["Specjaliści", numberValue(stats.professionals), "Podaż profili"],
-    ["Klienci", numberValue(stats.clients), `${numberValue(stats.active_30)} aktywnych kont`],
-    ["Projekty portfolio", numberValue(stats.projects), "Prace publiczne"],
-    ["Zapisane briefy", briefCount, "Wynik AI Project Compass"],
-    ["Zapytania", inquiryCount, "W całej platformie"],
-    ["Artykuły Inspiration Hub", contentRows.length, `${publishedArticles} opublikowanych`],
-    ["Ukryte treści", numberValue(stats.hidden_profiles) + numberValue(stats.hidden_projects), `${numberValue(stats.hidden_profiles)} profili, ${numberValue(stats.hidden_projects)} projektów`],
-    ["Wyświetlenia profili", numberValue(stats.profile_views_30), "Ostatnie 30 dni"],
+    [copy.cards[0], numberValue(stats.users), copy.details.newIn30(numberValue(stats.signups_30))],
+    [copy.cards[1], numberValue(stats.professionals), copy.details.profileSupply],
+    [copy.cards[2], numberValue(stats.clients), copy.details.activeAccounts(numberValue(stats.active_30))],
+    [copy.cards[3], numberValue(stats.projects), copy.details.publicWork],
+    [copy.cards[4], briefCount, copy.details.aiResult],
+    [copy.cards[5], inquiryCount, copy.details.entirePlatform],
+    [copy.cards[6], contentRows.length, copy.details.published(publishedArticles)],
+    [copy.cards[7], numberValue(stats.hidden_profiles) + numberValue(stats.hidden_projects), copy.details.hidden(numberValue(stats.hidden_profiles), numberValue(stats.hidden_projects))],
+    [copy.cards[8], numberValue(stats.profile_views_30), copy.details.last30Days],
   ];
 
   return (
@@ -90,18 +92,17 @@ export default async function AdminOverviewPage() {
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="text-sm font-semibold text-primary">Operacje platformy</div>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Admin</h1>
+            <div className="text-sm font-semibold text-primary">{copy.eyebrow}</div>
+            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">{copy.title}</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-              Monitoruj platformę, sprawdzaj konta i obserwuj, jak użytkownicy przechodzą
-              od inspiracji do rozmowy z projektantem.
+              {copy.intro}
             </p>
           </div>
           <Link
             href="/admin/users"
             className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white"
           >
-            Otwórz użytkowników
+            {copy.openUsersCta}
           </Link>
         </div>
       </section>
@@ -109,7 +110,7 @@ export default async function AdminOverviewPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         {statsResult.error || usersResult.error || contentResult.error ? (
           <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-5 text-sm text-red-700">
-            Nie udało się wczytać danych admina. Sprawdź migracje bazy oraz aktywną rolę owner/admin dla tego konta.
+            {copy.loadError}
           </div>
         ) : null}
 
@@ -127,11 +128,11 @@ export default async function AdminOverviewPage() {
           <section>
             <div className="flex items-end justify-between gap-4">
               <div>
-                <div className="text-sm font-semibold text-primary">Najnowsza aktywność</div>
-                <h2 className="mt-1 text-3xl font-bold">Ostatnie konta</h2>
+                <div className="text-sm font-semibold text-primary">{copy.activityEyebrow}</div>
+                <h2 className="mt-1 text-3xl font-bold">{copy.recentAccounts}</h2>
               </div>
               <Link href="/admin/users" className="text-sm font-semibold text-primary hover:underline">
-                Zobacz wszystkie
+                {copy.viewAll}
               </Link>
             </div>
 
@@ -144,9 +145,9 @@ export default async function AdminOverviewPage() {
                     className="flex flex-col gap-3 border-b border-line px-5 py-4 last:border-b-0 hover:bg-primary-soft/40 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
-                      <div className="font-semibold">{user.full_name || user.email || "Konto bez nazwy"}</div>
+                      <div className="font-semibold">{user.full_name || user.email || copy.accountLabels.noProfile}</div>
                       <div className="mt-1 text-sm text-muted">
-                        {accountLabel(user)} | Dołączył/a {formatDate(user.created_at)}
+                        {accountLabel(user, copy.accountLabels)} | {copy.joined} {formatDate(user.created_at, copy.dateLocale)}
                       </div>
                     </div>
                     <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold capitalize ${reviewClass(user.review_status)}`}>
@@ -155,29 +156,28 @@ export default async function AdminOverviewPage() {
                   </Link>
                 ))
               ) : (
-                <div className="p-6 text-sm text-muted">Brak kont do wyświetlenia.</div>
+                <div className="p-6 text-sm text-muted">{copy.noAccounts}</div>
               )}
             </div>
           </section>
 
           <aside className="grid h-fit gap-5">
             <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-              <div className="text-sm font-semibold text-primary">Granica prywatności</div>
-              <h2 className="mt-1 text-2xl font-bold">Tylko dane operacyjne</h2>
+              <div className="text-sm font-semibold text-primary">{copy.privacyEyebrow}</div>
+              <h2 className="mt-1 text-2xl font-bold">{copy.privacyTitle}</h2>
               <p className="mt-3 text-sm leading-6 text-muted">
-                Ten panel pokazuje liczniki, dane kont, profile publiczne i projekty publiczne.
-                Treści prywatnych wiadomości i prywatne zdjęcia referencyjne pozostają poza panelem admina.
+                {copy.privacyBody}
               </p>
             </section>
 
             <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-              <div className="text-sm font-semibold text-primary">Treści</div>
-              <h2 className="mt-1 text-2xl font-bold">Inspiration Hub</h2>
+              <div className="text-sm font-semibold text-primary">{copy.contentEyebrow}</div>
+              <h2 className="mt-1 text-2xl font-bold">{copy.contentTitle}</h2>
               <p className="mt-3 text-sm leading-6 text-muted">
-                Twórz szkice, publikuj artykuły i zarządzaj wyróżnionymi inspiracjami z chronionego edytora.
+                {copy.contentBody}
               </p>
               <Link href="/admin/content" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
-                Zarządzaj treściami
+                {copy.manageContentCta}
               </Link>
             </section>
           </aside>
