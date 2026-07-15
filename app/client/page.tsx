@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -18,20 +19,12 @@ type Profile = {
   profession_type: string | null;
 };
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("pl-PL", {
+function formatDate(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
   }).format(new Date(value));
-}
-
-function statusLabel(status: string) {
-  if (status === "accepted") return "Zaakceptowane";
-  if (status === "declined") return "Odrzucone";
-  if (status === "reviewing") return "W trakcie";
-  if (status === "sent") return "Nowe";
-  return status;
 }
 
 function statusClass(status: string) {
@@ -47,6 +40,7 @@ export default async function ClientOverviewPage({
   searchParams?: Promise<{ profileUpdated?: string }>;
 }) {
   const sp = (await searchParams) ?? {};
+  const copy = getWorkspaceCopy().clientOverview;
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
@@ -94,10 +88,10 @@ export default async function ClientOverviewPage({
   const designersById = new Map(designers.map((profile) => [profile.id, profile]));
 
   const stats = [
-    ["Zapisane briefy", String(briefs.length), "/client/briefs"],
-    ["Ulubione", String(favorites.length), "/client/favorites"],
-    ["Zapytania do projektantów", String(inquiries.length), "/client/messages"],
-    ["Nieprzeczytane wiadomości", String(unreadMessages ?? 0), "/client/messages"],
+    [copy.stats[0], String(briefs.length), "/client/briefs"],
+    [copy.stats[1], String(favorites.length), "/client/favorites"],
+    [copy.stats[2], String(inquiries.length), "/client/messages"],
+    [copy.stats[3], String(unreadMessages ?? 0), "/client/messages"],
   ];
 
   return (
@@ -105,19 +99,18 @@ export default async function ClientOverviewPage({
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="text-sm font-semibold text-primary">Twój projekt wnętrza</div>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Pulpit klienta</h1>
+            <div className="text-sm font-semibold text-primary">{copy.eyebrow}</div>
+            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">{copy.title}</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-              Trzymaj inspiracje, briefy, ulubionych specjalistów i wszystkie rozmowy
-              w jednym miejscu: od pierwszego pomysłu do wyboru projektanta.
+              {copy.intro}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link href="/project-compass" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-              Utwórz brief
+              {copy.createBrief}
             </Link>
             <Link href="/designers" className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
-              Otwórz Katalog Projektantów
+              {copy.openDirectory}
             </Link>
           </div>
         </div>
@@ -126,7 +119,7 @@ export default async function ClientOverviewPage({
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         {sp.profileUpdated ? (
           <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-900">
-            Dane konta zostały zaktualizowane.
+            {copy.profileUpdated}
           </div>
         ) : null}
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -142,10 +135,10 @@ export default async function ClientOverviewPage({
           <section>
             <div className="flex items-end justify-between gap-4">
               <div>
-                <div className="text-sm font-semibold text-primary">Ostatnia aktywność</div>
-                <h2 className="mt-1 text-3xl font-bold">Rozmowy z projektantami</h2>
+                <div className="text-sm font-semibold text-primary">{copy.activityEyebrow}</div>
+                <h2 className="mt-1 text-3xl font-bold">{copy.conversationsTitle}</h2>
               </div>
-              <Link href="/client/messages" className="text-sm font-semibold text-primary hover:underline">Zobacz wszystkie</Link>
+              <Link href="/client/messages" className="text-sm font-semibold text-primary hover:underline">{copy.viewAll}</Link>
             </div>
 
             {inquiries.length ? (
@@ -157,15 +150,15 @@ export default async function ClientOverviewPage({
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <div className="text-sm font-semibold text-primary">
-                            {designer?.full_name || "Projektant wnętrz"}
+                            {designer?.full_name || copy.defaultProfessional}
                           </div>
                           <h3 className="mt-1 text-xl font-bold">{inquiry.subject}</h3>
                           <div className="mt-2 text-sm text-muted">
-                            {designer?.profession_type === "Studio" ? "Pracownia projektowa" : "Projektant wnętrz"} · {formatDate(inquiry.created_at)}
+                            {designer?.profession_type === "Studio" ? copy.studio : copy.defaultProfessional} · {formatDate(inquiry.created_at, copy.dateLocale)}
                           </div>
                         </div>
                         <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusClass(inquiry.status)}`}>
-                          {statusLabel(inquiry.status)}
+                          {copy.statuses[inquiry.status] || inquiry.status}
                         </span>
                       </div>
                     </Link>
@@ -174,31 +167,30 @@ export default async function ClientOverviewPage({
               </div>
             ) : (
               <div className="mt-5 rounded-lg border border-dashed border-line bg-card p-8">
-                <h3 className="text-xl font-bold">Nie masz jeszcze rozmów z projektantami</h3>
+                <h3 className="text-xl font-bold">{copy.emptyTitle}</h3>
                 <p className="mt-2 max-w-xl leading-7 text-muted">
-                  Utwórz brief w AI Project Compass, zapisz go i wyślij do projektanta,
-                  którego portfolio pasuje do Twojego projektu.
+                  {copy.emptyBody}
                 </p>
                 <Link href="/project-compass" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
-                  Uruchom AI Project Compass
+                  {copy.emptyCta}
                 </Link>
               </div>
             )}
           </section>
 
           <aside className="h-fit rounded-lg border border-line bg-card p-6 shadow-sm lg:sticky lg:top-40">
-            <div className="text-sm font-semibold text-primary">Twój następny krok</div>
+            <div className="text-sm font-semibold text-primary">{copy.nextStepEyebrow}</div>
             <h2 className="mt-2 text-2xl font-bold">
-              {briefs.length ? "Porównaj najlepiej dopasowanych" : "Zamień inspiracje w brief"}
+              {briefs.length ? copy.nextStepWithBrief : copy.nextStepWithoutBrief}
             </h2>
             <p className="mt-3 text-sm leading-6 text-muted">
               {briefs.length
-                ? "Zapisuj interesujących projektantów i realizacje w Ulubionych, a potem wyślij dobrze przygotowany brief."
-                : "Dodaj inspiracje, zakres, budżet i termin, aby projektanci mogli dobrze zrozumieć inwestycję przed odpowiedzią."}
+                ? copy.nextStepWithBriefBody
+                : copy.nextStepWithoutBriefBody}
             </p>
             <div className="mt-6 grid gap-3">
-              <Link href="/client/briefs" className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white">Otwórz zapisane briefy</Link>
-              <Link href="/client/favorites" className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">Przejrzyj ulubione</Link>
+              <Link href="/client/briefs" className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white">{copy.savedBriefsCta}</Link>
+              <Link href="/client/favorites" className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">{copy.favoritesCta}</Link>
             </div>
           </aside>
         </div>

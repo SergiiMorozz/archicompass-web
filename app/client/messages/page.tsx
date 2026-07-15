@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import ConversationAutoRefresh from "@/components/ConversationAutoRefresh";
 import UnreadPageTitle from "@/components/UnreadPageTitle";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 import { clientUnreadByInquiry, unreadTotal } from "@/lib/inquiry-unread";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -38,21 +39,13 @@ type Studio = {
   location: string | null;
 };
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("pl-PL", {
+function formatDate(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
-}
-
-function statusLabel(status: string) {
-  if (status === "accepted") return "Zaakceptowane";
-  if (status === "declined") return "Odrzucone";
-  if (status === "reviewing") return "W trakcie";
-  if (status === "sent") return "Nowe";
-  return status;
 }
 
 function statusClass(status: string) {
@@ -68,6 +61,7 @@ export default async function ClientMessagesPage({
   searchParams?: Promise<{ view?: string }>;
 }) {
   const sp = (await searchParams) ?? {};
+  const copy = getWorkspaceCopy().clientMessages;
   const selectedView = sp.view === "unread" ? "unread" : "all";
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -128,14 +122,13 @@ export default async function ClientMessagesPage({
 
   return (
     <main>
-      <UnreadPageTitle count={totalUnread} label="Wiadomości" />
+      <UnreadPageTitle count={totalUnread} label={copy.unreadPageTitle} />
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="text-sm font-semibold text-primary">Komunikacja z projektantami</div>
-          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Wiadomości</h1>
+          <div className="text-sm font-semibold text-primary">{copy.eyebrow}</div>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">{copy.title}</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-            Prowadź rozmowy z projektantami obok dokładnego briefu i referencji,
-            które zostały wysłane.
+            {copy.intro}
           </p>
         </div>
       </section>
@@ -150,7 +143,7 @@ export default async function ClientMessagesPage({
               selectedView === "all" ? "bg-primary text-white" : "border border-line bg-card text-muted",
             ].join(" ")}
           >
-            Wszystkie rozmowy {inquiries.length}
+            {copy.allConversations} {inquiries.length}
           </Link>
           <Link
             href="/client/messages?view=unread"
@@ -159,19 +152,19 @@ export default async function ClientMessagesPage({
               selectedView === "unread" ? "bg-primary text-white" : "border border-line bg-card text-muted",
             ].join(" ")}
           >
-            Nieprzeczytane {totalUnread}
+            {copy.unread} {totalUnread}
           </Link>
           </div>
           <ConversationAutoRefresh />
         </div>
         {error ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">Nie udało się wczytać wiadomości: {error.message}</div>
+          <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">{copy.loadError}: {error.message}</div>
         ) : visibleInquiries.length ? (
           <div className="grid gap-4">
             {visibleInquiries.map((inquiry) => {
               const profile = profilesById.get(inquiry.designer_id);
               const studio = inquiry.studio_id ? studiosById.get(inquiry.studio_id) : null;
-              const recipientName = studio?.name || profile?.full_name || "Projektant wnętrz";
+              const recipientName = studio?.name || profile?.full_name || copy.defaultProfessional;
               const latest = latestByInquiry.get(inquiry.id);
               const unread = unreadByInquiry.get(inquiry.id) ?? 0;
               return (
@@ -180,34 +173,34 @@ export default async function ClientMessagesPage({
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusClass(inquiry.status)}`}>
-                          {statusLabel(inquiry.status)}
+                          {copy.statuses[inquiry.status] || inquiry.status}
                         </span>
-                        {unread ? <span className="rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-white">{unread} nowe</span> : null}
+                        {unread ? <span className="rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-white">{unread} {copy.newMessages}</span> : null}
                       </div>
                       <h2 className="mt-3 text-2xl font-bold">{inquiry.subject}</h2>
                       <div className="mt-2 text-sm text-muted">
                         {recipientName}
-                        {studio ? " · Pracownia projektowa" : profile?.profession_type ? ` · ${profile.profession_type}` : ""}
+                        {studio ? ` · ${copy.studio}` : profile?.profession_type ? ` · ${profile.profession_type}` : ""}
                         {studio?.location || profile?.location ? ` · ${studio?.location || profile?.location}` : ""}
                       </div>
                       <div className="mt-4 rounded-lg bg-background p-4 text-sm leading-6 text-muted">
                         <div className="font-semibold text-foreground">
                           {latest
                             ? latest.sender_id === user.id
-                              ? "Ty"
+                              ? copy.you
                               : recipientName
-                            : "Twoja wiadomość wprowadzająca"}
+                            : copy.openingMessage}
                         </div>
-                        <p className="mt-1 line-clamp-2">{latest?.body || inquiry.message || "Otwórz rozmowę, aby zobaczyć cały brief."}</p>
-                        <div className="mt-2 text-xs">{formatDate(latest?.created_at || inquiry.created_at)}</div>
+                        <p className="mt-1 line-clamp-2">{latest?.body || inquiry.message || copy.openToSeeBrief}</p>
+                        <div className="mt-2 text-xs">{formatDate(latest?.created_at || inquiry.created_at, copy.dateLocale)}</div>
                       </div>
                     </div>
                     <div className="grid gap-2">
                       <Link href={`/account/inquiries/${inquiry.id}`} className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white">
-                        {unread ? "Przeczytaj wiadomość" : "Otwórz rozmowę"}
+                        {unread ? copy.readMessage : copy.openConversation}
                       </Link>
                       <Link href={studio ? `/studios/${studio.id}` : `/designers/${inquiry.designer_id}`} className="rounded-xl border border-line bg-background px-5 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">
-                        {studio ? "Zobacz profil pracowni" : "Zobacz profil projektanta"}
+                        {studio ? copy.viewStudio : copy.viewProfessional}
                       </Link>
                     </div>
                   </div>
@@ -217,14 +210,14 @@ export default async function ClientMessagesPage({
           </div>
         ) : (
           <div className="rounded-lg border border-dashed border-line bg-card p-8">
-            <h2 className="text-2xl font-bold">{selectedView === "unread" ? "Wszystko przeczytane" : "Nie masz jeszcze wiadomości"}</h2>
+            <h2 className="text-2xl font-bold">{selectedView === "unread" ? copy.allReadTitle : copy.noMessagesTitle}</h2>
             <p className="mt-2 max-w-xl leading-7 text-muted">
               {selectedView === "unread"
-                ? "Nowe odpowiedzi pojawią się tutaj oraz w liczniku Wiadomości."
-                : "Wyślij zapisany brief projektantowi, a rozmowa pojawi się w tym miejscu."}
+                ? copy.allReadBody
+                : copy.noMessagesBody}
             </p>
             <Link href={selectedView === "unread" ? "/client/messages" : "/designers"} className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
-              {selectedView === "unread" ? "Zobacz wszystkie rozmowy" : "Przeglądaj projektantów"}
+              {selectedView === "unread" ? copy.allConversationsCta : copy.browseProfessionalsCta}
             </Link>
           </div>
         )}

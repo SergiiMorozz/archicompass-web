@@ -14,6 +14,13 @@ const sharedSourceFiles = [
   "components/Footer.tsx",
 ];
 
+const workspaceSourceFiles = [
+  "app/client/page.tsx",
+  "app/client/messages/page.tsx",
+  "app/client/favorites/page.tsx",
+  "app/client/briefs/page.tsx",
+];
+
 const failures = sharedSourceFiles.flatMap((file) => {
   const source = readFileSync(file, "utf8");
   const errors = [];
@@ -29,9 +36,16 @@ const failures = sharedSourceFiles.flatMap((file) => {
   return errors;
 });
 
+for (const file of workspaceSourceFiles) {
+  const source = readFileSync(file, "utf8");
+  if (!source.includes("@/content/workspace-copy")) {
+    failures.push(`${file}: missing the shared workspace locale contract`);
+  }
+}
+
 if (failures.length) {
   console.error("Locale architecture check failed:\n- " + failures.join("\n- "));
   process.exit(1);
 }
 
-console.log(`Locale architecture check passed for ${sharedSourceFiles.length} shared source files.`);
+console.log(`Locale architecture check passed for ${sharedSourceFiles.length + workspaceSourceFiles.length} shared source files.`);
