@@ -66,16 +66,14 @@ export default function Header() {
   const pathname = usePathname();
   const isGetStartedActive = pathname === "/get-started";
   const [isOpen, setIsOpen] = useState(false);
-  const [englishHref, setEnglishHref] = useState(() =>
-    pathname === "/" ? "/en" : `/en${pathname}`
-  );
+  const [englishHref, setEnglishHref] = useState("https://archicompass-web-en.vercel.app");
   const [account, setAccount] = useState<
     { id: string; isAdmin: boolean; isProfessional: boolean; unreadCount: number } | null
   >(null);
 
   useEffect(() => {
-    const path = pathname === "/" ? "/en" : `/en${pathname}`;
-    setEnglishHref(`${path}${window.location.search}${window.location.hash}`);
+    const path = pathname === "/" ? "/" : pathname;
+    setEnglishHref("https://archicompass-web-en.vercel.app" + path + window.location.search + window.location.hash);
   }, [pathname]);
 
   useEffect(() => {
