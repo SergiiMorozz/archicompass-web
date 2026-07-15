@@ -16,6 +16,7 @@ const sharedSourceFiles = [
 
 const workspaceSourceFiles = [
   "app/account/page.tsx",
+  "app/account/profile/page.tsx",
   "app/client/page.tsx",
   "app/client/messages/page.tsx",
   "app/client/favorites/page.tsx",

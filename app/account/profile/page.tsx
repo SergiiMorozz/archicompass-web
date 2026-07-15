@@ -21,6 +21,7 @@ import { publicTextError } from "@/lib/content-moderation";
 import { fetchGooglePlaceSummary } from "@/lib/google-places";
 import { profileReadinessScore } from "@/lib/profile-readiness";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 
 export const revalidate = 0;
 
@@ -127,12 +128,14 @@ async function uploadProfileMedia(
   kind: "logo" | "banner",
   file: File | null
 ) {
+  const copy = getWorkspaceCopy().accountProfile;
+  const kindLabel = kind === "logo" ? copy.logo : copy.banner;
   if (!file) return { path: null, error: null };
   if (!allowedProfileMediaTypes.includes(file.type)) {
-    return { path: null, error: `${kind === "logo" ? "Logo" : "Baner"} musi być plikiem JPEG, PNG lub WebP.` };
+    return { path: null, error: copy.errors.invalidMedia(kindLabel) };
   }
   if (file.size > maxProfileMediaSize) {
-    return { path: null, error: `${kind === "logo" ? "Logo" : "Baner"} musi mieć mniej niż 5 MB.` };
+    return { path: null, error: copy.errors.mediaTooLarge(kindLabel) };
   }
 
   const path = `${userId}/${kind}-${crypto.randomUUID()}.${mediaExtension(file)}`;
@@ -164,6 +167,7 @@ function Field({
 async function updateProfile(formData: FormData) {
   "use server";
 
+  const copy = getWorkspaceCopy().accountProfile;
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getUser();
   const user = data.user;
@@ -228,7 +232,7 @@ async function updateProfile(formData: FormData) {
   if (!commonProfile.full_name || !commonProfile.location || !commonProfile.phone) {
     redirect(
       `/account/profile?onboarding=1&error=${encodeURIComponent(
-        "Uzupełnij imię i nazwisko lub nazwę, telefon oraz lokalizację."
+        copy.errors.requiredDetails
       )}`
     );
   }
@@ -288,13 +292,14 @@ async function updateProfile(formData: FormData) {
 async function deleteProfessionalProfile(formData: FormData) {
   "use server";
 
+  const copy = getWorkspaceCopy().accountProfile;
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
   if (!user) redirect("/login");
 
   if (textValue(formData, "confirm_delete") !== "DELETE") {
-    redirect("/account/profile?error=Wpisz%20DELETE%2C%20aby%20potwierdzi%C4%87%20usuni%C4%99cie%20profilu.");
+    redirect(`/account/profile?error=${encodeURIComponent(copy.errors.confirmProfileDelete)}`);
   }
 
   const { data: projectData } = await supabase
@@ -342,16 +347,17 @@ async function deleteProfessionalProfile(formData: FormData) {
 async function deleteClientAccount(formData: FormData) {
   "use server";
 
+  const copy = getWorkspaceCopy().accountProfile;
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
   if (!user) redirect("/login");
 
   const accountRole = await getExplicitAccountRole(supabase, user.id);
-  if (accountRole !== "client") redirect("/account/profile?error=Usuni%C4%99cie%20konta%20jest%20dost%C4%99pne%20tutaj%20dla%20kont%20klienta.");
+  if (accountRole !== "client") redirect(`/account/profile?error=${encodeURIComponent(copy.errors.clientOnly)}`);
 
   if (textValue(formData, "confirm_delete_account") !== "DELETE") {
-    redirect("/account/profile?error=Wpisz%20DELETE%2C%20aby%20potwierdzi%C4%87%20usuni%C4%99cie%20konta.");
+    redirect(`/account/profile?error=${encodeURIComponent(copy.errors.confirmAccountDelete)}`);
   }
 
   const admin = createSupabaseAdminClient();
@@ -367,6 +373,7 @@ export default async function EditProfilePage({
 }: {
   searchParams?: Promise<{ error?: string; notice?: string; onboarding?: string; studio?: string }>;
 }) {
+  const copy = getWorkspaceCopy().accountProfile;
   const sp = (await searchParams) ?? {};
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -401,28 +408,28 @@ export default async function EditProfilePage({
             href={backHref}
             className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
           >
-            {isProfessional ? "Wróć do Studio projektanta" : "Wróć do Strefy klienta"}
+            {isProfessional ? copy.backProfessional : copy.backClient}
           </Link>
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
               <div className="text-sm font-semibold text-primary">
-                {isProfessional ? "Profil publiczny" : "Dane kontaktowe"}
+                {isProfessional ? copy.professionalEyebrow : copy.clientEyebrow}
               </div>
               <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
-                {isProfessional ? "Edytuj profil publiczny" : "Uzupełnij dane konta"}
+                {isProfessional ? copy.professionalTitle : copy.clientTitle}
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
                 {isProfessional
-                  ? "Uzupełnij informacje, które klienci widzą przed kontaktem. Na ich podstawie powstaje Twój profil w katalogu."
-                  : "Dbaj o aktualność danych osobowych i kontaktowych używanych w briefach i rozmowach."}
+                  ? copy.professionalIntro
+                  : copy.clientIntro}
               </p>
             </div>
 
             <div className="rounded-2xl border border-line bg-background p-5 shadow-sm">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <div className="text-sm font-semibold text-muted">Kompletność profilu</div>
+                  <div className="text-sm font-semibold text-muted">{copy.readiness}</div>
                   <div className="mt-1 text-3xl font-bold text-primary">{score}%</div>
                 </div>
                 {isProfessional && hasProfile ? (
@@ -430,7 +437,7 @@ export default async function EditProfilePage({
                     href={`/designers/${user.id}`}
                     className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                   >
-                    Zobacz profil
+                    {copy.viewProfile}
                   </Link>
                 ) : null}
               </div>
@@ -462,18 +469,18 @@ export default async function EditProfilePage({
           {isOnboarding ? (
             <div className="rounded-2xl border border-primary/30 bg-primary-soft p-6 text-foreground shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="font-bold text-primary">Pierwszy krok po rejestracji</div>
+                <div className="font-bold text-primary">{copy.onboardingTitle}</div>
                 <span className="rounded-full bg-card px-3 py-1 text-xs font-bold text-primary">
-                  {isStudioOnboarding ? "Krok 1 z 2" : "Krok 1 z 1"}
+                  {isStudioOnboarding ? copy.onboardingStudioStep : copy.onboardingClientStep}
                 </span>
               </div>
               <p className="mt-2 text-sm leading-6 text-muted">
                 {isStudioOnboarding
-                  ? "Najpierw uzupełnij dane właściciela. Po zapisaniu przejdziesz bezpośrednio do utworzenia profilu pracowni i zaproszenia zespołu."
-                  : "Uzupełnij trzy podstawowe dane. Dzięki nim briefy i rozmowy od razu trafiają do właściwego konta."}
+                  ? copy.onboardingStudioBody
+                  : copy.onboardingClientBody}
               </p>
               <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                {["Imię i nazwisko", "Telefon", "Lokalizacja"].map((item) => (
+                {copy.onboardingFields.map((item) => (
                   <div key={item} className="rounded-xl border border-primary/20 bg-card px-3 py-2 text-sm font-semibold">
                     {item}
                   </div>
@@ -484,21 +491,21 @@ export default async function EditProfilePage({
 
           <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div>
-              <div className="text-sm font-semibold text-primary">Tożsamość</div>
-              <h2 className="mt-1 text-2xl font-bold">Kogo poznają klienci</h2>
+              <div className="text-sm font-semibold text-primary">{copy.identityEyebrow}</div>
+              <h2 className="mt-1 text-2xl font-bold">{copy.identityTitle}</h2>
               <p className="mt-2 text-sm leading-6 text-muted">
                 {isProfessional
-                  ? "Profil projektanta i profil pracowni są oddzielne. Jeżeli kilka osób pracuje razem, utwórz pracownię w Studio projektanta."
-                  : "Te dane identyfikują Cię w zapisanych briefach i rozmowach z profesjonalistami."}
+                  ? copy.professionalIdentityBody
+                  : copy.clientIdentityBody}
               </p>
             </div>
 
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
-              <Field label={isProfessional ? "Imię i nazwisko / nazwa" : "Imię i nazwisko"}>
+              <Field label={isProfessional ? copy.professionalName : copy.clientName}>
                 <input name="full_name" required defaultValue={p.full_name ?? ""} className={fieldClass} />
               </Field>
 
-              <Field label="Lokalizacja" hint="miasto lub obszar działania">
+              <Field label={copy.location} hint={copy.locationHint}>
                 <input
                   name="location"
                   required
@@ -510,26 +517,26 @@ export default async function EditProfilePage({
 
               {isProfessional ? (
                 <>
-                  <Field label="Specjalizacja zawodowa">
+                  <Field label={copy.profession}>
                     <input
                       name="profession_type"
                       defaultValue={p.profession_type ?? ""}
-                      placeholder="Projektant wnętrz / architekt"
+                      placeholder={copy.professionPlaceholder}
                       className={fieldClass}
                     />
                   </Field>
                   <div className="sm:col-span-2 grid gap-5 sm:grid-cols-2">
-                    <Field label="Logo profilu" hint="kwadratowy obraz, maks. 5 MB">
+                    <Field label={copy.logo} hint={copy.logoHint}>
                       <input name="profile_logo" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} />
                     </Field>
-                    <Field label="Baner profilu" hint="szeroki obraz, maks. 5 MB">
+                    <Field label={copy.banner} hint={copy.bannerHint}>
                       <input name="profile_banner" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} />
                     </Field>
                   </div>
                 </>
               ) : (
                 <>
-                  <Field label="E-mail">
+                  <Field label={copy.email}>
                     <input
                       name="email"
                       type="email"
@@ -537,7 +544,7 @@ export default async function EditProfilePage({
                       className={fieldClass}
                     />
                   </Field>
-                  <Field label="Telefon">
+                  <Field label={copy.phone}>
                     <input name="phone" required defaultValue={p.phone ?? ""} className={fieldClass} />
                   </Field>
                 </>
@@ -547,12 +554,12 @@ export default async function EditProfilePage({
 
           {isProfessional ? <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div>
-              <div className="text-sm font-semibold text-primary">Informacje w katalogu</div>
-              <h2 className="mt-1 text-2xl font-bold">Ceny, doświadczenie i kontakt</h2>
+              <div className="text-sm font-semibold text-primary">{copy.directoryEyebrow}</div>
+              <h2 className="mt-1 text-2xl font-bold">{copy.directoryTitle}</h2>
             </div>
 
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
-              <Field label="Lata doświadczenia">
+              <Field label={copy.experience}>
                 <input
                   name="years_experience"
                   defaultValue={p.years_experience ?? ""}
@@ -562,31 +569,31 @@ export default async function EditProfilePage({
                 />
               </Field>
 
-              <Field label="Model rozliczenia">
+              <Field label={copy.pricing}>
                 <select name="pricing_model" defaultValue={p.pricing_model ?? "Custom quote"} className={fieldClass}>
                   {pricingModels.map((model) => <option key={model} value={model}>{pricingModelLabel(model)}</option>)}
                 </select>
               </Field>
 
-              <Field label="Dostępność">
+              <Field label={copy.availability}>
                 <select name="availability_status" defaultValue={p.availability_status ?? "Waitlist / ask"} className={fieldClass}>
                   {availabilityStatuses.map((status) => <option key={status} value={status}>{availabilityLabel(status)}</option>)}
                 </select>
               </Field>
 
-              <Field label="Cena od" hint="Kwota pokaże się jako zł/godz., zł/m² albo zł/pakiet zgodnie z modelem.">
+              <Field label={copy.priceFrom} hint={copy.priceHint}>
                 <input name="price_from" defaultValue={p.price_from ?? ""} inputMode="numeric" placeholder="5000" className={fieldClass} />
               </Field>
 
-              <Field label="Cena do" hint="Kwota pokaże się jako zł/godz., zł/m² albo zł/pakiet zgodnie z modelem.">
+              <Field label={copy.priceTo} hint={copy.priceHint}>
                 <input name="price_to" defaultValue={p.price_to ?? ""} inputMode="numeric" placeholder="15000" className={fieldClass} />
               </Field>
 
-              <Field label="Minimalny budżet inwestycji" hint="PLN, opcjonalnie">
+              <Field label={copy.minimumBudget} hint={copy.minimumBudgetHint}>
                 <input name="minimum_project_budget" defaultValue={p.minimum_project_budget ?? ""} inputMode="numeric" placeholder="30000" className={fieldClass} />
               </Field>
 
-              <Field label="E-mail">
+              <Field label={copy.email}>
                 <input
                   name="email"
                   type="email"
@@ -595,12 +602,12 @@ export default async function EditProfilePage({
                 />
               </Field>
 
-              <Field label="Telefon">
+              <Field label={copy.phone}>
                 <input name="phone" required defaultValue={p.phone ?? ""} className={fieldClass} />
               </Field>
 
               <div className="sm:col-span-2">
-                <Field label="Strona internetowa">
+                <Field label={copy.website}>
                   <input
                     name="website"
                     defaultValue={p.website ?? ""}
@@ -611,9 +618,9 @@ export default async function EditProfilePage({
               </div>
 
               <div className="sm:col-span-2">
-                <div className="text-sm font-bold text-foreground">Profile społecznościowe</div>
+                <div className="text-sm font-bold text-foreground">{copy.socialsTitle}</div>
                 <p className="mt-1 text-sm leading-6 text-muted">
-                  Linki pojawią się jako ikony na profilu publicznym. Dodaj tylko aktywne profile zawodowe.
+                  {copy.socialsBody}
                 </p>
                 <div className="mt-3 grid gap-4 sm:grid-cols-2">
                   <Field label="Instagram">
@@ -632,33 +639,33 @@ export default async function EditProfilePage({
               </div>
 
               <div className="sm:col-span-2 rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-5">
-                <div className="text-sm font-bold text-foreground">Ocena Google Business</div>
+                <div className="text-sm font-bold text-foreground">{copy.googleTitle}</div>
                 <p className="mt-1 text-sm leading-6 text-muted">
-                  Dodaj link do profilu Google Maps / Google Business albo Place ID. ArchiCompass weryfikuje ocenę bezpośrednio w Google; nie można wpisać jej ręcznie.
+                  {copy.googleBody}
                 </p>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <div className="sm:col-span-2">
-                    <Field label="Google Maps / Business link albo Place ID">
+                    <Field label={copy.googleInput}>
                       <input
                         name="google_place_input"
                         defaultValue={p.google_business_url ?? p.google_place_id ?? ""}
-                        placeholder="https://maps.google.com/... albo ChIJ..."
+                        placeholder={copy.googlePlaceholder}
                         className={fieldClass}
                       />
                     </Field>
                   </div>
                   <div className="sm:col-span-2 rounded-xl border border-line bg-card p-4 text-sm text-muted">
                     {p.google_rating !== null && p.google_rating !== undefined
-                      ? `Zweryfikowano przez Google: ${p.google_rating.toFixed(1)} na podstawie ${p.google_review_count ?? 0} opinii.`
+                      ? copy.googleVerified(p.google_rating.toFixed(1), p.google_review_count ?? 0)
                       : p.google_place_id || p.google_business_url
-                        ? "Profil Google jest zapisany, ale nie ma jeszcze zweryfikowanej oceny."
-                        : "Brak zweryfikowanej oceny Google."}
+                        ? copy.googlePending
+                        : copy.googleEmpty}
                   </div>
                 </div>
               </div>
 
               <fieldset className="sm:col-span-2">
-                <legend className="text-sm font-semibold">Formy współpracy</legend>
+                <legend className="text-sm font-semibold">{copy.workModes}</legend>
                 <div className="mt-3 flex flex-wrap gap-3">
                   {workModes.map((mode) => (
                     <label key={mode} className="flex items-center gap-3 rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold">
@@ -670,23 +677,23 @@ export default async function EditProfilePage({
               </fieldset>
 
               <div className="sm:col-span-2">
-                <Field label="Warunki współpracy po polsku" hint="tekst publiczny">
+                <Field label={copy.termsPl} hint={copy.publicTextHint}>
                   <textarea
                     name="cooperation_terms_pl"
                     defaultValue={p.cooperation_terms_pl ?? p.cooperation_terms ?? ""}
                     rows={4}
-                    placeholder="Np. zakres pierwszej konsultacji, etapy płatności, liczba poprawek i elementy wyceniane osobno."
+                    placeholder={copy.termsPlPlaceholder}
                     className={areaClass}
                   />
                 </Field>
               </div>
               <div className="sm:col-span-2">
-                <Field label="Cooperation terms in English" hint="optional; Polish is shown when this stays empty">
+                <Field label={copy.termsEn} hint={copy.fallbackEnHint}>
                   <textarea
                     name="cooperation_terms_en"
                     defaultValue={p.cooperation_terms_en ?? ""}
                     rows={4}
-                    placeholder="For example: first consultation scope, payment stages, revisions, and separately priced work."
+                    placeholder={copy.termsEnPlaceholder}
                     className={areaClass}
                   />
                 </Field>
@@ -696,22 +703,22 @@ export default async function EditProfilePage({
 
           {isProfessional ? <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div>
-              <div className="text-sm font-semibold text-primary">Pozycjonowanie profilu</div>
-              <h2 className="mt-1 text-2xl font-bold">Styl, specjalizacje i historia</h2>
+              <div className="text-sm font-semibold text-primary">{copy.positioningEyebrow}</div>
+              <h2 className="mt-1 text-2xl font-bold">{copy.positioningTitle}</h2>
             </div>
 
             <div className="mt-6 grid gap-5">
-              <Field label="Nagłówek profilu po polsku" hint="krótki tekst na banerze, maks. 140 znaków">
+              <Field label={copy.headlinePl} hint={copy.headlineHint}>
                 <input
                   name="profile_headline_pl"
                   maxLength={140}
                   defaultValue={p.profile_headline_pl ?? p.profile_headline ?? ""}
-                  placeholder="Ciepłe, funkcjonalne wnętrza do współczesnego życia"
+                  placeholder={copy.headlinePlPlaceholder}
                   className={fieldClass}
                 />
               </Field>
 
-              <Field label="Profile headline in English" hint="optional; Polish is shown when this stays empty">
+              <Field label={copy.headlineEn} hint={copy.fallbackEnHint}>
                 <input
                   name="profile_headline_en"
                   maxLength={140}
@@ -721,19 +728,19 @@ export default async function EditProfilePage({
                 />
               </Field>
 
-              <Field label="Specjalizacje" hint="oddziel przecinkami">
+              <Field label={copy.specialties} hint={copy.specialtiesHint}>
                 <input
                   name="specialties"
                   defaultValue={p.specialties?.join(", ") ?? ""}
-                  placeholder="wnętrza nowoczesne, małe mieszkania, segment premium"
+                  placeholder={copy.specialtiesPlaceholder}
                   className={fieldClass}
                 />
               </Field>
 
               <fieldset>
-                <legend className="text-sm font-semibold">Dostępne usługi</legend>
+                <legend className="text-sm font-semibold">{copy.services}</legend>
                 <p className="mt-1 text-sm leading-6 text-muted">
-                  Te informacje pomagają AI Project Compass wyjaśnić, dlaczego dany brief pasuje do Twoich usług.
+                  {copy.servicesBody}
                 </p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   {serviceCapabilities.map((capability) => (
@@ -754,22 +761,22 @@ export default async function EditProfilePage({
                 </div>
               </fieldset>
 
-              <Field label="O mnie / podejście projektowe po polsku">
+              <Field label={copy.bioPl}>
                 <textarea
                   name="bio_pl"
                   defaultValue={p.bio_pl ?? p.bio ?? ""}
                   rows={7}
-                  placeholder="Opisz swoje podejście, typowe projekty i sposób prowadzenia współpracy."
+                  placeholder={copy.bioPlPlaceholder}
                   className={areaClass}
                 />
               </Field>
 
-              <Field label="About me / design approach in English" hint="optional; Polish is shown when this stays empty">
+              <Field label={copy.bioEn} hint={copy.fallbackEnHint}>
                 <textarea
                   name="bio_en"
                   defaultValue={p.bio_en ?? ""}
                   rows={7}
-                  placeholder="Describe your approach, typical projects, and how you work with clients."
+                  placeholder={copy.bioEnPlaceholder}
                   className={areaClass}
                 />
               </Field>
@@ -781,47 +788,47 @@ export default async function EditProfilePage({
               type="submit"
               className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white hover:opacity-90"
             >
-              {isProfessional ? "Zapisz profil" : "Zapisz dane konta"}
+              {isProfessional ? copy.saveProfessional : copy.saveClient}
             </button>
             <Link
               href={hasProfile && isProfessional ? `/designers/${user.id}` : backHref}
               className="rounded-xl border border-line bg-card px-6 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
             >
-              Anuluj
+              {copy.cancel}
             </Link>
           </div>
         </form>
 
         <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
           <div className="text-sm font-semibold text-primary">
-            {isProfessional ? "Podgląd profilu" : "Konto klienta"}
+            {isProfessional ? copy.professionalPreviewEyebrow : copy.clientPreviewEyebrow}
           </div>
           <h2 className="mt-2 text-2xl font-bold">
-            {isProfessional ? "Gdzie pojawią się te dane" : "Gdzie pojawią się dane"}
+            {isProfessional ? copy.professionalPreviewTitle : copy.clientPreviewTitle}
           </h2>
           <div className="mt-5 grid gap-4 text-sm">
             <div className="rounded-2xl border border-line bg-background p-4">
-              <div className="font-semibold">{isProfessional ? "Karta w katalogu" : "Briefy projektowe"}</div>
+              <div className="font-semibold">{isProfessional ? copy.directoryCard : copy.clientBriefs}</div>
               <p className="mt-2 leading-6 text-muted">
                 {isProfessional
-                  ? "Nazwa, lokalizacja, specjalizacje, ceny i opis decydują o prezentacji w katalogu."
-                  : "Imię i lokalizacja pomagają projektantom zrozumieć, kto wysyła brief."}
+                  ? copy.professionalCardBody
+                  : copy.clientBriefsBody}
               </p>
             </div>
             <div className="rounded-2xl border border-line bg-background p-4">
-              <div className="font-semibold">{isProfessional ? "Profil publiczny" : "Rozmowy"}</div>
+              <div className="font-semibold">{isProfessional ? copy.publicProfile : copy.conversations}</div>
               <p className="mt-2 leading-6 text-muted">
                 {isProfessional
-                  ? "Dane kontaktowe i doświadczenie pojawiają się w nagłówku oraz panelu kontaktowym."
-                  : "Dane kontaktowe pozostają w koncie i wspierają aktywne rozmowy z projektantami."}
+                  ? copy.professionalPublicBody
+                  : copy.clientConversationsBody}
               </p>
             </div>
             {isProfessional ? <div className="rounded-2xl border border-line bg-background p-4">
-              <div className="font-semibold">Specjalizacje</div>
+              <div className="font-semibold">{copy.specialtiesCard}</div>
               <p className="mt-2 leading-6 text-muted">
                 {specialtyCount
-                  ? `${specialtyCount} specjalizacje są gotowe do pokazania.`
-                  : "Dodaj kilka specjalizacji, aby klienci szybko ocenili dopasowanie."}
+                  ? copy.specialtiesReady(specialtyCount)
+                  : copy.specialtiesEmpty}
               </p>
             </div> : null}
           </div>
@@ -830,23 +837,21 @@ export default async function EditProfilePage({
             href="/account/projects"
             className="mt-6 flex rounded-xl bg-primary-soft px-4 py-3 text-center text-sm font-semibold text-primary hover:bg-primary hover:text-white"
           >
-            <span className="w-full">Zarządzaj projektami portfolio</span>
+            <span className="w-full">{copy.managePortfolio}</span>
           </Link> : null}
 
           {isProfessional && hasProfile ? (
             <details className="mt-6 overflow-hidden rounded-xl border border-red-200 bg-red-50">
               <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-red-700">
-                Usuń profil projektanta
+                {copy.deleteProfessional}
               </summary>
               <div className="border-t border-red-200 p-4">
                 <p className="text-sm leading-6 text-red-700">
-                  Ta operacja trwale usuwa publiczny profil projektanta, portfolio,
-                  zdjęcia projektów, powiązane ulubione oraz statystyki profilu.
-                  Login, zapisane rozmowy i członkostwa w pracowniach pozostaną aktywne.
+                  {copy.deleteProfessionalBody}
                 </p>
                 <form action={deleteProfessionalProfile} className="mt-4 grid gap-3">
                   <label className="text-sm font-semibold text-red-800">
-                    Wpisz DELETE, aby potwierdzić
+                    {copy.deleteConfirm}
                     <input
                       name="confirm_delete"
                       required
@@ -859,7 +864,7 @@ export default async function EditProfilePage({
                     type="submit"
                     className="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700"
                   >
-                    Usuń profil publiczny
+                    {copy.deletePublicProfile}
                   </button>
                 </form>
               </div>
@@ -869,16 +874,15 @@ export default async function EditProfilePage({
           {!isProfessional ? (
             <details className="mt-6 overflow-hidden rounded-xl border border-red-200 bg-red-50">
               <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-red-700">
-                Usuń konto klienta
+                {copy.deleteClient}
               </summary>
               <div className="border-t border-red-200 p-4">
                 <p className="text-sm leading-6 text-red-700">
-                  Ta operacja trwale usuwa konto klienta, zapisane briefy, ulubione
-                  elementy oraz dostęp do rozmów. Nie będzie można jej cofnąć.
+                  {copy.deleteClientBody}
                 </p>
                 <form action={deleteClientAccount} className="mt-4 grid gap-3">
                   <label className="text-sm font-semibold text-red-800">
-                    Wpisz DELETE, aby potwierdzić
+                    {copy.deleteConfirm}
                     <input
                       name="confirm_delete_account"
                       required
@@ -891,7 +895,7 @@ export default async function EditProfilePage({
                     type="submit"
                     className="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700"
                   >
-                    Usuń konto
+                    {copy.deleteAccount}
                   </button>
                 </form>
               </div>

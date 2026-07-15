@@ -89,6 +89,117 @@ type AccountCopy = {
   };
 };
 
+type AccountProfileCopy = {
+  backProfessional: string;
+  backClient: string;
+  professionalEyebrow: string;
+  clientEyebrow: string;
+  professionalTitle: string;
+  clientTitle: string;
+  professionalIntro: string;
+  clientIntro: string;
+  readiness: string;
+  viewProfile: string;
+  onboardingTitle: string;
+  onboardingStudioStep: string;
+  onboardingClientStep: string;
+  onboardingStudioBody: string;
+  onboardingClientBody: string;
+  onboardingFields: [string, string, string];
+  identityEyebrow: string;
+  identityTitle: string;
+  professionalIdentityBody: string;
+  clientIdentityBody: string;
+  professionalName: string;
+  clientName: string;
+  location: string;
+  locationHint: string;
+  profession: string;
+  professionPlaceholder: string;
+  logo: string;
+  logoHint: string;
+  banner: string;
+  bannerHint: string;
+  email: string;
+  phone: string;
+  directoryEyebrow: string;
+  directoryTitle: string;
+  experience: string;
+  pricing: string;
+  availability: string;
+  priceFrom: string;
+  priceTo: string;
+  priceHint: string;
+  minimumBudget: string;
+  minimumBudgetHint: string;
+  website: string;
+  socialsTitle: string;
+  socialsBody: string;
+  googleTitle: string;
+  googleBody: string;
+  googleInput: string;
+  googlePlaceholder: string;
+  googleVerified: (rating: string, count: number) => string;
+  googlePending: string;
+  googleEmpty: string;
+  workModes: string;
+  termsPl: string;
+  publicTextHint: string;
+  termsPlPlaceholder: string;
+  termsEn: string;
+  fallbackEnHint: string;
+  termsEnPlaceholder: string;
+  positioningEyebrow: string;
+  positioningTitle: string;
+  headlinePl: string;
+  headlineHint: string;
+  headlinePlPlaceholder: string;
+  headlineEn: string;
+  specialties: string;
+  specialtiesHint: string;
+  specialtiesPlaceholder: string;
+  services: string;
+  servicesBody: string;
+  bioPl: string;
+  bioPlPlaceholder: string;
+  bioEn: string;
+  bioEnPlaceholder: string;
+  saveProfessional: string;
+  saveClient: string;
+  cancel: string;
+  professionalPreviewEyebrow: string;
+  clientPreviewEyebrow: string;
+  professionalPreviewTitle: string;
+  clientPreviewTitle: string;
+  directoryCard: string;
+  clientBriefs: string;
+  professionalCardBody: string;
+  clientBriefsBody: string;
+  publicProfile: string;
+  conversations: string;
+  professionalPublicBody: string;
+  clientConversationsBody: string;
+  specialtiesCard: string;
+  specialtiesReady: (count: number) => string;
+  specialtiesEmpty: string;
+  managePortfolio: string;
+  deleteProfessional: string;
+  deleteProfessionalBody: string;
+  deleteConfirm: string;
+  deletePublicProfile: string;
+  deleteClient: string;
+  deleteClientBody: string;
+  deleteAccount: string;
+  errors: {
+    invalidMedia: (kind: string) => string;
+    mediaTooLarge: (kind: string) => string;
+    requiredDetails: string;
+    clientOnly: string;
+    confirmProfileDelete: string;
+    confirmAccountDelete: string;
+  };
+};
+
 type AdminUsersCopy = {
   dateLocale: string;
   never: string;
@@ -357,6 +468,7 @@ type AdminUserDetailCopy = {
 
 type WorkspaceCopy = {
   account: AccountCopy;
+  accountProfile: AccountProfileCopy;
   clientOverview: ClientOverviewCopy;
   clientMessages: {
     dateLocale: string;
@@ -627,6 +739,116 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
         clientTitle: "Zapisane briefy",
         professionalBody: "Uruchom analizę AI zdjęć referencyjnych, aby rozpoznać styl, materiały i język projektu. Projektanci mogą korzystać z narzędzia, ale nie wysyłają briefów jako klienci.",
         clientBody: "Przejrzyj briefy z inspiracjami, budżetem i zakresem przed kontaktem z projektantem lub pracownią.",
+      },
+    },
+    accountProfile: {
+      backProfessional: "Wróć do Studio projektanta",
+      backClient: "Wróć do Strefy klienta",
+      professionalEyebrow: "Profil publiczny",
+      clientEyebrow: "Dane kontaktowe",
+      professionalTitle: "Edytuj profil publiczny",
+      clientTitle: "Uzupełnij dane konta",
+      professionalIntro: "Uzupełnij informacje, które klienci widzą przed kontaktem. Na ich podstawie powstaje Twój profil w katalogu.",
+      clientIntro: "Dbaj o aktualność danych osobowych i kontaktowych używanych w briefach i rozmowach.",
+      readiness: "Kompletność profilu",
+      viewProfile: "Zobacz profil",
+      onboardingTitle: "Pierwszy krok po rejestracji",
+      onboardingStudioStep: "Krok 1 z 2",
+      onboardingClientStep: "Krok 1 z 1",
+      onboardingStudioBody: "Najpierw uzupełnij dane właściciela. Po zapisaniu przejdziesz bezpośrednio do utworzenia profilu pracowni i zaproszenia zespołu.",
+      onboardingClientBody: "Uzupełnij trzy podstawowe dane. Dzięki nim briefy i rozmowy od razu trafiają do właściwego konta.",
+      onboardingFields: ["Imię i nazwisko", "Telefon", "Lokalizacja"],
+      identityEyebrow: "Tożsamość",
+      identityTitle: "Kogo poznają klienci",
+      professionalIdentityBody: "Profil projektanta i profil pracowni są oddzielne. Jeżeli kilka osób pracuje razem, utwórz pracownię w Studio projektanta.",
+      clientIdentityBody: "Te dane identyfikują Cię w zapisanych briefach i rozmowach z profesjonalistami.",
+      professionalName: "Imię i nazwisko / nazwa",
+      clientName: "Imię i nazwisko",
+      location: "Lokalizacja",
+      locationHint: "miasto lub obszar działania",
+      profession: "Specjalizacja zawodowa",
+      professionPlaceholder: "Projektant wnętrz / architekt",
+      logo: "Logo profilu",
+      logoHint: "kwadratowy obraz, maks. 5 MB",
+      banner: "Baner profilu",
+      bannerHint: "szeroki obraz, maks. 5 MB",
+      email: "E-mail",
+      phone: "Telefon",
+      directoryEyebrow: "Informacje w katalogu",
+      directoryTitle: "Ceny, doświadczenie i kontakt",
+      experience: "Lata doświadczenia",
+      pricing: "Model rozliczenia",
+      availability: "Dostępność",
+      priceFrom: "Cena od",
+      priceTo: "Cena do",
+      priceHint: "Kwota pokaże się jako zł/godz., zł/m² albo zł/pakiet zgodnie z modelem.",
+      minimumBudget: "Minimalny budżet inwestycji",
+      minimumBudgetHint: "PLN, opcjonalnie",
+      website: "Strona internetowa",
+      socialsTitle: "Profile społecznościowe",
+      socialsBody: "Linki pojawią się jako ikony na profilu publicznym. Dodaj tylko aktywne profile zawodowe.",
+      googleTitle: "Ocena Google Business",
+      googleBody: "Dodaj link do profilu Google Maps / Google Business albo Place ID. ArchiCompass weryfikuje ocenę bezpośrednio w Google; nie można wpisać jej ręcznie.",
+      googleInput: "Link Google Maps / Google Business albo Place ID",
+      googlePlaceholder: "https://maps.google.com/... albo ChIJ...",
+      googleVerified: (rating, count) => `Zweryfikowano przez Google: ${rating} na podstawie ${count} opinii.`,
+      googlePending: "Profil Google jest zapisany, ale nie ma jeszcze zweryfikowanej oceny.",
+      googleEmpty: "Brak zweryfikowanej oceny Google.",
+      workModes: "Formy współpracy",
+      termsPl: "Warunki współpracy po polsku",
+      publicTextHint: "tekst publiczny",
+      termsPlPlaceholder: "Np. zakres pierwszej konsultacji, etapy płatności, liczba poprawek i elementy wyceniane osobno.",
+      termsEn: "Warunki współpracy po angielsku",
+      fallbackEnHint: "opcjonalnie; gdy pole jest puste, wyświetli się wersja polska",
+      termsEnPlaceholder: "Np. zakres pierwszej konsultacji, etapy płatności, liczba poprawek i elementy wyceniane osobno.",
+      positioningEyebrow: "Pozycjonowanie profilu",
+      positioningTitle: "Styl, specjalizacje i historia",
+      headlinePl: "Nagłówek profilu po polsku",
+      headlineHint: "krótki tekst na banerze, maks. 140 znaków",
+      headlinePlPlaceholder: "Ciepłe, funkcjonalne wnętrza do współczesnego życia",
+      headlineEn: "Nagłówek profilu po angielsku",
+      specialties: "Specjalizacje",
+      specialtiesHint: "oddziel przecinkami",
+      specialtiesPlaceholder: "wnętrza nowoczesne, małe mieszkania, segment premium",
+      services: "Dostępne usługi",
+      servicesBody: "Te informacje pomagają AI Project Compass wyjaśnić, dlaczego dany brief pasuje do Twoich usług.",
+      bioPl: "O mnie / podejście projektowe po polsku",
+      bioPlPlaceholder: "Opisz swoje podejście, typowe projekty i sposób prowadzenia współpracy.",
+      bioEn: "O mnie / podejście projektowe po angielsku",
+      bioEnPlaceholder: "Describe your approach, typical projects, and how you work with clients.",
+      saveProfessional: "Zapisz profil",
+      saveClient: "Zapisz dane konta",
+      cancel: "Anuluj",
+      professionalPreviewEyebrow: "Podgląd profilu",
+      clientPreviewEyebrow: "Konto klienta",
+      professionalPreviewTitle: "Gdzie pojawią się te dane",
+      clientPreviewTitle: "Gdzie pojawią się dane",
+      directoryCard: "Karta w katalogu",
+      clientBriefs: "Briefy projektowe",
+      professionalCardBody: "Nazwa, lokalizacja, specjalizacje, ceny i opis decydują o prezentacji w katalogu.",
+      clientBriefsBody: "Imię i lokalizacja pomagają projektantom zrozumieć, kto wysyła brief.",
+      publicProfile: "Profil publiczny",
+      conversations: "Rozmowy",
+      professionalPublicBody: "Dane kontaktowe i doświadczenie pojawiają się w nagłówku oraz panelu kontaktowym.",
+      clientConversationsBody: "Dane kontaktowe pozostają w koncie i wspierają aktywne rozmowy z projektantami.",
+      specialtiesCard: "Specjalizacje",
+      specialtiesReady: (count) => `${count} specjalizacje są gotowe do pokazania.`,
+      specialtiesEmpty: "Dodaj kilka specjalizacji, aby klienci szybko ocenili dopasowanie.",
+      managePortfolio: "Zarządzaj projektami portfolio",
+      deleteProfessional: "Usuń profil projektanta",
+      deleteProfessionalBody: "Ta operacja trwale usuwa publiczny profil projektanta, portfolio, zdjęcia projektów, powiązane ulubione oraz statystyki profilu. Login, zapisane rozmowy i członkostwa w pracowniach pozostaną aktywne.",
+      deleteConfirm: "Wpisz DELETE, aby potwierdzić",
+      deletePublicProfile: "Usuń profil publiczny",
+      deleteClient: "Usuń konto klienta",
+      deleteClientBody: "Ta operacja trwale usuwa konto klienta, zapisane briefy, ulubione elementy oraz dostęp do rozmów. Nie będzie można jej cofnąć.",
+      deleteAccount: "Usuń konto",
+      errors: {
+        invalidMedia: (kind) => `${kind} musi być plikiem JPEG, PNG lub WebP.`,
+        mediaTooLarge: (kind) => `${kind} musi mieć mniej niż 5 MB.`,
+        requiredDetails: "Uzupełnij imię i nazwisko lub nazwę, telefon oraz lokalizację.",
+        clientOnly: "Usunięcie konta jest dostępne tutaj dla kont klienta.",
+        confirmProfileDelete: "Wpisz DELETE, aby potwierdzić usunięcie profilu.",
+        confirmAccountDelete: "Wpisz DELETE, aby potwierdzić usunięcie konta.",
       },
     },
     clientOverview: {
@@ -1140,6 +1362,116 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
         clientTitle: "Saved briefs",
         professionalBody: "Run an AI analysis of reference photos to recognize the style, materials, and design language. Designers can use the tool but cannot send briefs as clients.",
         clientBody: "Review briefs with inspiration, budget, and scope before contacting a designer or studio.",
+      },
+    },
+    accountProfile: {
+      backProfessional: "Back to Designer Studio",
+      backClient: "Back to Client Workspace",
+      professionalEyebrow: "Public profile",
+      clientEyebrow: "Contact details",
+      professionalTitle: "Edit your public profile",
+      clientTitle: "Complete your account details",
+      professionalIntro: "Add the details clients see before they contact you. They shape how your profile appears in the directory.",
+      clientIntro: "Keep the personal and contact details used in briefs and conversations up to date.",
+      readiness: "Profile readiness",
+      viewProfile: "View profile",
+      onboardingTitle: "First step after registration",
+      onboardingStudioStep: "Step 1 of 2",
+      onboardingClientStep: "Step 1 of 1",
+      onboardingStudioBody: "Complete the owner details first. After saving, you will go straight to creating the studio profile and inviting your team.",
+      onboardingClientBody: "Add three core details. They make sure briefs and conversations reach the right account immediately.",
+      onboardingFields: ["Full name", "Phone", "Location"],
+      identityEyebrow: "Identity",
+      identityTitle: "Who clients will meet",
+      professionalIdentityBody: "A designer profile and a studio profile are separate. If several people work together, create a studio in Designer Studio.",
+      clientIdentityBody: "These details identify you in saved briefs and conversations with professionals.",
+      professionalName: "Full name / business name",
+      clientName: "Full name",
+      location: "Location",
+      locationHint: "city or service area",
+      profession: "Professional specialty",
+      professionPlaceholder: "Interior designer / architect",
+      logo: "Profile logo",
+      logoHint: "square image, up to 5 MB",
+      banner: "Profile banner",
+      bannerHint: "wide image, up to 5 MB",
+      email: "Email",
+      phone: "Phone",
+      directoryEyebrow: "Directory details",
+      directoryTitle: "Pricing, experience, and contact",
+      experience: "Years of experience",
+      pricing: "Pricing model",
+      availability: "Availability",
+      priceFrom: "Price from",
+      priceTo: "Price to",
+      priceHint: "The amount will be shown per hour, per m², or per package according to the selected model.",
+      minimumBudget: "Minimum project budget",
+      minimumBudgetHint: "PLN, optional",
+      website: "Website",
+      socialsTitle: "Social profiles",
+      socialsBody: "Links appear as icons on the public profile. Add active professional profiles only.",
+      googleTitle: "Google Business rating",
+      googleBody: "Add your Google Maps / Google Business profile link or Place ID. ArchiCompass verifies the rating directly with Google; it cannot be entered manually.",
+      googleInput: "Google Maps / Google Business link or Place ID",
+      googlePlaceholder: "https://maps.google.com/... or ChIJ...",
+      googleVerified: (rating, count) => `Verified by Google: ${rating} based on ${count} reviews.`,
+      googlePending: "Your Google profile is saved, but it does not have a verified rating yet.",
+      googleEmpty: "No verified Google rating yet.",
+      workModes: "Ways of working",
+      termsPl: "Cooperation terms in Polish",
+      publicTextHint: "public text",
+      termsPlPlaceholder: "For example: first consultation scope, payment stages, revisions, and separately priced work.",
+      termsEn: "Cooperation terms in English",
+      fallbackEnHint: "optional; Polish is shown when this stays empty",
+      termsEnPlaceholder: "For example: first consultation scope, payment stages, revisions, and separately priced work.",
+      positioningEyebrow: "Profile positioning",
+      positioningTitle: "Style, specialties, and story",
+      headlinePl: "Profile headline in Polish",
+      headlineHint: "short banner text, up to 140 characters",
+      headlinePlPlaceholder: "Warm, functional interiors for contemporary living",
+      headlineEn: "Profile headline in English",
+      specialties: "Specialties",
+      specialtiesHint: "separate with commas",
+      specialtiesPlaceholder: "modern interiors, small apartments, premium projects",
+      services: "Available services",
+      servicesBody: "These details help AI Project Compass explain why a brief fits your services.",
+      bioPl: "About me / design approach in Polish",
+      bioPlPlaceholder: "Describe your approach, typical projects, and how you work with clients.",
+      bioEn: "About me / design approach in English",
+      bioEnPlaceholder: "Describe your approach, typical projects, and how you work with clients.",
+      saveProfessional: "Save profile",
+      saveClient: "Save account details",
+      cancel: "Cancel",
+      professionalPreviewEyebrow: "Profile preview",
+      clientPreviewEyebrow: "Client account",
+      professionalPreviewTitle: "Where these details will appear",
+      clientPreviewTitle: "Where your details will appear",
+      directoryCard: "Directory card",
+      clientBriefs: "Project briefs",
+      professionalCardBody: "Your name, location, specialties, pricing, and description define how you appear in the directory.",
+      clientBriefsBody: "Your name and location help designers understand who is sending a brief.",
+      publicProfile: "Public profile",
+      conversations: "Conversations",
+      professionalPublicBody: "Contact details and experience appear in the header and contact panel.",
+      clientConversationsBody: "Contact details stay in your account and support active conversations with designers.",
+      specialtiesCard: "Specialties",
+      specialtiesReady: (count) => `${count} specialties are ready to display.`,
+      specialtiesEmpty: "Add a few specialties so clients can assess the fit quickly.",
+      managePortfolio: "Manage portfolio projects",
+      deleteProfessional: "Delete designer profile",
+      deleteProfessionalBody: "This permanently deletes the public designer profile, portfolio, project images, related favorites, and profile statistics. Your login, saved conversations, and studio memberships remain active.",
+      deleteConfirm: "Type DELETE to confirm",
+      deletePublicProfile: "Delete public profile",
+      deleteClient: "Delete client account",
+      deleteClientBody: "This permanently deletes the client account, saved briefs, favorite items, and access to conversations. This cannot be undone.",
+      deleteAccount: "Delete account",
+      errors: {
+        invalidMedia: (kind) => `${kind} must be a JPEG, PNG, or WebP file.`,
+        mediaTooLarge: (kind) => `${kind} must be smaller than 5 MB.`,
+        requiredDetails: "Add your full name or business name, phone number, and location.",
+        clientOnly: "Account deletion is available here for client accounts.",
+        confirmProfileDelete: "Type DELETE to confirm profile deletion.",
+        confirmAccountDelete: "Type DELETE to confirm account deletion.",
       },
     },
     clientOverview: {
