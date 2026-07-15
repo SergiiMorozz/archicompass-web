@@ -37,6 +37,11 @@ const workspaceSourceFiles = [
 ];
 
 const publicProfileSourceFiles = ["components/ProjectGallery.tsx"];
+const projectCompassSourceFiles = [
+  "app/project-compass/page.tsx",
+  "app/ai-style-finder/ProjectCompass.tsx",
+  "components/ShareableStyleResult.tsx",
+];
 
 const failures = sharedSourceFiles.flatMap((file) => {
   const source = readFileSync(file, "utf8");
@@ -67,9 +72,16 @@ for (const file of publicProfileSourceFiles) {
   }
 }
 
+for (const file of projectCompassSourceFiles) {
+  const source = readFileSync(file, "utf8");
+  if (!source.includes("@/content/project-compass-copy")) {
+    failures.push(`${file}: missing the shared AI Project Compass locale contract`);
+  }
+}
+
 if (failures.length) {
   console.error("Locale architecture check failed:\n- " + failures.join("\n- "));
   process.exit(1);
 }
 
-console.log(`Locale architecture check passed for ${sharedSourceFiles.length + workspaceSourceFiles.length + publicProfileSourceFiles.length} shared source files.`);
+console.log(`Locale architecture check passed for ${sharedSourceFiles.length + workspaceSourceFiles.length + publicProfileSourceFiles.length + projectCompassSourceFiles.length} shared source files.`);

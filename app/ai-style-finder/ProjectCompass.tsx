@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ShareableStyleResult from "@/components/ShareableStyleResult";
-import { polishCountLabel } from "@/lib/count-label";
+import { getProjectCompassCopy } from "@/content/project-compass-copy";
 import { copyText } from "@/lib/copy-text";
 
 type Option = {
@@ -39,7 +39,7 @@ const maxReferencePhotos = 10;
 const maxAnalysisPhotos = 6;
 const projectCompassDraftKey = "archicompass-project-compass-draft";
 
-const projectTypes: Option[] = [
+let projectTypes: Option[] = [
   {
     label: "Mieszkanie",
     value: "Apartment",
@@ -62,7 +62,7 @@ const projectTypes: Option[] = [
   },
 ];
 
-const goals: Option[] = [
+let goals: Option[] = [
   {
     label: "Określić kierunek",
     value: "Clarify direction",
@@ -85,7 +85,7 @@ const goals: Option[] = [
   },
 ];
 
-const styles: Option[] = [
+let styles: Option[] = [
   {
     label: "Ciepły minimalizm",
     value: "Warm minimalism",
@@ -177,7 +177,7 @@ const styles: Option[] = [
   },
 ];
 
-const scopes: Option[] = [
+let scopes: Option[] = [
   {
     label: "Konsultacja",
     value: "Consultation",
@@ -200,7 +200,7 @@ const scopes: Option[] = [
   },
 ];
 
-const budgets: Option[] = [
+let budgets: Option[] = [
   {
     label: "Do 50 tys. zł",
     value: "Under 50k PLN total project budget",
@@ -238,7 +238,7 @@ const budgets: Option[] = [
   },
 ];
 
-const timelines: Option[] = [
+let timelines: Option[] = [
   {
     label: "Jak najszybciej",
     value: "As soon as possible",
@@ -261,7 +261,7 @@ const timelines: Option[] = [
   },
 ];
 
-const propertyStatuses: Option[] = [
+let propertyStatuses: Option[] = [
   {
     label: "Nowe mieszkanie lub dom",
     value: "New build / developer condition",
@@ -284,7 +284,7 @@ const propertyStatuses: Option[] = [
   },
 ];
 
-const visualizationNeeds: Option[] = [
+let visualizationNeeds: Option[] = [
   {
     label: "Nie potrzebuję",
     value: "Not needed",
@@ -307,7 +307,7 @@ const visualizationNeeds: Option[] = [
   },
 ];
 
-const supervisionNeeds: Option[] = [
+let supervisionNeeds: Option[] = [
   {
     label: "Nie potrzebuję",
     value: "Not needed",
@@ -341,7 +341,7 @@ const roomTypes = [
   "Other",
 ];
 
-const roomTypeLabels: Record<string, string> = {
+let roomTypeLabels: Record<string, string> = {
   "Living room": "Salon",
   Kitchen: "Kuchnia",
   Bedroom: "Sypialnia",
@@ -352,7 +352,7 @@ const roomTypeLabels: Record<string, string> = {
   Other: "Inne",
 };
 
-const visualCues: Option[] = [
+let visualCues: Option[] = [
   {
     label: "Naturalne drewno",
     value: "Natural wood",
@@ -411,6 +411,21 @@ const visualCues: Option[] = [
   },
 ];
 
+const copy = getProjectCompassCopy();
+({
+  projectTypes,
+  goals,
+  styles,
+  scopes,
+  budgets,
+  timelines,
+  propertyStatuses,
+  visualizationNeeds,
+  supervisionNeeds,
+  visualCues,
+  roomTypeLabels,
+} = copy.options);
+
 function selectedOption(options: Option[], value: string) {
   return options.find((option) => option.value === value) ?? options[0];
 }
@@ -428,7 +443,7 @@ function styleLabels(value: string) {
 }
 
 function confidenceLabel(confidence: StyleAnalysis["confidence"]) {
-  return confidence === "high" ? "wysoka" : confidence === "medium" ? "średnia" : "niska";
+  return copy.ui.confidence[confidence];
 }
 
 function styleValues(value: string) {
@@ -505,8 +520,7 @@ function MultiOptionGrid({
     <section>
       <h2 className="text-base font-bold">{label}</h2>
       <p className="mt-1 text-sm leading-6 text-muted">
-        Wybierz jeden lub kilka kierunków, maksymalnie cztery. Łączenie stylów jest
-        naturalne i pomaga w lepszym dopasowaniu projektanta.
+        {copy.ui.stylesHint}
       </p>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {options.map((option) => {
@@ -554,7 +568,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   const [propertyStatus, setPropertyStatus] = useState(propertyStatuses[0].value);
   const [visualizationNeed, setVisualizationNeed] = useState(visualizationNeeds[3].value);
   const [supervisionNeed, setSupervisionNeed] = useState(supervisionNeeds[0].value);
-  const [location, setLocation] = useState("Warszawa");
+  const [location, setLocation] = useState(copy.ui.defaultLocation);
   const [notes, setNotes] = useState("");
   const [referencePhotos, setReferencePhotos] = useState<ReferencePhoto[]>([]);
   const [selectedVisualCues, setSelectedVisualCues] = useState<string[]>([]);
@@ -613,46 +627,53 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   const briefText = useMemo(
     () =>
       [
-        `Rodzaj inwestycji: ${optionLabel(projectTypes, projectType)}`,
-        `Główny cel: ${optionLabel(goals, goal)}`,
-        `Powierzchnia: ${areaM2 ? `${areaM2} m²` : "nie podano"}`,
-        `Liczba pomieszczeń: ${roomCount || "nie podano"}`,
-        selectedRoomTypes.length ? `Pomieszczenia: ${selectedRoomTypes.map((item) => roomTypeLabels[item] || item).join(", ")}` : null,
-        `Status nieruchomości: ${optionLabel(propertyStatuses, propertyStatus)}`,
-        `Kierunek stylistyczny: ${styleLabels(style)}`,
+        copy.ui.draft.investment(optionLabel(projectTypes, projectType)),
+        copy.ui.draft.goal(optionLabel(goals, goal)),
+        copy.ui.draft.area(areaM2 ? `${areaM2} m²` : copy.ui.notProvided.toLowerCase()),
+        copy.ui.draft.roomCount(roomCount || copy.ui.notProvided.toLowerCase()),
+        selectedRoomTypes.length
+          ? copy.ui.draft.rooms(selectedRoomTypes.map((item) => roomTypeLabels[item] || item).join(", "))
+          : null,
+        copy.ui.draft.propertyStatus(optionLabel(propertyStatuses, propertyStatus)),
+        copy.ui.draft.style(styleLabels(style)),
         referencePhotos.length
-          ? `Zdjęcia referencyjne: przesłano ${referencePhotos.length} (${referencePhotos
-              .map((photo) => photo.name)
-              .slice(0, 5)
-              .join(", ")}${referencePhotos.length > 5 ? ", ..." : ""})`
-          : "Zdjęcia referencyjne: jeszcze nie dodano",
+          ? copy.ui.draft.photos(
+              referencePhotos.length,
+              `${referencePhotos.map((photo) => photo.name).slice(0, 5).join(", ")}${referencePhotos.length > 5 ? ", ..." : ""}`
+            )
+          : copy.ui.draft.noPhotos,
         styleAnalysis
           ? [
-              `Analiza stylu AI: ${styleAnalysis.primaryStyle} (pewność: ${confidenceLabel(styleAnalysis.confidence)})`,
-              `Podsumowanie AI: ${styleAnalysis.summary}`,
+              copy.ui.draft.analysis(
+                styleAnalysis.primaryStyle,
+                confidenceLabel(styleAnalysis.confidence)
+              ),
+              copy.ui.draft.analysisSummary(styleAnalysis.summary),
               styleAnalysis.colorPalette.length
-                ? `Paleta kolorów AI: ${styleAnalysis.colorPalette.join(", ")}`
+                ? copy.ui.draft.palette(styleAnalysis.colorPalette.join(", "))
                 : null,
               styleAnalysis.materials.length
-                ? `Materiały AI: ${styleAnalysis.materials.join(", ")}`
+                ? copy.ui.draft.materials(styleAnalysis.materials.join(", "))
                 : null,
               styleAnalysis.designerPrompt
-                ? `Wskazówki do wyboru projektanta: ${styleAnalysis.designerPrompt}`
+                ? copy.ui.draft.designerTip(styleAnalysis.designerPrompt)
                 : null,
             ]
               .filter(Boolean)
               .join("\n")
           : null,
         selectedVisualCues.length
-          ? `Cechy wizualne: ${selectedVisualCues.map((item) => optionLabel(visualCues, item)).join(", ")}`
+          ? copy.ui.draft.visualCues(
+              selectedVisualCues.map((item) => optionLabel(visualCues, item)).join(", ")
+            )
           : null,
-        `Potrzebny zakres wsparcia: ${optionLabel(scopes, scope)}`,
-        `Całkowity budżet inwestycji: ${optionLabel(budgets, budget)}`,
-        `Planowany termin: ${optionLabel(timelines, timeline)}`,
-        `Wizualizacje 3D: ${optionLabel(visualizationNeeds, visualizationNeed)}`,
-        `Nadzór: ${optionLabel(supervisionNeeds, supervisionNeed)}`,
-        `Lokalizacja: ${location.trim() || "nie podano"}`,
-        notes.trim() ? `Dodatkowe informacje: ${notes.trim()}` : null,
+        copy.ui.draft.scope(optionLabel(scopes, scope)),
+        copy.ui.draft.budget(optionLabel(budgets, budget)),
+        copy.ui.draft.timeline(optionLabel(timelines, timeline)),
+        copy.ui.draft.visualization(optionLabel(visualizationNeeds, visualizationNeed)),
+        copy.ui.draft.supervision(optionLabel(supervisionNeeds, supervisionNeed)),
+        copy.ui.draft.location(location.trim() || copy.ui.notProvided.toLowerCase()),
+        notes.trim() ? copy.ui.draft.notes(notes.trim()) : null,
       ]
         .filter(Boolean)
         .join("\n"),
@@ -679,18 +700,18 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
   const nextStep = useMemo(() => {
     if (scope === "Consultation") {
-      return "Umów jedną konkretną konsultację i wykorzystaj brief, aby od początku rozmawiać o realnych potrzebach.";
+      return copy.ui.nextSteps.consultation;
     }
 
     if (scope === "End-to-end support") {
-      return "Wybierz 2-3 projektantów z rozbudowanym portfolio i zapytaj o proces, dostępność oraz wsparcie podczas realizacji.";
+      return copy.ui.nextSteps.endToEnd;
     }
 
     if (goal === "Clarify direction") {
-      return "Zacznij od projektu koncepcyjnego, zanim zamówisz dokumentację lub podejmiesz decyzje remontowe.";
+      return copy.ui.nextSteps.clarify;
     }
 
-    return "Porównaj projektantów na podstawie podobnych realizacji, a następnie wyślij ten brief jako pierwszą wiadomość.";
+    return copy.ui.nextSteps.default;
   }, [goal, scope]);
 
   async function copyBrief() {
@@ -699,7 +720,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
     } catch (error) {
-      setSaveError(error instanceof Error ? error.message : "Nie udało się skopiować briefu.");
+      setSaveError(error instanceof Error ? error.message : copy.ui.errors.copy);
     }
   }
 
@@ -748,7 +769,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
   async function analyzeReferencePhotos() {
     if (!referencePhotos.length) {
-      setAnalysisError("Dodaj co najmniej jedno zdjęcie referencyjne przed uruchomieniem analizy AI.");
+      setAnalysisError(copy.ui.errors.noPhotos);
       return;
     }
 
@@ -781,7 +802,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       };
 
       if (!response.ok || !payload.analysis) {
-        throw new Error(payload.error ?? "Nie udało się przeprowadzić analizy stylu AI.");
+        throw new Error(payload.error ?? copy.ui.errors.analysis);
       }
 
       setStyleAnalysis(payload.analysis);
@@ -794,7 +815,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       );
     } catch (error) {
       setAnalysisError(
-        error instanceof Error ? error.message : "Nie udało się przeprowadzić analizy stylu AI."
+        error instanceof Error ? error.message : copy.ui.errors.analysis
       );
     } finally {
       setIsAnalyzing(false);
@@ -885,7 +906,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       }
 
       if (!response.ok || !payload.id) {
-        throw new Error(payload.error ?? "Nie udało się zapisać briefu.");
+        throw new Error(payload.error ?? copy.ui.errors.save);
       }
 
       setSavedBriefId(payload.id);
@@ -899,7 +920,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
         window.location.href = `${matchesUrl.pathname}?${matchesUrl.searchParams.toString()}`;
       }
     } catch (error) {
-      setSaveError(error instanceof Error ? error.message : "Nie udało się zapisać briefu.");
+      setSaveError(error instanceof Error ? error.message : copy.ui.errors.save);
     } finally {
       setIsSaving(false);
     }
@@ -977,22 +998,20 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
         <div className="mx-auto grid max-w-7xl gap-7 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-end">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full bg-[#4fd8c7] px-3 py-1 text-xs font-bold text-[#173d39]">
-              AI Project Compass
+              {copy.ui.hero.eyebrow}
             </div>
             <h1 className="mt-2 max-w-4xl text-4xl font-bold tracking-tight sm:text-6xl">
-              Zamień niejasny pomysł w konkretny brief projektowy
+              {copy.ui.hero.title}
             </h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-white/72">
-              Styl ma znaczenie, ale trafne dopasowanie zależy także od zakresu,
-              budżetu, rodzaju wnętrza, zdjęć referencyjnych, terminu i potrzebnego wsparcia.
+              {copy.ui.hero.body}
             </p>
           </div>
 
           <div className="rounded-lg border border-white/15 bg-white/10 p-5 shadow-sm">
-            <div className="text-sm font-semibold text-[#64dfd0]">Dlaczego to działa lepiej</div>
+            <div className="text-sm font-semibold text-[#64dfd0]">{copy.ui.hero.insightTitle}</div>
             <p className="mt-2 text-sm leading-6 text-white/70">
-              Zamiast zgadywać nazwę stylu ArchiCompass porządkuje informacje, których
-              projektant potrzebuje, aby ocenić, czy inwestycja pasuje do jego specjalizacji.
+              {copy.ui.hero.insightBody}
             </p>
           </div>
         </div>
@@ -1001,21 +1020,20 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_390px]">
         <div className="grid gap-7 rounded-lg border border-line bg-card p-5 shadow-[0_18px_50px_rgba(54,31,73,0.08)] sm:p-6">
           <OptionGrid
-            label="1. Co planujesz?"
+            label={copy.ui.steps.projectType}
             onChange={setProjectType}
             options={projectTypes}
             value={projectType}
           />
 
           <section>
-            <h2 className="text-base font-bold">2. Opowiedz o przestrzeni</h2>
+            <h2 className="text-base font-bold">{copy.ui.steps.space}</h2>
             <p className="mt-1 text-sm leading-6 text-muted">
-              Wystarczą dane orientacyjne. Pomogą projektantom oszacować zakres pracy
-              jeszcze przed pierwszą rozmową.
+              {copy.ui.steps.spaceBody}
             </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <label className="block text-sm font-semibold">
-                Powierzchnia, m²
+                {copy.ui.steps.area}
                 <input
                   type="number"
                   min="1"
@@ -1023,12 +1041,12 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                   inputMode="decimal"
                   value={areaM2}
                   onChange={(event) => setAreaM2(event.target.value)}
-                  placeholder="np. 72"
+                  placeholder={copy.ui.steps.areaPlaceholder}
                   className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary"
                 />
               </label>
               <label className="block text-sm font-semibold">
-                Liczba pomieszczeń
+                {copy.ui.steps.roomsCount}
                 <input
                   type="number"
                   min="1"
@@ -1036,13 +1054,13 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                   inputMode="numeric"
                   value={roomCount}
                   onChange={(event) => setRoomCount(event.target.value)}
-                  placeholder="np. 3"
+                  placeholder={copy.ui.steps.roomsCountPlaceholder}
                   className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary"
                 />
               </label>
             </div>
             <div className="mt-4">
-              <div className="text-sm font-semibold">Pomieszczenia objęte projektem</div>
+              <div className="text-sm font-semibold">{copy.ui.steps.roomsIncluded}</div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {roomTypes.map((room) => {
                   const isSelected = selectedRoomTypes.includes(room);
@@ -1068,14 +1086,14 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
           </section>
 
           <OptionGrid
-            label="3. Jaki jest status nieruchomości?"
+            label={copy.ui.steps.propertyStatus}
             onChange={setPropertyStatus}
             options={propertyStatuses}
             value={propertyStatus}
           />
 
           <OptionGrid
-            label="4. Czego potrzebujesz najbardziej?"
+            label={copy.ui.steps.goal}
             onChange={setGoal}
             options={goals}
             value={goal}
@@ -1084,11 +1102,9 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
           <section>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-base font-bold">5. Dodaj zdjęcia referencyjne</h2>
+                <h2 className="text-base font-bold">{copy.ui.steps.photos}</h2>
                 <p className="mt-1 text-sm leading-6 text-muted">
-                  Dodaj 4-10 zdjęć wnętrz, detali lub nastrojów, które Ci się podobają.
-                  Podgląd pozostaje w tej przeglądarce do chwili uruchomienia analizy lub
-                  zapisania briefu. Zapisane pliki trafiają do prywatnego briefu.
+                  {copy.ui.steps.photosBody}
                 </p>
               </div>
               <span className="rounded-full bg-background px-3 py-1 text-sm font-semibold text-muted">
@@ -1114,11 +1130,11 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
               />
               <span className="text-sm font-bold">
                 {referencePhotos.length >= maxReferencePhotos
-                  ? "Osiągnięto limit zdjęć"
-                  : "Dodaj zdjęcia referencyjne"}
+                  ? copy.ui.steps.photoLimitReached
+                  : copy.ui.steps.addPhotos}
               </span>
               <span className="mt-1 text-sm text-muted">
-                JPEG, PNG lub WebP. Dodaj kilka zdjęć, aby łatwiej rozpoznać wspólne cechy.
+                {copy.ui.steps.photoTypes}
               </span>
             </label>
 
@@ -1144,7 +1160,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                         onClick={() => removeReferencePhoto(photo.id)}
                         className="rounded-lg border border-line bg-card px-3 py-2 text-xs font-semibold text-muted hover:border-primary hover:text-primary"
                       >
-                        Usuń
+                        {copy.ui.steps.removePhoto}
                       </button>
                     </div>
                   </div>
@@ -1152,8 +1168,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
               </div>
             ) : (
               <div className="mt-4 rounded-2xl border border-line bg-background p-4 text-sm leading-6 text-muted">
-                Nie dodano jeszcze zdjęć. Zacznij od obrazów, które najlepiej oddają
-                oczekiwany nastrój, materiał, światło lub detal.
+                {copy.ui.steps.noPhotos}
               </div>
             )}
 
@@ -1162,11 +1177,10 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-white">AI</span>
-                    <h3 className="text-sm font-bold text-primary">Analiza stylu ze zdjęć</h3>
+                    <h3 className="text-sm font-bold text-primary">{copy.ui.steps.aiTitle}</h3>
                   </div>
                   <p className="mt-1 text-sm leading-6 text-muted">
-                    ArchiCompass przeanalizuje zdjęcia i zaproponuje nazwę stylu, materiały,
-                    kolory oraz wskazówki pomocne przy wyborze projektanta.
+                    {copy.ui.steps.aiBody}
                   </p>
                 </div>
                 <button
@@ -1175,20 +1189,18 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                   disabled={!referencePhotos.length || isAnalyzing}
                   className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isAnalyzing ? "Analizowanie..." : "Analizuj zdjęcia"}
+                  {isAnalyzing ? copy.ui.steps.analyzing : copy.ui.steps.analyze}
                 </button>
               </div>
 
               <p className="mt-3 text-xs leading-5 text-muted">
-                Uruchomienie analizy wysyła maksymalnie {maxAnalysisPhotos} zdjęć do dostawcy
-                usługi AI. Nie przesyłaj zdjęć osób, adresów ani informacji poufnych.
-                Szczegóły znajdziesz w <Link href="/privacy" className="underline">Polityce prywatności</Link>.
+                {copy.ui.steps.aiPrivacyBefore} {maxAnalysisPhotos} {copy.ui.steps.aiPrivacyAfter} {" "}
+                <Link href="/privacy" className="underline">{copy.ui.steps.privacy}</Link>.
               </p>
 
               {referencePhotos.length > maxAnalysisPhotos ? (
                 <p className="mt-3 text-xs leading-5 text-muted">
-                  Analiza AI wykorzysta pierwsze {maxAnalysisPhotos} zdjęć, aby wynik był
-                  szybki i precyzyjny. Wszystkie zdjęcia nadal można zapisać w briefie.
+                  {copy.ui.steps.manyPhotos(maxAnalysisPhotos)}
                 </p>
               ) : null}
 
@@ -1197,14 +1209,14 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <div className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">
-                        Sugerowany styl
+                        {copy.ui.steps.suggestedStyle}
                       </div>
                       <div className="mt-1 text-2xl font-bold">
                         {styleAnalysis.primaryStyle}
                       </div>
                     </div>
                     <span className="w-fit rounded-full bg-card px-3 py-1 text-xs font-semibold text-primary">
-                      pewność: {confidenceLabel(styleAnalysis.confidence)}
+                      {copy.ui.steps.confidencePrefix} {confidenceLabel(styleAnalysis.confidence)}
                     </span>
                   </div>
 
@@ -1212,24 +1224,24 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
                   <div className="grid gap-3 text-sm sm:grid-cols-2">
                     {[
-                      ["Najbliższy kierunek", optionLabel(styles, styleAnalysis.styleDirection)],
+                      [copy.ui.steps.closestDirection, optionLabel(styles, styleAnalysis.styleDirection)],
                       [
-                        "Kolory",
+                        copy.ui.steps.colors,
                         styleAnalysis.colorPalette.length
                           ? styleAnalysis.colorPalette.join(", ")
-                          : "Za mało danych",
+                          : copy.ui.steps.tooLittleData,
                       ],
                       [
-                        "Materiały",
+                        copy.ui.steps.materials,
                         styleAnalysis.materials.length
                           ? styleAnalysis.materials.join(", ")
-                          : "Za mało danych",
+                          : copy.ui.steps.tooLittleData,
                       ],
                       [
-                        "Cechy stylu",
+                        copy.ui.steps.styleClues,
                         styleAnalysis.styleClues.length
                           ? styleAnalysis.styleClues.join(", ")
-                          : "Za mało danych",
+                          : copy.ui.steps.tooLittleData,
                       ],
                     ].map(([label, value]) => (
                       <div key={label} className="rounded-xl border border-line bg-card p-3">
@@ -1240,13 +1252,13 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                   </div>
 
                   <div className="rounded-xl border border-line bg-card p-3 text-sm leading-6">
-                    <div className="font-semibold">Jak opisać potrzeby projektantowi</div>
+                    <div className="font-semibold">{copy.ui.steps.describeNeeds}</div>
                     <p className="mt-1 text-muted">{styleAnalysis.designerPrompt}</p>
                   </div>
 
                   {styleAnalysis.watchOuts.length ? (
                     <div>
-                      <div className="text-sm font-semibold">Na co uważać</div>
+                      <div className="text-sm font-semibold">{copy.ui.steps.watchOuts}</div>
                       <ul className="mt-2 grid gap-2 text-sm leading-6 text-muted">
                         {styleAnalysis.watchOuts.map((item) => (
                           <li key={item}>- {item}</li>
@@ -1261,14 +1273,14 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
               {analysisError ? (
                 <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
-                  <div className="font-semibold">Analiza AI jest niedostępna</div>
+                  <div className="font-semibold">{copy.ui.steps.analysisUnavailable}</div>
                   <p className="mt-1">{analysisError}</p>
                 </div>
               ) : null}
             </div>
 
             <div className="mt-5">
-              <h3 className="text-sm font-bold">Co łączy te zdjęcia?</h3>
+              <h3 className="text-sm font-bold">{copy.ui.steps.visualCues}</h3>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 {visualCues.map((cue) => {
                   const isSelected = selectedVisualCues.includes(cue.value);
@@ -1298,42 +1310,42 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
           </section>
 
           <MultiOptionGrid
-            label="6. Które kierunki są Ci najbliższe?"
+            label={copy.ui.steps.style}
             onChange={(values) => setStyle(values.length ? values.join(" | ") : "Not sure yet")}
             options={styles}
             values={selectedStyles}
           />
 
           <OptionGrid
-            label="7. Jakiego zakresu pomocy potrzebujesz?"
+            label={copy.ui.steps.scope}
             onChange={setScope}
             options={scopes}
             value={scope}
           />
 
           <OptionGrid
-            label="8. Całkowity budżet inwestycji (projektant + materiały + wykonanie)"
+            label={copy.ui.steps.budget}
             onChange={setBudget}
             options={budgets}
             value={budget}
           />
 
           <OptionGrid
-            label="9. Kiedy chcesz rozpocząć?"
+            label={copy.ui.steps.timeline}
             onChange={setTimeline}
             options={timelines}
             value={timeline}
           />
 
           <OptionGrid
-            label="10. Czy potrzebujesz wizualizacji 3D?"
+            label={copy.ui.steps.visualization}
             onChange={setVisualizationNeed}
             options={visualizationNeeds}
             value={visualizationNeed}
           />
 
           <OptionGrid
-            label="11. Jakiego nadzoru potrzebujesz?"
+            label={copy.ui.steps.supervision}
             onChange={setSupervisionNeed}
             options={supervisionNeeds}
             value={supervisionNeed}
@@ -1341,36 +1353,34 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block text-sm font-semibold">
-              Lokalizacja
+              {copy.ui.location}
               <input
                 value={location}
                 onChange={(event) => setLocation(event.target.value)}
-                placeholder="Warszawa, Kraków, Gdańsk..."
+                placeholder={copy.ui.locationPlaceholder}
                 className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary"
               />
             </label>
 
             <label className="block text-sm font-semibold">
-              Dodatkowe informacje
+              {copy.ui.notes}
               <input
                 value={notes}
                 onChange={(event) => setNotes(event.target.value)}
-                placeholder="Dzieci, wynajem, termin, wykonawca..."
+                placeholder={copy.ui.notesPlaceholder}
                 className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary"
               />
             </label>
           </div>
 
           <div className="rounded-2xl border border-primary/20 bg-primary-soft p-4">
-            <div className="text-sm font-semibold text-primary">Gotowe?</div>
+            <div className="text-sm font-semibold text-primary">{copy.ui.ready}</div>
             <p className="mt-1 text-sm leading-6 text-muted">
-              Możesz zapisać brief, od razu przejść do dopasowanych projektantów albo
-              skopiować tekst i wysłać go poza platformą.
+              {copy.ui.readyBody}
             </p>
             {isDesigner ? (
               <div className="mt-4 rounded-xl border border-primary/30 bg-card p-3 text-sm leading-6 text-muted">
-                Jako projektant możesz korzystać z analizy AI i podglądu dopasowań, ale
-                zapisywanie oraz wysyłanie briefów klienta jest zablokowane.
+                {copy.ui.designerOnly}
               </div>
             ) : null}
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -1380,53 +1390,53 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                 disabled={isSaving || isDesigner}
                 className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSaving ? "Zapisywanie briefu..." : "Zapisz brief i znajdź projektantów"}
+                {isSaving ? copy.ui.saving : copy.ui.saveAndFind}
               </button>
               <Link
                 href={designerHref}
                 className="rounded-xl border border-line bg-card px-5 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
               >
-                Zobacz dopasowania bez zapisywania
+                {copy.ui.viewMatches}
               </Link>
               <button
                 type="button"
                 onClick={copyBrief}
                 className="rounded-xl border border-line bg-card px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
               >
-                {copied ? "Brief skopiowany" : "Kopiuj brief"}
+                {copied ? copy.ui.briefCopied : copy.ui.copyBrief}
               </button>
             </div>
           </div>
         </div>
 
         <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
-          <div className="text-sm font-semibold text-primary">Twój brief</div>
-          <h2 className="mt-2 text-2xl font-bold">{optionLabel(projectTypes, projectType)} · {location || "Polska"}</h2>
+          <div className="text-sm font-semibold text-primary">{copy.ui.brief.title}</div>
+          <h2 className="mt-2 text-2xl font-bold">{optionLabel(projectTypes, projectType)} · {location || copy.ui.defaultLocation}</h2>
 
           <div className="mt-5 grid gap-3 text-sm">
             {[
-              ["Cel", optionLabel(goals, goal)],
-              ["Powierzchnia", areaM2 ? `${areaM2} m²` : "Nie podano"],
-              ["Pomieszczenia", roomCount || selectedRoomTypes.slice(0, 2).map((item) => roomTypeLabels[item] || item).join(", ") || "Nie podano"],
-              ["Nieruchomość", optionLabel(propertyStatuses, propertyStatus)],
-              ["Styl", styleLabels(style)],
+              [copy.ui.brief.goal, optionLabel(goals, goal)],
+              [copy.ui.brief.area, areaM2 ? `${areaM2} m²` : copy.ui.notProvided],
+              [copy.ui.brief.rooms, roomCount || selectedRoomTypes.slice(0, 2).map((item) => roomTypeLabels[item] || item).join(", ") || copy.ui.notProvided],
+              [copy.ui.brief.property, optionLabel(propertyStatuses, propertyStatus)],
+              [copy.ui.brief.style, styleLabels(style)],
               [
-                "Zdjęcia",
+                copy.ui.brief.photos,
                 referencePhotos.length
                   ? `${referencePhotos.length}/${maxReferencePhotos}`
-                  : "Brak",
+                  : copy.ui.none,
               ],
               [
-                "Cechy wizualne",
+                copy.ui.brief.visualCues,
                 selectedVisualCues.length
                   ? selectedVisualCues.slice(0, 2).map((item) => optionLabel(visualCues, item)).join(", ")
-                  : "Nie oznaczono",
+                  : copy.ui.notSelected,
               ],
-              ["Wsparcie", optionLabel(scopes, scope)],
-              ["Budżet", optionLabel(budgets, budget)],
-              ["Termin", optionLabel(timelines, timeline)],
-              ["3D", optionLabel(visualizationNeeds, visualizationNeed)],
-              ["Nadzór", optionLabel(supervisionNeeds, supervisionNeed)],
+              [copy.ui.brief.support, optionLabel(scopes, scope)],
+              [copy.ui.brief.budget, optionLabel(budgets, budget)],
+              [copy.ui.brief.timeline, optionLabel(timelines, timeline)],
+              [copy.ui.brief.visualization, optionLabel(visualizationNeeds, visualizationNeed)],
+              [copy.ui.brief.supervision, optionLabel(supervisionNeeds, supervisionNeed)],
             ].map(([label, value]) => (
               <div
                 key={label}
@@ -1439,27 +1449,25 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
           </div>
 
           <div className="mt-6 rounded-2xl border border-line bg-background p-4">
-            <div className="text-sm font-semibold">Rekomendowany następny krok</div>
+            <div className="text-sm font-semibold">{copy.ui.brief.nextStep}</div>
             <p className="mt-2 text-sm leading-6 text-muted">{nextStep}</p>
           </div>
 
           <div className="mt-5 rounded-2xl border border-line bg-background p-4">
-            <div className="text-sm font-semibold">Wskazówka do wyboru projektanta</div>
+            <div className="text-sm font-semibold">{copy.ui.brief.designerTip}</div>
             <p className="mt-2 text-sm leading-6 text-muted">
               {styleAnalysis
                 ? styleAnalysis.designerPrompt
-                : `Szukaj portfolio z cechami takimi jak ${visualCueLabel.toLowerCase()} i zapytaj,
-              czy projektant oferuje zakres: ${selectedScope.label.toLowerCase()}.`}
+                : copy.ui.brief.designerTipBody(visualCueLabel, selectedScope.label)}
             </p>
           </div>
 
           <div className="mt-6 grid gap-3">
             {isDesigner ? (
               <div className="rounded-xl border border-primary/30 bg-primary-soft p-4 text-sm leading-6 text-foreground">
-                <div className="font-semibold text-primary">Jesteś zalogowany jako projektant</div>
+                <div className="font-semibold text-primary">{copy.ui.brief.designerNoticeTitle}</div>
                 <p className="mt-1 text-muted">
-                  Analiza zdjęć AI, wskazówki stylistyczne, kopiowanie i podgląd dopasowań
-                  pozostają dostępne. Konto projektanta nie może zapisywać ani wysyłać briefów klienta.
+                  {copy.ui.brief.designerNoticeBody}
                 </p>
               </div>
             ) : null}
@@ -1469,7 +1477,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
               disabled={isSaving || isDesigner}
               className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSaving ? "Zapisywanie briefu..." : "Zapisz brief i znajdź projektantów"}
+              {isSaving ? copy.ui.saving : copy.ui.saveAndFind}
             </button>
             <button
               type="button"
@@ -1477,38 +1485,38 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
               disabled={isSaving || isDesigner}
               className="rounded-xl border border-primary bg-primary-soft px-5 py-3 text-sm font-semibold text-primary hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSaving ? "Zapisywanie briefu..." : "Zapisz na później"}
+              {isSaving ? copy.ui.saving : copy.ui.brief.saveForLater}
             </button>
             <Link
               href={designerHref}
               className="rounded-xl border border-line bg-background px-5 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
             >
-              Zobacz dopasowania bez zapisywania
+              {copy.ui.viewMatches}
             </Link>
             <button
               type="button"
               onClick={copyBrief}
               className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
             >
-              {copied ? "Brief skopiowany" : "Kopiuj brief"}
+              {copied ? copy.ui.briefCopied : copy.ui.copyBrief}
             </button>
           </div>
 
           {savedBriefId ? (
             <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
-              <div className="font-semibold">Brief zapisany</div>
+              <div className="font-semibold">{copy.ui.brief.savedTitle}</div>
               <p className="mt-1">
-                Zapisano {polishCountLabel(savedReferenceCount ?? 0, "zdjęcie referencyjne", "zdjęcia referencyjne", "zdjęć referencyjnych")}. Brief jest gotowy do wysłania projektantowi.
+                {copy.ui.brief.savedBody(savedReferenceCount ?? 0)}
               </p>
               <Link href="/client/briefs" className="mt-3 inline-flex font-semibold underline">
-                Otwórz zapisane briefy
+                {copy.ui.brief.openSavedBriefs}
               </Link>
             </div>
           ) : null}
 
           {saveError ? (
             <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
-              <div className="font-semibold">Nie udało się zapisać briefu</div>
+              <div className="font-semibold">{copy.ui.brief.saveFailed}</div>
               <p className="mt-1">{saveError}</p>
             </div>
           ) : null}
@@ -1522,15 +1530,15 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
         <div className="mx-auto flex max-w-7xl gap-3">
           {isDesigner ? (
             <Link href={designerHref} className="flex-1 rounded-xl bg-primary px-4 py-3 text-center text-sm font-bold text-white">
-              Zobacz dopasowanych projektantów
+              {copy.ui.brief.mobileMatches}
             </Link>
           ) : (
             <button type="button" onClick={() => saveBrief(true)} disabled={isSaving} className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white disabled:opacity-60">
-              {isSaving ? "Zapisywanie..." : "Zapisz i znajdź projektantów"}
+              {isSaving ? copy.ui.brief.mobileSaving : copy.ui.brief.mobileSaveAndFind}
             </button>
           )}
           <button type="button" onClick={copyBrief} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-bold">
-            {copied ? "Skopiowano" : "Kopiuj"}
+            {copied ? copy.ui.brief.mobileCopied : copy.ui.brief.mobileCopy}
           </button>
         </div>
       </div>

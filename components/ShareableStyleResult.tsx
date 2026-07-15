@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import BrandLogo from "@/components/BrandLogo";
+import { getProjectCompassCopy } from "@/content/project-compass-copy";
 import { copyText } from "@/lib/copy-text";
 
 type ShareableStyleAnalysis = {
@@ -22,6 +23,7 @@ type ShareablePhoto = {
 const canvasWidth = 1080;
 const canvasHeight = 1350;
 const logoCrop = { x: 0, y: 793, width: 3371, height: 798 };
+const copy = getProjectCompassCopy();
 
 function paletteColor(label: string, index: number) {
   const value = label.toLowerCase();
@@ -77,7 +79,7 @@ function loadImage(url: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image();
     image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("Nie udało się przygotować zdjęcia referencyjnego."));
+    image.onerror = () => reject(new Error(copy.ui.share.imageLoadError));
     image.src = url;
   });
 }
@@ -147,7 +149,7 @@ function wrappedLines(
 
 function conciseSentence(text: string, maxCharacters = 180) {
   const clean = text.replace(/\s+/g, " ").trim();
-  if (!clean) return "Spójny kierunek wnętrza odczytany z Twoich zdjęć referencyjnych.";
+  if (!clean) return copy.ui.share.fallbackSummary;
 
   const firstSentence = clean.split(/(?<=[.!?])\s+/)[0];
   if (firstSentence.length <= maxCharacters) {
@@ -165,7 +167,7 @@ function conciseSentence(text: string, maxCharacters = 180) {
 }
 
 function confidenceLabel(confidence: ShareableStyleAnalysis["confidence"]) {
-  return confidence === "high" ? "Wysoka pewność" : confidence === "medium" ? "Średnia pewność" : "Niska pewność";
+  return copy.ui.confidence[confidence];
 }
 
 function drawPhotoGrid(
@@ -223,7 +225,7 @@ async function createResultPng({
   canvas.width = canvasWidth;
   canvas.height = canvasHeight;
   const context = canvas.getContext("2d");
-  if (!context) throw new Error("Ta przeglądarka nie może utworzyć obrazu z wynikiem.");
+  if (!context) throw new Error(copy.ui.share.canvasError);
 
   context.fillStyle = "#faf9fb";
   context.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -244,7 +246,7 @@ async function createResultPng({
   context.fillStyle = "#706284";
   context.font = "600 22px Outfit, Arial, sans-serif";
   context.textAlign = "right";
-  context.fillText("ANALIZA STYLU WNĘTRZA AI", 1020, 91);
+  context.fillText(copy.ui.share.canvasTitle, 1020, 91);
   context.textAlign = "left";
 
   const images = await Promise.all(photos.slice(0, 4).map((photo) => loadImage(photo.url)));
@@ -252,7 +254,7 @@ async function createResultPng({
 
   context.fillStyle = "#592d86";
   context.font = "700 22px Outfit, Arial, sans-serif";
-  context.fillText("TWÓJ STYL WNĘTRZA", 60, 596);
+  context.fillText(copy.ui.share.canvasStyle, 60, 596);
 
   context.fillStyle = "#251d30";
   context.font = "700 66px Outfit, Arial, sans-serif";
@@ -276,7 +278,7 @@ async function createResultPng({
   const paletteY = Math.max(830, titleBottom + 48 + summaryLines.length * 35 + 28);
   context.fillStyle = "#251d30";
   context.font = "700 23px Outfit, Arial, sans-serif";
-  context.fillText("PALETA", 60, paletteY);
+  context.fillText(copy.ui.share.canvasPalette, 60, paletteY);
   const paletteItems = analysis.colorPalette.slice(0, 4);
   const paletteWidth = (960 - 18 * 3) / 4;
   paletteItems.forEach((item, index) => {
@@ -294,7 +296,7 @@ async function createResultPng({
   const materialsY = paletteY + 116;
   context.fillStyle = "#251d30";
   context.font = "700 23px Outfit, Arial, sans-serif";
-  context.fillText("MATERIAŁY", 60, materialsY);
+  context.fillText(copy.ui.share.canvasMaterials, 60, materialsY);
   let pillX = 60;
   let pillY = materialsY + 24;
   context.font = "600 20px Outfit, Arial, sans-serif";
@@ -313,7 +315,7 @@ async function createResultPng({
   const designerFitY = Math.max(materialsY + 98, pillY + 72);
   context.fillStyle = "#251d30";
   context.font = "700 23px Outfit, Arial, sans-serif";
-  context.fillText("DOPASOWANIE PROJEKTANTA", 60, designerFitY);
+  context.fillText(copy.ui.share.canvasDesignerFit, 60, designerFitY);
   context.fillStyle = "#706284";
   context.font = "500 21px Outfit, Arial, sans-serif";
   const fitLines = wrappedLines(
@@ -327,7 +329,7 @@ async function createResultPng({
   context.fillStyle = "#592d86";
   context.textAlign = "left";
   context.font = "700 21px Outfit, Arial, sans-serif";
-  context.fillText("Dodaj 4 zdjęcia. Otrzymaj brief gotowy dla projektanta.", 60, 1280);
+  context.fillText(copy.ui.share.canvasFooter, 60, 1280);
   context.fillStyle = "#592d86";
   context.textAlign = "right";
   context.font = "600 19px Outfit, Arial, sans-serif";
@@ -347,7 +349,7 @@ function safeFileName(style: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 42);
-  return `archicompass-${slug || "styl-wnetrza"}.png`;
+  return `archicompass-${slug || copy.ui.share.defaultFileName}.png`;
 }
 
 function downloadBlob(blob: Blob, fileName: string) {
@@ -371,10 +373,10 @@ export default function ShareableStyleResult({
   const [error, setError] = useState<string | null>(null);
   const visiblePhotos = photos.slice(0, 4);
   const shareCaption = [
-    `Mój styl wnętrza to ${analysis.primaryStyle} (${confidenceLabel(analysis.confidence).toLowerCase()}).`,
+    copy.ui.share.captionStyle(analysis.primaryStyle, confidenceLabel(analysis.confidence)),
     conciseSentence(analysis.summary),
-    `Dopasowanie projektanta: ${conciseSentence(analysis.designerPrompt, 140)}`,
-    "Dodaj swoje inspiracje i otrzymaj brief gotowy dla projektanta z ArchiCompass.",
+    copy.ui.share.captionDesignerFit(conciseSentence(analysis.designerPrompt, 140)),
+    copy.ui.share.captionCta,
   ].join("\n\n");
 
   async function downloadResult() {
@@ -384,9 +386,9 @@ export default function ShareableStyleResult({
     try {
       const blob = await createResultPng({ analysis, photos });
       downloadBlob(blob, safeFileName(analysis.primaryStyle));
-      setNotice("Plik PNG został pobrany. Możesz opublikować go w relacji, poście lub wiadomości.");
+      setNotice(copy.ui.share.downloadSuccess);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Nie udało się pobrać wyniku.");
+      setError(caught instanceof Error ? caught.message : copy.ui.share.downloadError);
     } finally {
       setBusyAction(null);
     }
@@ -405,25 +407,25 @@ export default function ShareableStyleResult({
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: `Mój styl wnętrza: ${analysis.primaryStyle}`,
+          title: copy.ui.share.shareTitle(analysis.primaryStyle),
           text: shareText,
         });
-        setNotice("Wynik został udostępniony.");
+        setNotice(copy.ui.share.shareSuccess);
       } else if (navigator.share) {
         await navigator.share({
-          title: `Mój styl wnętrza: ${analysis.primaryStyle}`,
+          title: copy.ui.share.shareTitle(analysis.primaryStyle),
           text: shareText,
           url: window.location.href,
         });
-        setNotice("Link do wyniku został udostępniony. Pobierz PNG, aby przesłać kartę wizualną.");
+        setNotice(copy.ui.share.shareLinkSuccess);
       } else {
         await copyText(`${shareText} ${window.location.href}`);
         downloadBlob(blob, fileName);
-        setNotice("Tekst został skopiowany, a plik PNG pobrany.");
+        setNotice(copy.ui.share.shareFallbackSuccess);
       }
     } catch (caught) {
       if (caught instanceof DOMException && caught.name === "AbortError") return;
-      setError(caught instanceof Error ? caught.message : "Nie udało się udostępnić wyniku.");
+      setError(caught instanceof Error ? caught.message : copy.ui.share.shareError);
     } finally {
       setBusyAction(null);
     }
@@ -435,9 +437,9 @@ export default function ShareableStyleResult({
     setError(null);
     try {
       await copyText(shareCaption);
-      setNotice("Podpis został skopiowany. Możesz wkleić go do posta lub wiadomości.");
+      setNotice(copy.ui.share.captionSuccess);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Nie udało się skopiować podpisu.");
+      setError(caught instanceof Error ? caught.message : copy.ui.share.captionError);
     } finally {
       setBusyAction(null);
     }
@@ -447,10 +449,10 @@ export default function ShareableStyleResult({
     <section className="mt-5 border-t border-primary/20 pt-5" aria-labelledby="share-style-title">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="text-xs font-semibold uppercase text-primary">Gotowe do udostępnienia</div>
-          <h3 id="share-style-title" className="mt-1 text-xl font-bold">Twoja karta stylu ArchiCompass</h3>
+          <div className="text-xs font-semibold uppercase text-primary">{copy.ui.share.eyebrow}</div>
+          <h3 id="share-style-title" className="mt-1 text-xl font-bold">{copy.ui.share.title}</h3>
           <p className="mt-1 max-w-xl text-sm leading-6 text-muted">
-            Pobierz pionowy plik PNG lub udostępnij go z telefonu. Karta wykorzystuje pierwsze cztery zdjęcia referencyjne.
+            {copy.ui.share.body}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -460,7 +462,7 @@ export default function ShareableStyleResult({
             disabled={Boolean(busyAction)}
             className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
           >
-            {busyAction === "share" ? "Przygotowywanie..." : "Udostępnij wynik"}
+            {busyAction === "share" ? copy.ui.share.preparing : copy.ui.share.share}
           </button>
           <button
             type="button"
@@ -468,7 +470,7 @@ export default function ShareableStyleResult({
             disabled={Boolean(busyAction)}
             className="rounded-xl border border-primary bg-card px-4 py-3 text-sm font-semibold text-primary disabled:opacity-60"
           >
-            {busyAction === "download" ? "Tworzenie PNG..." : "Pobierz PNG"}
+            {busyAction === "download" ? copy.ui.share.creating : copy.ui.share.download}
           </button>
           <button
             type="button"
@@ -477,10 +479,10 @@ export default function ShareableStyleResult({
             className="rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold text-foreground disabled:opacity-60"
           >
             {busyAction === "caption"
-              ? "Kopiowanie..."
-              : notice?.startsWith("Podpis")
-                ? "Podpis skopiowany"
-                : "Kopiuj podpis"}
+              ? copy.ui.share.copying
+              : notice === copy.ui.share.captionSuccess
+                ? copy.ui.share.copied
+                : copy.ui.share.copy}
           </button>
         </div>
       </div>
@@ -488,14 +490,14 @@ export default function ShareableStyleResult({
       <div className="mt-4 overflow-hidden rounded-lg border border-line bg-card shadow-sm">
         <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
           <BrandLogo className="h-8 w-[148px]" />
-          <span className="text-xs font-semibold uppercase text-muted">Analiza stylu wnętrza AI</span>
+          <span className="text-xs font-semibold uppercase text-muted">{copy.ui.share.cardTitle}</span>
         </div>
 
         <div className={visiblePhotos.length > 1 ? "grid grid-cols-2 gap-1" : "grid"}>
           {visiblePhotos.map((photo, index) => (
             <div key={photo.url} className="relative aspect-[4/3] overflow-hidden bg-primary-soft">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.url} alt={`Inspiracja stylistyczna ${index + 1}: ${photo.name}`} className="h-full w-full object-cover" />
+              <img src={photo.url} alt={copy.ui.share.imageAlt(index + 1, photo.name)} className="h-full w-full object-cover" />
               {index === 3 && photos.length > 4 ? (
                 <span className="absolute bottom-2 right-2 rounded-full bg-foreground/85 px-3 py-1 text-xs font-semibold text-white">
                   +{photos.length - 4}
@@ -506,7 +508,7 @@ export default function ShareableStyleResult({
         </div>
 
         <div className="p-5 sm:p-6">
-          <div className="text-xs font-semibold uppercase text-primary">Twój styl wnętrza</div>
+          <div className="text-xs font-semibold uppercase text-primary">{copy.ui.share.canvasStyle}</div>
           <div className="mt-1 flex flex-wrap items-center gap-3">
             <h4 className="text-3xl font-bold">{analysis.primaryStyle}</h4>
             <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
@@ -516,7 +518,7 @@ export default function ShareableStyleResult({
           <p className="mt-3 text-sm leading-6 text-muted">{conciseSentence(analysis.summary)}</p>
 
           <div className="mt-5">
-            <div className="text-xs font-semibold uppercase text-muted">Paleta</div>
+            <div className="text-xs font-semibold uppercase text-muted">{copy.ui.share.palette}</div>
             <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {analysis.colorPalette.slice(0, 4).map((color, index) => (
                 <div key={color} className="text-center text-xs font-semibold">
@@ -528,7 +530,7 @@ export default function ShareableStyleResult({
           </div>
 
           <div className="mt-5">
-            <div className="text-xs font-semibold uppercase text-muted">Materiały</div>
+            <div className="text-xs font-semibold uppercase text-muted">{copy.ui.share.materials}</div>
             <div className="mt-2 flex flex-wrap gap-2">
               {analysis.materials.slice(0, 6).map((material) => (
                 <span key={material} className="rounded-full bg-primary-soft px-3 py-1.5 text-xs font-semibold text-primary">{material}</span>
@@ -537,7 +539,7 @@ export default function ShareableStyleResult({
           </div>
 
           <div className="mt-5 rounded-lg bg-background p-4">
-            <div className="text-xs font-semibold uppercase text-primary">Dopasowanie projektanta</div>
+            <div className="text-xs font-semibold uppercase text-primary">{copy.ui.share.designerFit}</div>
             <p className="mt-2 text-sm leading-6 text-muted">
               {conciseSentence(analysis.designerPrompt, 170)}
             </p>
@@ -545,9 +547,9 @@ export default function ShareableStyleResult({
 
           <div className="mt-5 border-t border-line pt-4">
             <div className="text-sm font-semibold text-primary">
-              Dodaj 4 zdjęcia. Otrzymaj brief gotowy dla projektanta.
+              {copy.ui.share.footer}
             </div>
-            <div className="mt-1 text-xs font-semibold text-muted">Utworzono z ArchiCompass</div>
+            <div className="mt-1 text-xs font-semibold text-muted">{copy.ui.share.createdWith}</div>
           </div>
         </div>
       </div>

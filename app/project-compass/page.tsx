@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import ProjectCompassView from "@/components/ProjectCompassView";
-import { projectCompassCopy } from "@/content/pl/copy";
+import { getProjectCompassCopy } from "@/content/project-compass-copy";
 import { pageMetadata } from "@/lib/seo";
 
+const copy = getProjectCompassCopy();
+
 export const metadata: Metadata = pageMetadata({
-  title: projectCompassCopy.metadata.title,
-  description: projectCompassCopy.metadata.description,
+  title: copy.metadata.title,
+  description: copy.metadata.description,
   path: "/project-compass",
 });
 

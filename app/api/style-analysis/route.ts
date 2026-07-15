@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createHash } from "node:crypto";
+import { siteLocale } from "@/lib/site-locale";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -12,6 +13,11 @@ const openAiStyleModel = process.env.OPENAI_STYLE_MODEL || "gpt-4.1-mini";
 const geminiStyleModel = process.env.GEMINI_STYLE_MODEL || "gemini-3.1-flash-lite";
 const anonymousDailyLimit = positiveLimit(process.env.STYLE_ANALYSIS_DAILY_ANON_LIMIT, 5);
 const accountDailyLimit = positiveLimit(process.env.STYLE_ANALYSIS_DAILY_ACCOUNT_LIMIT, 15);
+const isEnglish = siteLocale === "en";
+
+function localized(pl: string, en: string) {
+  return isEnglish ? en : pl;
+}
 
 const allowedVisualCues = [
   "Natural wood",
@@ -90,6 +96,24 @@ const polishKnownTerms: Record<string, string> = {
   "Light wood": "jasne drewno",
   "Dark wood": "ciemne drewno",
   "Bouclé fabric": "tkanina boucle",
+};
+
+const englishStyleNames: Record<string, string> = {
+  "Warm minimalism": "Warm minimalism",
+  Scandinavian: "Scandinavian",
+  "Modern classic": "Modern classic",
+  Industrial: "Industrial",
+  Japandi: "Japandi",
+  Contemporary: "Contemporary",
+  "Mid-century modern": "Mid-century modern",
+  "Art Deco": "Art Deco",
+  Mediterranean: "Mediterranean",
+  Bohemian: "Bohemian",
+  Eclectic: "Eclectic",
+  "Rustic / organic": "Rustic / organic",
+  Traditional: "Traditional",
+  "Luxury contemporary": "Contemporary luxury",
+  "Not sure yet": "Direction to refine",
 };
 
 type StyleAnalysis = {
@@ -232,14 +256,14 @@ function arrayOfStrings(value: unknown, fallback: string[] = []) {
     : fallback;
 }
 
-function polishKnownTerm(value: string) {
+function localizedKnownTerm(value: string) {
   const trimmed = value.trim();
-  return polishKnownTerms[trimmed] ?? trimmed;
+  return isEnglish ? trimmed : polishKnownTerms[trimmed] ?? trimmed;
 }
 
 function cleanUserTextList(value: unknown, maxItems: number) {
   return arrayOfStrings(value)
-    .map(polishKnownTerm)
+    .map(localizedKnownTerm)
     .slice(0, maxItems);
 }
 
@@ -261,14 +285,17 @@ function cleanAnalysis(value: unknown, imageCount: number): StyleAnalysis {
   return {
     primaryStyle:
       typeof data.primaryStyle === "string" && data.primaryStyle.trim()
-        ? (polishStyleNames[data.primaryStyle.trim()] ?? data.primaryStyle.trim())
-        : polishStyleNames[styleDirection],
+        ? ((isEnglish ? englishStyleNames : polishStyleNames)[data.primaryStyle.trim()] ?? data.primaryStyle.trim())
+        : (isEnglish ? englishStyleNames : polishStyleNames)[styleDirection],
     styleDirection,
     confidence,
     summary:
       typeof data.summary === "string" && data.summary.trim()
         ? data.summary.trim()
-        : "Zdjęcia wskazują na spójny kierunek wnętrza, ale do precyzyjnego określenia stylu potrzeba nieco więcej kontekstu.",
+        : localized(
+            "Zdjęcia wskazują na spójny kierunek wnętrza, ale do precyzyjnego określenia stylu potrzeba nieco więcej kontekstu.",
+            "The photos point to a coherent interior direction, but a little more context is needed to identify the style precisely."
+          ),
     colorPalette: cleanUserTextList(data.colorPalette, 6),
     materials: cleanUserTextList(data.materials, 6),
     styleClues: cleanUserTextList(data.styleClues, 6),
@@ -278,7 +305,10 @@ function cleanAnalysis(value: unknown, imageCount: number): StyleAnalysis {
     designerPrompt:
       typeof data.designerPrompt === "string" && data.designerPrompt.trim()
         ? data.designerPrompt.trim()
-        : "Szukaj projektantów, których portfolio pokazuje podobny nastrój, materiały i sposób pracy ze światłem.",
+        : localized(
+            "Szukaj projektantów, których portfolio pokazuje podobny nastrój, materiały i sposób pracy ze światłem.",
+            "Look for designers whose portfolios show a similar mood, material palette, and approach to light."
+          ),
     watchOuts: cleanUserTextList(data.watchOuts, 4),
   };
 }
@@ -311,14 +341,20 @@ function userFacingOpenAiError(message: string) {
     normalized.includes("billing") ||
     normalized.includes("plan")
   ) {
-    return "Usługa AI jest połączona, ale konto OpenAI nie ma obecnie dostępnego limitu. Spróbuj ponownie później.";
+    return localized(
+      "Usługa AI jest połączona, ale konto OpenAI nie ma obecnie dostępnego limitu. Spróbuj ponownie później.",
+      "The AI service is connected, but the OpenAI account has no available quota right now. Please try again later."
+    );
   }
 
   if (normalized.includes("api key") || normalized.includes("unauthorized")) {
-    return "Usługa AI jest chwilowo niedostępna z powodu błędu konfiguracji. Spróbuj ponownie później.";
+    return localized(
+      "Usługa AI jest chwilowo niedostępna z powodu błędu konfiguracji. Spróbuj ponownie później.",
+      "The AI service is temporarily unavailable because of a configuration issue. Please try again later."
+    );
   }
 
-  return message || "Nie udało się przeprowadzić analizy AI.";
+  return message || localized("Nie udało się przeprowadzić analizy AI.", "The AI analysis could not be completed.");
 }
 
 function userFacingGeminiError(message: string) {
@@ -330,7 +366,10 @@ function userFacingGeminiError(message: string) {
     normalized.includes("unauthenticated") ||
     normalized.includes("forbidden")
   ) {
-    return "Usługa AI jest chwilowo niedostępna z powodu błędu konfiguracji. Spróbuj ponownie później.";
+    return localized(
+      "Usługa AI jest chwilowo niedostępna z powodu błędu konfiguracji. Spróbuj ponownie później.",
+      "The AI service is temporarily unavailable because of a configuration issue. Please try again later."
+    );
   }
 
   if (
@@ -338,10 +377,13 @@ function userFacingGeminiError(message: string) {
     normalized.includes("billing") ||
     normalized.includes("rate")
   ) {
-    return "Dzienny limit analizy AI został chwilowo wyczerpany. Spróbuj ponownie później.";
+    return localized(
+      "Dzienny limit analizy AI został chwilowo wyczerpany. Spróbuj ponownie później.",
+      "The daily AI analysis limit has been reached. Please try again later."
+    );
   }
 
-  return message || "Nie udało się przeprowadzić analizy AI.";
+  return message || localized("Nie udało się przeprowadzić analizy AI.", "The AI analysis could not be completed.");
 }
 
 async function fileToImageInput(file: File): Promise<ImageInput> {
@@ -358,9 +400,26 @@ function analysisPrompt({
   projectType,
   images,
 }: AnalysisInput) {
-  return [
-    "Przeanalizuj te zdjęcia referencyjne wnętrz dla ArchiCompass.",
-    "Przygotuj praktyczne wskazówki stylistyczne dla klienta, który chce znaleźć właściwego projektanta wnętrz.",
+  const prompt = isEnglish
+    ? [
+        "Analyse these interior reference photos for ArchiCompass.",
+        "Prepare practical style guidance for a client looking for the right interior designer.",
+        `Reference photo count: ${images.length}.`,
+        `Project type: ${projectType}.`,
+        `Style selected by the client before the analysis: ${currentStyle}.`,
+        `Visual cues selected by the client before the analysis: ${currentCues}.`,
+        "Return every user-facing field in natural, professional English: primaryStyle, summary, colorPalette, materials, styleClues, designerPrompt and watchOuts.",
+        "Do not classify the interior as Japandi solely because it has light wood and a neutral palette. Choose Japandi only when Japanese restraint, calm composition, and Scandinavian softness are all clearly visible. Otherwise choose a more accurate general direction, for example Contemporary.",
+        "For a single photo, use confidence: medium or low. Explain the limitation in summary when the full style cannot be confirmed without more images.",
+        "Describe only materials and details visible in the images. Do not guess wood species, technology, or material when it is not clear.",
+        `styleDirection must be one of: ${allowedStyles.join(", ")}.`,
+        `visualCues must only use these values: ${allowedVisualCues.join(", ")}.`,
+        "Only the technical fields styleDirection, visualCues and searchSpecialty may use English enum values.",
+        "searchSpecialty should be one short marketplace keyword such as minimalist, scandinavian, modern, industrial, luxury, eco-friendly, smart home, or an empty string.",
+      ]
+    : [
+        "Przeanalizuj te zdjęcia referencyjne wnętrz dla ArchiCompass.",
+        "Przygotuj praktyczne wskazówki stylistyczne dla klienta, który chce znaleźć właściwego projektanta wnętrz.",
     `Liczba zdjęć referencyjnych: ${images.length}.`,
     `Typ inwestycji: ${projectType}.`,
     `Styl wybrany przez klienta przed analizą: ${currentStyle}.`,
@@ -374,8 +433,10 @@ function analysisPrompt({
     `styleDirection must be one of: ${allowedStyles.join(", ")}.`,
     `visualCues must only use these values: ${allowedVisualCues.join(", ")}.`,
     "Tylko pola techniczne styleDirection, visualCues i searchSpecialty mogą używać angielskich wartości enum.",
-    "searchSpecialty should be one short marketplace keyword such as minimalist, scandinavian, modern, industrial, luxury, eco-friendly, smart home, or an empty string.",
-  ].join("\n");
+        "searchSpecialty should be one short marketplace keyword such as minimalist, scandinavian, modern, industrial, luxury, eco-friendly, smart home, or an empty string.",
+      ];
+
+  return prompt.join("\n");
 }
 
 async function analyzeWithOpenAi(input: AnalysisInput) {
@@ -384,7 +445,7 @@ async function analyzeWithOpenAi(input: AnalysisInput) {
     return NextResponse.json(
       {
         code: "AI_NOT_CONFIGURED",
-        error: "Analiza zdjęć AI jest chwilowo niedostępna.",
+        error: localized("Analiza zdjęć AI jest chwilowo niedostępna.", "AI photo analysis is temporarily unavailable."),
       },
       { status: 501 }
     );
@@ -442,7 +503,7 @@ async function analyzeWithOpenAi(input: AnalysisInput) {
   const text = responseText(payload);
   if (!text) {
     return NextResponse.json(
-      { error: "Usługa AI nie zwróciła czytelnego wyniku analizy." },
+      { error: localized("Usługa AI nie zwróciła czytelnego wyniku analizy.", "The AI service did not return a readable analysis.") },
       { status: 502 }
     );
   }
@@ -451,7 +512,7 @@ async function analyzeWithOpenAi(input: AnalysisInput) {
     return NextResponse.json({ analysis: cleanAnalysis(JSON.parse(text), input.images.length) });
   } catch {
     return NextResponse.json(
-      { error: "Usługa AI zwróciła nieczytelny wynik analizy." },
+      { error: localized("Usługa AI zwróciła nieczytelny wynik analizy.", "The AI service returned an unreadable analysis.") },
       { status: 502 }
     );
   }
@@ -485,7 +546,7 @@ async function analyzeWithGemini(input: AnalysisInput) {
     return NextResponse.json(
       {
         code: "AI_NOT_CONFIGURED",
-        error: "Analiza zdjęć AI jest chwilowo niedostępna.",
+        error: localized("Analiza zdjęć AI jest chwilowo niedostępna.", "AI photo analysis is temporarily unavailable."),
       },
       { status: 501 }
     );
@@ -543,7 +604,7 @@ async function analyzeWithGemini(input: AnalysisInput) {
   const text = geminiText(payload);
   if (!text) {
     return NextResponse.json(
-      { error: "Usługa AI nie zwróciła czytelnego wyniku analizy." },
+      { error: localized("Usługa AI nie zwróciła czytelnego wyniku analizy.", "The AI service did not return a readable analysis.") },
       { status: 502 }
     );
   }
@@ -552,7 +613,7 @@ async function analyzeWithGemini(input: AnalysisInput) {
     return NextResponse.json({ analysis: cleanAnalysis(JSON.parse(text), input.images.length) });
   } catch {
     return NextResponse.json(
-      { error: "Usługa AI zwróciła nieczytelny wynik analizy." },
+      { error: localized("Usługa AI zwróciła nieczytelny wynik analizy.", "The AI service returned an unreadable analysis.") },
       { status: 502 }
     );
   }
@@ -564,7 +625,7 @@ export async function POST(request: Request) {
     formData = await request.formData();
   } catch {
     return NextResponse.json(
-      { error: "Przed uruchomieniem analizy dodaj zdjęcia referencyjne." },
+      { error: localized("Przed uruchomieniem analizy dodaj zdjęcia referencyjne.", "Add reference photos before starting the analysis.") },
       { status: 400 }
     );
   }
@@ -572,14 +633,14 @@ export async function POST(request: Request) {
 
   if (!photos.length) {
     return NextResponse.json(
-      { error: "Dodaj co najmniej jedno zdjęcie referencyjne przed uruchomieniem analizy AI." },
+      { error: localized("Dodaj co najmniej jedno zdjęcie referencyjne przed uruchomieniem analizy AI.", "Add at least one reference photo before starting the AI analysis.") },
       { status: 400 }
     );
   }
 
   if (photos.length > maxAnalysisPhotos) {
     return NextResponse.json(
-      { error: `Jednocześnie możesz przeanalizować maksymalnie ${maxAnalysisPhotos} zdjęć.` },
+      { error: localized(`Jednocześnie możesz przeanalizować maksymalnie ${maxAnalysisPhotos} zdjęć.`, `You can analyse up to ${maxAnalysisPhotos} photos at a time.`) },
       { status: 400 }
     );
   }
@@ -587,14 +648,14 @@ export async function POST(request: Request) {
   for (const photo of photos) {
     if (!allowedImageTypes.includes(photo.type)) {
       return NextResponse.json(
-        { error: "Analiza AI obsługuje pliki JPEG, PNG i WebP." },
+        { error: localized("Analiza AI obsługuje pliki JPEG, PNG i WebP.", "AI analysis supports JPEG, PNG and WebP files.") },
         { status: 400 }
       );
     }
 
     if (photo.size > maxImageSize) {
       return NextResponse.json(
-        { error: "Każde zdjęcie do analizy AI musi mieć mniej niż 8 MB." },
+        { error: localized("Każde zdjęcie do analizy AI musi mieć mniej niż 8 MB.", "Each photo for AI analysis must be smaller than 8 MB.") },
         { status: 400 }
       );
     }
@@ -604,7 +665,7 @@ export async function POST(request: Request) {
   if (quotaError || !quota) {
     console.error("Style analysis quota check failed", quotaError);
     return NextResponse.json(
-      { error: "Analiza AI jest chwilowo niedostępna. Spróbuj ponownie za moment." },
+      { error: localized("Analiza AI jest chwilowo niedostępna. Spróbuj ponownie za moment.", "AI analysis is temporarily unavailable. Please try again in a moment.") },
       { status: 503 }
     );
   }
@@ -612,7 +673,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         code: "AI_DAILY_LIMIT_REACHED",
-        error: "Dzienny limit analizy zdjęć AI został wyczerpany. Spróbuj ponownie jutro.",
+        error: localized("Dzienny limit analizy zdjęć AI został wyczerpany. Spróbuj ponownie jutro.", "The daily AI photo analysis limit has been reached. Please try again tomorrow."),
         resetAt: quota.reset_at,
       },
       {
