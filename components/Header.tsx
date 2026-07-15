@@ -63,7 +63,10 @@ export default function Header() {
   const navItems = copy.header.nav;
   const isGetStartedActive = pathname === "/get-started";
   const [isOpen, setIsOpen] = useState(false);
-  const [languageHref, setLanguageHref] = useState(localeSiteUrl(otherLocale()));
+  const [languageHref, setLanguageHref] = useState(() => {
+    const initialPath = pathname || "/";
+    return `${localeSiteUrl(otherLocale())}${initialPath}`;
+  });
   const [account, setAccount] = useState<
     { id: string; isAdmin: boolean; isProfessional: boolean; unreadCount: number } | null
   >(null);
