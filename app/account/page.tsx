@@ -8,6 +8,7 @@ import {
   inquiryRecipientFilter,
 } from "@/lib/studios";
 import { profileReadinessScore } from "@/lib/profile-readiness";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 
 export const revalidate = 0;
 
@@ -42,9 +43,9 @@ type DesignerInquiry = {
   id: string;
 };
 
-function profileName(profile: Partial<Profile>, email?: string) {
+function profileName(profile: Partial<Profile>, email: string | undefined, fallback: string) {
   const name = profile.full_name?.trim();
-  if (!name || name.toLowerCase() === email?.toLowerCase()) return "Twoje konto ArchiCompass";
+  if (!name || name.toLowerCase() === email?.toLowerCase()) return fallback;
   return name;
 }
 
@@ -102,17 +103,19 @@ export default async function AccountPage({
   const sentInquiries = (sentInquiriesData ?? []) as DesignerInquiry[];
   const incomingInquiries = (incomingInquiriesData ?? []) as DesignerInquiry[];
   const isProfessional = accountRole === "designer";
+  const copy = getWorkspaceCopy().account;
   const score = profileReadinessScore(profile, isProfessional);
   const hasPublicProfile = isProfessional && Boolean(profileData);
   const compassHref = isProfessional ? "/project-compass" : "/client/briefs";
-  const compassTitle = isProfessional ? "Analizuj inspiracje" : "Zapisane briefy";
+  const compassTitle = isProfessional ? copy.compass.professionalTitle : copy.compass.clientTitle;
   const compassDescription = isProfessional
-    ? "Uruchom analizę AI zdjęć referencyjnych, aby rozpoznać styl, materiały i język projektu. Projektanci mogą korzystać z narzędzia, ale nie wysyłają briefów jako klienci."
-    : "Przejrzyj briefy z inspiracjami, budżetem i zakresem przed kontaktem z projektantem lub pracownią.";
+    ? copy.compass.professionalBody
+    : copy.compass.clientBody;
   const nextActionHref = isProfessional ? "/studio" : "/designers";
   const nextActionLabel = isProfessional
-    ? "Otwórz Studio projektanta"
-    : "Przeglądaj projektantów";
+    ? copy.professionalNextCta
+    : copy.clientNextCta;
+  const steps = isProfessional ? copy.stepsProfessional : copy.stepsClient;
 
   return (
     <main className="bg-background">
@@ -120,21 +123,21 @@ export default async function AccountPage({
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
             <div>
-              <div className="text-sm font-semibold text-primary">Ustawienia konta</div>
+              <div className="text-sm font-semibold text-primary">{copy.settingsEyebrow}</div>
               <h1 className="mt-2 break-words text-4xl font-bold tracking-tight sm:text-6xl">
-                {profileName(profile, user.email ?? undefined)}
+                {profileName(profile, user.email ?? undefined, copy.defaultName)}
               </h1>
               <div className="mt-3 break-all text-sm font-semibold text-muted">
                 {user.email}
               </div>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
                 {isProfessional
-                  ? "Tutaj aktualizujesz dane konta i profil publiczny. Codzienna praca z briefami, portfolio i zespołem jest w Studio projektanta."
-                  : "Tutaj aktualizujesz dane konta. Briefy, ulubione i rozmowy znajdziesz w Strefie klienta."}
+                  ? copy.professionalIntro
+                  : copy.clientIntro}
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
-                  {isProfessional ? "Projektant" : "Klient"}
+                  {isProfessional ? copy.designer : copy.client}
                 </span>
                 {profile.location ? (
                   <span className="rounded-full border border-line bg-background px-3 py-1 text-sm font-semibold text-muted">
@@ -155,7 +158,7 @@ export default async function AccountPage({
                   href="/studio"
                   className="rounded-xl bg-foreground px-4 py-3 text-sm font-semibold text-white"
                 >
-                  Przejdź do Studio
+                  {copy.openStudio}
                 </Link>
               ) : null}
               {hasPublicProfile ? (
@@ -163,7 +166,7 @@ export default async function AccountPage({
                   href={`/designers/${myProfileId}`}
                   className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                 >
-                  Zobacz profil publiczny
+                  {copy.publicProfile}
                 </Link>
               ) : null}
               <SignOutButton className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary disabled:opacity-60" />
@@ -176,16 +179,15 @@ export default async function AccountPage({
         <div className="grid gap-7">
           {sp.profileDeleted ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900">
-              <div className="font-semibold">Profil profesjonalisty został usunięty</div>
+              <div className="font-semibold">{copy.deletedTitle}</div>
               <p className="mt-1">
-                Publiczny profil i portfolio zostały usunięte. Konto projektanta,
-                rozmowy i członkostwa w pracowniach pozostają aktywne.
+                {copy.deletedBody}
               </p>
             </div>
           ) : null}
           {sp.profileUpdated ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
-              Dane profilu zostały zaktualizowane.
+              {copy.updated}
             </div>
           ) : null}
           <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -193,20 +195,20 @@ export default async function AccountPage({
               href="/account/profile"
               className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
             >
-              <div className="text-sm font-semibold text-primary">Dane i widoczność</div>
+              <div className="text-sm font-semibold text-primary">{copy.profileEyebrow}</div>
               <h2 className="mt-2 text-2xl font-bold">
-                {isProfessional ? "Profil publiczny" : "Dane kontaktowe"}
+                {isProfessional ? copy.professionalProfile : copy.contactDetails}
               </h2>
               <p className="mt-3 text-sm leading-6 text-muted">
                 {isProfessional
-                  ? "Aktualizuj dane, specjalizacje, ceny, kontakt i podejście projektowe."
-                  : "Imię, telefon i lokalizacja pojawią się przy briefach i pomogą projektantom sprawnie odpowiedzieć."}
+                  ? copy.professionalProfileBody
+                  : copy.contactDetailsBody}
               </p>
               <div className="mt-6 h-2 overflow-hidden rounded-full bg-primary-soft">
                 <div className="h-full rounded-full bg-primary" style={{ width: `${score}%` }} />
               </div>
               <div className="mt-3 text-sm font-semibold text-muted">
-                {score}% kompletności profilu
+                {copy.profileReadiness(score)}
               </div>
             </Link>
 
@@ -215,19 +217,18 @@ export default async function AccountPage({
                 href="/account/projects"
                 className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
               >
-                <div className="text-sm font-semibold text-primary">Zarządzanie portfolio</div>
-                <h2 className="mt-2 text-2xl font-bold">Zarządzaj projektami</h2>
+                <div className="text-sm font-semibold text-primary">{copy.portfolioEyebrow}</div>
+                <h2 className="mt-2 text-2xl font-bold">{copy.manageProjects}</h2>
                 <p className="mt-3 text-sm leading-6 text-muted">
-                  Dodawaj karty projektów, które budują wiarygodność profilu publicznego
-                  i mogą pojawiać się również w powiązanych pracowniach.
+                  {copy.manageProjectsBody}
                 </p>
                 <div className="mt-6 grid grid-cols-2 gap-3">
                   <div className="rounded-xl border border-line bg-background p-3">
-                    <div className="text-sm text-muted">Projekty</div>
+                    <div className="text-sm text-muted">{copy.projects}</div>
                     <div className="mt-1 text-xl font-bold">{projects.length}</div>
                   </div>
                   <div className="rounded-xl border border-line bg-background p-3">
-                    <div className="text-sm text-muted">Specjalizacje</div>
+                    <div className="text-sm text-muted">{copy.specialties}</div>
                     <div className="mt-1 text-xl font-bold">
                       {profile.specialties?.length ?? 0}
                     </div>
@@ -241,14 +242,13 @@ export default async function AccountPage({
                 href="/studio/team"
                 className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
               >
-                <div className="text-sm font-semibold text-primary">Profil pracowni</div>
-                <h2 className="mt-2 text-2xl font-bold">Pracownia i zespół</h2>
+                <div className="text-sm font-semibold text-primary">{copy.studioEyebrow}</div>
+                <h2 className="mt-2 text-2xl font-bold">{copy.studioAndTeam}</h2>
                 <p className="mt-3 text-sm leading-6 text-muted">
-                  Utwórz pracownię, zaproś projektantów i korzystaj ze wspólnej skrzynki
-                  zapytań oraz połączonego portfolio zespołu.
+                  {copy.studioAndTeamBody}
                 </p>
                 <div className="mt-6 rounded-xl border border-line bg-background p-3">
-                  <div className="text-sm text-muted">Aktywne pracownie</div>
+                  <div className="text-sm text-muted">{copy.activeStudios}</div>
                   <div className="mt-1 text-xl font-bold">{studioIds.length}</div>
                 </div>
               </Link>
@@ -268,14 +268,14 @@ export default async function AccountPage({
               <div className="mt-6 grid grid-cols-2 gap-3">
                 <div className="rounded-xl border border-line bg-background p-3">
                   <div className="text-sm text-muted">
-                    {isProfessional ? "Analizy w historii" : "Briefy"}
+                    {isProfessional ? copy.aiHistory : copy.savedBriefs}
                   </div>
                   <div className="mt-1 text-xl font-bold">{briefs.length}</div>
                 </div>
                 <div className="rounded-xl border border-line bg-background p-3">
-                  <div className="text-sm text-muted">Narzędzie</div>
+                  <div className="text-sm text-muted">{copy.tool}</div>
                   <div className="mt-1 text-xl font-bold">
-                    {isProfessional ? "Analiza AI" : "Aktywne"}
+                    {isProfessional ? copy.aiAnalysis : copy.active}
                   </div>
                 </div>
               </div>
@@ -285,17 +285,17 @@ export default async function AccountPage({
               href={isProfessional ? "/studio/inbox" : "/account/inquiries"}
               className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
             >
-              <div className="text-sm font-semibold text-primary">Zapytania projektowe</div>
-              <h2 className="mt-2 text-2xl font-bold">Zapytania z briefem</h2>
+              <div className="text-sm font-semibold text-primary">{copy.enquiriesEyebrow}</div>
+              <h2 className="mt-2 text-2xl font-bold">{copy.enquiries}</h2>
               <p className="mt-3 text-sm leading-6 text-muted">
                 {isProfessional
-                  ? "Przeglądaj zapytania kierowane do Twojego profilu i pracowni, do których należysz."
-                  : "Śledź briefy wysłane do projektantów i pracowni oraz kontynuuj rozmowy."}
+                  ? copy.professionalEnquiriesBody
+                  : copy.clientEnquiriesBody}
               </p>
               <div className="mt-6 grid grid-cols-2 gap-3">
                 <div className="rounded-xl border border-line bg-background p-3">
                   <div className="text-sm text-muted">
-                    {isProfessional ? "Otrzymane" : "Wysłane"}
+                    {isProfessional ? copy.received : copy.sent}
                   </div>
                   <div className="mt-1 text-xl font-bold">
                     {isProfessional ? incomingInquiries.length : sentInquiries.length}
@@ -303,10 +303,10 @@ export default async function AccountPage({
                 </div>
                 <div className="rounded-xl border border-line bg-background p-3">
                   <div className="text-sm text-muted">
-                    {isProfessional ? "Pracownie" : "Rola"}
+                    {isProfessional ? copy.activeStudios : copy.role}
                   </div>
                   <div className="mt-1 text-xl font-bold">
-                    {isProfessional ? studioIds.length : "Klient"}
+                    {isProfessional ? studioIds.length : copy.client}
                   </div>
                 </div>
               </div>
@@ -316,9 +316,9 @@ export default async function AccountPage({
           <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-sm font-semibold text-primary">Najlepsze kolejne działania</div>
+                <div className="text-sm font-semibold text-primary">{copy.nextEyebrow}</div>
                 <h2 className="mt-1 text-3xl font-bold">
-                  {isProfessional ? "Przygotuj profil dla klientów" : "Poprowadź projekt dalej"}
+                  {isProfessional ? copy.professionalNextTitle : copy.clientNextTitle}
                 </h2>
               </div>
               <Link
@@ -332,32 +332,26 @@ export default async function AccountPage({
             <div className="mt-6 grid gap-4 md:grid-cols-3">
               <div className="rounded-2xl border border-line bg-background p-5">
                 <div className="font-bold">
-                  {isProfessional ? "1. Uzupełnij podstawy" : "1. Stwórz jasny brief"}
+                  {steps[0]}
                 </div>
                 <p className="mt-2 text-sm leading-6 text-muted">
-                  {isProfessional
-                    ? "Dodaj lokalizację, specjalizację, ceny i kontakt, aby klienci szybko ocenili dopasowanie."
-                    : "Określ typ inwestycji, budżet, termin, styl i dodaj zdjęcia referencyjne."}
+                  {steps[1]}
                 </p>
               </div>
               <div className="rounded-2xl border border-line bg-background p-5">
                 <div className="font-bold">
-                  {isProfessional ? "2. Dodaj pierwszy projekt" : "2. Porównaj specjalistów"}
+                  {steps[2]}
                 </div>
                 <p className="mt-2 text-sm leading-6 text-muted">
-                  {isProfessional
-                    ? "Już jedna mocna karta portfolio sprawia, że publiczny profil wygląda znacznie bardziej wiarygodnie."
-                    : "Porównaj niezależnych projektantów i pracownie, zanim wyślesz brief."}
+                  {steps[3]}
                 </p>
               </div>
               <div className="rounded-2xl border border-line bg-background p-5">
                 <div className="font-bold">
-                  {isProfessional ? "3. Sprawdź widok publiczny" : "3. Kontynuuj w wiadomościach"}
+                  {steps[4]}
                 </div>
                 <p className="mt-2 text-sm leading-6 text-muted">
-                  {isProfessional
-                    ? "Otwórz profil jak klient i sprawdź, czy opowieść jest jasna."
-                    : "Przechowuj odpowiedzi, decyzje i kontekst projektu razem w strefie klienta."}
+                  {steps[5]}
                 </p>
               </div>
             </div>
@@ -365,16 +359,16 @@ export default async function AccountPage({
         </div>
 
         <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
-          <div className="text-sm font-semibold text-primary">Twoje konto</div>
-          <h2 className="mt-2 text-2xl font-bold">Dostęp i dane</h2>
+          <div className="text-sm font-semibold text-primary">{copy.accessEyebrow}</div>
+          <h2 className="mt-2 text-2xl font-bold">{copy.accessTitle}</h2>
           <div className="mt-5 grid gap-4 text-sm">
             <div>
-              <div className="text-muted">E-mail</div>
+              <div className="text-muted">{copy.email}</div>
               <div className="mt-1 break-words font-semibold">{user.email}</div>
             </div>
             <div>
-              <div className="text-muted">Typ konta</div>
-              <div className="mt-1 font-semibold">{isProfessional ? "Projektant" : "Klient"}</div>
+              <div className="text-muted">{copy.accountType}</div>
+              <div className="mt-1 font-semibold">{isProfessional ? copy.designer : copy.client}</div>
             </div>
           </div>
 
@@ -382,17 +376,17 @@ export default async function AccountPage({
             href={isProfessional ? "/studio" : "/client"}
             className="mt-6 flex rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
           >
-            <span className="w-full">{isProfessional ? "Otwórz Studio projektanta" : "Otwórz Strefę klienta"}</span>
+            <span className="w-full">{isProfessional ? copy.professionalNextCta : copy.openClientZone}</span>
           </Link>
 
           {hasPublicProfile ? (
             <div className="mt-6 border-t border-line pt-6">
-              <div className="font-bold">Link do profilu publicznego</div>
+              <div className="font-bold">{copy.publicProfileLink}</div>
               <Link
                 href={`/designers/${myProfileId}`}
                 className="mt-3 flex rounded-xl bg-primary-soft px-4 py-3 text-center text-sm font-semibold text-primary hover:bg-primary hover:text-white"
               >
-                <span className="w-full">Otwórz profil</span>
+                <span className="w-full">{copy.openProfile}</span>
               </Link>
             </div>
           ) : null}

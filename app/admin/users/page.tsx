@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 
 export const revalidate = 0;
 
@@ -29,9 +30,9 @@ const pageSize = 30;
 const fieldClass =
   "rounded-xl border border-line bg-card px-4 py-3 text-sm text-foreground outline-none focus:border-primary";
 
-function formatDate(value: string | null) {
-  if (!value) return "Nigdy";
-  return new Intl.DateTimeFormat("pl-PL", {
+function formatDate(value: string | null, locale: string, never: string) {
+  if (!value) return never;
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -47,20 +48,20 @@ function selectedValue<T extends readonly string[]>(value: string | undefined, o
   return options.includes(value as T[number]) ? (value as T[number]) : options[0];
 }
 
-function accountLabel(user: AdminUser) {
-  if (user.profession_type || user.user_type === "professional") return "Specjalista";
-  if (!user.full_name && !user.user_type) return "Brak profilu";
-  return user.user_type === "client" ? "Klient" : user.user_type || "Klient";
+function accountLabel(user: AdminUser, copy: ReturnType<typeof getWorkspaceCopy>["adminUsers"]) {
+  if (user.profession_type || user.user_type === "professional") return copy.professional;
+  if (!user.full_name && !user.user_type) return copy.noProfile;
+  return user.user_type === "client" ? copy.client : user.user_type || copy.client;
 }
 
-function reviewLabel(status: string) {
-  if (status === "needs_review") return "Do sprawdzenia";
-  if (status === "priority") return "Priorytet";
-  return "Czyste";
+function reviewLabel(status: string, copy: ReturnType<typeof getWorkspaceCopy>["adminUsers"]) {
+  if (status === "needs_review") return copy.needsReview;
+  if (status === "priority") return copy.priority;
+  return copy.clear;
 }
 
-function visibilityLabel(status: string) {
-  return status === "hidden" ? "Ukryty" : "Widoczny";
+function visibilityLabel(status: string, copy: ReturnType<typeof getWorkspaceCopy>["adminUsers"]) {
+  return status === "hidden" ? copy.hidden : copy.visible;
 }
 
 function reviewClass(status: string) {
@@ -103,6 +104,7 @@ export default async function AdminUsersPage({
   const review = selectedValue(sp.review, reviewStatuses);
   const visibility = selectedValue(sp.visibility, visibilityStatuses);
   const page = safePage(sp.page);
+  const copy = getWorkspaceCopy().adminUsers;
   const { supabase } = await requireAdmin("users");
   const { data, error } = await supabase.rpc("admin_user_directory", {
     account_type: type,
@@ -120,11 +122,10 @@ export default async function AdminUsersPage({
     <main>
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="text-sm font-semibold text-primary">Użytkownicy</div>
-          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Konta</h1>
+          <div className="text-sm font-semibold text-primary">{copy.eyebrow}</div>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">{copy.title}</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-            Znajdź klientów i specjalistów, sprawdzaj aktywność publiczną
-            oraz zapisuj wewnętrzne notatki operacyjne.
+            {copy.intro}
           </p>
         </div>
       </section>
@@ -134,38 +135,38 @@ export default async function AdminUsersPage({
           <input
             name="q"
             defaultValue={q}
-            placeholder="Szukaj po nazwie, e-mailu lub lokalizacji"
+            placeholder={copy.searchPlaceholder}
             className={fieldClass}
           />
           <select name="type" defaultValue={type} className={fieldClass}>
-            <option value="all">Wszystkie typy kont</option>
-            <option value="professional">Specjaliści</option>
-            <option value="client">Klienci</option>
-            <option value="no_profile">Bez profilu</option>
+            <option value="all">{copy.allAccountTypes}</option>
+            <option value="professional">{copy.professionals}</option>
+            <option value="client">{copy.clients}</option>
+            <option value="no_profile">{copy.noProfileOption}</option>
           </select>
           <select name="review" defaultValue={review} className={fieldClass}>
-            <option value="all">Wszystkie statusy</option>
-            <option value="clear">Czyste</option>
-            <option value="needs_review">Do sprawdzenia</option>
-            <option value="priority">Priorytet</option>
+            <option value="all">{copy.allReviewStatuses}</option>
+            <option value="clear">{copy.clear}</option>
+            <option value="needs_review">{copy.needsReview}</option>
+            <option value="priority">{copy.priority}</option>
           </select>
           <select name="visibility" defaultValue={visibility} className={fieldClass}>
-            <option value="all">Każda widoczność</option>
-            <option value="visible">Widoczne</option>
-            <option value="hidden">Ukryte</option>
+            <option value="all">{copy.allVisibility}</option>
+            <option value="visible">{copy.visible}</option>
+            <option value="hidden">{copy.hidden}</option>
           </select>
           <button className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-            Zastosuj filtry
+            {copy.applyFilters}
           </button>
         </form>
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm text-muted">
-            <span className="font-semibold text-foreground">{total}</span> pasujących kont
+            <span className="font-semibold text-foreground">{copy.matches(total)}</span>
           </div>
           {(q || type !== "all" || review !== "all" || visibility !== "all") ? (
             <Link href="/admin/users" className="text-sm font-semibold text-primary hover:underline">
-              Wyczyść filtry
+              {copy.clearFilters}
             </Link>
           ) : null}
         </div>
@@ -179,38 +180,38 @@ export default async function AdminUsersPage({
             <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
               <thead className="bg-background text-xs uppercase text-muted">
                 <tr>
-                  <th className="px-5 py-4 font-semibold">Konto</th>
-                  <th className="px-4 py-4 font-semibold">Typ</th>
-                  <th className="px-4 py-4 font-semibold">Projekty</th>
-                  <th className="px-4 py-4 font-semibold">Briefy</th>
-                  <th className="px-4 py-4 font-semibold">Zapytania</th>
-                  <th className="px-4 py-4 font-semibold">Ostatnie logowanie</th>
-                  <th className="px-4 py-4 font-semibold">Status</th>
-                  <th className="px-4 py-4 font-semibold">Widoczność</th>
-                  <th className="px-5 py-4 text-right font-semibold">Akcja</th>
+                  <th className="px-5 py-4 font-semibold">{copy.table[0]}</th>
+                  <th className="px-4 py-4 font-semibold">{copy.table[1]}</th>
+                  <th className="px-4 py-4 font-semibold">{copy.table[2]}</th>
+                  <th className="px-4 py-4 font-semibold">{copy.table[3]}</th>
+                  <th className="px-4 py-4 font-semibold">{copy.table[4]}</th>
+                  <th className="px-4 py-4 font-semibold">{copy.table[5]}</th>
+                  <th className="px-4 py-4 font-semibold">{copy.table[6]}</th>
+                  <th className="px-4 py-4 font-semibold">{copy.table[7]}</th>
+                  <th className="px-5 py-4 text-right font-semibold">{copy.table[8]}</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((user) => (
                   <tr key={user.user_id} className="border-t border-line align-top">
                     <td className="px-5 py-4">
-                      <div className="font-semibold">{user.full_name || "Konto bez nazwy"}</div>
-                      <div className="mt-1 text-muted">{user.email || "Brak e-maila"}</div>
+                      <div className="font-semibold">{user.full_name || copy.unnamedAccount}</div>
+                      <div className="mt-1 text-muted">{user.email || copy.noEmail}</div>
                       <div className="mt-1 text-xs text-muted">
-                        Dołączył/a {formatDate(user.created_at)}
+                        {copy.joined} {formatDate(user.created_at, copy.dateLocale, copy.never)}
                         {user.location ? ` | ${user.location}` : ""}
                       </div>
                     </td>
-                    <td className="px-4 py-4">{accountLabel(user)}</td>
+                    <td className="px-4 py-4">{accountLabel(user, copy)}</td>
                     <td className="px-4 py-4 font-semibold">{Number(user.project_count)}</td>
                     <td className="px-4 py-4 font-semibold">{Number(user.brief_count)}</td>
                     <td className="px-4 py-4 font-semibold">
                       {Number(user.sent_inquiry_count) + Number(user.received_inquiry_count)}
                     </td>
-                    <td className="px-4 py-4">{formatDate(user.last_sign_in_at)}</td>
+                    <td className="px-4 py-4">{formatDate(user.last_sign_in_at, copy.dateLocale, copy.never)}</td>
                     <td className="px-4 py-4">
                       <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${reviewClass(user.review_status)}`}>
-                        {reviewLabel(user.review_status)}
+                        {reviewLabel(user.review_status, copy)}
                       </span>
                     </td>
                     <td className="px-4 py-4">
@@ -220,7 +221,7 @@ export default async function AdminUsersPage({
                           ? "bg-red-50 text-red-700"
                           : "bg-emerald-50 text-emerald-800",
                       ].join(" ")}>
-                        {visibilityLabel(user.profile_visibility)}
+                        {visibilityLabel(user.profile_visibility, copy)}
                       </span>
                     </td>
                     <td className="px-5 py-4 text-right">
@@ -228,7 +229,7 @@ export default async function AdminUsersPage({
                         href={`/admin/users/${user.user_id}`}
                         className="inline-flex rounded-xl border border-line bg-background px-4 py-2.5 font-semibold hover:border-primary hover:text-primary"
                       >
-                        Otwórz
+                        {copy.open}
                       </Link>
                     </td>
                   </tr>
@@ -238,8 +239,8 @@ export default async function AdminUsersPage({
           </div>
         ) : (
           <div className="mt-5 rounded-lg border border-dashed border-line bg-card p-8">
-            <h2 className="text-2xl font-bold">Brak pasujących kont</h2>
-            <p className="mt-2 text-muted">Wyczyść filtry albo użyj szerszego wyszukiwania.</p>
+            <h2 className="text-2xl font-bold">{copy.emptyTitle}</h2>
+            <p className="mt-2 text-muted">{copy.emptyBody}</p>
           </div>
         )}
 
@@ -247,13 +248,13 @@ export default async function AdminUsersPage({
           <div className="mt-6 flex items-center justify-between gap-4">
             {page > 1 ? (
               <Link href={pageHref({ page: page - 1, q, type, review, visibility })} className="rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold">
-                Poprzednia
+                {copy.previous}
               </Link>
             ) : <span />}
-            <span className="text-sm text-muted">Strona {page} z {totalPages}</span>
+            <span className="text-sm text-muted">{copy.page(page, totalPages)}</span>
             {page < totalPages ? (
               <Link href={pageHref({ page: page + 1, q, type, review, visibility })} className="rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold">
-                Następna
+                {copy.next}
               </Link>
             ) : <span />}
           </div>

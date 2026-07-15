@@ -27,7 +27,149 @@ type ClientOverviewCopy = {
   favoritesCta: string;
 };
 
+type AccountCopy = {
+  defaultName: string;
+  settingsEyebrow: string;
+  professionalIntro: string;
+  clientIntro: string;
+  designer: string;
+  client: string;
+  openStudio: string;
+  publicProfile: string;
+  deletedTitle: string;
+  deletedBody: string;
+  updated: string;
+  profileEyebrow: string;
+  professionalProfile: string;
+  contactDetails: string;
+  professionalProfileBody: string;
+  contactDetailsBody: string;
+  profileReadiness: (score: number) => string;
+  portfolioEyebrow: string;
+  manageProjects: string;
+  manageProjectsBody: string;
+  projects: string;
+  specialties: string;
+  studioEyebrow: string;
+  studioAndTeam: string;
+  studioAndTeamBody: string;
+  activeStudios: string;
+  aiHistory: string;
+  savedBriefs: string;
+  tool: string;
+  aiAnalysis: string;
+  active: string;
+  enquiriesEyebrow: string;
+  enquiries: string;
+  professionalEnquiriesBody: string;
+  clientEnquiriesBody: string;
+  received: string;
+  sent: string;
+  role: string;
+  nextEyebrow: string;
+  professionalNextTitle: string;
+  clientNextTitle: string;
+  professionalNextCta: string;
+  clientNextCta: string;
+  stepsProfessional: [string, string, string, string, string, string];
+  stepsClient: [string, string, string, string, string, string];
+  accessEyebrow: string;
+  accessTitle: string;
+  email: string;
+  accountType: string;
+  account: string;
+  openClientZone: string;
+  publicProfileLink: string;
+  openProfile: string;
+  compass: {
+    professionalTitle: string;
+    clientTitle: string;
+    professionalBody: string;
+    clientBody: string;
+  };
+};
+
+type AdminUsersCopy = {
+  dateLocale: string;
+  never: string;
+  professional: string;
+  client: string;
+  noProfile: string;
+  needsReview: string;
+  priority: string;
+  clear: string;
+  hidden: string;
+  visible: string;
+  eyebrow: string;
+  title: string;
+  intro: string;
+  searchPlaceholder: string;
+  allAccountTypes: string;
+  professionals: string;
+  clients: string;
+  noProfileOption: string;
+  allReviewStatuses: string;
+  allVisibility: string;
+  applyFilters: string;
+  matches: (count: number) => string;
+  clearFilters: string;
+  table: [string, string, string, string, string, string, string, string, string];
+  unnamedAccount: string;
+  noEmail: string;
+  joined: string;
+  open: string;
+  emptyTitle: string;
+  emptyBody: string;
+  previous: string;
+  next: string;
+  page: (page: number, total: number) => string;
+};
+
+type AdminTeamCopy = {
+  dateLocale: string;
+  owner: string;
+  admin: string;
+  active: string;
+  revoked: string;
+  accessControl: string;
+  title: string;
+  intro: string;
+  accessGranted: string;
+  accessRevoked: string;
+  loadError: string;
+  unnamedAccount: string;
+  noEmail: string;
+  added: string;
+  revokeAccess: string;
+  restoreAccess: string;
+  noAdmins: string;
+  addAdmin: string;
+  grantAccess: string;
+  instructions: string;
+  emailLabel: string;
+  accessScope: string;
+  grantAdminAccess: string;
+  permissions: Record<string, string>;
+};
+
+type AdminActivityCopy = {
+  dateLocale: string;
+  eyebrow: string;
+  title: string;
+  intro: string;
+  loadError: (message: string) => string;
+  actions: Record<string, string>;
+  status: string;
+  visibility: string;
+  hidden: string;
+  visible: string;
+  emptyTitle: string;
+  emptyBody: string;
+  openUsers: string;
+};
+
 type WorkspaceCopy = {
+  account: AccountCopy;
   clientOverview: ClientOverviewCopy;
   clientMessages: {
     dateLocale: string;
@@ -188,6 +330,9 @@ type WorkspaceCopy = {
     publicSite: string;
     ariaLabel: string;
   };
+  adminUsers: AdminUsersCopy;
+  adminTeam: AdminTeamCopy;
+  adminActivity: AdminActivityCopy;
   adminOverview: {
     dateLocale: string;
     accountLabels: { professional: string; client: string; noProfile: string };
@@ -225,6 +370,75 @@ type WorkspaceCopy = {
 
 const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
   pl: {
+    account: {
+      defaultName: "Twoje konto ArchiCompass",
+      settingsEyebrow: "Ustawienia konta",
+      professionalIntro: "Tutaj aktualizujesz dane konta i profil publiczny. Codzienna praca z briefami, portfolio i zespołem jest w Studio projektanta.",
+      clientIntro: "Tutaj aktualizujesz dane konta. Briefy, ulubione i rozmowy znajdziesz w Strefie klienta.",
+      designer: "Projektant",
+      client: "Klient",
+      openStudio: "Przejdź do Studio",
+      publicProfile: "Zobacz profil publiczny",
+      deletedTitle: "Profil profesjonalisty został usunięty",
+      deletedBody: "Publiczny profil i portfolio zostały usunięte. Konto projektanta, rozmowy i członkostwa w pracowniach pozostają aktywne.",
+      updated: "Dane profilu zostały zaktualizowane.",
+      profileEyebrow: "Dane i widoczność",
+      professionalProfile: "Profil publiczny",
+      contactDetails: "Dane kontaktowe",
+      professionalProfileBody: "Aktualizuj dane, specjalizacje, ceny, kontakt i podejście projektowe.",
+      contactDetailsBody: "Imię, telefon i lokalizacja pojawią się przy briefach i pomogą projektantom sprawnie odpowiedzieć.",
+      profileReadiness: (score) => `${score}% kompletności profilu`,
+      portfolioEyebrow: "Zarządzanie portfolio",
+      manageProjects: "Zarządzaj projektami",
+      manageProjectsBody: "Dodawaj karty projektów, które budują wiarygodność profilu publicznego i mogą pojawiać się również w powiązanych pracowniach.",
+      projects: "Projekty",
+      specialties: "Specjalizacje",
+      studioEyebrow: "Profil pracowni",
+      studioAndTeam: "Pracownia i zespół",
+      studioAndTeamBody: "Utwórz pracownię, zaproś projektantów i korzystaj ze wspólnej skrzynki zapytań oraz połączonego portfolio zespołu.",
+      activeStudios: "Aktywne pracownie",
+      aiHistory: "Analizy w historii",
+      savedBriefs: "Briefy",
+      tool: "Narzędzie",
+      aiAnalysis: "Analiza AI",
+      active: "Aktywne",
+      enquiriesEyebrow: "Zapytania projektowe",
+      enquiries: "Zapytania z briefem",
+      professionalEnquiriesBody: "Przeglądaj zapytania kierowane do Twojego profilu i pracowni, do których należysz.",
+      clientEnquiriesBody: "Śledź briefy wysłane do projektantów i pracowni oraz kontynuuj rozmowy.",
+      received: "Otrzymane",
+      sent: "Wysłane",
+      role: "Rola",
+      nextEyebrow: "Najlepsze kolejne działania",
+      professionalNextTitle: "Przygotuj profil dla klientów",
+      clientNextTitle: "Poprowadź projekt dalej",
+      professionalNextCta: "Otwórz Studio projektanta",
+      clientNextCta: "Przeglądaj projektantów",
+      stepsProfessional: [
+        "1. Uzupełnij podstawy", "Dodaj lokalizację, specjalizację, ceny i kontakt, aby klienci szybko ocenili dopasowanie.",
+        "2. Dodaj pierwszy projekt", "Już jedna mocna karta portfolio sprawia, że publiczny profil wygląda znacznie bardziej wiarygodnie.",
+        "3. Sprawdź widok publiczny", "Otwórz profil jak klient i sprawdź, czy opowieść jest jasna.",
+      ],
+      stepsClient: [
+        "1. Stwórz jasny brief", "Określ typ inwestycji, budżet, termin, styl i dodaj zdjęcia referencyjne.",
+        "2. Porównaj specjalistów", "Porównaj niezależnych projektantów i pracownie, zanim wyślesz brief.",
+        "3. Kontynuuj w wiadomościach", "Przechowuj odpowiedzi, decyzje i kontekst projektu razem w strefie klienta.",
+      ],
+      accessEyebrow: "Twoje konto",
+      accessTitle: "Dostęp i dane",
+      email: "E-mail",
+      accountType: "Typ konta",
+      account: "Konto",
+      openClientZone: "Otwórz Strefę klienta",
+      publicProfileLink: "Link do profilu publicznego",
+      openProfile: "Otwórz profil",
+      compass: {
+        professionalTitle: "Analizuj inspiracje",
+        clientTitle: "Zapisane briefy",
+        professionalBody: "Uruchom analizę AI zdjęć referencyjnych, aby rozpoznać styl, materiały i język projektu. Projektanci mogą korzystać z narzędzia, ale nie wysyłają briefów jako klienci.",
+        clientBody: "Przejrzyj briefy z inspiracjami, budżetem i zakresem przed kontaktem z projektantem lub pracownią.",
+      },
+    },
     clientOverview: {
       dateLocale: "pl-PL",
       statuses: { accepted: "Zaakceptowane", declined: "Odrzucone", reviewing: "W trakcie", sent: "Nowe" },
@@ -401,6 +615,82 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       manageProjectsCta: "Zarządzaj projektami",
       publicProfileCta: "Otwórz profil publiczny",
     },
+    adminUsers: {
+      dateLocale: "pl-PL",
+      never: "Nigdy",
+      professional: "Specjalista",
+      client: "Klient",
+      noProfile: "Brak profilu",
+      needsReview: "Do sprawdzenia",
+      priority: "Priorytet",
+      clear: "Czyste",
+      hidden: "Ukryty",
+      visible: "Widoczny",
+      eyebrow: "Użytkownicy",
+      title: "Konta",
+      intro: "Znajdź klientów i specjalistów, sprawdzaj aktywność publiczną oraz zapisuj wewnętrzne notatki operacyjne.",
+      searchPlaceholder: "Szukaj po nazwie, e-mailu lub lokalizacji",
+      allAccountTypes: "Wszystkie typy kont",
+      professionals: "Specjaliści",
+      clients: "Klienci",
+      noProfileOption: "Bez profilu",
+      allReviewStatuses: "Wszystkie statusy",
+      allVisibility: "Każda widoczność",
+      applyFilters: "Zastosuj filtry",
+      matches: (count) => `${count} pasujących kont`,
+      clearFilters: "Wyczyść filtry",
+      table: ["Konto", "Typ", "Projekty", "Briefy", "Zapytania", "Ostatnie logowanie", "Status", "Widoczność", "Akcja"],
+      unnamedAccount: "Konto bez nazwy",
+      noEmail: "Brak e-maila",
+      joined: "Dołączył/a",
+      open: "Otwórz",
+      emptyTitle: "Brak pasujących kont",
+      emptyBody: "Wyczyść filtry albo użyj szerszego wyszukiwania.",
+      previous: "Poprzednia",
+      next: "Następna",
+      page: (page, total) => `Strona ${page} z ${total}`,
+    },
+    adminTeam: {
+      dateLocale: "pl-PL",
+      owner: "właściciel",
+      admin: "administrator",
+      active: "Aktywny",
+      revoked: "Cofnięty",
+      accessControl: "Kontrola dostępu",
+      title: "Zespół admin",
+      intro: "Nadawaj zaufanym osobom dostęp do użytkowników, moderacji, treści, statystyk, finansów i aktywności administracyjnej.",
+      accessGranted: "Dostęp administratora został nadany.",
+      accessRevoked: "Dostęp administratora został cofnięty.",
+      loadError: "Nie udało się wczytać dostępu zespołu. Najpierw zastosuj migrację Admin Team.",
+      unnamedAccount: "Konto bez nazwy",
+      noEmail: "Brak e-maila",
+      added: "Dodano",
+      revokeAccess: "Cofnij dostęp",
+      restoreAccess: "Przywróć dostęp",
+      noAdmins: "Nie znaleziono kont administracyjnych.",
+      addAdmin: "Dodaj administratora",
+      grantAccess: "Nadaj dostęp",
+      instructions: "Osoba musi najpierw utworzyć konto ArchiCompass. Wybierz zakresy dostępu, które mają być przypisane do jej roli admin.",
+      emailLabel: "E-mail konta",
+      accessScope: "Zakres dostępu",
+      grantAdminAccess: "Nadaj dostęp administratora",
+      permissions: { users: "Użytkownicy", moderation: "Moderacja", content: "Treści", analytics: "Statystyki", team: "Zespół admin", finance: "Finanse" },
+    },
+    adminActivity: {
+      dateLocale: "pl-PL",
+      eyebrow: "Dziennik działań",
+      title: "Aktywność admina",
+      intro: "Sprawdzaj wrażliwe działania administracyjne razem z osobą wykonującą, celem i czasem operacji.",
+      loadError: (message) => `Nie udało się wczytać aktywności: ${message}`,
+      actions: { admin_access_granted: "Nadano dostęp administratora", admin_access_revoked: "Odebrano dostęp administratora", content_visibility_updated: "Zmieniono widoczność treści", user_review_updated: "Zmieniono status weryfikacji użytkownika" },
+      status: "Status",
+      visibility: "Widoczność",
+      hidden: "ukryte",
+      visible: "widoczne",
+      emptyTitle: "Brak działań administracyjnych",
+      emptyBody: "Zmiany weryfikacji i moderacji pojawią się tutaj.",
+      openUsers: "Otwórz użytkowników",
+    },
     adminNav: {
       dashboard: "Pulpit",
       users: "Użytkownicy",
@@ -445,6 +735,75 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
     },
   },
   en: {
+    account: {
+      defaultName: "Your ArchiCompass account",
+      settingsEyebrow: "Account settings",
+      professionalIntro: "Update your account and public profile here. Your daily brief, portfolio, and team work lives in Designer Studio.",
+      clientIntro: "Update your account details here. Find briefs, favorites, and conversations in Client Workspace.",
+      designer: "Designer",
+      client: "Client",
+      openStudio: "Open Designer Studio",
+      publicProfile: "View public profile",
+      deletedTitle: "Professional profile deleted",
+      deletedBody: "The public profile and portfolio have been removed. Your designer account, conversations, and studio memberships remain active.",
+      updated: "Profile details have been updated.",
+      profileEyebrow: "Details and visibility",
+      professionalProfile: "Public profile",
+      contactDetails: "Contact details",
+      professionalProfileBody: "Update your details, specialties, pricing, contact information, and design approach.",
+      contactDetailsBody: "Your name, phone number, and location appear with briefs and help designers respond efficiently.",
+      profileReadiness: (score) => `${score}% profile readiness`,
+      portfolioEyebrow: "Portfolio management",
+      manageProjects: "Manage projects",
+      manageProjectsBody: "Add project cards that build trust in your public profile and can also appear in connected studios.",
+      projects: "Projects",
+      specialties: "Specialties",
+      studioEyebrow: "Studio profile",
+      studioAndTeam: "Studio and team",
+      studioAndTeamBody: "Create a studio, invite designers, and use a shared enquiry inbox and connected team portfolio.",
+      activeStudios: "Active studios",
+      aiHistory: "Saved analyses",
+      savedBriefs: "Briefs",
+      tool: "Tool",
+      aiAnalysis: "AI analysis",
+      active: "Active",
+      enquiriesEyebrow: "Project enquiries",
+      enquiries: "Brief enquiries",
+      professionalEnquiriesBody: "Review enquiries sent to your profile and any studios you belong to.",
+      clientEnquiriesBody: "Track briefs sent to designers and studios, then continue the conversation.",
+      received: "Received",
+      sent: "Sent",
+      role: "Role",
+      nextEyebrow: "Best next steps",
+      professionalNextTitle: "Prepare your profile for clients",
+      clientNextTitle: "Move your project forward",
+      professionalNextCta: "Open Designer Studio",
+      clientNextCta: "Browse designers",
+      stepsProfessional: [
+        "1. Complete the essentials", "Add your location, specialty, pricing, and contact details so clients can assess the fit quickly.",
+        "2. Add your first project", "Even one strong portfolio card makes a public profile look far more credible.",
+        "3. Review the public view", "Open your profile as a client and check that the story is clear.",
+      ],
+      stepsClient: [
+        "1. Create a clear brief", "Set the project type, budget, timing, style, and add reference photos.",
+        "2. Compare professionals", "Compare independent designers and studios before you send a brief.",
+        "3. Continue in messages", "Keep replies, decisions, and project context together in Client Workspace.",
+      ],
+      accessEyebrow: "Your account",
+      accessTitle: "Access and details",
+      email: "Email",
+      accountType: "Account type",
+      account: "Account",
+      openClientZone: "Open Client Workspace",
+      publicProfileLink: "Public profile link",
+      openProfile: "Open profile",
+      compass: {
+        professionalTitle: "Analyze inspiration",
+        clientTitle: "Saved briefs",
+        professionalBody: "Run an AI analysis of reference photos to recognize the style, materials, and design language. Designers can use the tool but cannot send briefs as clients.",
+        clientBody: "Review briefs with inspiration, budget, and scope before contacting a designer or studio.",
+      },
+    },
     clientOverview: {
       dateLocale: "en-GB",
       statuses: { accepted: "Accepted", declined: "Declined", reviewing: "In review", sent: "New" },
@@ -620,6 +979,82 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       projectCount: (count) => `${count} ${count === 1 ? "public project" : "public projects"} available to clients before sending a brief.`,
       manageProjectsCta: "Manage projects",
       publicProfileCta: "Open public profile",
+    },
+    adminUsers: {
+      dateLocale: "en-GB",
+      never: "Never",
+      professional: "Professional",
+      client: "Client",
+      noProfile: "No profile",
+      needsReview: "Needs review",
+      priority: "Priority",
+      clear: "Clear",
+      hidden: "Hidden",
+      visible: "Visible",
+      eyebrow: "Users",
+      title: "Accounts",
+      intro: "Find clients and professionals, review public activity, and keep internal operational notes.",
+      searchPlaceholder: "Search by name, email, or location",
+      allAccountTypes: "All account types",
+      professionals: "Professionals",
+      clients: "Clients",
+      noProfileOption: "No profile",
+      allReviewStatuses: "All review statuses",
+      allVisibility: "Any visibility",
+      applyFilters: "Apply filters",
+      matches: (count) => `${count} matching accounts`,
+      clearFilters: "Clear filters",
+      table: ["Account", "Type", "Projects", "Briefs", "Enquiries", "Last sign-in", "Status", "Visibility", "Action"],
+      unnamedAccount: "Unnamed account",
+      noEmail: "No email",
+      joined: "Joined",
+      open: "Open",
+      emptyTitle: "No matching accounts",
+      emptyBody: "Clear the filters or try a broader search.",
+      previous: "Previous",
+      next: "Next",
+      page: (page, total) => `Page ${page} of ${total}`,
+    },
+    adminTeam: {
+      dateLocale: "en-GB",
+      owner: "owner",
+      admin: "admin",
+      active: "Active",
+      revoked: "Revoked",
+      accessControl: "Access control",
+      title: "Admin team",
+      intro: "Give trusted people access to users, moderation, content, analytics, finance, and administrative activity.",
+      accessGranted: "Administrator access has been granted.",
+      accessRevoked: "Administrator access has been revoked.",
+      loadError: "Could not load team access. Apply the Admin Team migration first.",
+      unnamedAccount: "Unnamed account",
+      noEmail: "No email",
+      added: "Added",
+      revokeAccess: "Revoke access",
+      restoreAccess: "Restore access",
+      noAdmins: "No administrator accounts found.",
+      addAdmin: "Add administrator",
+      grantAccess: "Grant access",
+      instructions: "The person must first create an ArchiCompass account. Choose the access areas to assign to their admin role.",
+      emailLabel: "Account email",
+      accessScope: "Access scope",
+      grantAdminAccess: "Grant administrator access",
+      permissions: { users: "Users", moderation: "Moderation", content: "Content", analytics: "Analytics", team: "Admin team", finance: "Finance" },
+    },
+    adminActivity: {
+      dateLocale: "en-GB",
+      eyebrow: "Activity log",
+      title: "Admin activity",
+      intro: "Review sensitive administrative actions together with the actor, target, and time of the operation.",
+      loadError: (message) => `Could not load activity: ${message}`,
+      actions: { admin_access_granted: "Administrator access granted", admin_access_revoked: "Administrator access revoked", content_visibility_updated: "Content visibility updated", user_review_updated: "User review status updated" },
+      status: "Status",
+      visibility: "Visibility",
+      hidden: "hidden",
+      visible: "visible",
+      emptyTitle: "No administrative activity yet",
+      emptyBody: "Verification and moderation changes will appear here.",
+      openUsers: "Open users",
     },
     adminNav: {
       dashboard: "Dashboard",

@@ -4,11 +4,11 @@ ArchiCompass is being consolidated onto one source branch. The production locale
 
 ## Migration status
 
-The shared foundation, home page, global navigation, account entry flow, password recovery, onboarding, Inspiration Hub, and articles already render from the single typed contract in `main`.
+The shared foundation, home page, global navigation, account entry flow, password recovery, onboarding, Inspiration Hub, public designer directory and profiles, client workspace, the main Designer Studio views, and the main Admin views render from typed locale contracts in one source tree.
 
-The English Vercel project must continue using the legacy `english` branch until the remaining route groups have been migrated: AI Project Compass, designer directory and profiles, legal pages, client workspace, Designer Studio, and Admin. Switching it to `main` before then would expose Polish legacy labels on English routes.
+The Polish and English deployment branches must always point to the same application commit. The two Vercel projects differ only by `NEXT_PUBLIC_SITE_LOCALE`; no feature or visual fix may be introduced in one language branch without being released from the same source commit to the other.
 
-When those route groups are complete, both Vercel projects will build the same `main` commit with only `NEXT_PUBLIC_SITE_LOCALE` changed.
+The remaining route groups are being migrated into the shared contract route by route: AI Project Compass detail UI, account editing and project management, Studio team and individual conversation views, and the remaining Admin detail/content views.
 
 ## Required Vercel variables
 
@@ -36,9 +36,10 @@ remaining route groups are still being migrated to the shared source.
 
 - `lib/site-locale.ts` owns the locale, the public `/en` path, the internal rewrite host, and HTML/SEO locale metadata.
 - `content/site-copy.ts` owns the paired PL and EN contracts for the shared global UI, account entry flow, and Inspiration Hub.
+- `content/workspace-copy.ts` owns paired PL and EN contracts for the account dashboard, client workspace, main Designer Studio views, and Admin dashboard, users, team, and activity views.
 - `content/public-profile-copy.ts` owns paired system labels visible on public profiles, including location, experience, price, availability, contact, and portfolio.
 - `lib/profile-system-labels.ts`, `lib/profile-pricing.ts`, `lib/professional-options.ts`, and `lib/service-capabilities.ts` translate stored platform values from their canonical database keys. They must not store language-specific values in a profile row.
-- `Header`, `Footer`, root metadata, home page, login, registration, password recovery, onboarding, Inspiration Hub, and article pages render from this shared content contract.
+- `Header`, `Footer`, root metadata, home page, login, registration, password recovery, onboarding, Inspiration Hub, article pages, designer directory, client workspace, account dashboard, main Designer Studio views, and main Admin views render from shared content contracts.
 
 Both entries in `content/site-copy.ts` must satisfy the same `SiteCopy` TypeScript type. Adding a field to one language without adding it to the other therefore fails type checking.
 

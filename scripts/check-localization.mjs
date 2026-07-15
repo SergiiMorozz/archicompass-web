@@ -15,6 +15,7 @@ const sharedSourceFiles = [
 ];
 
 const workspaceSourceFiles = [
+  "app/account/page.tsx",
   "app/client/page.tsx",
   "app/client/messages/page.tsx",
   "app/client/favorites/page.tsx",
@@ -23,6 +24,9 @@ const workspaceSourceFiles = [
   "app/studio/inbox/page.tsx",
   "app/studio/analytics/page.tsx",
   "app/admin/page.tsx",
+  "app/admin/activity/page.tsx",
+  "app/admin/team/page.tsx",
+  "app/admin/users/page.tsx",
   "components/AdminNav.tsx",
 ];
 

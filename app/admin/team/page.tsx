@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 
 export const revalidate = 0;
 
@@ -15,12 +16,12 @@ type StaffMember = {
 };
 
 const permissionOptions = [
-  ["users", "Użytkownicy"],
-  ["moderation", "Moderacja"],
-  ["content", "Treści"],
-  ["analytics", "Statystyki"],
-  ["team", "Zespół admin"],
-  ["finance", "Finanse"],
+  "users",
+  "moderation",
+  "content",
+  "analytics",
+  "team",
+  "finance",
 ] as const;
 
 function textValue(formData: FormData, key: string) {
@@ -57,8 +58,8 @@ async function setStaffAccess(formData: FormData) {
   redirect(`/admin/team?${action === "grant" ? "granted" : "revoked"}=1`);
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("pl-PL", {
+function formatDate(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -71,6 +72,7 @@ export default async function AdminTeamPage({
   searchParams?: Promise<{ error?: string; granted?: string; revoked?: string }>;
 }) {
   const sp = (await searchParams) ?? {};
+  const copy = getWorkspaceCopy().adminTeam;
   const { supabase, role } = await requireAdmin();
   if (role !== "owner") redirect("/admin");
   const { data, error } = await supabase.rpc("admin_staff_directory");
@@ -80,11 +82,10 @@ export default async function AdminTeamPage({
     <main>
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="text-sm font-semibold text-primary">Kontrola dostępu</div>
-          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Zespół admin</h1>
+          <div className="text-sm font-semibold text-primary">{copy.accessControl}</div>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">{copy.title}</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-            Nadawaj zaufanym osobom dostęp do użytkowników, moderacji, treści,
-            statystyk, finansów i aktywności administracyjnej.
+            {copy.intro}
           </p>
         </div>
       </section>
@@ -93,7 +94,7 @@ export default async function AdminTeamPage({
         <div>
           {sp.granted || sp.revoked ? (
             <div className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-              {sp.granted ? "Dostęp administratora został nadany." : "Dostęp administratora został cofnięty."}
+              {sp.granted ? copy.accessGranted : copy.accessRevoked}
             </div>
           ) : null}
           {sp.error ? (
@@ -103,7 +104,7 @@ export default async function AdminTeamPage({
           ) : null}
           {error ? (
             <div className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-              Nie udało się wczytać dostępu zespołu. Najpierw zastosuj migrację Admin Team.
+              {copy.loadError}
             </div>
           ) : null}
 
@@ -112,24 +113,24 @@ export default async function AdminTeamPage({
               <article key={member.user_id} className="flex flex-col gap-4 border-b border-line p-5 last:border-0 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold">{member.full_name || member.email || "Konto bez nazwy"}</span>
+                    <span className="font-semibold">{member.full_name || member.email || copy.unnamedAccount}</span>
                     <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold capitalize text-primary">
-                      {member.role}
+                      {member.role === "owner" ? copy.owner : copy.admin}
                     </span>
                     <span className={[
                       "rounded-full px-2.5 py-1 text-xs font-semibold",
                       member.active ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700",
                     ].join(" ")}>
-                      {member.active ? "Aktywny" : "Cofnięty"}
+                      {member.active ? copy.active : copy.revoked}
                     </span>
                   </div>
                   <div className="mt-1 text-sm text-muted">
-                    {member.email || "Brak e-maila"} | Dodano {formatDate(member.created_at)}
+                    {member.email || copy.noEmail} | {copy.added} {formatDate(member.created_at, copy.dateLocale)}
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {(member.permissions?.length ? member.permissions : ["users", "moderation", "content", "analytics", "team", "finance"]).map((permission) => (
+                    {(member.permissions?.length ? member.permissions : permissionOptions).map((permission) => (
                       <span key={permission} className="rounded-full border border-line bg-background px-2.5 py-1 text-xs font-semibold text-muted">
-                        {permissionOptions.find(([value]) => value === permission)?.[1] ?? permission}
+                        {copy.permissions[permission] ?? permission}
                       </span>
                     ))}
                   </div>
@@ -139,7 +140,7 @@ export default async function AdminTeamPage({
                     <input type="hidden" name="email" value={member.email} />
                     <input type="hidden" name="access_action" value="revoke" />
                     <button className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700">
-                      Cofnij dostęp
+                      {copy.revokeAccess}
                     </button>
                   </form>
                 ) : member.role === "admin" && member.email ? (
@@ -147,28 +148,27 @@ export default async function AdminTeamPage({
                     <input type="hidden" name="email" value={member.email} />
                     <input type="hidden" name="access_action" value="grant" />
                     <button className="rounded-xl border border-line bg-background px-4 py-2.5 text-sm font-semibold text-primary">
-                      Przywróć dostęp
+                      {copy.restoreAccess}
                     </button>
                   </form>
                 ) : null}
               </article>
             )) : (
-              <div className="p-6 text-sm text-muted">Nie znaleziono kont administracyjnych.</div>
+              <div className="p-6 text-sm text-muted">{copy.noAdmins}</div>
             )}
           </div>
         </div>
 
         <aside className="h-fit rounded-lg border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
-          <div className="text-sm font-semibold text-primary">Dodaj administratora</div>
-          <h2 className="mt-1 text-2xl font-bold">Nadaj dostęp</h2>
+          <div className="text-sm font-semibold text-primary">{copy.addAdmin}</div>
+          <h2 className="mt-1 text-2xl font-bold">{copy.grantAccess}</h2>
           <p className="mt-3 text-sm leading-6 text-muted">
-            Osoba musi najpierw utworzyć konto ArchiCompass. Wybierz zakresy dostępu,
-            które mają być przypisane do jej roli admin.
+            {copy.instructions}
           </p>
           <form action={setStaffAccess} className="mt-5 grid gap-4">
             <input type="hidden" name="access_action" value="grant" />
             <label className="text-sm font-semibold">
-              E-mail konta
+              {copy.emailLabel}
               <input
                 name="email"
                 type="email"
@@ -178,9 +178,9 @@ export default async function AdminTeamPage({
               />
             </label>
             <fieldset>
-              <legend className="text-sm font-semibold">Zakres dostępu</legend>
+              <legend className="text-sm font-semibold">{copy.accessScope}</legend>
               <div className="mt-3 grid gap-2">
-                {permissionOptions.map(([value, label]) => (
+                {permissionOptions.map((value) => (
                   <label key={value} className="flex items-center gap-3 rounded-xl border border-line bg-background px-3 py-2 text-sm font-semibold">
                     <input
                       type="checkbox"
@@ -189,13 +189,13 @@ export default async function AdminTeamPage({
                       defaultChecked
                       className="h-4 w-4 accent-primary"
                     />
-                    {label}
+                    {copy.permissions[value]}
                   </label>
                 ))}
               </div>
             </fieldset>
             <button className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-              Nadaj dostęp administratora
+              {copy.grantAdminAccess}
             </button>
           </form>
         </aside>
