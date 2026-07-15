@@ -1,4 +1,5 @@
 import { polishVisualCue } from "@/lib/visual-cues";
+import { siteLocale, type SiteLocale } from "@/lib/site-locale";
 
 const briefLabels: Record<string, string> = {
   Apartment: "Mieszkanie",
@@ -73,31 +74,33 @@ const briefLabels: Record<string, string> = {
   "quiet luxury": "quiet luxury",
 };
 
-export function briefLabel(value: string | null | undefined) {
+export function briefLabel(value: string | null | undefined, locale: SiteLocale = siteLocale) {
   const trimmed = value?.trim();
   if (!trimmed) return "";
+  if (locale === "en") return trimmed;
   return briefLabels[trimmed] ?? polishVisualCue(trimmed);
 }
 
-export function briefStyleLabel(value: string | null | undefined) {
+export function briefStyleLabel(value: string | null | undefined, locale: SiteLocale = siteLocale) {
   return value
     ?.split("|")
-    .map((item) => briefLabel(item))
+    .map((item) => briefLabel(item, locale))
     .filter(Boolean)
     .join(" / ") ?? "";
 }
 
-export function briefListLabel(values: string[] | null | undefined) {
-  return values?.map((value) => briefLabel(value)).filter(Boolean).join(", ") ?? "";
+export function briefListLabel(values: string[] | null | undefined, locale: SiteLocale = siteLocale) {
+  return values?.map((value) => briefLabel(value, locale)).filter(Boolean).join(", ") ?? "";
 }
 
-export function briefSnapshotLabel(snapshot: Record<string, unknown> | null, key: string) {
+export function briefSnapshotLabel(snapshot: Record<string, unknown> | null, key: string, locale: SiteLocale = siteLocale) {
   const value = snapshot?.[key];
   if (typeof value === "number") return String(value);
   if (Array.isArray(value)) {
     const items = value.filter((item): item is string => typeof item === "string");
-    return briefListLabel(items) || "Nie podano";
+    return briefListLabel(items, locale) || (locale === "pl" ? "Nie podano" : "Not specified");
   }
-  if (typeof value !== "string" || !value.trim()) return "Nie podano";
-  return key === "style_direction" ? briefStyleLabel(value) || "Nie podano" : briefLabel(value);
+  if (typeof value !== "string" || !value.trim()) return locale === "pl" ? "Nie podano" : "Not specified";
+  const label = key === "style_direction" ? briefStyleLabel(value, locale) : briefLabel(value, locale);
+  return label || (locale === "pl" ? "Nie podano" : "Not specified");
 }

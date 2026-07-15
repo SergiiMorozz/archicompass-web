@@ -5,12 +5,18 @@ import { useState, type ReactNode } from "react";
 type CatalogFiltersPanelProps = {
   activeFilters: number;
   children: ReactNode;
+  labels: {
+    title: string;
+    show: string;
+    hide: string;
+  };
   resultCount: string;
 };
 
 export default function CatalogFiltersPanel({
   activeFilters,
   children,
+  labels,
   resultCount,
 }: CatalogFiltersPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +31,7 @@ export default function CatalogFiltersPanel({
         className="mb-5 flex w-full items-center justify-between rounded-xl border border-primary/20 bg-card px-4 py-4 text-left shadow-sm lg:hidden"
       >
         <span>
-          <span className="block text-base font-bold">Filtry</span>
+          <span className="block text-base font-bold">{labels.title}</span>
           <span className="mt-0.5 block text-sm text-muted">{resultCount}</span>
         </span>
         <span className="flex items-center gap-2">
@@ -35,7 +41,7 @@ export default function CatalogFiltersPanel({
             </span>
           ) : null}
           <span className="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-white">
-            {isOpen ? "Ukryj" : "Pokaż"}
+            {isOpen ? labels.hide : labels.show}
           </span>
         </span>
       </button>
