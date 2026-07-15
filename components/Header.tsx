@@ -4,15 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import BrandLogo from "@/components/BrandLogo";
+import { getSiteCopy } from "@/content/site-copy";
 import { isProfessionalProfile } from "@/lib/professional";
+import { localeSiteUrl, otherLocale } from "@/lib/site-locale";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-
-const navItems = [
-  { href: "/", label: "Strona główna" },
-  { href: "/project-compass", label: "AI Project Compass", featured: true },
-  { href: "/designers", label: "Katalog Projektantów" },
-  { href: "/inspiration", label: "Inspiration Hub" },
-];
 
 function NavLink({
   href,
@@ -56,7 +51,7 @@ function NavLink({
 
 function Brand() {
   return (
-    <Link href="/" className="flex items-center" aria-label="ArchiCompass home">
+    <Link href="/" className="flex items-center" aria-label="ArchiCompass">
       <BrandLogo className="h-9 w-[158px] sm:w-[174px]" />
     </Link>
   );
@@ -64,16 +59,18 @@ function Brand() {
 
 export default function Header() {
   const pathname = usePathname();
+  const copy = getSiteCopy();
+  const navItems = copy.header.nav;
   const isGetStartedActive = pathname === "/get-started";
   const [isOpen, setIsOpen] = useState(false);
-  const [englishHref, setEnglishHref] = useState("https://archicompass-web-en.vercel.app");
+  const [languageHref, setLanguageHref] = useState(localeSiteUrl(otherLocale()));
   const [account, setAccount] = useState<
     { id: string; isAdmin: boolean; isProfessional: boolean; unreadCount: number } | null
   >(null);
 
   useEffect(() => {
     const path = pathname === "/" ? "/" : pathname;
-    setEnglishHref("https://archicompass-web-en.vercel.app" + path + window.location.search + window.location.hash);
+    setLanguageHref(`${localeSiteUrl(otherLocale())}${path}${window.location.search}${window.location.hash}`);
   }, [pathname]);
 
   useEffect(() => {
@@ -175,12 +172,12 @@ export default function Header() {
   const workspaceItems = account
     ? [
         ...(!account.isProfessional || account.isAdmin
-          ? [{ href: "/client", label: "Strefa klienta" }]
+          ? [{ href: "/client", label: copy.header.clientWorkspace }]
           : []),
         ...(account.isProfessional || account.isAdmin
-          ? [{ href: "/studio", label: "Studio projektanta" }]
+          ? [{ href: "/studio", label: copy.header.designerStudio }]
           : []),
-        ...(account.isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
+        ...(account.isAdmin ? [{ href: "/admin", label: copy.header.admin }] : []),
       ]
     : [];
   const isWorkspaceActive = workspaceItems.some(
@@ -200,8 +197,8 @@ export default function Header() {
         </nav>
 
         <div className="hidden items-center gap-2 xl:flex">
-          <a href={englishHref} hrefLang="en" className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium text-foreground">
-            EN
+          <a href={languageHref} hrefLang={otherLocale()} className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium text-foreground">
+            {copy.header.languageSwitch}
           </a>
           {account ? (
             <div className="flex items-center gap-2">
@@ -209,7 +206,7 @@ export default function Header() {
                 href={account.isProfessional ? "/studio/inbox" : "/client/messages"}
                 className="relative whitespace-nowrap rounded-xl border border-line bg-card px-3 py-2 text-sm font-semibold text-muted transition hover:border-primary/25 hover:bg-primary-soft hover:text-primary"
               >
-                Wiadomości
+                {copy.header.messages}
                 {account.unreadCount ? (
                   <span className="ml-1.5 inline-flex min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
                     {account.unreadCount > 99 ? "99+" : account.unreadCount}
@@ -223,11 +220,11 @@ export default function Header() {
                     isWorkspaceActive ? "border-primary/25 bg-primary-soft text-primary" : "text-muted",
                   ].join(" ")}
                 >
-                  Konto
+                  {copy.header.account}
                   <span className="text-base leading-none transition group-open:rotate-180" aria-hidden="true">⌄</span>
                 </summary>
                 <div className="absolute right-0 top-full z-50 mt-2 w-64 rounded-xl border border-line bg-card p-2 shadow-[0_18px_45px_rgba(54,31,73,0.16)]">
-                  <div className="px-3 pb-2 pt-1 text-[11px] font-bold uppercase tracking-wide text-muted">Twoje strefy</div>
+                  <div className="px-3 pb-2 pt-1 text-[11px] font-bold uppercase tracking-wide text-muted">{copy.header.workspaceTitle}</div>
                   {workspaceItems.map((item) => (
                     <Link
                       key={item.href}
@@ -244,7 +241,7 @@ export default function Header() {
                   ))}
                   <div className="my-2 h-px bg-line" />
                   <Link href="/account" className="block rounded-lg bg-primary px-3 py-2.5 text-center text-sm font-bold text-white transition hover:opacity-90">
-                    Ustawienia konta
+                    {copy.header.accountSettings}
                   </Link>
                 </div>
               </details>
@@ -272,12 +269,12 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2 xl:hidden">
-          <a href={englishHref} hrefLang="en" className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium">
-            EN
+          <a href={languageHref} hrefLang={otherLocale()} className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium">
+            {copy.header.languageSwitch}
           </a>
           <button
             type="button"
-            aria-label="Otwórz lub zamknij menu"
+            aria-label={copy.header.menuLabel}
             aria-expanded={isOpen}
             onClick={() => setIsOpen((value) => !value)}
             className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-card"
@@ -301,9 +298,9 @@ export default function Header() {
             ))}
             {account ? (
               <div className="mt-2 grid gap-2 border-t border-line pt-3">
-                <div className="px-3 text-xs font-semibold uppercase text-muted">Panel użytkownika</div>
+                <div className="px-3 text-xs font-semibold uppercase text-muted">{copy.header.userPanel}</div>
                 <NavLink href={account.isProfessional ? "/studio/inbox" : "/client/messages"} onClick={() => setIsOpen(false)}>
-                  Wiadomości{account.unreadCount ? ` (${account.unreadCount})` : ""}
+                  {copy.header.messages}{account.unreadCount ? ` (${account.unreadCount})` : ""}
                 </NavLink>
                 {workspaceItems.map((item) => (
                   <NavLink key={item.href} href={item.href} onClick={() => setIsOpen(false)}>
@@ -315,7 +312,7 @@ export default function Header() {
                   onClick={() => setIsOpen(false)}
                   className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white"
                 >
-                  Ustawienia
+                  {copy.header.accountSettings}
                 </Link>
               </div>
             ) : (
@@ -325,14 +322,14 @@ export default function Header() {
                   onClick={() => setIsOpen(false)}
                   className="rounded-xl border border-line bg-card px-4 py-3 text-center text-sm font-medium"
                 >
-                  Zaloguj się
+                  {copy.header.signIn}
                 </Link>
                 <Link
                   href="/get-started"
                   onClick={() => setIsOpen(false)}
                   className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white"
                 >
-                  Dołącz
+                  {copy.header.join}
                 </Link>
               </div>
             )}

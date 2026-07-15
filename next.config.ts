@@ -13,8 +13,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return {
       beforeFiles: [
-        { source: "/en", destination: `${englishZoneUrl}/en` },
-        { source: "/en/:path*", destination: `${englishZoneUrl}/en/:path*` },
+        { source: "/en", destination: `${englishZoneUrl}/` },
+        { source: "/en/:path*", destination: `${englishZoneUrl}/:path*` },
       ],
     };
   },

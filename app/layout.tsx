@@ -3,45 +3,40 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
+import { getSiteCopy } from "@/content/site-copy";
+import { localeMetadata, localeSiteUrl, siteLocale } from "@/lib/site-locale";
 import { absoluteUrl, siteUrl } from "@/lib/seo";
+
+const copy = getSiteCopy();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: "Katalog Projektantów wnętrz z pomocą AI | ArchiCompass",
+    default: `${copy.seo.defaultTitle} | ArchiCompass`,
     template: "%s | ArchiCompass",
   },
-  description:
-    "Znajdź projektantów wnętrz i pracownie projektowe według lokalizacji, stylu, usług i portfolio. Zamień zdjęcia inspiracji w precyzyjny brief z pomocą AI.",
+  description: copy.seo.defaultDescription,
   applicationName: "ArchiCompass",
   authors: [{ name: "ArchiCompass", url: siteUrl() }],
   creator: "ArchiCompass",
   publisher: "ArchiCompass",
-  category: "Platforma projektowania wnętrz",
+  category: copy.seo.category,
   keywords: [
-    "projektant wnętrz",
-    "znajdź projektanta wnętrz",
-    "projektant wnętrz Polska",
-    "architekt wnętrz Warszawa",
-    "projektowanie wnętrz",
-    "projektant wnętrz",
-    "architekt wnętrz",
-    "pracownia projektowania wnętrz",
-    "portfolio projektanta wnętrz",
-    "AI rozpoznawanie stylu wnętrza",
+    ...(siteLocale === "pl"
+      ? ["projektant wnętrz", "znajdź projektanta wnętrz", "projektant wnętrz Polska", "architekt wnętrz Warszawa", "projektowanie wnętrz", "pracownia projektowania wnętrz", "portfolio projektanta wnętrz", "AI rozpoznawanie stylu wnętrza"]
+      : ["interior designer", "find an interior designer", "interior designers Poland", "interior architect Warsaw", "interior design", "interior design studio", "designer portfolio", "AI interior style analysis"]),
   ],
   alternates: {
     canonical: siteUrl(),
-    languages: { pl: siteUrl(), en: absoluteUrl("/en"), "x-default": siteUrl() },
+    languages: { pl: localeSiteUrl("pl"), en: localeSiteUrl("en"), "x-default": localeSiteUrl("pl") },
   },
   openGraph: {
     type: "website",
-    locale: "pl_PL",
+    locale: localeMetadata[siteLocale].openGraph,
     siteName: "ArchiCompass",
     url: siteUrl(),
-    title: "Katalog Projektantów wnętrz z pomocą AI | ArchiCompass",
-    description:
-      "Stwórz precyzyjny brief na podstawie zdjęć inspiracji i znajdź specjalistów dopasowanych do Twojego projektu.",
+    title: `${copy.seo.defaultTitle} | ArchiCompass`,
+    description: copy.seo.defaultDescription,
     images: [
       {
         url: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=85",
@@ -53,9 +48,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Katalog Projektantów wnętrz z pomocą AI | ArchiCompass",
-    description:
-      "Stwórz precyzyjny brief i poznaj specjalistów dopasowanych do Twojego projektu.",
+    title: `${copy.seo.defaultTitle} | ArchiCompass`,
+    description: copy.seo.defaultDescription,
     images: [
       "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=85",
     ],
@@ -86,7 +80,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pl">
+    <html lang={localeMetadata[siteLocale].html}>
       <body className="antialiased">
         <JsonLd
           data={[
@@ -97,8 +91,7 @@ export default function RootLayout({
               name: "ArchiCompass",
               url: siteUrl(),
               logo: absoluteUrl("/brand/archicompass-logo-purple.png"),
-              description:
-                "Platforma wspierana przez AI, która pomaga znaleźć projektantów wnętrz i pracownie projektowe.",
+              description: copy.seo.organizationDescription,
             },
             {
               "@context": "https://schema.org",

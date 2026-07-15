@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { applyPolishArticleCopy, homeCopy } from "@/content/pl/copy";
+import { applyPolishArticleCopy } from "@/content/pl/copy";
+import { getSiteCopy } from "@/content/site-copy";
+import { isEnglishSite, localeMetadata, siteLocale } from "@/lib/site-locale";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { pageMetadata } from "@/lib/seo";
+
+const copy = getSiteCopy();
+const homeCopy = copy.home;
 
 export const metadata: Metadata = pageMetadata({
   title: homeCopy.metadata.title,
@@ -45,25 +50,13 @@ type FeaturedArticle = {
 };
 
 function metricValue(value: number) {
-  return new Intl.NumberFormat("pl-PL").format(value);
+  return new Intl.NumberFormat(localeMetadata[siteLocale].number).format(value);
 }
 
-const projectCategoryLabels: Record<string, string> = {
-  Apartment: "Mieszkanie",
-  House: "Dom",
-  Loft: "Loft",
-  Hospitality: "Hotelarstwo i gastronomia",
-  "Rental property": "Nieruchomość na wynajem",
-  Kitchen: "Kuchnia",
-  "Dining room": "Jadalnia",
-  "Home office": "Gabinet domowy",
-  Bedroom: "Sypialnia",
-  Penthouse: "Penthouse",
-  Office: "Biuro",
-};
+const projectCategoryLabels = homeCopy.projectCategories;
 
 function projectCategoryLabel(value: string | null) {
-  if (!value) return "Projekt wnętrza";
+  if (!value) return homeCopy.latestProjects.fallbackCategory;
   return projectCategoryLabels[value] || value;
 }
 
@@ -112,7 +105,9 @@ async function homeData() {
       [metricValue(reviewCount), homeCopy.metrics.reviews],
     ],
     featuredProjects,
-    featuredArticles: ((articles.data ?? []) as FeaturedArticle[]).map(applyPolishArticleCopy),
+    featuredArticles: isEnglishSite
+      ? ((articles.data ?? []) as FeaturedArticle[])
+      : ((articles.data ?? []) as FeaturedArticle[]).map(applyPolishArticleCopy),
   };
 }
 
@@ -235,14 +230,14 @@ export default async function Home() {
           <div className="flex items-start gap-4">
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary text-sm font-bold text-white shadow-lg shadow-primary/20" aria-hidden="true">AI</span>
             <div>
-              <h3 className="text-lg font-bold">Precyzyjne dopasowanie zamiast przypadkowego szukania</h3>
+              <h3 className="text-lg font-bold">{homeCopy.matching.title}</h3>
               <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">
-                Z całej bazy projektantów w Polsce otrzymujesz osoby najlepiej dopasowane do Twojego stylu, zakresu prac, budżetu i lokalizacji.
+                {homeCopy.matching.body}
               </p>
             </div>
           </div>
           <Link href="/project-compass" className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
-            Zacznij z AI
+            {homeCopy.matching.cta}
             <span className="text-base transition group-hover:translate-x-1" aria-hidden="true">&#8594;</span>
           </Link>
         </div>
@@ -260,8 +255,9 @@ export default async function Home() {
               {homeCopy.aiProjectCompass.body}
             </p>
             <div className="mt-7 flex flex-wrap gap-4 text-sm text-white/72">
-              <span className="inline-flex items-center gap-2"><b className="grid h-5 w-5 place-items-center rounded-full bg-[#4fd8c7]/16 text-xs text-[#5de1d1]">&#10003;</b> Styl i paleta</span>
-              <span className="inline-flex items-center gap-2"><b className="grid h-5 w-5 place-items-center rounded-full bg-[#4fd8c7]/16 text-xs text-[#5de1d1]">&#10003;</b> Sygnały do dopasowania</span>
+              {homeCopy.aiProjectCompass.signals.map((signal) => (
+                <span key={signal} className="inline-flex items-center gap-2"><b className="grid h-5 w-5 place-items-center rounded-full bg-[#4fd8c7]/16 text-xs text-[#5de1d1]">&#10003;</b> {signal}</span>
+              ))}
             </div>
             <Link href="/project-compass" className="group mt-8 inline-flex min-h-[58px] items-center justify-center gap-3 rounded-xl border border-[#bfa0ff] bg-[#7c3aed] px-5 py-3.5 text-center font-bold text-white shadow-[0_16px_38px_rgba(111,51,236,0.32)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#8b4cf0] hover:shadow-[0_22px_48px_rgba(111,51,236,0.45)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
               <span className="grid h-7 w-7 place-items-center rounded-full bg-white/16 transition duration-300 group-hover:scale-110 group-hover:rotate-12" aria-hidden="true">✦</span>
@@ -278,7 +274,7 @@ export default async function Home() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={aiResultImages[0]}
-                    alt="Przykładowa inspiracja wnętrza w naturalnym, ciepłym stylu"
+                    alt={homeCopy.aiProjectCompass.imageAlt[0]}
                     width="1200"
                     height="900"
                     loading="lazy"
@@ -286,10 +282,10 @@ export default async function Home() {
                   />
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#21162c]/85 via-[#21162c]/18 to-transparent p-4 text-white">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="rounded-full bg-white/18 px-3 py-1 text-xs font-bold backdrop-blur">Inspiracja 01</span>
-                      <span className="grid h-8 w-8 place-items-center rounded-full bg-[#4fd8c7] text-xs font-bold text-[#173d39] shadow-lg" aria-label="Analizowane przez AI">AI</span>
+                      <span className="rounded-full bg-white/18 px-3 py-1 text-xs font-bold backdrop-blur">{homeCopy.aiProjectCompass.inspirationLabels[0]}</span>
+                      <span className="grid h-8 w-8 place-items-center rounded-full bg-[#4fd8c7] text-xs font-bold text-[#173d39] shadow-lg" aria-label={homeCopy.aiProjectCompass.analysedByAi}>AI</span>
                     </div>
-                    <p className="mt-3 text-sm font-semibold">AI rozpoznaje światło, materiały i proporcje.</p>
+                    <p className="mt-3 text-sm font-semibold">{homeCopy.aiProjectCompass.imageSummary}</p>
                   </div>
                 </figure>
 
@@ -298,25 +294,25 @@ export default async function Home() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={aiResultImages[1]}
-                      alt="Druga inspiracja do analizy stylu wnętrza"
+                      alt={homeCopy.aiProjectCompass.imageAlt[1]}
                       width="900"
                       height="650"
                       loading="lazy"
                       className="h-full w-full object-cover"
                     />
-                    <span className="absolute left-3 top-3 rounded-full bg-[#21162c]/70 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur">Inspiracja 02</span>
+                    <span className="absolute left-3 top-3 rounded-full bg-[#21162c]/70 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur">{homeCopy.aiProjectCompass.inspirationLabels[1]}</span>
                   </figure>
                   <figure className="relative min-h-36 overflow-hidden rounded-xl bg-[#e4dacd] sm:min-h-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={aiResultImages[2]}
-                      alt="Trzecia inspiracja do analizy stylu wnętrza"
+                      alt={homeCopy.aiProjectCompass.imageAlt[2]}
                       width="900"
                       height="650"
                       loading="lazy"
                       className="h-full w-full object-cover"
                     />
-                    <span className="absolute left-3 top-3 rounded-full bg-[#21162c]/70 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur">Inspiracja 03</span>
+                    <span className="absolute left-3 top-3 rounded-full bg-[#21162c]/70 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur">{homeCopy.aiProjectCompass.inspirationLabels[2]}</span>
                   </figure>
                 </div>
               </div>
@@ -335,7 +331,7 @@ export default async function Home() {
                     <div className="text-[11px] font-bold uppercase text-muted">{homeCopy.aiProjectCompass.example.items[0][0]}</div>
                     <div className="mt-1 text-sm font-semibold">{homeCopy.aiProjectCompass.example.items[0][1]}</div>
                   </div>
-                  <div className="flex gap-2" aria-label="Przykładowa paleta kolorów">
+                  <div className="flex gap-2" aria-label={homeCopy.aiProjectCompass.paletteAriaLabel}>
                     {['#f3eadb', '#d7c09a', '#b8835b', '#51473f'].map((color) => (
                       <span key={color} className="h-8 w-8 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: color }} />
                     ))}
@@ -346,11 +342,11 @@ export default async function Home() {
                   {homeCopy.aiProjectCompass.example.items.slice(1, 3).map(([title]) => (
                     <span key={title} className="rounded-full bg-primary-soft px-3 py-1.5 text-xs font-bold text-primary">{title}</span>
                   ))}
-                  <span className="rounded-full bg-warm-soft px-3 py-1.5 text-xs font-bold text-warm">Dopasowanie projektantów</span>
+                  <span className="rounded-full bg-warm-soft px-3 py-1.5 text-xs font-bold text-warm">{homeCopy.aiProjectCompass.designerMatching}</span>
                 </div>
 
                 <p className="mt-4 rounded-lg bg-background px-3.5 py-3 text-sm leading-6 text-muted">
-                  <span className="font-bold text-foreground">Wniosek AI: </span>
+                  <span className="font-bold text-foreground">{homeCopy.aiProjectCompass.aiConclusion} </span>
                   {homeCopy.aiProjectCompass.example.summary}
                 </p>
               </div>
@@ -362,7 +358,7 @@ export default async function Home() {
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase text-warm">Najnowsze realizacje</p>
+            <p className="text-sm font-bold uppercase text-warm">{homeCopy.latestProjects.eyebrow}</p>
             <h2 className="mt-2 text-4xl font-bold">{homeCopy.latestProjects.headline}</h2>
           </div>
           <Link href="/designers" className="font-bold text-primary hover:underline">{homeCopy.latestProjects.cta} &#8594;</Link>
@@ -376,7 +372,7 @@ export default async function Home() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={project.image}
-                    alt={`${project.title || "Projekt wnętrza"}${project.category ? ` - ${projectCategoryLabel(project.category)}` : ""}`}
+                    alt={`${project.title || homeCopy.latestProjects.fallbackCategory}${project.category ? ` - ${projectCategoryLabel(project.category)}` : ""}`}
                     width="1000"
                     height="750"
                     loading="lazy"
@@ -384,7 +380,7 @@ export default async function Home() {
                   />
                   <div className="p-5">
                     <div className="text-xs font-bold uppercase text-accent">{projectCategoryLabel(project.category)}</div>
-                    <h3 className="mt-2 text-xl font-bold">{project.title || "Projekt bez tytułu"}</h3>
+                    <h3 className="mt-2 text-xl font-bold">{project.title || homeCopy.latestProjects.fallbackTitle}</h3>
                   </div>
                 </Link>
               </article>

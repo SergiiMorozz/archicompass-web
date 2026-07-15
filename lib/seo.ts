@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { localeMetadata, localeSiteUrl, siteLocale } from "@/lib/site-locale";
 
 export const SITE_NAME = "ArchiCompass";
 export const DEFAULT_SITE_URL = "https://archicompass.pl";
 
 export function siteUrl() {
-  return (process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_SITE_URL).replace(/\/$/, "");
+  return (process.env.NEXT_PUBLIC_SITE_URL || localeSiteUrl(siteLocale) || DEFAULT_SITE_URL).replace(/\/$/, "");
 }
 
 export function absoluteUrl(path = "/") {
@@ -14,7 +15,12 @@ export function absoluteUrl(path = "/") {
 
 export function englishUrl(path = "/") {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return absoluteUrl(normalizedPath === "/" ? "/en" : `/en${normalizedPath}`);
+  return `${localeSiteUrl("en")}${normalizedPath}`;
+}
+
+export function polishUrl(path = "/") {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${localeSiteUrl("pl")}${normalizedPath}`;
 }
 
 export function truncateDescription(value: string, maxLength = 160) {
@@ -42,7 +48,7 @@ export function pageMetadata({
   noIndex = false,
   type = "website",
   alternates,
-  locale = "pl_PL",
+  locale = localeMetadata[siteLocale].openGraph,
 }: PageMetadataOptions): Metadata {
   const canonical = absoluteUrl(path);
   const brandedTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
@@ -58,9 +64,9 @@ export function pageMetadata({
     alternates: alternates || {
       canonical,
       languages: {
-        pl: canonical,
+        pl: polishUrl(path),
         en: englishUrl(path),
-        "x-default": canonical,
+        "x-default": polishUrl(path),
       },
     },
     openGraph: {
