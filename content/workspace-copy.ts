@@ -217,6 +217,93 @@ type StudioConversationCopy = {
   };
 };
 
+type StudioTeamCopy = {
+  eyebrow: string;
+  title: string;
+  intro: string;
+  setupTitle: string;
+  setupBody: string;
+  created: string;
+  updated: string;
+  invited: string;
+  removed: string;
+  invitationAccepted: string;
+  invitationDeclined: string;
+  invitationUpdated: string;
+  pendingInvitations: string;
+  invitedYou: string;
+  defaultStudio: string;
+  rolePrefix: string;
+  decline: string;
+  accept: string;
+  owner: string;
+  manager: string;
+  designer: string;
+  member: string;
+  active: string;
+  pending: string;
+  access: string;
+  publicProfile: string;
+  privateDraft: string;
+  activeMembers: (count: number) => string;
+  openStudioProfile: string;
+  team: string;
+  profile: string;
+  remove: string;
+  inviteTitle: string;
+  inviteBody: string;
+  accountEmail: string;
+  teamRole: string;
+  invite: string;
+  editStudio: string;
+  managerInfo: string;
+  createStudio: string;
+  createIntro: string;
+  publish: string;
+  form: {
+    name: string;
+    headlinePl: string;
+    headlineEn: string;
+    logo: string;
+    banner: string;
+    location: string;
+    specialties: string;
+    specialtiesPlaceholder: string;
+    services: string;
+    bioPl: string;
+    bioEn: string;
+    website: string;
+    publicEmail: string;
+    phone: string;
+    experience: string;
+    pricing: string;
+    availability: string;
+    priceFrom: string;
+    priceTo: string;
+    minimumBudget: string;
+    workModes: string;
+    termsPl: string;
+    termsEn: string;
+    googleTitle: string;
+    googleInput: string;
+    googleVerified: string;
+    googleVerifiedShort: string;
+    save: string;
+  };
+  errors: {
+    invalidMedia: (kind: string) => string;
+    nameShort: string;
+    google: string;
+    designerOnly: string;
+    create: string;
+    missingStudio: string;
+    managerOnly: string;
+    inviteEmail: string;
+    missingInvitation: string;
+    missingMember: string;
+  };
+};
+
 type WorkspaceCopy = {
   account: AccountCopy;
   clientOverview: ClientOverviewCopy;
@@ -383,6 +470,7 @@ type WorkspaceCopy = {
   adminTeam: AdminTeamCopy;
   adminActivity: AdminActivityCopy;
   studioConversation: StudioConversationCopy;
+  studioTeam: StudioTeamCopy;
   adminOverview: {
     dateLocale: string;
     accountLabels: { professional: string; client: string; noProfile: string };
@@ -787,6 +875,56 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
         unavailable: "Ta rozmowa nie jest dostępna.",
         invalidStatus: "Wybierz prawidłowy status zapytania.",
         statusPermission: "Tylko projektant lub zespół pracowni może zmienić status tego zapytania.",
+      },
+    },
+    studioTeam: {
+      eyebrow: "Profil zespołowy",
+      title: "Pracownia i zespół",
+      intro: "Pracownia ma własny profil publiczny i wspólną skrzynkę zapytań. Aktywni projektanci zachowują osobne profile, a ich projekty mogą automatycznie wzmacniać portfolio pracowni.",
+      setupTitle: "Krok 2 z 2: utwórz pracownię",
+      setupBody: "Właściciel został już skonfigurowany. Dodaj teraz wspólny profil pracowni, a po zapisaniu zaprosisz do niej pozostałych projektantów.",
+      created: "Pracownia została utworzona. Możesz zaprosić projektantów.",
+      updated: "Profil pracowni został zaktualizowany.",
+      invited: "Zaproszenie zostało wysłane w ArchiCompass.",
+      removed: "Członek zespołu został usunięty.",
+      invitationAccepted: "Zaproszenie zostało przyjęte.",
+      invitationDeclined: "Zaproszenie zostało odrzucone.",
+      invitationUpdated: "Status zaproszenia został zaktualizowany.",
+      pendingInvitations: "Oczekujące zaproszenia",
+      invitedYou: "Pracownia zaprosiła Cię do zespołu",
+      defaultStudio: "Pracownia projektowa",
+      rolePrefix: "Rola",
+      decline: "Odrzuć",
+      accept: "Przyjmij",
+      owner: "właściciel",
+      manager: "menedżer",
+      designer: "projektant",
+      member: "członek",
+      active: "aktywny",
+      pending: "oczekuje",
+      access: "dostęp",
+      publicProfile: "Profil publiczny",
+      privateDraft: "Szkic prywatny",
+      activeMembers: (count) => `${count} aktywnych członków`,
+      openStudioProfile: "Otwórz profil pracowni",
+      team: "Zespół",
+      profile: "Profil",
+      remove: "Usuń",
+      inviteTitle: "Zaproś istniejącego projektanta",
+      inviteBody: "Ta osoba musi mieć już konto projektanta w ArchiCompass. Sama zdecyduje, czy przyjąć zaproszenie do pracowni.",
+      accountEmail: "E-mail konta",
+      teamRole: "Rola w zespole",
+      invite: "Zaproś",
+      editStudio: "Edytuj profil pracowni",
+      managerInfo: "Menedżerowie pracowni edytują wspólny profil i zapraszają osoby. Każdy aktywny członek może otwierać zapytania pracowni i odpowiadać ze wspólnej skrzynki zespołu.",
+      createStudio: "Utwórz pracownię projektową",
+      createIntro: "Zacznij od tożsamości pracowni. Po utworzeniu zaprosisz projektantów po adresie e-mail ich konta ArchiCompass.",
+      publish: "Opublikuj od razu",
+      form: {
+        name: "Nazwa pracowni", headlinePl: "Nagłówek profilu po polsku", headlineEn: "Nagłówek profilu po angielsku", logo: "Logo pracowni", banner: "Baner pracowni", location: "Lokalizacja", specialties: "Specjalizacje", specialtiesPlaceholder: "mieszkania, hospitality, remonty", services: "Dostępne usługi", bioPl: "Opis pracowni po polsku", bioEn: "Opis pracowni po angielsku", website: "Strona internetowa", publicEmail: "Publiczny e-mail", phone: "Telefon", experience: "Lata doświadczenia", pricing: "Model rozliczenia", availability: "Dostępność", priceFrom: "Cena od, PLN w wybranym modelu", priceTo: "Cena do, PLN w wybranym modelu", minimumBudget: "Minimalny budżet inwestycji, PLN", workModes: "Format współpracy", termsPl: "Warunki współpracy po polsku", termsEn: "Warunki współpracy po angielsku", googleTitle: "Ocena Google Business", googleInput: "Link Google Maps / Google Business albo Place ID", googleVerified: "Ocena i liczba opinii są weryfikowane przez Google i nie można wpisać ich ręcznie.", googleVerifiedShort: "Ocena i liczba opinii są weryfikowane przez Google.", save: "Zapisz pracownię",
+      },
+      errors: {
+        invalidMedia: (kind) => `${kind} musi być plikiem JPEG, PNG lub WebP mniejszym niż 5 MB.`, nameShort: "Nazwa pracowni musi mieć co najmniej dwa znaki.", google: "Google nie mógł zweryfikować tego profilu firmy.", designerOnly: "Tylko konto projektanta może utworzyć pracownię.", create: "Nie udało się utworzyć pracowni.", missingStudio: "Nie znaleziono pracowni.", managerOnly: "Tylko menedżer pracowni może edytować ten profil.", inviteEmail: "Wpisz e-mail projektanta w ArchiCompass.", missingInvitation: "Nie znaleziono zaproszenia do pracowni.", missingMember: "Nie znaleziono członka zespołu.",
       },
     },
     adminNav: {
@@ -1200,6 +1338,56 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
         unavailable: "This conversation is not available.",
         invalidStatus: "Choose a valid enquiry status.",
         statusPermission: "Only the designer or studio team can change this enquiry status.",
+      },
+    },
+    studioTeam: {
+      eyebrow: "Team profile",
+      title: "Studio and team",
+      intro: "A studio has its own public profile and shared enquiry inbox. Active designers keep individual profiles, while their projects can automatically strengthen the studio portfolio.",
+      setupTitle: "Step 2 of 2: create a studio",
+      setupBody: "The owner is already set up. Add the shared studio profile now, then invite the remaining designers after saving.",
+      created: "Studio created. You can now invite designers.",
+      updated: "Studio profile updated.",
+      invited: "Invitation sent in ArchiCompass.",
+      removed: "Team member removed.",
+      invitationAccepted: "Invitation accepted.",
+      invitationDeclined: "Invitation declined.",
+      invitationUpdated: "Invitation status updated.",
+      pendingInvitations: "Pending invitations",
+      invitedYou: "A studio invited you to its team",
+      defaultStudio: "Design studio",
+      rolePrefix: "Role",
+      decline: "Decline",
+      accept: "Accept",
+      owner: "owner",
+      manager: "manager",
+      designer: "designer",
+      member: "member",
+      active: "active",
+      pending: "pending",
+      access: "access",
+      publicProfile: "Public profile",
+      privateDraft: "Private draft",
+      activeMembers: (count) => `${count} active members`,
+      openStudioProfile: "Open studio profile",
+      team: "Team",
+      profile: "Profile",
+      remove: "Remove",
+      inviteTitle: "Invite an existing designer",
+      inviteBody: "This person must already have a designer account in ArchiCompass. They decide whether to accept the studio invitation.",
+      accountEmail: "Account email",
+      teamRole: "Team role",
+      invite: "Invite",
+      editStudio: "Edit studio profile",
+      managerInfo: "Studio managers edit the shared profile and invite people. Every active member can open studio enquiries and reply from the shared team inbox.",
+      createStudio: "Create a design studio",
+      createIntro: "Start with the studio identity. After creating it, invite designers using the email address of their ArchiCompass account.",
+      publish: "Publish now",
+      form: {
+        name: "Studio name", headlinePl: "Polish profile headline", headlineEn: "English profile headline", logo: "Studio logo", banner: "Studio banner", location: "Location", specialties: "Specialties", specialtiesPlaceholder: "apartments, hospitality, renovations", services: "Available services", bioPl: "Polish studio description", bioEn: "English studio description", website: "Website", publicEmail: "Public email", phone: "Phone", experience: "Years of experience", pricing: "Pricing model", availability: "Availability", priceFrom: "Price from, PLN in the selected model", priceTo: "Price to, PLN in the selected model", minimumBudget: "Minimum project budget, PLN", workModes: "Ways of working", termsPl: "Polish cooperation terms", termsEn: "English cooperation terms", googleTitle: "Google Business rating", googleInput: "Google Maps / Google Business link or Place ID", googleVerified: "The rating and review count are verified by Google and cannot be entered manually.", googleVerifiedShort: "The rating and review count are verified by Google.", save: "Save studio",
+      },
+      errors: {
+        invalidMedia: (kind) => `${kind} must be a JPEG, PNG, or WebP file smaller than 5 MB.`, nameShort: "Studio name must contain at least two characters.", google: "Google could not verify this business profile.", designerOnly: "Only a designer account can create a studio.", create: "Could not create the studio.", missingStudio: "Studio not found.", managerOnly: "Only a studio manager can edit this profile.", inviteEmail: "Enter the email of a designer in ArchiCompass.", missingInvitation: "Studio invitation not found.", missingMember: "Team member not found.",
       },
     },
     adminNav: {
