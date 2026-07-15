@@ -19,6 +19,9 @@ const workspaceSourceFiles = [
   "app/client/messages/page.tsx",
   "app/client/favorites/page.tsx",
   "app/client/briefs/page.tsx",
+  "app/studio/page.tsx",
+  "app/studio/inbox/page.tsx",
+  "app/studio/analytics/page.tsx",
 ];
 
 const failures = sharedSourceFiles.flatMap((file) => {

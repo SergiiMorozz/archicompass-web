@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { countLabel } from "@/lib/count-label";
 import { getStudioMemberships, inquiryRecipientFilter } from "@/lib/studios";
 
 export const revalidate = 0;
@@ -22,11 +22,12 @@ function dayKey(value: Date) {
   ].join("-");
 }
 
-function shortDay(value: Date) {
-  return new Intl.DateTimeFormat("pl-PL", { day: "2-digit", month: "short" }).format(value);
+function shortDay(value: Date, locale: string) {
+  return new Intl.DateTimeFormat(locale, { day: "2-digit", month: "short" }).format(value);
 }
 
 export default async function StudioAnalyticsPage() {
+  const copy = getWorkspaceCopy().studioAnalytics;
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
@@ -118,11 +119,10 @@ export default async function StudioAnalyticsPage() {
     <main>
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="text-sm font-semibold text-primary">Skuteczność profilu</div>
-          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Statystyki</h1>
+          <div className="text-sm font-semibold text-primary">{copy.eyebrow}</div>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">{copy.title}</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-            Zobacz rzeczywiste wizyty profilu, zapytania z AI Project Compass, zaakceptowane
-            dopasowania i zmierzony czas odpowiedzi.
+            {copy.intro}
           </p>
         </div>
       </section>
@@ -130,10 +130,10 @@ export default async function StudioAnalyticsPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            ["Wyświetlenia", String(views30), "Ostatnie 30 dni"],
-            ["Zapytania", String(inquiries30), "Ostatnie 30 dni"],
-            ["Zaakceptowane", `${acceptance}%`, `${accepted} zaakceptowanych`],
-            ["Pierwsza odpowiedź", averageResponse === null ? "Brak danych" : averageResponse < 24 ? `${Math.round(averageResponse)} godz.` : `${(averageResponse / 24).toFixed(1)} dni`, "Na podstawie odpowiedzi w platformie"],
+            [copy.stats[0], String(views30), copy.last30Days],
+            [copy.stats[1], String(inquiries30), copy.last30Days],
+            [copy.stats[2], `${acceptance}%`, copy.acceptedDetail(accepted)],
+            [copy.stats[3], averageResponse === null ? copy.noData : averageResponse < 24 ? `${Math.round(averageResponse)} ${copy.hours}` : `${(averageResponse / 24).toFixed(1)} ${copy.days}`, copy.responseDetail],
           ].map(([label, value, detail]) => (
             <article key={label} className="rounded-lg border border-line bg-card p-5 shadow-sm">
               <div className="text-sm font-semibold text-muted">{label}</div>
@@ -147,10 +147,10 @@ export default async function StudioAnalyticsPage() {
           <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-sm font-semibold text-primary">Ostatnie 14 dni</div>
-                <h2 className="mt-1 text-3xl font-bold">Wyświetlenia profilu</h2>
+                <div className="text-sm font-semibold text-primary">{copy.last14Days}</div>
+                <h2 className="mt-1 text-3xl font-bold">{copy.profileViews}</h2>
               </div>
-              <div className="text-sm text-muted">Jedna sesja przeglądarki na profil dziennie</div>
+              <div className="text-sm text-muted">{copy.dailySessionDetail}</div>
             </div>
 
             <div className="mt-8 grid grid-cols-14 items-end gap-2" style={{ gridTemplateColumns: `repeat(${daily.length}, minmax(0, 1fr))` }}>
@@ -160,10 +160,10 @@ export default async function StudioAnalyticsPage() {
                     <div
                       className="w-full rounded-t-md bg-primary"
                       style={{ height: `${Math.max(day.views ? 8 : 2, (day.views / maxDaily) * 100)}%` }}
-                      title={`${day.views} wyświetleń, ${day.inquiries} zapytań`}
+                      title={copy.chartTitle(day.views, day.inquiries)}
                     />
                   </div>
-                  <div className="text-[10px] text-muted">{shortDay(day.date)}</div>
+                  <div className="text-[10px] text-muted">{shortDay(day.date, copy.dateLocale)}</div>
                 </div>
               ))}
             </div>
@@ -171,13 +171,13 @@ export default async function StudioAnalyticsPage() {
 
           <aside className="grid h-fit gap-5">
             <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-              <div className="text-sm font-semibold text-primary">Lejek z ostatnich 90 dni</div>
-              <h2 className="mt-1 text-2xl font-bold">Od wyświetlenia do współpracy</h2>
+              <div className="text-sm font-semibold text-primary">{copy.funnelEyebrow}</div>
+              <h2 className="mt-1 text-2xl font-bold">{copy.funnelTitle}</h2>
               <div className="mt-6 grid gap-4">
                 {[
-                  ["Wyświetlenia profilu", views.length, 100],
-                  ["Zapytania", inquiries.length, views.length ? Math.min(100, (inquiries.length / views.length) * 100) : 0],
-                  ["Zaakceptowane", accepted, inquiries.length ? (accepted / inquiries.length) * 100 : 0],
+                  [copy.profileViews, views.length, 100],
+                  [copy.stats[1], inquiries.length, views.length ? Math.min(100, (inquiries.length / views.length) * 100) : 0],
+                  [copy.stats[2], accepted, inquiries.length ? (accepted / inquiries.length) * 100 : 0],
                 ].map(([label, value, width]) => (
                   <div key={String(label)}>
                     <div className="flex justify-between gap-4 text-sm">
@@ -193,17 +193,17 @@ export default async function StudioAnalyticsPage() {
             </section>
 
             <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-              <div className="text-sm font-semibold text-primary">Zawartość portfolio</div>
+              <div className="text-sm font-semibold text-primary">{copy.portfolioEyebrow}</div>
               <div className="mt-2 text-4xl font-bold">{projects.length}</div>
               <p className="mt-2 text-sm leading-6 text-muted">
-                {countLabel(projects.length, "Publiczny projekt", "Publiczne projekty")} dostępne dla klientów przed wysłaniem briefu.
+                {copy.projectCount(projects.length)}
               </p>
               <div className="mt-5 grid gap-3">
                 <Link href="/account/projects" className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white">
-                  Zarządzaj projektami
+                  {copy.manageProjectsCta}
                 </Link>
                 <Link href={`/designers/${user.id}`} className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">
-                  Otwórz profil publiczny
+                  {copy.publicProfileCta}
                 </Link>
               </div>
             </section>

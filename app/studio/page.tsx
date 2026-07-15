@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 import { briefSnapshotLabel } from "@/lib/brief-labels";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getStudioMemberships, inquiryRecipientFilter } from "@/lib/studios";
@@ -22,8 +23,8 @@ type ClientProfile = {
   email: string | null;
 };
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("pl-PL", {
+function formatDate(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -41,15 +42,8 @@ function statusClass(status: string) {
   return "bg-primary-soft text-primary";
 }
 
-function statusLabel(status: string) {
-  if (status === "accepted") return "Zaakceptowane";
-  if (status === "declined") return "Odrzucone";
-  if (status === "reviewing") return "W trakcie";
-  if (status === "sent") return "Nowe";
-  return status;
-}
-
 export default async function StudioOverviewPage() {
+  const copy = getWorkspaceCopy().studioOverview;
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
@@ -109,10 +103,10 @@ export default async function StudioOverviewPage() {
   const readiness = profileReadinessScore(profile, true);
 
   const stats = [
-    ["Wyświetlenia profilu", String(views.length), "Ostatnie 30 dni"],
-    ["Nowe zapytania", String(newRequests), "Oczekują na sprawdzenie"],
-    ["Nieprzeczytane wiadomości", String(unreadMessages ?? 0), "We wszystkich aktywnych zapytaniach"],
-    ["Zaakceptowane", `${conversion}%`, `${accepted} z ${inquiries.length || 0} zapytań`],
+    [copy.stats[0], String(views.length), copy.details[0]],
+    [copy.stats[1], String(newRequests), copy.details[1]],
+    [copy.stats[2], String(unreadMessages ?? 0), copy.details[2]],
+    [copy.stats[3], `${conversion}%`, copy.details[3](accepted, inquiries.length)],
   ];
 
   return (
@@ -120,22 +114,21 @@ export default async function StudioOverviewPage() {
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="text-sm font-semibold text-primary">Panel profesjonalisty</div>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Pulpit projektanta</h1>
+            <div className="text-sm font-semibold text-primary">{copy.eyebrow}</div>
+            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">{copy.title}</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-              Przeglądaj dopasowane briefy, odpowiadaj klientom, rozwijaj portfolio i
-              obserwuj skuteczność profilu.
+              {copy.intro}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link href="/studio/inbox" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-              Otwórz zapytania
+              {copy.inboxCta}
             </Link>
               <Link href="/account/projects" className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
-                Dodaj projekt
+                {copy.addProjectCta}
               </Link>
               <Link href="/studio/team" className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
-                Pracownia i zespół
+                {copy.studioTeamCta}
               </Link>
           </div>
         </div>
@@ -156,17 +149,17 @@ export default async function StudioOverviewPage() {
           <section>
             <div className="flex items-end justify-between gap-4">
               <div>
-                <div className="text-sm font-semibold text-primary">Najnowsze możliwości</div>
-                <h2 className="mt-1 text-3xl font-bold">Otrzymane briefy</h2>
+                <div className="text-sm font-semibold text-primary">{copy.opportunitiesEyebrow}</div>
+                <h2 className="mt-1 text-3xl font-bold">{copy.receivedBriefs}</h2>
               </div>
               <Link href="/studio/inbox" className="text-sm font-semibold text-primary hover:underline">
-                Zobacz wszystkie
+                {copy.viewAll}
               </Link>
             </div>
 
             {inquiryResult.error ? (
               <div className="mt-5 rounded-lg border border-red-200 bg-red-50 p-5 text-sm text-red-700">
-                Nie udało się wczytać zapytań: {inquiryResult.error.message}
+                {copy.loadError}: {inquiryResult.error.message}
               </div>
             ) : inquiries.length ? (
               <div className="mt-5 grid gap-4">
@@ -181,19 +174,19 @@ export default async function StudioOverviewPage() {
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <div className="text-sm font-semibold text-primary">
-                            {client?.full_name || client?.email || "Nowy klient"}
+                            {client?.full_name || client?.email || copy.newClient}
                           </div>
                           <h3 className="mt-1 text-xl font-bold">{inquiry.subject}</h3>
                         </div>
                         <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${statusClass(inquiry.status)}`}>
-                          {statusLabel(inquiry.status)}
+                          {copy.statuses[inquiry.status] || inquiry.status}
                         </span>
                       </div>
                       <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted">
                         <span>{snapshotValue(inquiry.brief_snapshot, "project_type")}</span>
                         <span>{snapshotValue(inquiry.brief_snapshot, "style_direction")}</span>
                         <span>{snapshotValue(inquiry.brief_snapshot, "location")}</span>
-                        <span>{formatDate(inquiry.created_at)}</span>
+                        <span>{formatDate(inquiry.created_at, copy.dateLocale)}</span>
                       </div>
                     </Link>
                   );
@@ -201,36 +194,35 @@ export default async function StudioOverviewPage() {
               </div>
             ) : (
               <div className="mt-5 rounded-lg border border-dashed border-line bg-card p-8">
-                <h3 className="text-xl font-bold">Nie masz jeszcze nowych briefów</h3>
+                <h3 className="text-xl font-bold">{copy.emptyTitle}</h3>
                 <p className="mt-2 max-w-xl leading-7 text-muted">
-                  Uzupełnij profil publiczny i dodaj mocne projekty portfolio. Nowe
-                  zapytania klientów pojawią się tutaj automatycznie.
+                  {copy.emptyBody}
                 </p>
                 <Link href={`/designers/${user.id}`} className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
-                  Zobacz profil publiczny
+                  {copy.publicProfileCta}
                 </Link>
               </div>
             )}
           </section>
 
           <aside className="h-fit rounded-lg border border-line bg-card p-6 shadow-sm lg:sticky lg:top-40">
-            <div className="text-sm font-semibold text-primary">Kompletność profilu</div>
+            <div className="text-sm font-semibold text-primary">{copy.readinessEyebrow}</div>
             <div className="mt-2 text-4xl font-bold">{readiness}%</div>
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-primary-soft">
               <div className="h-full rounded-full bg-primary" style={{ width: `${readiness}%` }} />
             </div>
             <p className="mt-4 text-sm leading-6 text-muted">
-              Kompletny profil daje klientom więcej informacji przed wysłaniem briefu.
+              {copy.readinessBody}
             </p>
             <div className="mt-6 grid gap-3">
               <Link href="/account/profile" className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white">
-                Edytuj profil
+                {copy.editProfileCta}
               </Link>
               <Link href="/account/projects" className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">
-                Zarządzaj projektami ({projects.length})
+                {copy.manageProjectsCta(projects.length)}
               </Link>
               <Link href="/studio/analytics" className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary">
-                Otwórz statystyki
+                {copy.analyticsCta}
               </Link>
             </div>
           </aside>

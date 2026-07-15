@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import ConversationAutoRefresh from "@/components/ConversationAutoRefresh";
 import UnreadPageTitle from "@/components/UnreadPageTitle";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 import { briefSnapshotLabel } from "@/lib/brief-labels";
 import { professionalUnreadByInquiry, unreadTotal } from "@/lib/inquiry-unread";
 import { getStudioMemberships, inquiryRecipientFilter } from "@/lib/studios";
@@ -46,22 +47,13 @@ function statusClass(status: string) {
   return "bg-primary-soft text-primary";
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("pl-PL", {
+function formatDate(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
-}
-
-function statusLabel(status: string) {
-  if (status === "all") return "Wszystkie";
-  if (status === "accepted") return "Zaakceptowane";
-  if (status === "declined") return "Odrzucone";
-  if (status === "reviewing") return "W trakcie";
-  if (status === "sent") return "Nowe";
-  return status;
 }
 
 function snapshotValue(snapshot: Record<string, unknown> | null, key: string) {
@@ -74,6 +66,7 @@ export default async function StudioInboxPage({
   searchParams?: Promise<{ status?: string; view?: string }>;
 }) {
   const sp = (await searchParams) ?? {};
+  const copy = getWorkspaceCopy().studioInbox;
   const selectedView = sp.view === "unread" ? "unread" : "status";
   const selectedStatus = statusFilters.includes(sp.status as (typeof statusFilters)[number])
     ? (sp.status as (typeof statusFilters)[number])
@@ -140,14 +133,13 @@ export default async function StudioInboxPage({
 
   return (
     <main>
-      <UnreadPageTitle count={totalUnread} label="Zapytania projektowe" />
+      <UnreadPageTitle count={totalUnread} label={copy.pageTitle} />
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="text-sm font-semibold text-primary">Komunikacja z klientami</div>
-          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">Otrzymane briefy</h1>
+          <div className="text-sm font-semibold text-primary">{copy.eyebrow}</div>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">{copy.title}</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-            Oceniaj dopasowanie projektu, aktualizuj status i prowadź każdą rozmowę
-            bezpośrednio przy oryginalnym briefie klienta.
+            {copy.intro}
           </p>
         </div>
       </section>
@@ -164,7 +156,7 @@ export default async function StudioInboxPage({
                 : "border border-line bg-card text-muted hover:border-primary hover:text-primary",
             ].join(" ")}
           >
-            Nieprzeczytane {totalUnread}
+            {copy.unread} {totalUnread}
           </Link>
           {statusFilters.map((status) => {
             const count =
@@ -182,7 +174,7 @@ export default async function StudioInboxPage({
                     : "border border-line bg-card text-muted hover:border-primary hover:text-primary",
                 ].join(" ")}
               >
-                {statusLabel(status)} {count}
+                {copy.statuses[status] || status} {count}
               </Link>
             );
           })}
@@ -192,7 +184,7 @@ export default async function StudioInboxPage({
 
         {error ? (
           <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-5 text-red-700">
-            Nie udało się wczytać zapytań: {error.message}
+            {copy.loadError}: {error.message}
           </div>
         ) : visibleInquiries.length ? (
           <div className="mt-6 grid gap-4">
@@ -206,22 +198,22 @@ export default async function StudioInboxPage({
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusClass(inquiry.status)}`}>
-                          {statusLabel(inquiry.status)}
+                          {copy.statuses[inquiry.status] || inquiry.status}
                         </span>
                         {unread ? (
                           <span className="rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-white">
-                            {unread} nowe
+                            {unread} {copy.newMessages}
                           </span>
                         ) : null}
                         <span className="rounded-full border border-line bg-background px-3 py-1 text-xs font-semibold text-muted">
                           {inquiry.studio_id
-                            ? studiosById.get(inquiry.studio_id)?.name || "Skrzynka pracowni"
-                            : "Profil osobisty"}
+                            ? studiosById.get(inquiry.studio_id)?.name || copy.studioInbox
+                            : copy.personalProfile}
                         </span>
                       </div>
                       <h2 className="mt-3 text-2xl font-bold">{inquiry.subject}</h2>
                       <div className="mt-2 text-sm text-muted">
-                        {client?.full_name || client?.email || "Nowy klient"}
+                        {client?.full_name || client?.email || copy.newClient}
                         {client?.location ? ` · ${client.location}` : ""}
                       </div>
 
@@ -237,15 +229,15 @@ export default async function StudioInboxPage({
                         <div className="font-semibold text-foreground">
                           {latest
                             ? latest.sender_id === inquiry.client_id
-                              ? client?.full_name || client?.email || "Klient"
-                              : "Ty / zespół pracowni"
-                            : "Wiadomość klienta"}
+                              ? client?.full_name || client?.email || copy.client
+                              : copy.youAndStudio
+                            : copy.clientMessage}
                         </div>
                         <p className="mt-1 line-clamp-2">
-                          {latest?.body || inquiry.message || "Otwórz brief, aby zobaczyć pełny kontekst projektu."}
+                          {latest?.body || inquiry.message || copy.openToSeeBrief}
                         </p>
                         <div className="mt-2 text-xs">
-                          {formatDate(latest?.created_at || inquiry.created_at)}
+                          {formatDate(latest?.created_at || inquiry.created_at, copy.dateLocale)}
                         </div>
                       </div>
                     </div>
@@ -254,7 +246,7 @@ export default async function StudioInboxPage({
                       href={`/studio/inbox/${inquiry.id}`}
                       className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white"
                     >
-                      {unread ? "Odpowiedz klientowi" : "Otwórz rozmowę"}
+                      {unread ? copy.replyCta : copy.openConversationCta}
                     </Link>
                   </div>
                 </article>
@@ -264,15 +256,15 @@ export default async function StudioInboxPage({
         ) : (
           <div className="mt-6 rounded-lg border border-dashed border-line bg-card p-8">
             <h2 className="text-2xl font-bold">
-              {selectedView === "unread" ? "Wszystko przeczytane" : "Brak zapytań w tym widoku"}
+              {selectedView === "unread" ? copy.allReadTitle : copy.noRequestsTitle}
             </h2>
             <p className="mt-2 max-w-xl leading-7 text-muted">
               {selectedView === "unread"
-                ? "Nowe odpowiedzi klientów pojawią się tutaj oraz w liczniku zapytań."
-                : "Nowe briefy z AI Project Compass pojawią się tutaj razem z inspiracjami, zakresem, budżetem i wiadomością klienta."}
+                ? copy.allReadBody
+                : copy.noRequestsBody}
             </p>
             <Link href={selectedView === "unread" ? "/studio/inbox" : "/account/profile"} className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
-              {selectedView === "unread" ? "Zobacz wszystkie zapytania" : "Ulepsz profil publiczny"}
+              {selectedView === "unread" ? copy.viewAllCta : copy.improveProfileCta}
             </Link>
           </div>
         )}

@@ -105,6 +105,80 @@ type WorkspaceCopy = {
     discoverInspiration: string;
     articlesEmpty: string;
   };
+  studioOverview: {
+    dateLocale: string;
+    statuses: Record<string, string>;
+    stats: [string, string, string, string];
+    details: [string, string, string, (accepted: number, total: number) => string];
+    eyebrow: string;
+    title: string;
+    intro: string;
+    inboxCta: string;
+    addProjectCta: string;
+    studioTeamCta: string;
+    opportunitiesEyebrow: string;
+    receivedBriefs: string;
+    viewAll: string;
+    loadError: string;
+    newClient: string;
+    emptyTitle: string;
+    emptyBody: string;
+    publicProfileCta: string;
+    readinessEyebrow: string;
+    readinessBody: string;
+    editProfileCta: string;
+    manageProjectsCta: (count: number) => string;
+    analyticsCta: string;
+  };
+  studioInbox: {
+    dateLocale: string;
+    statuses: Record<string, string>;
+    pageTitle: string;
+    eyebrow: string;
+    title: string;
+    intro: string;
+    unread: string;
+    loadError: string;
+    newMessages: string;
+    studioInbox: string;
+    personalProfile: string;
+    newClient: string;
+    client: string;
+    youAndStudio: string;
+    clientMessage: string;
+    openToSeeBrief: string;
+    replyCta: string;
+    openConversationCta: string;
+    allReadTitle: string;
+    noRequestsTitle: string;
+    allReadBody: string;
+    noRequestsBody: string;
+    viewAllCta: string;
+    improveProfileCta: string;
+  };
+  studioAnalytics: {
+    dateLocale: string;
+    eyebrow: string;
+    title: string;
+    intro: string;
+    stats: [string, string, string, string];
+    last30Days: string;
+    acceptedDetail: (count: number) => string;
+    noData: string;
+    hours: string;
+    days: string;
+    responseDetail: string;
+    last14Days: string;
+    profileViews: string;
+    dailySessionDetail: string;
+    chartTitle: (views: number, inquiries: number) => string;
+    funnelEyebrow: string;
+    funnelTitle: string;
+    portfolioEyebrow: string;
+    projectCount: (count: number) => string;
+    manageProjectsCta: string;
+    publicProfileCta: string;
+  };
 };
 
 const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
@@ -211,6 +285,80 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       discoverInspiration: "Odkrywaj Inspiration Hub",
       articlesEmpty: "Zapisuj artykuły z Inspiration Hub, aby zachować tutaj przydatne pomysły.",
     },
+    studioOverview: {
+      dateLocale: "pl-PL",
+      statuses: { accepted: "Zaakceptowane", declined: "Odrzucone", reviewing: "W trakcie", sent: "Nowe" },
+      stats: ["Wyświetlenia profilu", "Nowe zapytania", "Nieprzeczytane wiadomości", "Zaakceptowane"],
+      details: ["Ostatnie 30 dni", "Oczekują na sprawdzenie", "We wszystkich aktywnych zapytaniach", (accepted, total) => `${accepted} z ${total} zapytań`],
+      eyebrow: "Panel profesjonalisty",
+      title: "Pulpit projektanta",
+      intro: "Przeglądaj dopasowane briefy, odpowiadaj klientom, rozwijaj portfolio i obserwuj skuteczność profilu.",
+      inboxCta: "Otwórz zapytania",
+      addProjectCta: "Dodaj projekt",
+      studioTeamCta: "Pracownia i zespół",
+      opportunitiesEyebrow: "Najnowsze możliwości",
+      receivedBriefs: "Otrzymane briefy",
+      viewAll: "Zobacz wszystkie",
+      loadError: "Nie udało się wczytać zapytań",
+      newClient: "Nowy klient",
+      emptyTitle: "Nie masz jeszcze nowych briefów",
+      emptyBody: "Uzupełnij profil publiczny i dodaj mocne projekty portfolio. Nowe zapytania klientów pojawią się tutaj automatycznie.",
+      publicProfileCta: "Zobacz profil publiczny",
+      readinessEyebrow: "Kompletność profilu",
+      readinessBody: "Kompletny profil daje klientom więcej informacji przed wysłaniem briefu.",
+      editProfileCta: "Edytuj profil",
+      manageProjectsCta: (count) => `Zarządzaj projektami (${count})`,
+      analyticsCta: "Otwórz statystyki",
+    },
+    studioInbox: {
+      dateLocale: "pl-PL",
+      statuses: { all: "Wszystkie", accepted: "Zaakceptowane", declined: "Odrzucone", reviewing: "W trakcie", sent: "Nowe" },
+      pageTitle: "Zapytania projektowe",
+      eyebrow: "Komunikacja z klientami",
+      title: "Otrzymane briefy",
+      intro: "Oceniaj dopasowanie projektu, aktualizuj status i prowadź każdą rozmowę bezpośrednio przy oryginalnym briefie klienta.",
+      unread: "Nieprzeczytane",
+      loadError: "Nie udało się wczytać zapytań",
+      newMessages: "nowe",
+      studioInbox: "Skrzynka pracowni",
+      personalProfile: "Profil osobisty",
+      newClient: "Nowy klient",
+      client: "Klient",
+      youAndStudio: "Ty / zespół pracowni",
+      clientMessage: "Wiadomość klienta",
+      openToSeeBrief: "Otwórz brief, aby zobaczyć pełny kontekst projektu.",
+      replyCta: "Odpowiedz klientowi",
+      openConversationCta: "Otwórz rozmowę",
+      allReadTitle: "Wszystko przeczytane",
+      noRequestsTitle: "Brak zapytań w tym widoku",
+      allReadBody: "Nowe odpowiedzi klientów pojawią się tutaj oraz w liczniku zapytań.",
+      noRequestsBody: "Nowe briefy z AI Project Compass pojawią się tutaj razem z inspiracjami, zakresem, budżetem i wiadomością klienta.",
+      viewAllCta: "Zobacz wszystkie zapytania",
+      improveProfileCta: "Ulepsz profil publiczny",
+    },
+    studioAnalytics: {
+      dateLocale: "pl-PL",
+      eyebrow: "Skuteczność profilu",
+      title: "Statystyki",
+      intro: "Zobacz rzeczywiste wizyty profilu, zapytania z AI Project Compass, zaakceptowane dopasowania i zmierzony czas odpowiedzi.",
+      stats: ["Wyświetlenia", "Zapytania", "Zaakceptowane", "Pierwsza odpowiedź"],
+      last30Days: "Ostatnie 30 dni",
+      acceptedDetail: (count) => `${count} zaakceptowanych`,
+      noData: "Brak danych",
+      hours: "godz.",
+      days: "dni",
+      responseDetail: "Na podstawie odpowiedzi w platformie",
+      last14Days: "Ostatnie 14 dni",
+      profileViews: "Wyświetlenia profilu",
+      dailySessionDetail: "Jedna sesja przeglądarki na profil dziennie",
+      chartTitle: (views, inquiries) => `${views} wyświetleń, ${inquiries} zapytań`,
+      funnelEyebrow: "Lejek z ostatnich 90 dni",
+      funnelTitle: "Od wyświetlenia do współpracy",
+      portfolioEyebrow: "Zawartość portfolio",
+      projectCount: (count) => `${count} ${count === 1 ? "publiczny projekt" : "publiczne projekty"} dostępne dla klientów przed wysłaniem briefu.`,
+      manageProjectsCta: "Zarządzaj projektami",
+      publicProfileCta: "Otwórz profil publiczny",
+    },
   },
   en: {
     clientOverview: {
@@ -314,6 +462,80 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       inspirationTitle: "Saved inspiration",
       discoverInspiration: "Explore Inspiration Hub",
       articlesEmpty: "Save articles from Inspiration Hub to keep useful ideas here.",
+    },
+    studioOverview: {
+      dateLocale: "en-GB",
+      statuses: { accepted: "Accepted", declined: "Declined", reviewing: "In review", sent: "New" },
+      stats: ["Profile views", "New enquiries", "Unread messages", "Accepted"],
+      details: ["Last 30 days", "Waiting to be reviewed", "Across all active enquiries", (accepted, total) => `${accepted} of ${total} enquiries`],
+      eyebrow: "Professional dashboard",
+      title: "Designer dashboard",
+      intro: "Review relevant briefs, respond to clients, develop your portfolio, and follow your profile performance.",
+      inboxCta: "Open enquiries",
+      addProjectCta: "Add a project",
+      studioTeamCta: "Studio and team",
+      opportunitiesEyebrow: "Latest opportunities",
+      receivedBriefs: "Received briefs",
+      viewAll: "View all",
+      loadError: "Could not load enquiries",
+      newClient: "New client",
+      emptyTitle: "You do not have any new briefs yet",
+      emptyBody: "Complete your public profile and add strong portfolio projects. New client enquiries will appear here automatically.",
+      publicProfileCta: "View public profile",
+      readinessEyebrow: "Profile readiness",
+      readinessBody: "A complete profile gives clients more information before they send a brief.",
+      editProfileCta: "Edit profile",
+      manageProjectsCta: (count) => `Manage projects (${count})`,
+      analyticsCta: "Open analytics",
+    },
+    studioInbox: {
+      dateLocale: "en-GB",
+      statuses: { all: "All", accepted: "Accepted", declined: "Declined", reviewing: "In review", sent: "New" },
+      pageTitle: "Project enquiries",
+      eyebrow: "Client communication",
+      title: "Received briefs",
+      intro: "Assess project fit, update the status, and keep each conversation next to the original client brief.",
+      unread: "Unread",
+      loadError: "Could not load enquiries",
+      newMessages: "new",
+      studioInbox: "Studio inbox",
+      personalProfile: "Personal profile",
+      newClient: "New client",
+      client: "Client",
+      youAndStudio: "You / studio team",
+      clientMessage: "Client message",
+      openToSeeBrief: "Open the brief to see the full project context.",
+      replyCta: "Reply to client",
+      openConversationCta: "Open conversation",
+      allReadTitle: "Everything is read",
+      noRequestsTitle: "No enquiries in this view",
+      allReadBody: "New client replies will appear here and in the enquiries counter.",
+      noRequestsBody: "New AI Project Compass briefs will appear here with inspiration, scope, budget, and the client message.",
+      viewAllCta: "View all enquiries",
+      improveProfileCta: "Improve public profile",
+    },
+    studioAnalytics: {
+      dateLocale: "en-GB",
+      eyebrow: "Profile performance",
+      title: "Analytics",
+      intro: "See real profile visits, AI Project Compass enquiries, accepted matches, and measured response time.",
+      stats: ["Views", "Enquiries", "Accepted", "First reply"],
+      last30Days: "Last 30 days",
+      acceptedDetail: (count) => `${count} accepted`,
+      noData: "No data",
+      hours: "hrs",
+      days: "days",
+      responseDetail: "Based on replies sent on the platform",
+      last14Days: "Last 14 days",
+      profileViews: "Profile views",
+      dailySessionDetail: "One browser session per profile per day",
+      chartTitle: (views, inquiries) => `${views} views, ${inquiries} enquiries`,
+      funnelEyebrow: "Last 90-day funnel",
+      funnelTitle: "From view to collaboration",
+      portfolioEyebrow: "Portfolio content",
+      projectCount: (count) => `${count} ${count === 1 ? "public project" : "public projects"} available to clients before sending a brief.`,
+      manageProjectsCta: "Manage projects",
+      publicProfileCta: "Open public profile",
     },
   },
 };
