@@ -27,9 +27,13 @@ export const revalidate = 0;
 type Profile = {
   full_name: string | null;
   profile_headline: string | null;
+  profile_headline_pl: string | null;
+  profile_headline_en: string | null;
   profile_logo_path: string | null;
   profile_banner_path: string | null;
   bio: string | null;
+  bio_pl: string | null;
+  bio_en: string | null;
   location: string | null;
   profession_type: string | null;
   user_type: string | null;
@@ -50,6 +54,8 @@ type Profile = {
   work_modes: string[] | null;
   availability_status: string | null;
   cooperation_terms: string | null;
+  cooperation_terms_pl: string | null;
+  cooperation_terms_en: string | null;
   years_experience: number | null;
   google_business_url: string | null;
   google_place_id: string | null;
@@ -178,12 +184,23 @@ async function updateProfile(formData: FormData) {
     .eq("id", user.id)
     .maybeSingle();
 
-  const headline = textValue(formData, "profile_headline");
-  const bio = textValue(formData, "bio");
-  const cooperationTerms = textValue(formData, "cooperation_terms");
+  const headlinePl = textValue(formData, "profile_headline_pl");
+  const headlineEn = textValue(formData, "profile_headline_en");
+  const bioPl = textValue(formData, "bio_pl");
+  const bioEn = textValue(formData, "bio_en");
+  const cooperationTermsPl = textValue(formData, "cooperation_terms_pl");
+  const cooperationTermsEn = textValue(formData, "cooperation_terms_en");
   const specialties = specialtiesValue(formData);
   const moderationError = isProfessional
-    ? publicTextError([headline, bio, cooperationTerms, ...specialties])
+    ? publicTextError([
+        headlinePl,
+        headlineEn,
+        bioPl,
+        bioEn,
+        cooperationTermsPl,
+        cooperationTermsEn,
+        ...specialties,
+      ])
     : null;
   if (moderationError) {
     redirect(`/account/profile?error=${encodeURIComponent(moderationError)}`);
@@ -218,10 +235,14 @@ async function updateProfile(formData: FormData) {
   const payload = isProfessional
     ? {
         ...commonProfile,
-        profile_headline: headline,
+        profile_headline: headlinePl ?? headlineEn,
+        profile_headline_pl: headlinePl,
+        profile_headline_en: headlineEn,
         profile_logo_path: logoUpload.path ?? currentProfile?.profile_logo_path ?? null,
         profile_banner_path: bannerUpload.path ?? currentProfile?.profile_banner_path ?? null,
-        bio,
+        bio: bioPl ?? bioEn,
+        bio_pl: bioPl,
+        bio_en: bioEn,
         profession_type: textValue(formData, "profession_type"),
         user_type: "professional",
         specialties,
@@ -238,7 +259,9 @@ async function updateProfile(formData: FormData) {
         minimum_project_budget: numberValue(formData, "minimum_project_budget"),
         work_modes: workModeValues(formData),
         availability_status: textValue(formData, "availability_status"),
-        cooperation_terms: cooperationTerms,
+        cooperation_terms: cooperationTermsPl ?? cooperationTermsEn,
+        cooperation_terms_pl: cooperationTermsPl,
+        cooperation_terms_en: cooperationTermsEn,
         years_experience: numberValue(formData, "years_experience"),
         google_place_id: google.data?.placeId ?? null,
         google_business_url: google.data?.businessUrl ?? null,
@@ -354,7 +377,7 @@ export default async function EditProfilePage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "full_name, profile_headline, profile_logo_path, profile_banner_path, bio, location, profession_type, user_type, specialties, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_place_id, google_rating, google_review_count, google_rating_updated_at"
+      "full_name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_place_id, google_rating, google_review_count, google_rating_updated_at"
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -647,12 +670,23 @@ export default async function EditProfilePage({
               </fieldset>
 
               <div className="sm:col-span-2">
-                <Field label="Warunki współpracy" hint="krótkie podsumowanie publiczne">
+                <Field label="Warunki współpracy po polsku" hint="tekst publiczny">
                   <textarea
-                    name="cooperation_terms"
-                    defaultValue={p.cooperation_terms ?? ""}
+                    name="cooperation_terms_pl"
+                    defaultValue={p.cooperation_terms_pl ?? p.cooperation_terms ?? ""}
                     rows={4}
                     placeholder="Np. zakres pierwszej konsultacji, etapy płatności, liczba poprawek i elementy wyceniane osobno."
+                    className={areaClass}
+                  />
+                </Field>
+              </div>
+              <div className="sm:col-span-2">
+                <Field label="Cooperation terms in English" hint="optional; Polish is shown when this stays empty">
+                  <textarea
+                    name="cooperation_terms_en"
+                    defaultValue={p.cooperation_terms_en ?? ""}
+                    rows={4}
+                    placeholder="For example: first consultation scope, payment stages, revisions, and separately priced work."
                     className={areaClass}
                   />
                 </Field>
@@ -667,12 +701,22 @@ export default async function EditProfilePage({
             </div>
 
             <div className="mt-6 grid gap-5">
-              <Field label="Nagłówek profilu" hint="krótki tekst na banerze, maks. 140 znaków">
+              <Field label="Nagłówek profilu po polsku" hint="krótki tekst na banerze, maks. 140 znaków">
                 <input
-                  name="profile_headline"
+                  name="profile_headline_pl"
                   maxLength={140}
-                  defaultValue={p.profile_headline ?? ""}
+                  defaultValue={p.profile_headline_pl ?? p.profile_headline ?? ""}
                   placeholder="Ciepłe, funkcjonalne wnętrza do współczesnego życia"
+                  className={fieldClass}
+                />
+              </Field>
+
+              <Field label="Profile headline in English" hint="optional; Polish is shown when this stays empty">
+                <input
+                  name="profile_headline_en"
+                  maxLength={140}
+                  defaultValue={p.profile_headline_en ?? ""}
+                  placeholder="Warm, functional interiors for contemporary living"
                   className={fieldClass}
                 />
               </Field>
@@ -710,12 +754,22 @@ export default async function EditProfilePage({
                 </div>
               </fieldset>
 
-              <Field label="O mnie / podejście projektowe">
+              <Field label="O mnie / podejście projektowe po polsku">
                 <textarea
-                  name="bio"
-                  defaultValue={p.bio ?? ""}
+                  name="bio_pl"
+                  defaultValue={p.bio_pl ?? p.bio ?? ""}
                   rows={7}
                   placeholder="Opisz swoje podejście, typowe projekty i sposób prowadzenia współpracy."
+                  className={areaClass}
+                />
+              </Field>
+
+              <Field label="About me / design approach in English" hint="optional; Polish is shown when this stays empty">
+                <textarea
+                  name="bio_en"
+                  defaultValue={p.bio_en ?? ""}
+                  rows={7}
+                  placeholder="Describe your approach, typical projects, and how you work with clients."
                   className={areaClass}
                 />
               </Field>

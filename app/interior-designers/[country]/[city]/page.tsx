@@ -8,6 +8,7 @@ import { polishCountLabel } from "@/lib/count-label";
 import { professionalOptionLabel } from "@/lib/professional-options";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import { localizeProfileContent } from "@/lib/localized-profile-content";
 import {
   getSeoLocation,
   locationPath,
@@ -22,6 +23,8 @@ type Designer = {
   id: string;
   full_name: string | null;
   bio: string | null;
+  bio_pl: string | null;
+  bio_en: string | null;
   location: string | null;
   profession_type: string | null;
   specialties: string[] | null;
@@ -34,6 +37,8 @@ type Studio = {
   id: string;
   name: string;
   bio: string | null;
+  bio_pl: string | null;
+  bio_en: string | null;
   location: string | null;
   specialties: string[] | null;
   google_business_url: string | null;
@@ -54,21 +59,21 @@ async function professionalsForLocation(location: SeoLocation) {
   const [profiles, studios] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, full_name, bio, location, profession_type, specialties, google_business_url, google_rating, google_review_count")
+      .select("id, full_name, bio, bio_pl, bio_en, location, profession_type, specialties, google_business_url, google_rating, google_review_count")
       .eq("user_type", "professional")
       .limit(100),
     supabase
       .from("studios")
-      .select("id, name, bio, location, specialties, google_business_url, google_rating, google_review_count")
+      .select("id, name, bio, bio_pl, bio_en, location, specialties, google_business_url, google_rating, google_review_count")
       .eq("published", true)
       .limit(100),
   ]);
 
   return {
-    designers: ((profiles.data ?? []) as Designer[]).filter((profile) =>
+    designers: ((profiles.data ?? []) as Designer[]).map((profile) => localizeProfileContent(profile)).filter((profile) =>
       matchesSeoLocation(profile.location, location)
     ),
-    studios: ((studios.data ?? []) as Studio[]).filter((studio) =>
+    studios: ((studios.data ?? []) as Studio[]).map((studio) => localizeProfileContent(studio)).filter((studio) =>
       matchesSeoLocation(studio.location, location)
     ),
   };

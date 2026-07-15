@@ -5,6 +5,7 @@ import {
   applyDemoProfilePresentation,
   getDemoProjectPresentation,
 } from "@/lib/public-demo-profiles";
+import { localizeProfileContent } from "@/lib/localized-profile-content";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -22,6 +23,8 @@ type Profile = {
   location: string | null;
   specialties: string[] | null;
   bio: string | null;
+  bio_pl: string | null;
+  bio_en: string | null;
 };
 
 type Project = {
@@ -38,6 +41,8 @@ type Studio = {
   id: string;
   name: string;
   bio: string | null;
+  bio_pl: string | null;
+  bio_en: string | null;
   location: string | null;
   specialties: string[] | null;
 };
@@ -75,13 +80,13 @@ export default async function ClientFavoritesPage() {
     designerIds.length
       ? supabase
           .from("profiles")
-          .select("id, full_name, profession_type, user_type, location, specialties, bio")
+          .select("id, full_name, profession_type, user_type, location, specialties, bio, bio_pl, bio_en")
           .in("id", designerIds)
       : Promise.resolve({ data: [] }),
     studioIds.length
       ? supabase
           .from("studios")
-          .select("id, name, bio, location, specialties")
+          .select("id, name, bio, bio_pl, bio_en, location, specialties")
           .in("id", studioIds)
       : Promise.resolve({ data: [] }),
     projectIds.length
@@ -97,8 +102,10 @@ export default async function ClientFavoritesPage() {
           .in("id", articleIds)
       : Promise.resolve({ data: [] }),
   ]);
-  const designers = ((profileData ?? []) as Profile[]).map(applyDemoProfilePresentation);
-  const studios = (studioData ?? []) as Studio[];
+  const designers = ((profileData ?? []) as Profile[])
+    .map(applyDemoProfilePresentation)
+    .map((profile) => localizeProfileContent(profile));
+  const studios = ((studioData ?? []) as Studio[]).map((studio) => localizeProfileContent(studio));
   const projects = ((projectData ?? []) as Project[]).map((project) => {
     const presentation = getDemoProjectPresentation(project.profile_id, project.id);
     return presentation ? { ...project, ...presentation } : project;

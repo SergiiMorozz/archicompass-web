@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { localeMetadata, localeSiteUrl, siteLocale } from "@/lib/site-locale";
+import { localeMetadata, localePublicUrl, siteLocale } from "@/lib/site-locale";
 
 export const SITE_NAME = "ArchiCompass";
 export const DEFAULT_SITE_URL = "https://archicompass.pl";
 
 export function siteUrl() {
-  return (process.env.NEXT_PUBLIC_SITE_URL || localeSiteUrl(siteLocale) || DEFAULT_SITE_URL).replace(/\/$/, "");
+  return localePublicUrl(siteLocale).replace(/\/$/, "");
 }
 
 export function absoluteUrl(path = "/") {
@@ -14,13 +14,11 @@ export function absoluteUrl(path = "/") {
 }
 
 export function englishUrl(path = "/") {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${localeSiteUrl("en")}${normalizedPath}`;
+  return localePublicUrl("en", path);
 }
 
 export function polishUrl(path = "/") {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${localeSiteUrl("pl")}${normalizedPath}`;
+  return localePublicUrl("pl", path);
 }
 
 export function truncateDescription(value: string, maxLength = 160) {

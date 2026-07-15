@@ -13,6 +13,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { availabilityLabel, pricingLabel, workModeLabel } from "@/lib/profile-pricing";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import { localizeProfileContent, localizedProfileText } from "@/lib/localized-profile-content";
 import { professionalOptionLabel } from "@/lib/professional-options";
 
 export const revalidate = 0;
@@ -22,9 +23,13 @@ type Studio = {
   owner_id: string;
   name: string;
   profile_headline: string | null;
+  profile_headline_pl: string | null;
+  profile_headline_en: string | null;
   profile_logo_path: string | null;
   profile_banner_path: string | null;
   bio: string | null;
+  bio_pl: string | null;
+  bio_en: string | null;
   location: string | null;
   specialties: string[] | null;
   service_capabilities: string[] | null;
@@ -43,6 +48,8 @@ type Studio = {
   work_modes: string[] | null;
   availability_status: string | null;
   cooperation_terms: string | null;
+  cooperation_terms_pl: string | null;
+  cooperation_terms_en: string | null;
   years_experience: number | null;
   google_business_url: string | null;
   google_rating: number | null;
@@ -59,6 +66,8 @@ type Profile = {
   id: string;
   full_name: string | null;
   bio: string | null;
+  bio_pl: string | null;
+  bio_en: string | null;
   location: string | null;
   profession_type: string | null;
   specialties: string[] | null;
@@ -97,7 +106,7 @@ export async function generateMetadata({
   const supabase = createPublicSupabaseClient();
   const { data: studio } = await supabase
     .from("studios")
-    .select("name, bio, location")
+    .select("name, bio, bio_pl, bio_en, location")
     .eq("id", id)
     .eq("published", true)
     .maybeSingle();
@@ -106,7 +115,7 @@ export async function generateMetadata({
   }
   return pageMetadata({
     title: `${studio.name} – pracownia projektowania wnętrz${studio.location ? ` · ${studio.location}` : ""}`,
-    description: studio.bio || `Zobacz zespół, portfolio, specjalizacje, usługi i dostępność pracowni ${studio.name} w ArchiCompass.`,
+    description: localizedProfileText(studio, "bio") || `Zobacz zespół, portfolio, specjalizacje, usługi i dostępność pracowni ${studio.name} w ArchiCompass.`,
     path: `/studios/${id}`,
     type: "profile",
   });
@@ -143,11 +152,11 @@ export default async function PublicStudioPage({
 
   const { data: studioData } = await supabase
     .from("studios")
-    .select("id, owner_id, name, profile_headline, profile_logo_path, profile_banner_path, bio, location, specialties, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count, published")
+    .select("id, owner_id, name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, specialties, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_rating, google_review_count, published")
     .eq("id", id)
     .maybeSingle();
   if (!studioData) notFound();
-  const studio = studioData as Studio;
+  const studio = localizeProfileContent(studioData as Studio);
 
   const { data: memberData } = await supabase
     .from("studio_members")
@@ -161,7 +170,7 @@ export default async function PublicStudioPage({
     memberIds.length
       ? supabase
           .from("profiles")
-          .select("id, full_name, bio, location, profession_type, specialties, years_experience")
+          .select("id, full_name, bio, bio_pl, bio_en, location, profession_type, specialties, years_experience")
           .in("id", memberIds)
       : Promise.resolve({ data: [] }),
     memberIds.length
@@ -173,7 +182,7 @@ export default async function PublicStudioPage({
           .limit(36)
       : Promise.resolve({ data: [] }),
   ]);
-  const profiles = (profileData ?? []) as Profile[];
+  const profiles = ((profileData ?? []) as Profile[]).map((profile) => localizeProfileContent(profile));
   const profilesById = new Map(profiles.map((profile) => [profile.id, profile]));
   const visibleMembers = members.filter((member) => profilesById.has(member.user_id));
 

@@ -6,7 +6,12 @@ import { useEffect, useState } from "react";
 import BrandLogo from "@/components/BrandLogo";
 import { getSiteCopy } from "@/content/site-copy";
 import { isProfessionalProfile } from "@/lib/professional";
-import { localeSiteUrl, otherLocale } from "@/lib/site-locale";
+import {
+  localePublicPath,
+  localePublicUrl,
+  otherLocale,
+  siteLocale,
+} from "@/lib/site-locale";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 function NavLink({
@@ -21,11 +26,13 @@ function NavLink({
   onClick?: () => void;
 }) {
   const pathname = usePathname();
-  const isActive = pathname === href || (href !== "/" && pathname?.startsWith(href));
+  const localizedHref = localePublicPath(siteLocale, href);
+  const currentPath = pathname?.replace(/^\/en(?=\/|$)/, "") || "/";
+  const isActive = currentPath === href || (href !== "/" && currentPath.startsWith(href));
 
   return (
     <Link
-      href={href}
+      href={localizedHref}
       onClick={onClick}
       className={[
         "whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition",
@@ -51,7 +58,7 @@ function NavLink({
 
 function Brand() {
   return (
-    <Link href="/" className="flex items-center" aria-label="ArchiCompass">
+    <Link href={localePublicPath(siteLocale)} className="flex items-center" aria-label="ArchiCompass">
       <BrandLogo className="h-9 w-[158px] sm:w-[174px]" />
     </Link>
   );
@@ -61,19 +68,27 @@ export default function Header() {
   const pathname = usePathname();
   const copy = getSiteCopy();
   const navItems = copy.header.nav;
-  const isGetStartedActive = pathname === "/get-started";
+  const currentPath = pathname?.replace(/^\/en(?=\/|$)/, "") || "/";
+  const isGetStartedActive = currentPath === "/get-started";
+  const appHref = (path: string) => localePublicPath(siteLocale, path);
+  const alternateHref = (path: string, suffix = "") => {
+    const targetLocale = otherLocale();
+    const targetPath = localePublicPath(targetLocale, path);
+    return targetLocale === "en"
+      ? `${targetPath}${suffix}`
+      : `${localePublicUrl("pl", path)}${suffix}`;
+  };
   const [isOpen, setIsOpen] = useState(false);
   const [languageHref, setLanguageHref] = useState(() => {
-    const initialPath = pathname || "/";
-    return `${localeSiteUrl(otherLocale())}${initialPath}`;
+    return alternateHref(currentPath);
   });
   const [account, setAccount] = useState<
     { id: string; isAdmin: boolean; isProfessional: boolean; unreadCount: number } | null
   >(null);
 
   useEffect(() => {
-    const path = pathname === "/" ? "/" : pathname;
-    setLanguageHref(`${localeSiteUrl(otherLocale())}${path}${window.location.search}${window.location.hash}`);
+    const path = pathname?.replace(/^\/en(?=\/|$)/, "") || "/";
+    setLanguageHref(alternateHref(path, `${window.location.search}${window.location.hash}`));
   }, [pathname]);
 
   useEffect(() => {
@@ -184,7 +199,7 @@ export default function Header() {
       ]
     : [];
   const isWorkspaceActive = workspaceItems.some(
-    (item) => pathname === item.href || pathname?.startsWith(`${item.href}/`)
+    (item) => currentPath === item.href || currentPath.startsWith(`${item.href}/`)
   );
   return (
     <header className="sticky top-0 z-50 w-full border-b border-line/80 bg-card/95 shadow-[0_8px_30px_rgba(73,35,102,0.06)] backdrop-blur-md">
@@ -206,7 +221,7 @@ export default function Header() {
           {account ? (
             <div className="flex items-center gap-2">
               <Link
-                href={account.isProfessional ? "/studio/inbox" : "/client/messages"}
+                href={appHref(account.isProfessional ? "/studio/inbox" : "/client/messages")}
                 className="relative whitespace-nowrap rounded-xl border border-line bg-card px-3 py-2 text-sm font-semibold text-muted transition hover:border-primary/25 hover:bg-primary-soft hover:text-primary"
               >
                 {copy.header.messages}
@@ -231,10 +246,10 @@ export default function Header() {
                   {workspaceItems.map((item) => (
                     <Link
                       key={item.href}
-                      href={item.href}
+                      href={appHref(item.href)}
                       className={[
                         "block rounded-lg px-3 py-2.5 text-sm font-semibold transition",
-                        pathname === item.href || pathname?.startsWith(`${item.href}/`)
+                        currentPath === item.href || currentPath.startsWith(`${item.href}/`)
                           ? "bg-primary-soft text-primary"
                           : "text-muted hover:bg-primary-soft hover:text-primary",
                       ].join(" ")}
@@ -243,7 +258,7 @@ export default function Header() {
                     </Link>
                   ))}
                   <div className="my-2 h-px bg-line" />
-                  <Link href="/account" className="block rounded-lg bg-primary px-3 py-2.5 text-center text-sm font-bold text-white transition hover:opacity-90">
+                  <Link href={appHref("/account")} className="block rounded-lg bg-primary px-3 py-2.5 text-center text-sm font-bold text-white transition hover:opacity-90">
                     {copy.header.accountSettings}
                   </Link>
                 </div>
@@ -252,14 +267,14 @@ export default function Header() {
           ) : (
             <>
               <Link
-                href="/login"
+                href={appHref("/login")}
                 className="rounded-xl px-4 py-2 text-sm font-medium text-foreground transition hover:bg-primary-soft hover:text-primary"
               >
                 Zaloguj się
               </Link>
 
               <Link
-                href="/get-started"
+                href={appHref("/get-started")}
                 className={[
                   "rounded-xl px-4 py-2 text-sm font-medium text-white transition",
                   isGetStartedActive ? "bg-foreground" : "bg-primary hover:opacity-90",
@@ -311,7 +326,7 @@ export default function Header() {
                   </NavLink>
                 ))}
                 <Link
-                  href="/account"
+                  href={appHref("/account")}
                   onClick={() => setIsOpen(false)}
                   className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white"
                 >
@@ -321,14 +336,14 @@ export default function Header() {
             ) : (
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <Link
-                  href="/login"
+                  href={appHref("/login")}
                   onClick={() => setIsOpen(false)}
                   className="rounded-xl border border-line bg-card px-4 py-3 text-center text-sm font-medium"
                 >
                   {copy.header.signIn}
                 </Link>
                 <Link
-                  href="/get-started"
+                  href={appHref("/get-started")}
                   onClick={() => setIsOpen(false)}
                   className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white"
                 >

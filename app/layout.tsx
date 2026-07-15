@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
 import { getSiteCopy } from "@/content/site-copy";
-import { localeMetadata, localeSiteUrl, siteLocale } from "@/lib/site-locale";
+import { localeMetadata, localePublicUrl, siteLocale } from "@/lib/site-locale";
 import { absoluteUrl, siteUrl } from "@/lib/seo";
 
 const copy = getSiteCopy();
@@ -28,7 +28,11 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: siteUrl(),
-    languages: { pl: localeSiteUrl("pl"), en: localeSiteUrl("en"), "x-default": localeSiteUrl("pl") },
+    languages: {
+      pl: localePublicUrl("pl"),
+      en: localePublicUrl("en"),
+      "x-default": localePublicUrl("pl"),
+    },
   },
   openGraph: {
     type: "website",

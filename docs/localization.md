@@ -17,18 +17,51 @@ Set these in both production projects:
 ```text
 NEXT_PUBLIC_SITE_LOCALE=pl | en
 NEXT_PUBLIC_POLISH_SITE_URL=https://archicompass.pl
-NEXT_PUBLIC_ENGLISH_SITE_URL=https://archicompass-web-en.vercel.app
+ENGLISH_ZONE_URL=https://archicompass-web-en.vercel.app
 ```
 
-`NEXT_PUBLIC_SITE_URL` can remain set to the canonical URL of the individual deployment. The shared locale helper uses it for canonical URLs, while the two explicit host variables build the language switch and `hreflang` links.
+`archicompass.pl` is the only public host. English pages are publicly addressed as
+`https://archicompass.pl/en/...`; the English Vercel deployment is an internal
+rewrite target and must not appear in language switches, canonical URLs, or
+`hreflang` links. `NEXT_PUBLIC_ENGLISH_SITE_URL` remains supported only as a
+temporary compatibility fallback for the rewrite target.
 
 ## Shared layer
 
-- `lib/site-locale.ts` owns the locale, locale-specific hosts, and HTML/SEO locale metadata.
+- `lib/site-locale.ts` owns the locale, the public `/en` path, the internal rewrite host, and HTML/SEO locale metadata.
 - `content/site-copy.ts` owns the paired PL and EN contracts for the shared global UI, account entry flow, and Inspiration Hub.
 - `Header`, `Footer`, root metadata, home page, login, registration, password recovery, onboarding, Inspiration Hub, and article pages render from this shared content contract.
 
 Both entries in `content/site-copy.ts` must satisfy the same `SiteCopy` TypeScript type. Adding a field to one language without adding it to the other therefore fails type checking.
+
+## Public URLs
+
+- Polish: `https://archicompass.pl/<route>`
+- English: `https://archicompass.pl/en/<route>`
+- Root English URL: `https://archicompass.pl/en`
+
+Use `localePublicPath()` for internal links and `localePublicUrl()` for canonical,
+Open Graph, JSON-LD, and alternate-language URLs. `localeSiteUrl()` is only for
+the internal deployment origin used by the `/en` rewrite.
+
+## Author-provided profile copy
+
+Platform fields such as location, experience, pricing, availability, labels,
+and actions are part of the shared UI contract and must be supplied in both
+language objects. They must never rely on a user-entered translation.
+
+Professional profiles and studio profiles have paired fields for the authored
+headline, description, and cooperation terms:
+
+- `*_pl` is shown on Polish pages when present.
+- `*_en` is shown on English pages when present.
+- If the requested language is empty, the other authored version is shown.
+- Legacy fields remain populated with the preferred available value during the
+  migration, so existing profiles stay visible.
+
+Use `localizeProfileContent()` or `localizedProfileText()` whenever public
+profile or studio data is rendered or used for metadata. Do not copy fallback
+logic into individual components.
 
 ## Migration rule
 

@@ -21,6 +21,7 @@ import {
   getDemoProfilePresentation,
   getDemoProjectPresentation,
 } from "@/lib/public-demo-profiles";
+import { localizeProfileContent, localizedProfileText } from "@/lib/localized-profile-content";
 
 export const revalidate = 0;
 
@@ -29,9 +30,13 @@ type Profile = {
   avatar_url: string | null;
   full_name: string | null;
   profile_headline: string | null;
+  profile_headline_pl: string | null;
+  profile_headline_en: string | null;
   profile_logo_path: string | null;
   profile_banner_path: string | null;
   bio: string | null;
+  bio_pl: string | null;
+  bio_en: string | null;
   location: string | null;
   profession_type: string | null;
   user_type: string | null;
@@ -53,6 +58,8 @@ type Profile = {
   work_modes: string[] | null;
   availability_status: string | null;
   cooperation_terms: string | null;
+  cooperation_terms_pl: string | null;
+  cooperation_terms_en: string | null;
   years_experience: number | null;
   google_business_url: string | null;
   google_rating: number | null;
@@ -135,7 +142,7 @@ export async function generateMetadata({
   const [{ data: profile }, { data: projects }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("full_name, profile_headline, profile_banner_path, bio, location, profession_type, is_demo")
+      .select("full_name, profile_headline, profile_headline_pl, profile_headline_en, profile_banner_path, bio, bio_pl, bio_en, location, profession_type, is_demo")
       .eq("id", id)
       .eq("user_type", "professional")
       .maybeSingle(),
@@ -160,7 +167,7 @@ export async function generateMetadata({
   const image = banner || projects?.[0]?.image_url || projects?.[0]?.image_urls?.[0] || null;
   return pageMetadata({
     title: `${name} – ${profession}${location}`,
-    description: demo?.profile.bio || profile.bio || `Zobacz profil ${name}, portfolio, specjalizacje, usługi, dostępność i dopasowanie do projektu w ArchiCompass.`,
+    description: demo?.profile.bio || localizedProfileText(profile, "bio") || `Zobacz profil ${name}, portfolio, specjalizacje, usługi, dostępność i dopasowanie do projektu w ArchiCompass.`,
     path: `/designers/${id}`,
     image,
     type: "profile",
@@ -324,7 +331,7 @@ export default async function DesignerProfilePage({
   const { data: profileData, error: pErr } = await supabase
     .from("profiles")
     .select(
-      "id, avatar_url, full_name, profile_headline, profile_logo_path, profile_banner_path, bio, location, profession_type, user_type, specialties, languages, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_rating, google_review_count, is_demo"
+      "id, avatar_url, full_name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, languages, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_rating, google_review_count, is_demo"
     )
     .eq("id", id)
     .single();
@@ -340,7 +347,7 @@ export default async function DesignerProfilePage({
     if (!isDesignerAccount) notFound();
   }
 
-  const profile = applyDemoProfilePresentation(profileData as Profile);
+  const profile = localizeProfileContent(applyDemoProfilePresentation(profileData as Profile));
 
   const { data: projectsData, error: prErr } = await supabase
     .from("projects")

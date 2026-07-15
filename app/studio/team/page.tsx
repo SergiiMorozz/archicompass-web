@@ -27,9 +27,13 @@ type Studio = {
   owner_id: string;
   name: string;
   profile_headline: string | null;
+  profile_headline_pl: string | null;
+  profile_headline_en: string | null;
   profile_logo_path: string | null;
   profile_banner_path: string | null;
   bio: string | null;
+  bio_pl: string | null;
+  bio_en: string | null;
   location: string | null;
   specialties: string[] | null;
   service_capabilities: string[] | null;
@@ -48,6 +52,8 @@ type Studio = {
   work_modes: string[] | null;
   availability_status: string | null;
   cooperation_terms: string | null;
+  cooperation_terms_pl: string | null;
+  cooperation_terms_en: string | null;
   years_experience: number | null;
   google_business_url: string | null;
   google_place_id: string | null;
@@ -142,11 +148,23 @@ async function studioPayload(
   const name = textValue(formData, "name");
   if (!name || name.length < 2) actionRedirect("Nazwa pracowni musi mieć co najmniej dwa znaki.");
 
-  const headline = textValue(formData, "profile_headline");
-  const bio = textValue(formData, "bio");
-  const cooperationTerms = textValue(formData, "cooperation_terms");
+  const headlinePl = textValue(formData, "profile_headline_pl");
+  const headlineEn = textValue(formData, "profile_headline_en");
+  const bioPl = textValue(formData, "bio_pl");
+  const bioEn = textValue(formData, "bio_en");
+  const cooperationTermsPl = textValue(formData, "cooperation_terms_pl");
+  const cooperationTermsEn = textValue(formData, "cooperation_terms_en");
   const specialties = listValue(formData, "specialties");
-  const moderationError = publicTextError([name, headline, bio, cooperationTerms, ...specialties]);
+  const moderationError = publicTextError([
+    name,
+    headlinePl,
+    headlineEn,
+    bioPl,
+    bioEn,
+    cooperationTermsPl,
+    cooperationTermsEn,
+    ...specialties,
+  ]);
   if (moderationError) actionRedirect(moderationError);
   const googleInput = textValue(formData, "google_place_input");
   const google = googleInput ? await fetchGooglePlaceSummary(googleInput) : { data: null, error: null };
@@ -158,10 +176,14 @@ async function studioPayload(
 
   return {
     name,
-    profile_headline: headline,
+    profile_headline: headlinePl ?? headlineEn,
+    profile_headline_pl: headlinePl,
+    profile_headline_en: headlineEn,
     profile_logo_path: logoPath ?? current?.profile_logo_path ?? null,
     profile_banner_path: bannerPath ?? current?.profile_banner_path ?? null,
-    bio,
+    bio: bioPl ?? bioEn,
+    bio_pl: bioPl,
+    bio_en: bioEn,
     location: textValue(formData, "location"),
     specialties,
     service_capabilities: serviceCapabilityValues(formData),
@@ -179,7 +201,9 @@ async function studioPayload(
     minimum_project_budget: numberValue(formData, "minimum_project_budget"),
     work_modes: workModeValues(formData),
     availability_status: textValue(formData, "availability_status"),
-    cooperation_terms: cooperationTerms,
+    cooperation_terms: cooperationTermsPl ?? cooperationTermsEn,
+    cooperation_terms_pl: cooperationTermsPl,
+    cooperation_terms_en: cooperationTermsEn,
     years_experience: numberValue(formData, "years_experience"),
     google_place_id: google.data?.placeId ?? null,
     google_business_url: google.data?.businessUrl ?? null,
@@ -361,7 +385,7 @@ export default async function StudioTeamPage({
   const { data: studioData } = studioIds.length
     ? await supabase
         .from("studios")
-        .select("id, owner_id, name, profile_headline, profile_logo_path, profile_banner_path, bio, location, specialties, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, years_experience, google_business_url, google_place_id, google_rating, google_review_count, published, created_at")
+        .select("id, owner_id, name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, specialties, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_place_id, google_rating, google_review_count, published, created_at")
         .in("id", studioIds)
         .order("created_at", { ascending: true })
     : { data: [] };
@@ -551,7 +575,8 @@ export default async function StudioTeamPage({
                     <form action={updateStudio} className="mt-5 grid gap-4">
                       <input type="hidden" name="studio_id" value={studio.id} />
                       <label className="text-sm font-semibold">Nazwa pracowni<input name="name" required defaultValue={studio.name} className={fieldClass} /></label>
-                      <label className="text-sm font-semibold">Nagłówek profilu<input name="profile_headline" maxLength={140} defaultValue={studio.profile_headline ?? ""} className={fieldClass} /></label>
+                      <label className="text-sm font-semibold">Nagłówek profilu po polsku<input name="profile_headline_pl" maxLength={140} defaultValue={studio.profile_headline_pl ?? studio.profile_headline ?? ""} className={fieldClass} /></label>
+                      <label className="text-sm font-semibold">Profile headline in English<input name="profile_headline_en" maxLength={140} defaultValue={studio.profile_headline_en ?? ""} className={fieldClass} /></label>
                       <div className="grid gap-3 sm:grid-cols-2">
                         <label className="text-sm font-semibold">Logo pracowni<input name="profile_logo" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} /></label>
                         <label className="text-sm font-semibold">Baner pracowni<input name="profile_banner" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} /></label>
@@ -569,7 +594,8 @@ export default async function StudioTeamPage({
                           ))}
                         </div>
                       </fieldset>
-                      <label className="text-sm font-semibold">Opis pracowni<textarea name="bio" rows={5} defaultValue={studio.bio ?? ""} className={fieldClass} /></label>
+                      <label className="text-sm font-semibold">Opis pracowni po polsku<textarea name="bio_pl" rows={5} defaultValue={studio.bio_pl ?? studio.bio ?? ""} className={fieldClass} /></label>
+                      <label className="text-sm font-semibold">Studio description in English<textarea name="bio_en" rows={5} defaultValue={studio.bio_en ?? ""} className={fieldClass} /></label>
                       <label className="text-sm font-semibold">Strona internetowa<input name="website" defaultValue={studio.website ?? ""} className={fieldClass} /></label>
                       <div className="grid gap-3 sm:grid-cols-2">
                         <label className="text-sm font-semibold">Instagram<input name="instagram_url" defaultValue={studio.instagram_url ?? ""} placeholder="https://instagram.com/..." className={fieldClass} /></label>
@@ -591,7 +617,8 @@ export default async function StudioTeamPage({
                         <legend className="text-sm font-semibold">Format współpracy</legend>
                         <div className="mt-3 flex flex-wrap gap-2">{workModes.map((mode) => <label key={mode} className="flex items-center gap-2 rounded-xl border border-line bg-card px-3 py-2 text-sm font-semibold"><input type="checkbox" name="work_modes" value={mode} defaultChecked={studio.work_modes?.includes(mode)} className="h-4 w-4 accent-primary" />{workModeLabel(mode)}</label>)}</div>
                       </fieldset>
-                      <label className="text-sm font-semibold">Warunki współpracy<textarea name="cooperation_terms" rows={4} defaultValue={studio.cooperation_terms ?? ""} className={fieldClass} /></label>
+                      <label className="text-sm font-semibold">Warunki współpracy po polsku<textarea name="cooperation_terms_pl" rows={4} defaultValue={studio.cooperation_terms_pl ?? studio.cooperation_terms ?? ""} className={fieldClass} /></label>
+                      <label className="text-sm font-semibold">Cooperation terms in English<textarea name="cooperation_terms_en" rows={4} defaultValue={studio.cooperation_terms_en ?? ""} className={fieldClass} /></label>
                       <div className="rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-4">
                         <div className="font-bold">Ocena Google Business</div>
                         <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -626,7 +653,8 @@ export default async function StudioTeamPage({
           </p>
           <form action={createStudio} className="mt-6 grid gap-4 md:grid-cols-2">
             <label className="text-sm font-semibold">Nazwa pracowni<input name="name" required className={fieldClass} /></label>
-            <label className="text-sm font-semibold">Nagłówek profilu<input name="profile_headline" maxLength={140} className={fieldClass} /></label>
+            <label className="text-sm font-semibold">Nagłówek profilu po polsku<input name="profile_headline_pl" maxLength={140} className={fieldClass} /></label>
+            <label className="text-sm font-semibold">Profile headline in English<input name="profile_headline_en" maxLength={140} className={fieldClass} /></label>
             <label className="text-sm font-semibold">Logo pracowni<input name="profile_logo" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} /></label>
             <label className="text-sm font-semibold">Baner pracowni<input name="profile_banner" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} /></label>
             <label className="text-sm font-semibold">Lokalizacja<input name="location" className={fieldClass} /></label>
@@ -642,7 +670,8 @@ export default async function StudioTeamPage({
                 ))}
               </div>
             </fieldset>
-            <label className="text-sm font-semibold md:col-span-2">Opis pracowni<textarea name="bio" rows={5} className={fieldClass} /></label>
+            <label className="text-sm font-semibold md:col-span-2">Opis pracowni po polsku<textarea name="bio_pl" rows={5} className={fieldClass} /></label>
+            <label className="text-sm font-semibold md:col-span-2">Studio description in English<textarea name="bio_en" rows={5} className={fieldClass} /></label>
             <label className="text-sm font-semibold">Strona internetowa<input name="website" placeholder="https://" className={fieldClass} /></label>
             <label className="text-sm font-semibold">Instagram<input name="instagram_url" placeholder="https://instagram.com/..." className={fieldClass} /></label>
             <label className="text-sm font-semibold">Facebook<input name="facebook_url" placeholder="https://facebook.com/..." className={fieldClass} /></label>
@@ -657,7 +686,8 @@ export default async function StudioTeamPage({
             <label className="text-sm font-semibold">Cena do, PLN w wybranym modelu<input name="price_to" inputMode="numeric" className={fieldClass} /></label>
             <label className="text-sm font-semibold md:col-span-2">Minimalny budżet inwestycji, PLN<input name="minimum_project_budget" inputMode="numeric" className={fieldClass} /></label>
             <fieldset className="md:col-span-2"><legend className="text-sm font-semibold">Format współpracy</legend><div className="mt-3 flex flex-wrap gap-2">{workModes.map((mode) => <label key={mode} className="flex items-center gap-2 rounded-xl border border-line bg-background px-3 py-2 text-sm font-semibold"><input type="checkbox" name="work_modes" value={mode} className="h-4 w-4 accent-primary" />{workModeLabel(mode)}</label>)}</div></fieldset>
-            <label className="text-sm font-semibold md:col-span-2">Warunki współpracy<textarea name="cooperation_terms" rows={4} className={fieldClass} /></label>
+            <label className="text-sm font-semibold md:col-span-2">Warunki współpracy po polsku<textarea name="cooperation_terms_pl" rows={4} className={fieldClass} /></label>
+            <label className="text-sm font-semibold md:col-span-2">Cooperation terms in English<textarea name="cooperation_terms_en" rows={4} className={fieldClass} /></label>
             <div className="rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-4 md:col-span-2">
               <div className="font-bold">Ocena Google Business</div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">

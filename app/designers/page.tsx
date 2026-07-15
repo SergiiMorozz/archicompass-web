@@ -28,6 +28,7 @@ import {
   applyDemoProfilePresentation,
   getDemoProfilePresentation,
 } from "@/lib/public-demo-profiles";
+import { localizeProfileContent } from "@/lib/localized-profile-content";
 
 export const revalidate = 0;
 
@@ -44,6 +45,8 @@ type Profile = {
   profile_logo_path: string | null;
   full_name: string | null;
   bio: string | null;
+  bio_pl: string | null;
+  bio_en: string | null;
   location: string | null;
   profession_type: string | null;
   user_type: string | null;
@@ -71,6 +74,8 @@ type Studio = {
   name: string;
   profile_logo_path: string | null;
   bio: string | null;
+  bio_pl: string | null;
+  bio_en: string | null;
   location: string | null;
   specialties: string[] | null;
   service_capabilities: string[] | null;
@@ -718,7 +723,7 @@ export default async function DesignersPage({
   const query = supabase
     .from("profiles")
     .select(
-      "id, avatar_url, profile_logo_path, full_name, bio, location, profession_type, user_type, specialties, service_categories, languages, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at"
+      "id, avatar_url, profile_logo_path, full_name, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, service_categories, languages, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at"
     )
     .eq("user_type", "professional")
     .order("created_at", { ascending: false })
@@ -727,7 +732,7 @@ export default async function DesignersPage({
   const { data, error } = await query;
   const { data: studioData } = await supabase
     .from("studios")
-    .select("id, name, profile_logo_path, bio, location, specialties, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at")
+    .select("id, name, profile_logo_path, bio, bio_pl, bio_en, location, specialties, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at")
     .eq("published", true)
     .order("created_at", { ascending: false })
     .limit(30);
@@ -800,6 +805,7 @@ export default async function DesignersPage({
 
   let profiles = ((data ?? []) as Profile[])
     .map(applyDemoProfilePresentation)
+    .map((profile) => localizeProfileContent(profile))
     .filter((profile) => {
       const searchable = normalizeSearchText(
         [
@@ -860,7 +866,7 @@ export default async function DesignersPage({
       );
     });
 
-  let studios = ((studioData ?? []) as Studio[]).filter((studio) => {
+  let studios = ((studioData ?? []) as Studio[]).map((studio) => localizeProfileContent(studio)).filter((studio) => {
     const searchable = normalizeSearchText(
       [studio.name, studio.bio, ...(studio.specialties ?? []), ...(studio.service_capabilities ?? [])]
         .filter(Boolean)

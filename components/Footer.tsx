@@ -1,15 +1,17 @@
 import Link from "next/link";
 import BrandLogo from "@/components/BrandLogo";
 import { getSiteCopy } from "@/content/site-copy";
+import { localePublicPath, siteLocale } from "@/lib/site-locale";
 
 export default function Footer() {
   const copy = getSiteCopy().footer;
+  const appHref = (path: string) => localePublicPath(siteLocale, path);
 
   return (
     <footer className="border-t-4 border-accent bg-[#21152d] text-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <div>
-          <Link href="/" className="inline-flex items-center" aria-label="ArchiCompass">
+          <Link href={appHref("/")} className="inline-flex items-center" aria-label="ArchiCompass">
             <BrandLogo variant="white" className="h-11 w-[190px]" />
           </Link>
           <p className="mt-5 max-w-md text-sm leading-6 text-white/70">
@@ -23,7 +25,7 @@ export default function Footer() {
           </h2>
           <div className="mt-4 grid gap-3 text-sm text-white/75">
             {copy.navigation.map((item) => (
-              <Link key={item.href} href={item.href} className="hover:text-white">
+              <Link key={item.href} href={appHref(item.href)} className="hover:text-white">
                 {item.label}
               </Link>
             ))}
@@ -36,7 +38,7 @@ export default function Footer() {
           </h2>
           <div className="mt-4 grid gap-3 text-sm text-white/75">
             {copy.locations.map((item) => (
-              <Link key={item.href} href={item.href} className="hover:text-white">
+              <Link key={item.href} href={appHref(item.href)} className="hover:text-white">
                 {item.label}
               </Link>
             ))}
@@ -48,13 +50,13 @@ export default function Footer() {
             {copy.legalTitle}
           </h2>
           <div className="mt-4 grid gap-3 text-sm text-white/75">
-            <Link href="/privacy" className="hover:text-white">
+            <Link href={appHref("/privacy")} className="hover:text-white">
               {copy.privacy}
             </Link>
-            <Link href="/terms" className="hover:text-white">
+            <Link href={appHref("/terms")} className="hover:text-white">
               {copy.terms}
             </Link>
-            <Link href="/cookies" className="hover:text-white">
+            <Link href={appHref("/cookies")} className="hover:text-white">
               {copy.cookies}
             </Link>
             <a href="mailto:contact@archicompass.pl" className="hover:text-white">

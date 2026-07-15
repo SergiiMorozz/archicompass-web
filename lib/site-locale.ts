@@ -33,6 +33,18 @@ export function localeSiteUrl(locale: SiteLocale) {
   return normalizedUrl(process.env.NEXT_PUBLIC_POLISH_SITE_URL || "https://archicompass.pl");
 }
 
+export function localePublicPath(locale: SiteLocale, path = "/") {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  if (locale === "en") {
+    return normalizedPath === "/" ? "/en" : `/en${normalizedPath}`;
+  }
+  return normalizedPath;
+}
+
+export function localePublicUrl(locale: SiteLocale, path = "/") {
+  return `${localeSiteUrl("pl")}${localePublicPath(locale, path)}`;
+}
+
 export function otherLocale(locale: SiteLocale = siteLocale): SiteLocale {
   return locale === "pl" ? "en" : "pl";
 }
