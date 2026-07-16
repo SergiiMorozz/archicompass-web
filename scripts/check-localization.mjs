@@ -42,6 +42,14 @@ const interactiveSourceFiles = [
   "components/FavoriteButton.tsx",
   "components/GoogleRating.tsx",
   "components/SocialLinks.tsx",
+  "components/ReferencePhotoGrid.tsx",
+  "components/MessageAttachments.tsx",
+  "components/ConversationAutoRefresh.tsx",
+];
+const accountFlowSourceFiles = [
+  "app/account/briefs/page.tsx",
+  "app/account/inquiries/page.tsx",
+  "app/account/inquiries/[id]/page.tsx",
 ];
 const projectCompassSourceFiles = [
   "app/project-compass/page.tsx",
@@ -92,6 +100,13 @@ for (const file of interactiveSourceFiles) {
   }
 }
 
+for (const file of accountFlowSourceFiles) {
+  const source = readFileSync(file, "utf8");
+  if (!source.includes("@/content/account-flow-copy")) {
+    failures.push(`${file}: missing the account flow locale contract`);
+  }
+}
+
 for (const file of projectCompassSourceFiles) {
   const source = readFileSync(file, "utf8");
   if (!source.includes("@/content/project-compass-copy")) {
@@ -104,4 +119,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Locale architecture check passed for ${sharedSourceFiles.length + workspaceSourceFiles.length + publicProfileSourceFiles.length + designerProfileSourceFiles.length + interactiveSourceFiles.length + projectCompassSourceFiles.length} shared source files.`);
+console.log(`Locale architecture check passed for ${sharedSourceFiles.length + workspaceSourceFiles.length + publicProfileSourceFiles.length + designerProfileSourceFiles.length + interactiveSourceFiles.length + accountFlowSourceFiles.length + projectCompassSourceFiles.length} shared source files.`);

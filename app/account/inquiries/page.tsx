@@ -7,6 +7,8 @@ import {
   type ReferencePhotoPreview,
 } from "@/lib/reference-photos";
 import { briefSnapshotLabel } from "@/lib/brief-labels";
+import { getAccountFlowCopy } from "@/content/account-flow-copy";
+import { profileLocationLabel, profileTypeLabel } from "@/lib/profile-system-labels";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getExplicitAccountRole } from "@/lib/studios";
 
@@ -44,13 +46,7 @@ function textValue(formData: FormData, key: string) {
 }
 
 function statusLabel(status: string) {
-  const labels: Record<string, string> = {
-    accepted: "Zaakceptowane",
-    declined: "Odrzucone",
-    reviewing: "W analizie",
-    sent: "Wysłane",
-  };
-  return labels[status] || status;
+  return getAccountFlowCopy().inquiries.statuses[status] || status;
 }
 
 function statusClass(status: string) {
@@ -61,7 +57,7 @@ function statusClass(status: string) {
 }
 
 function createdLabel(value: string) {
-  return new Intl.DateTimeFormat("pl-PL", {
+  return new Intl.DateTimeFormat(getAccountFlowCopy().dateLocale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -69,11 +65,12 @@ function createdLabel(value: string) {
 }
 
 function profileName(profile?: Profile) {
-  return profile?.full_name || "Specjalista ArchiCompass";
+  return profile?.full_name || getAccountFlowCopy().common.defaultProfessional;
 }
 
 function profileMeta(profile?: Profile) {
-  return [profile?.profession_type || profile?.user_type, profile?.location]
+  if (!profile) return "";
+  return [profileTypeLabel(profile?.profession_type || profile?.user_type), profileLocationLabel(profile?.location)]
     .filter(Boolean)
     .join(" · ");
 }
@@ -89,6 +86,7 @@ function errorRedirect(message: string) {
 async function updateInquiryStatus(formData: FormData) {
   "use server";
 
+  const copy = getAccountFlowCopy();
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getUser();
   const user = data.user;
@@ -98,9 +96,9 @@ async function updateInquiryStatus(formData: FormData) {
   const inquiryId = textValue(formData, "inquiry_id");
   const status = textValue(formData, "status");
 
-  if (!inquiryId) errorRedirect("Nie znaleziono zapytania.");
+  if (!inquiryId) errorRedirect(copy.inquiries.errors.missing);
   if (!status || !designerStatuses.includes(status as (typeof designerStatuses)[number])) {
-    errorRedirect("Wybierz poprawny status zapytania.");
+    errorRedirect(copy.inquiries.errors.invalidStatus);
   }
 
   const { data: updated, error } = await supabase
@@ -115,7 +113,7 @@ async function updateInquiryStatus(formData: FormData) {
     .maybeSingle();
 
   if (error) errorRedirect(error.message);
-  if (!updated) errorRedirect("Tylko odbiorca zapytania może zmienić jego status.");
+  if (!updated) errorRedirect(copy.inquiries.errors.receiverOnly);
 
   revalidatePath("/account");
   revalidatePath("/account/inquiries");
@@ -125,6 +123,7 @@ async function updateInquiryStatus(formData: FormData) {
 async function cancelSentInquiry(formData: FormData) {
   "use server";
 
+  const copy = getAccountFlowCopy();
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getUser();
   const user = data.user;
@@ -132,7 +131,7 @@ async function cancelSentInquiry(formData: FormData) {
   if (!user) redirect("/login");
 
   const inquiryId = textValue(formData, "inquiry_id");
-  if (!inquiryId) errorRedirect("Nie znaleziono zapytania.");
+  if (!inquiryId) errorRedirect(copy.inquiries.errors.missing);
 
   const { data: deleted, error } = await supabase
     .from("designer_inquiries")
@@ -143,7 +142,7 @@ async function cancelSentInquiry(formData: FormData) {
     .maybeSingle();
 
   if (error) errorRedirect(error.message);
-  if (!deleted) errorRedirect("Tylko nadawca może anulować to zapytanie.");
+  if (!deleted) errorRedirect(copy.inquiries.errors.senderOnly);
 
   revalidatePath("/account");
   revalidatePath("/account/briefs");
@@ -162,6 +161,7 @@ function InquiryCard({
   photos: ReferencePhotoPreview[];
   profile?: Profile;
 }) {
+  const copy = getAccountFlowCopy();
   const snapshot = inquiry.brief_snapshot;
 
   return (
@@ -169,7 +169,7 @@ function InquiryCard({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="text-sm font-semibold text-primary">
-            {mode === "sent" ? "Wysłano do" : "Zapytanie od"}
+            {mode === "sent" ? copy.inquiries.sentTo : copy.inquiries.inquiryFrom}
           </div>
           <h2 className="mt-1 text-2xl font-bold">{profileName(profile)}</h2>
           {profileMeta(profile) ? (
@@ -181,7 +181,7 @@ function InquiryCard({
         </span>
       </div>
 
-      <div className="mt-5 text-sm text-muted">Wysłano {createdLabel(inquiry.created_at)}</div>
+      <div className="mt-5 text-sm text-muted">{copy.inquiries.sentOn(createdLabel(inquiry.created_at))}</div>
       <h3 className="mt-2 text-xl font-bold">{inquiry.subject}</h3>
 
       {inquiry.message ? (
@@ -192,18 +192,18 @@ function InquiryCard({
 
       <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
         {[
-          ["Projekt", snapshotText(snapshot, "project_type")],
-          ["Style", snapshotText(snapshot, "style_direction")],
-          ["Zakres", snapshotText(snapshot, "support_scope")],
-          ["Budżet", snapshotText(snapshot, "budget_signal")],
-          ["Termin", snapshotText(snapshot, "timeline")],
-          ["Powierzchnia", snapshotText(snapshot, "area_m2") === "Nie podano" ? "Nie podano" : `${snapshotText(snapshot, "area_m2")} m²`],
-          ["Pomieszczenia", snapshotText(snapshot, "room_types")],
-          ["Nieruchomość", snapshotText(snapshot, "property_status")],
-          ["3D", snapshotText(snapshot, "visualization_need")],
-          ["Nadzór", snapshotText(snapshot, "supervision_need")],
-          ["Lokalizacja", snapshotText(snapshot, "location")],
-          ["Cel", snapshotText(snapshot, "goal")],
+          [copy.inquiries.fields.project, snapshotText(snapshot, "project_type")],
+          [copy.inquiries.fields.styles, snapshotText(snapshot, "style_direction")],
+          [copy.inquiries.fields.scope, snapshotText(snapshot, "support_scope")],
+          [copy.inquiries.fields.budget, snapshotText(snapshot, "budget_signal")],
+          [copy.inquiries.fields.timeline, snapshotText(snapshot, "timeline")],
+          [copy.inquiries.fields.area, snapshotText(snapshot, "area_m2") === copy.common.notProvided ? copy.common.notProvided : `${snapshotText(snapshot, "area_m2")} m²`],
+          [copy.inquiries.fields.rooms, snapshotText(snapshot, "room_types")],
+          [copy.inquiries.fields.property, snapshotText(snapshot, "property_status")],
+          [copy.inquiries.fields.visualisation, snapshotText(snapshot, "visualization_need")],
+          [copy.inquiries.fields.supervision, snapshotText(snapshot, "supervision_need")],
+          [copy.inquiries.fields.location, snapshotText(snapshot, "location")],
+          [copy.inquiries.fields.goal, snapshotText(snapshot, "goal")],
         ].map(([label, value]) => (
           <div key={label} className="rounded-xl border border-line bg-background p-3">
             <div className="text-muted">{label}</div>
@@ -216,7 +216,7 @@ function InquiryCard({
         {inquiry.brief_text}
       </pre>
 
-      <ReferencePhotoGrid photos={photos} title="Zdjęcia referencyjne z zapytania" />
+      <ReferencePhotoGrid photos={photos} title={copy.inquiries.referencePhotos} />
 
       <div className="mt-5 flex flex-wrap gap-3">
         <Link
@@ -227,21 +227,21 @@ function InquiryCard({
           }
           className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
         >
-          Otwórz rozmowę
+          {copy.inquiries.openConversation}
         </Link>
         {mode === "sent" ? (
           <Link
             href={`/designers/${inquiry.designer_id}`}
             className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
           >
-            Otwórz profil projektanta
+            {copy.inquiries.openDesignerProfile}
           </Link>
         ) : profile?.email ? (
           <a
             href={`mailto:${profile.email}?subject=${encodeURIComponent(`Re: ${inquiry.subject}`)}`}
             className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
           >
-            Odpowiedz e-mailem
+            {copy.inquiries.replyByEmail}
           </a>
         ) : null}
       </div>
@@ -253,7 +253,7 @@ function InquiryCard({
         >
           <input type="hidden" name="inquiry_id" value={inquiry.id} />
           <label className="block text-sm font-semibold">
-            Status zapytania
+            {copy.inquiries.statusLabel}
             <select
               name="status"
               defaultValue={
@@ -263,16 +263,16 @@ function InquiryCard({
               }
               className="mt-2 w-full rounded-xl border border-line bg-card px-4 py-3 font-normal text-foreground outline-none transition focus:border-primary"
             >
-              <option value="reviewing">W trakcie</option>
-              <option value="accepted">Zaakceptowane</option>
-              <option value="declined">Odrzucone</option>
+              <option value="reviewing">{copy.inquiries.statuses.reviewing}</option>
+              <option value="accepted">{copy.inquiries.statuses.accepted}</option>
+              <option value="declined">{copy.inquiries.statuses.declined}</option>
             </select>
           </label>
           <button
             type="submit"
             className="self-end rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
           >
-            Zaktualizuj status
+            {copy.inquiries.updateStatus}
           </button>
         </form>
       ) : null}
@@ -280,12 +280,11 @@ function InquiryCard({
       {mode === "sent" ? (
         <details className="mt-5 overflow-hidden rounded-xl border border-red-200 bg-red-50">
           <summary className="block cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-red-700">
-            Anuluj zapytanie
+            {copy.inquiries.cancelSummary}
           </summary>
           <div className="border-t border-red-200 p-4">
             <p className="text-sm leading-6 text-red-700">
-              To usunie zapytanie z ArchiCompass. Zapisany brief pozostanie dostępny
-              w AI Project Compass.
+              {copy.inquiries.cancelBody}
             </p>
             <form action={cancelSentInquiry} className="mt-4">
               <input type="hidden" name="inquiry_id" value={inquiry.id} />
@@ -293,7 +292,7 @@ function InquiryCard({
                 type="submit"
                 className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white hover:bg-red-700"
               >
-                Anuluj to zapytanie
+                {copy.inquiries.cancel}
               </button>
             </form>
           </div>
@@ -369,6 +368,7 @@ export default async function InquiriesPage({
 
   const profiles = (profilesData ?? []) as Profile[];
   const profilesById = new Map(profiles.map((profile) => [profile.id, profile]));
+  const copy = getAccountFlowCopy();
 
   return (
     <main className="bg-background">
@@ -378,26 +378,24 @@ export default async function InquiriesPage({
             href="/account"
             className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
           >
-            Wróć do konta
+            {copy.inquiries.back}
           </Link>
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
-              <div className="text-sm font-semibold text-primary">Zapytania projektowe</div>
+              <div className="text-sm font-semibold text-primary">{copy.inquiries.eyebrow}</div>
               <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
-                Zapytania z briefów
+                {copy.inquiries.title}
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
-                {isDesigner
-                  ? "Przeglądaj briefy i wiadomości wysłane do Twojego profilu specjalisty."
-                  : "Śledź briefy projektowe i rozmowy rozpoczęte z projektantami."}
+                {copy.inquiries.intro(isDesigner)}
               </p>
             </div>
 
             <div className="rounded-2xl border border-line bg-background p-5 shadow-sm">
               <div className="grid gap-3">
                 <div className="rounded-xl border border-line bg-card p-4">
-                  <div className="text-sm text-muted">{isDesigner ? "Przychodzące" : "Wysłane"}</div>
+                  <div className="text-sm text-muted">{copy.inquiries.countLabel(isDesigner)}</div>
                   <div className="mt-1 text-2xl font-bold">{isDesigner ? incoming.length : sent.length}</div>
                 </div>
               </div>
@@ -405,7 +403,7 @@ export default async function InquiriesPage({
                 href="/account/briefs"
                 className="mt-4 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
               >
-                <span className="w-full">Wyślij zapisany brief</span>
+                <span className="w-full">{copy.inquiries.sendSavedBrief}</span>
               </Link> : null}
             </div>
           </div>
@@ -414,22 +412,20 @@ export default async function InquiriesPage({
 
       <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6">
         <div className="rounded-2xl border border-line bg-card p-5 text-sm leading-6 text-muted lg:col-span-2">
-          <div className="font-semibold text-foreground">Przewodnik po statusach zapytań</div>
+          <div className="font-semibold text-foreground">{copy.inquiries.statusGuide}</div>
           <div className="mt-3 flex flex-wrap gap-2">
             {[
-              ["Wysłane", "Zapytanie czeka na sprawdzenie przez projektanta."],
-              ["W analizie", "Projektant sprawdza dopasowanie i zakres."],
-              ["Zaakceptowane", "Projektant jest zainteresowany projektem."],
-              ["Odrzucone", "Projekt nie pasuje teraz do zakresu lub dostępności."],
-            ].map(([label, copy]) => (
+              ["sent", copy.inquiries.statusGuideBody.sent],
+              ["reviewing", copy.inquiries.statusGuideBody.reviewing],
+              ["accepted", copy.inquiries.statusGuideBody.accepted],
+              ["declined", copy.inquiries.statusGuideBody.declined],
+            ].map(([status, description]) => (
               <span
-                key={label}
-                className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass(
-                  label === "Wysłane" ? "sent" : label === "W analizie" ? "reviewing" : label === "Zaakceptowane" ? "accepted" : "declined"
-                )}`}
-                title={copy}
+                key={status}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass(status)}`}
+                title={description}
               >
-                {label}
+                {copy.inquiries.statuses[status]}
               </span>
             ))}
           </div>
@@ -437,28 +433,28 @@ export default async function InquiriesPage({
 
         {sp.updated ? (
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900 lg:col-span-2">
-            <div className="font-semibold">Zapytanie zaktualizowane</div>
-            <p className="mt-1">Klient widzi już najnowszy status.</p>
+            <div className="font-semibold">{copy.inquiries.updatedTitle}</div>
+            <p className="mt-1">{copy.inquiries.updatedBody}</p>
           </div>
         ) : null}
 
         {sp.cancelled ? (
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900 lg:col-span-2">
-            <div className="font-semibold">Zapytanie anulowane</div>
-            <p className="mt-1">Zapisany brief nadal jest dostępny, jeśli zechcesz wysłać go ponownie.</p>
+            <div className="font-semibold">{copy.inquiries.cancelledTitle}</div>
+            <p className="mt-1">{copy.inquiries.cancelledBody}</p>
           </div>
         ) : null}
 
         {sp.error ? (
           <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-700 lg:col-span-2">
-            <div className="font-semibold">Nie udało się wykonać działania na zapytaniu</div>
+            <div className="font-semibold">{copy.inquiries.actionError}</div>
             <p className="mt-1">{sp.error}</p>
           </div>
         ) : null}
 
         {!isDesigner ? <div>
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-2xl font-bold">Wysłane zapytania</h2>
+            <h2 className="text-2xl font-bold">{copy.inquiries.sentTitle}</h2>
             <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
               {sent.length}
             </span>
@@ -482,16 +478,15 @@ export default async function InquiriesPage({
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-line bg-card p-6 text-sm leading-6 text-muted">
-              <div className="text-lg font-bold text-foreground">Nie masz jeszcze wysłanych zapytań</div>
+              <div className="text-lg font-bold text-foreground">{copy.inquiries.sentEmptyTitle}</div>
               <p className="mt-2">
-                Wyślij zapisany brief AI Project Compass, gdy będziesz gotowy do kontaktu
-                z projektantem.
+                {copy.inquiries.sentEmptyBody}
               </p>
               <Link
                 href="/account/briefs"
                 className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
               >
-                Wyślij zapisany brief
+                {copy.inquiries.sendSavedBrief}
               </Link>
             </div>
           )}
@@ -499,7 +494,7 @@ export default async function InquiriesPage({
 
         {isDesigner ? <div>
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-2xl font-bold">Przychodzące zapytania</h2>
+            <h2 className="text-2xl font-bold">{copy.inquiries.incomingTitle}</h2>
             <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
               {incoming.length}
             </span>
@@ -523,23 +518,22 @@ export default async function InquiriesPage({
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-line bg-card p-6 text-sm leading-6 text-muted">
-              <div className="text-lg font-bold text-foreground">Nie ma jeszcze zapytań</div>
+              <div className="text-lg font-bold text-foreground">{copy.inquiries.incomingEmptyTitle}</div>
               <p className="mt-2">
-                Gdy klient wyśle zapisany brief do Twojego profilu, pojawi się tutaj.
-                Utrzymuj profil publiczny w gotowości na pierwsze wartościowe zapytanie.
+                {copy.inquiries.incomingEmptyBody}
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 <Link
                   href={`/designers/${user.id}`}
                   className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                 >
-                  Zobacz profil publiczny
+                  {copy.inquiries.viewPublicProfile}
                 </Link>
                 <Link
                   href="/account/profile"
                   className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
                 >
-                  Edytuj profil
+                  {copy.inquiries.editProfile}
                 </Link>
               </div>
             </div>

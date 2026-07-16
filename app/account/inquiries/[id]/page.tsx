@@ -14,6 +14,7 @@ import {
 } from "@/lib/message-attachments";
 import { referencePhotoPreviews } from "@/lib/reference-photos";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getAccountFlowCopy } from "@/content/account-flow-copy";
 
 export const revalidate = 0;
 
@@ -67,12 +68,13 @@ function isUuid(value: string) {
 async function sendParticipantMessage(formData: FormData) {
   "use server";
 
+  const copy = getAccountFlowCopy();
   const inquiryId = textValue(formData, "inquiry_id");
   const body = textValue(formData, "body");
   if (!inquiryId || !isUuid(inquiryId)) redirect("/account/inquiries");
   const files = attachmentFiles(formData);
-  if (!body && !files.length) redirect(`/account/inquiries/${inquiryId}?error=Wpisz%20wiadomo%C5%9B%C4%87%20albo%20dodaj%20plik`);
-  if ((body?.length ?? 0) > 4000) redirect(`/account/inquiries/${inquiryId}?error=Wiadomo%C5%9B%C4%87%20jest%20zbyt%20d%C5%82uga`);
+  if (!body && !files.length) redirect(`/account/inquiries/${inquiryId}?error=${encodeURIComponent(copy.conversation.errors.messageOrFile)}`);
+  if ((body?.length ?? 0) > 4000) redirect(`/account/inquiries/${inquiryId}?error=${encodeURIComponent(copy.conversation.errors.messageTooLong)}`);
 
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -93,7 +95,7 @@ async function sendParticipantMessage(formData: FormData) {
   const { data: insertedMessage, error } = await supabase.from("inquiry_messages").insert({
     inquiry_id: inquiryId,
     sender_id: user.id,
-    body: body || "Udostępniono załączniki",
+    body: body || copy.conversation.attachmentsShared,
     attachment_names: upload.names,
     attachment_paths: upload.paths,
     attachment_types: upload.types,
@@ -120,14 +122,14 @@ async function sendParticipantMessage(formData: FormData) {
         : Promise.resolve({ data: null }),
     ]);
   const notification = await sendConversationNotificationEmail({
-    body: body || `Udostępniono załączniki: ${upload.names.join(", ")}`,
+    body: body || `${copy.conversation.attachmentsShared}: ${upload.names.join(", ")}`,
     inquiryId,
     recipient: {
       email: studio?.email || designerProfile?.email || null,
       name: studio?.name || designerProfile?.full_name || null,
       role: "designer",
     },
-    senderName: senderProfile?.full_name || user.email || "Klient",
+    senderName: senderProfile?.full_name || user.email || copy.conversation.client,
     subject: inquiry.subject,
   });
   if (notification.error) {
@@ -152,7 +154,7 @@ async function sendParticipantMessage(formData: FormData) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("pl-PL", {
+  return new Intl.DateTimeFormat(getAccountFlowCopy().dateLocale, {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
@@ -168,11 +170,7 @@ function statusClass(status: string) {
 }
 
 function statusLabel(status: string) {
-  if (status === "accepted") return "Zaakceptowane";
-  if (status === "declined") return "Odrzucone";
-  if (status === "reviewing") return "W trakcie";
-  if (status === "sent") return "Nowe";
-  return status;
+  return getAccountFlowCopy().inquiries.statuses[status] || status;
 }
 
 export default async function AccountConversationPage({
@@ -227,22 +225,23 @@ export default async function AccountConversationPage({
   const attachmentsByMessage = new Map(messageAttachmentEntries);
   const other = profileData as Profile | null;
   const studio = studioData as Studio | null;
-  const otherName = studio?.name || other?.full_name || studio?.email || other?.email || "Projektant wnętrz";
-  const originalAuthor = "Ty";
+  const copy = getAccountFlowCopy();
+  const otherName = studio?.name || other?.full_name || studio?.email || other?.email || copy.conversation.designerFallback;
+  const originalAuthor = copy.conversation.you;
 
   return (
     <main>
       <section className="border-b border-line bg-card px-4 py-8 sm:px-6">
         <div className="mx-auto max-w-6xl">
           <Link href="/client/messages" className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary">
-            Wróć do wiadomości
+            {copy.conversation.back}
           </Link>
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-sm font-semibold text-primary">Rozmowa z: {otherName}</div>
+              <div className="text-sm font-semibold text-primary">{copy.conversation.with(otherName)}</div>
               <h1 className="mt-2 text-4xl font-bold">{inquiry.subject}</h1>
               <Link href={studio ? `/studios/${studio.id}` : `/designers/${inquiry.designer_id}`} className="mt-3 inline-flex text-sm font-bold text-primary hover:underline">
-                {studio ? "Otwórz profil pracowni" : "Otwórz profil projektanta"}
+                {studio ? copy.conversation.openStudio : copy.conversation.openDesigner}
               </Link>
             </div>
             <span className={`w-fit rounded-full px-3 py-1 text-sm font-semibold capitalize ${statusClass(inquiry.status)}`}>
@@ -256,7 +255,7 @@ export default async function AccountConversationPage({
         <section className="rounded-lg border border-line bg-card p-5 shadow-sm sm:p-6">
           {sp.sent ? (
             <div className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-              Wiadomość została wysłana.
+              {copy.conversation.sent}
             </div>
           ) : null}
           {sp.error ? (
@@ -266,11 +265,11 @@ export default async function AccountConversationPage({
           ) : null}
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-2xl font-bold">Wiadomości</h2>
+            <h2 className="text-2xl font-bold">{copy.conversation.messages}</h2>
             <div className="flex flex-wrap items-center gap-3">
               <ConversationAutoRefresh />
               <Link href={`/account/inquiries/${inquiry.id}`} className="text-sm font-semibold text-primary hover:underline">
-                Odśwież
+                {copy.conversation.refresh}
               </Link>
             </div>
           </div>
@@ -281,7 +280,7 @@ export default async function AccountConversationPage({
                 "max-w-[85%] rounded-lg p-4",
                 inquiry.client_id === user.id ? "ml-auto bg-primary text-white" : "mr-auto bg-background",
               ].join(" ")}>
-                <div className="text-xs font-semibold opacity-70">{originalAuthor} · pierwsza wiadomość</div>
+                <div className="text-xs font-semibold opacity-70">{originalAuthor} · {copy.conversation.firstMessage}</div>
                 <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{inquiry.message}</p>
               </div>
             ) : null}
@@ -294,13 +293,13 @@ export default async function AccountConversationPage({
                   mine ? "ml-auto rounded-br-sm bg-primary text-white" : "mr-auto rounded-bl-sm bg-background",
                 ].join(" ")}>
                   <div className="text-xs font-semibold opacity-70">
-                    {mine ? "Ty" : otherName} · {formatDate(message.created_at)}
+                    {mine ? copy.conversation.you : otherName} · {formatDate(message.created_at)}
                   </div>
                   <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{message.body}</p>
                   <MessageAttachments attachments={attachmentsByMessage.get(message.id) ?? []} inverted={mine} />
                   {mine ? (
                     <div className="mt-2 text-right text-[11px] font-semibold opacity-70">
-                      {message.read_at ? "Przeczytano" : "Wysłano"}
+                      {message.read_at ? copy.conversation.read : copy.inquiries.statuses.sent}
                     </div>
                   ) : null}
                 </div>
@@ -311,25 +310,25 @@ export default async function AccountConversationPage({
           <form action={sendParticipantMessage} className="sticky bottom-3 z-10 mt-6 rounded-xl border border-line bg-card p-4 shadow-lg">
             <input type="hidden" name="inquiry_id" value={inquiry.id} />
             <label className="block text-sm font-semibold">
-              Odpowiedź
-              <textarea name="body" maxLength={4000} rows={5} placeholder="Napisz wiadomość..." className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
+              {copy.conversation.reply}
+              <textarea name="body" maxLength={4000} rows={5} placeholder={copy.conversation.replyPlaceholder} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
             <label className="mt-3 block text-sm font-semibold">
-              Dodaj plany lub dokumenty <span className="font-normal text-muted">maksymalnie 5 plików, do 20 MB każdy</span>
+              {copy.conversation.attachments} <span className="font-normal text-muted">{copy.conversation.attachmentLimit}</span>
               <input name="attachments" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.dwg,.dxf,.zip,.txt" className="mt-2 block w-full rounded-xl border border-dashed border-line bg-background px-4 py-3 text-sm font-normal text-muted" />
             </label>
             <PendingSubmitButton
               className="mt-3 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"
-              idleLabel="Wyślij wiadomość"
-              pendingLabel="Wysyłanie..."
+              idleLabel={copy.conversation.sendMessage}
+              pendingLabel={copy.conversation.sending}
             />
           </form>
         </section>
 
         <aside className="grid h-fit gap-5 lg:sticky lg:top-24">
-          <ReferencePhotoGrid photos={photos} title="Zdjęcia referencyjne z briefu" />
+          <ReferencePhotoGrid photos={photos} title={copy.conversation.referencePhotos} />
           <details className="rounded-lg border border-line bg-card p-5 shadow-sm">
-            <summary className="cursor-pointer font-semibold">Otwórz pełną treść briefu</summary>
+            <summary className="cursor-pointer font-semibold">{copy.conversation.openFullBrief}</summary>
             <pre className="mt-4 max-h-80 overflow-auto whitespace-pre-wrap rounded-lg bg-[#1f172a] p-4 text-xs leading-6 text-white/80">
               {inquiry.brief_text}
             </pre>

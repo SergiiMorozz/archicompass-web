@@ -16,6 +16,17 @@ type InteractiveCopy = {
   social: {
     profileLinks: string;
   };
+  referencePhotos: {
+    defaultTitle: string;
+    photoCount: (count: number) => string;
+    openFullSize: (name: string) => string;
+    imageAlt: (title: string, index: number, name: string) => string;
+    caption: (name: string) => string;
+  };
+  conversation: {
+    openAttachment: string;
+    autoRefresh: string;
+  };
 };
 
 const interactiveCopy: Record<SiteLocale, InteractiveCopy> = {
@@ -33,6 +44,14 @@ const interactiveCopy: Record<SiteLocale, InteractiveCopy> = {
       verified: "zweryfikowano",
     },
     social: { profileLinks: "Linki społecznościowe profilu" },
+    referencePhotos: {
+      defaultTitle: "Zdjęcia referencyjne",
+      photoCount: (count) => `${count} ${count === 1 ? "zdjęcie" : count < 5 ? "zdjęcia" : "zdjęć"}`,
+      openFullSize: (name) => `Otwórz ${name} w pełnym rozmiarze`,
+      imageAlt: (title, index, name) => `${title} ${index}: ${name}`,
+      caption: (name) => `${name} - otwórz pełny rozmiar`,
+    },
+    conversation: { openAttachment: "Otwórz", autoRefresh: "Odświeżane automatycznie" },
   },
   en: {
     favorite: {
@@ -48,6 +67,14 @@ const interactiveCopy: Record<SiteLocale, InteractiveCopy> = {
       verified: "verified",
     },
     social: { profileLinks: "Profile social links" },
+    referencePhotos: {
+      defaultTitle: "Reference photos",
+      photoCount: (count) => `${count} ${count === 1 ? "photo" : "photos"}`,
+      openFullSize: (name) => `Open ${name} at full size`,
+      imageAlt: (title, index, name) => `${title} ${index}: ${name}`,
+      caption: (name) => `${name} - open full size`,
+    },
+    conversation: { openAttachment: "Open", autoRefresh: "Updates automatically" },
   },
 };
 

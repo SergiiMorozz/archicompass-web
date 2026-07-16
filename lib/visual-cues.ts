@@ -1,3 +1,5 @@
+import { siteLocale, type SiteLocale } from "@/lib/site-locale";
+
 const polishVisualCueLabels: Record<string, string> = {
   "Natural wood": "Naturalne drewno",
   "Bright neutral palette": "Jasna neutralna paleta",
@@ -11,10 +13,19 @@ const polishVisualCueLabels: Record<string, string> = {
   "Soft curves": "Miękkie linie",
 };
 
+export function visualCue(value: string, locale: SiteLocale = siteLocale) {
+  return locale === "pl" ? polishVisualCueLabels[value] ?? value : value;
+}
+
+export function visualCues(values: string[] | null | undefined, locale: SiteLocale = siteLocale) {
+  return values?.map((value) => visualCue(value, locale)) ?? [];
+}
+
+// Legacy aliases keep existing Polish-only call sites stable while they are migrated.
 export function polishVisualCue(value: string) {
-  return polishVisualCueLabels[value] ?? value;
+  return visualCue(value, "pl");
 }
 
 export function polishVisualCues(values: string[] | null | undefined) {
-  return values?.map(polishVisualCue) ?? [];
+  return visualCues(values, "pl");
 }

@@ -1,4 +1,5 @@
 import type { MessageAttachment } from "@/lib/message-attachments";
+import { getInteractiveCopy } from "@/content/interactive-copy";
 
 export default function MessageAttachments({
   attachments,
@@ -7,6 +8,7 @@ export default function MessageAttachments({
   attachments: MessageAttachment[];
   inverted?: boolean;
 }) {
+  const copy = getInteractiveCopy().conversation;
   if (!attachments.length) return null;
   return (
     <div className="mt-3 grid gap-2">
@@ -22,7 +24,7 @@ export default function MessageAttachments({
           ].join(" ")}
         >
           <span className="truncate">{attachment.name}</span>
-          <span className="shrink-0">Open</span>
+          <span className="shrink-0">{copy.openAttachment}</span>
         </a>
       ))}
     </div>
