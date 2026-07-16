@@ -38,6 +38,7 @@ const workspaceSourceFiles = [
 
 const publicProfileSourceFiles = ["components/ProjectGallery.tsx"];
 const designerProfileSourceFiles = ["app/designers/[id]/page.tsx"];
+const studioProfileSourceFiles = ["app/studios/[id]/page.tsx"];
 const interactiveSourceFiles = [
   "components/FavoriteButton.tsx",
   "components/GoogleRating.tsx",
@@ -93,6 +94,13 @@ for (const file of designerProfileSourceFiles) {
   }
 }
 
+for (const file of studioProfileSourceFiles) {
+  const source = readFileSync(file, "utf8");
+  if (!source.includes("@/content/studio-profile-copy")) {
+    failures.push(`${file}: missing the studio profile locale contract`);
+  }
+}
+
 for (const file of interactiveSourceFiles) {
   const source = readFileSync(file, "utf8");
   if (!source.includes("@/content/interactive-copy")) {
@@ -119,4 +127,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Locale architecture check passed for ${sharedSourceFiles.length + workspaceSourceFiles.length + publicProfileSourceFiles.length + designerProfileSourceFiles.length + interactiveSourceFiles.length + accountFlowSourceFiles.length + projectCompassSourceFiles.length} shared source files.`);
+console.log(`Locale architecture check passed for ${sharedSourceFiles.length + workspaceSourceFiles.length + publicProfileSourceFiles.length + designerProfileSourceFiles.length + studioProfileSourceFiles.length + interactiveSourceFiles.length + accountFlowSourceFiles.length + projectCompassSourceFiles.length} shared source files.`);

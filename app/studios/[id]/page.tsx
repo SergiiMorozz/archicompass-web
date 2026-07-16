@@ -7,7 +7,6 @@ import GoogleRating from "@/components/GoogleRating";
 import JsonLd from "@/components/JsonLd";
 import ProjectGallery from "@/components/ProjectGallery";
 import SocialLinks, { socialSameAs } from "@/components/SocialLinks";
-import { polishCountLabel } from "@/lib/count-label";
 import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { availabilityLabel, pricingLabel, workModeLabel } from "@/lib/profile-pricing";
@@ -15,6 +14,9 @@ import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { localizeProfileContent, localizedProfileText } from "@/lib/localized-profile-content";
 import { professionalOptionLabel } from "@/lib/professional-options";
+import { serviceCapabilityLabel } from "@/lib/service-capabilities";
+import { profileExperienceLabel, profileLocationLabel, profileTypeLabel } from "@/lib/profile-system-labels";
+import { getStudioProfileCopy } from "@/content/studio-profile-copy";
 
 export const revalidate = 0;
 
@@ -100,8 +102,9 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
+  const copy = getStudioProfileCopy();
   if (!isUuid(id)) {
-    return pageMetadata({ title: "Nie znaleziono pracowni", description: "Ten profil pracowni projektowej nie jest dostępny.", path: `/studios/${id}`, noIndex: true });
+    return pageMetadata({ title: copy.metadata.missingTitle, description: copy.metadata.missingDescription, path: `/studios/${id}`, noIndex: true });
   }
   const supabase = createPublicSupabaseClient();
   const { data: studio } = await supabase
@@ -111,11 +114,11 @@ export async function generateMetadata({
     .eq("published", true)
     .maybeSingle();
   if (!studio) {
-    return pageMetadata({ title: "Nie znaleziono pracowni", description: "Ten profil pracowni projektowej nie jest dostępny.", path: `/studios/${id}`, noIndex: true });
+    return pageMetadata({ title: copy.metadata.missingTitle, description: copy.metadata.missingDescription, path: `/studios/${id}`, noIndex: true });
   }
   return pageMetadata({
-    title: `${studio.name} – pracownia projektowania wnętrz${studio.location ? ` · ${studio.location}` : ""}`,
-    description: localizedProfileText(studio, "bio") || `Zobacz zespół, portfolio, specjalizacje, usługi i dostępność pracowni ${studio.name} w ArchiCompass.`,
+    title: copy.metadata.title(studio.name, studio.location),
+    description: localizedProfileText(studio, "bio") || copy.metadata.description(studio.name),
     path: `/studios/${id}`,
     type: "profile",
   });
@@ -231,14 +234,15 @@ export default async function PublicStudioPage({
     (maximum, profile) => Math.max(maximum, profile.years_experience ?? 0),
     studio.years_experience ?? 0
   );
+  const copy = getStudioProfileCopy();
 
   return (
     <main className="bg-background pb-24 lg:pb-0">
       <JsonLd
         data={[
           breadcrumbJsonLd([
-            { name: "Strona główna", path: "/" },
-            { name: "Katalog Projektantów", path: "/designers" },
+            { name: copy.metadata.home, path: "/" },
+            { name: copy.metadata.directory, path: "/designers" },
             { name: studio.name, path: `/studios/${studio.id}` },
           ]),
           {
@@ -267,7 +271,7 @@ export default async function PublicStudioPage({
               const memberProfile = profilesById.get(member.user_id);
               return {
                 "@type": "Person",
-                name: memberProfile?.full_name || "Projektant wnętrz",
+                name: memberProfile?.full_name || copy.labels.interiorDesigner,
                 url: absoluteUrl(`/designers/${member.user_id}`),
               };
             }),
@@ -276,7 +280,7 @@ export default async function PublicStudioPage({
       />
       <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
         <Link href="/designers" className="inline-flex rounded-full border border-line bg-card px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary">
-          Wróć do wyszukiwarki projektantów
+          {copy.labels.back}
         </Link>
 
         <div
@@ -285,10 +289,10 @@ export default async function PublicStudioPage({
         >
           <div className="flex min-h-[380px] items-end p-6 text-white sm:p-10">
             <div className="max-w-3xl">
-              <span className="inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-semibold backdrop-blur">Pracownia projektowa</span>
+              <span className="inline-flex rounded-full bg-white/15 px-4 py-2 text-sm font-semibold backdrop-blur">{copy.labels.studioType}</span>
               <h1 className="mt-5 text-4xl font-bold sm:text-6xl">{studio.name}</h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-white/85">
-                {studio.profile_headline || `Pracownia projektowania wnętrz${studio.location ? ` · ${studio.location}` : ""}`}
+                {studio.profile_headline || `${copy.labels.studioType}${studio.location ? ` · ${profileLocationLabel(studio.location)}` : ""}`}
               </p>
             </div>
           </div>
@@ -302,62 +306,61 @@ export default async function PublicStudioPage({
                   <Image src={logo} alt={`${studio.name} logo`} width={72} height={72} unoptimized className="h-18 w-18 rounded-xl border border-line object-cover" />
                 ) : null}
                 <div>
-                <div className="text-sm font-semibold text-primary">Profil pracowni</div>
-                <h2 className="mt-1 text-3xl font-bold">Jedna pracownia, {polishCountLabel(visibleMembers.length, "powiązany projektant", "powiązanych projektantów", "powiązanych projektantów")}</h2>
-                <p className="mt-3 text-muted">{studio.location || "Zdalnie / lokalizacja do uzgodnienia"}</p>
+                <div className="text-sm font-semibold text-primary">{copy.labels.profile}</div>
+                <h2 className="mt-1 text-3xl font-bold">{copy.labels.teamHeading(visibleMembers.length)}</h2>
+                <p className="mt-3 text-muted">{studio.location ? profileLocationLabel(studio.location) : copy.labels.remoteLocation}</p>
                 </div>
               </div>
               {isMember ? (
-                <Link href="/studio/team" className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white">Zarządzaj pracownią</Link>
+                <Link href="/studio/team" className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white">{copy.labels.manageStudio}</Link>
               ) : (
                 <FavoriteButton entityType="studio" entityKey={studio.id} initialSaved={savedFavorites.has(`studio:${studio.id}`)} />
               )}
             </div>
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-lg border border-line bg-background p-4"><div className="text-sm text-muted">Zespół</div><div className="mt-1 text-xl font-bold">{visibleMembers.length}</div></div>
-              <div className="rounded-lg border border-line bg-background p-4"><div className="text-sm text-muted">Projekty</div><div className="mt-1 text-xl font-bold">{projects.length}</div></div>
-              <div className="rounded-lg border border-line bg-background p-4"><div className="text-sm text-muted">Doświadczenie</div><div className="mt-1 text-xl font-bold">{totalExperience ? `${totalExperience}+ lat` : "Na zapytanie"}</div></div>
+              <div className="rounded-lg border border-line bg-background p-4"><div className="text-sm text-muted">{copy.labels.team}</div><div className="mt-1 text-xl font-bold">{visibleMembers.length}</div></div>
+              <div className="rounded-lg border border-line bg-background p-4"><div className="text-sm text-muted">{copy.labels.projects}</div><div className="mt-1 text-xl font-bold">{projects.length}</div></div>
+              <div className="rounded-lg border border-line bg-background p-4"><div className="text-sm text-muted">{copy.labels.experience}</div><div className="mt-1 text-xl font-bold">{totalExperience ? profileExperienceLabel(totalExperience) : copy.labels.onRequest}</div></div>
             </div>
             {studio.specialties?.length ? (
               <div className="mt-5 flex flex-wrap gap-2">
-                {studio.specialties.map((specialty) => <span key={specialty} className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">{specialty}</span>)}
+                {studio.specialties.map((specialty) => <span key={specialty} className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">{professionalOptionLabel(specialty)}</span>)}
               </div>
             ) : null}
             {studio.service_capabilities?.length ? (
               <div className="mt-4 flex flex-wrap gap-2">
-                {studio.service_capabilities.map((capability) => <span key={capability} className="rounded-full border border-line bg-background px-3 py-1 text-sm font-semibold text-muted">{capability}</span>)}
+                {studio.service_capabilities.map((capability) => <span key={capability} className="rounded-full border border-line bg-background px-3 py-1 text-sm font-semibold text-muted">{serviceCapabilityLabel(capability)}</span>)}
               </div>
             ) : null}
           </div>
 
           <aside className="h-fit rounded-lg border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
-            <div className="text-sm font-semibold text-primary">Wspólna skrzynka pracowni</div>
-            <h2 className="mt-2 text-2xl font-bold">Skontaktuj się z {studio.name}</h2>
+            <div className="text-sm font-semibold text-primary">{copy.labels.sharedInbox}</div>
+            <h2 className="mt-2 text-2xl font-bold">{copy.labels.contactHeading(studio.name)}</h2>
             <p className="mt-3 text-sm leading-6 text-muted">
-              Brief trafia do zespołu pracowni. Każdy aktywny członek może zobaczyć kontekst
-              i kontynuować tę samą rozmowę.
+              {copy.labels.contactBody}
             </p>
             <div className="mt-5 grid gap-3 text-sm">
-              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Cena</span><span className="text-right font-semibold">{pricingLabel(studio)}</span></div>
-              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Dostępność</span><span className="text-right font-semibold">{studio.availability_status ? availabilityLabel(studio.availability_status) : "Na zapytanie"}</span></div>
-              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Forma współpracy</span><span className="text-right font-semibold">{studio.work_modes?.map((mode) => workModeLabel(mode)).join(" · ") || "Na zapytanie"}</span></div>
-              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">Minimalny budżet</span><span className="text-right font-semibold">{studio.minimum_project_budget ? `${studio.minimum_project_budget} PLN` : "Nie podano"}</span></div>
-              <div className="flex justify-between gap-4"><span className="text-muted">Kontakt</span><span className="truncate font-semibold">{studio.email || studio.phone || "Przez brief"}</span></div>
+              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">{copy.labels.price}</span><span className="text-right font-semibold">{pricingLabel(studio)}</span></div>
+              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">{copy.labels.availability}</span><span className="text-right font-semibold">{studio.availability_status ? availabilityLabel(studio.availability_status) : copy.labels.onRequest}</span></div>
+              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">{copy.labels.workMode}</span><span className="text-right font-semibold">{studio.work_modes?.map((mode) => workModeLabel(mode)).join(" · ") || copy.labels.onRequest}</span></div>
+              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">{copy.labels.minimumBudget}</span><span className="text-right font-semibold">{studio.minimum_project_budget ? `${studio.minimum_project_budget} PLN` : copy.labels.onRequest}</span></div>
+              <div className="flex justify-between gap-4"><span className="text-muted">{copy.labels.contact}</span><span className="truncate font-semibold">{studio.email || studio.phone || copy.labels.throughBrief}</span></div>
             </div>
             {hasVerifiedGoogleRating ? (
               <div className="mt-5">
                 <GoogleRating rating={studio.google_rating} count={studio.google_review_count} url={studio.google_business_url} />
               </div>
             ) : null}
-            {studio.cooperation_terms ? <div className="mt-5 rounded-lg border border-line bg-background p-4"><div className="text-sm font-semibold text-primary">Warunki współpracy</div><p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted">{studio.cooperation_terms}</p></div> : null}
+            {studio.cooperation_terms ? <div className="mt-5 rounded-lg border border-line bg-background p-4"><div className="text-sm font-semibold text-primary">{copy.labels.terms}</div><p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted">{studio.cooperation_terms}</p></div> : null}
             {isMember ? (
-              <Link href="/studio/inbox" className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"><span className="w-full">Otwórz skrzynkę zespołu</span></Link>
+              <Link href="/studio/inbox" className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"><span className="w-full">{copy.labels.openInbox}</span></Link>
             ) : viewerRole === "client" ? (
-              <Link href={briefRequestHref(studio.id, selectedBriefId)} className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"><span className="w-full">Wyślij brief do pracowni</span></Link>
+              <Link href={briefRequestHref(studio.id, selectedBriefId)} className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"><span className="w-full">{copy.labels.sendBrief}</span></Link>
             ) : (
-              <div className="mt-6 rounded-lg border border-line bg-background p-4 text-sm leading-6 text-muted">Konta projektantów otrzymują briefy i nie mogą wysyłać zapytań jako klienci.</div>
+              <div className="mt-6 rounded-lg border border-line bg-background p-4 text-sm leading-6 text-muted">{copy.labels.designerNotice}</div>
             )}
-            {website ? <a href={website} target="_blank" rel="noreferrer" className="mt-3 flex rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold"><span className="w-full">Otwórz stronę internetową</span></a> : null}
+            {website ? <a href={website} target="_blank" rel="noreferrer" className="mt-3 flex rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold"><span className="w-full">{copy.labels.openWebsite}</span></a> : null}
             <div className="mt-4">
               <SocialLinks
                 behanceUrl={studio.behance_url}
@@ -373,14 +376,14 @@ export default async function PublicStudioPage({
       <section className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6">
         {studio.bio ? (
           <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-            <div className="text-sm font-semibold text-primary">O pracowni</div>
-            <h2 className="mt-1 text-3xl font-bold">Podejście do projektowania</h2>
+            <div className="text-sm font-semibold text-primary">{copy.labels.about}</div>
+            <h2 className="mt-1 text-3xl font-bold">{copy.labels.designApproach}</h2>
             <p className="mt-5 max-w-4xl whitespace-pre-line text-base leading-8 text-muted">{studio.bio}</p>
           </section>
         ) : null}
         <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
-          <div className="text-sm font-semibold text-primary">Zespół pracowni</div>
-          <h2 className="mt-1 text-3xl font-bold">Powiązani projektanci</h2>
+          <div className="text-sm font-semibold text-primary">{copy.labels.studioTeam}</div>
+          <h2 className="mt-1 text-3xl font-bold">{copy.labels.connectedDesigners}</h2>
           {visibleMembers.length ? (
             <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {visibleMembers.map((member) => {
@@ -388,21 +391,21 @@ export default async function PublicStudioPage({
                 return (
                   <article key={member.user_id} className="rounded-lg border border-line bg-background p-5">
                     <div className="text-xs font-semibold uppercase text-primary">{member.role}</div>
-                    <h3 className="mt-2 text-xl font-bold">{profile.full_name || "Projektant wnętrz"}</h3>
-                    <p className="mt-1 text-sm text-muted">{profile.profession_type || "Projektant"}{profile.location ? ` · ${profile.location}` : ""}</p>
-                    <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">{profile.bio || "Otwórz indywidualny profil, aby zobaczyć portfolio i sposób pracy tego projektanta."}</p>
-                    <Link href={`/designers/${profile.id}${selectedBriefId ? `?brief=${encodeURIComponent(selectedBriefId)}` : ""}`} className="mt-5 inline-flex rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary">Otwórz profil projektanta</Link>
+                    <h3 className="mt-2 text-xl font-bold">{profile.full_name || copy.labels.interiorDesigner}</h3>
+                    <p className="mt-1 text-sm text-muted">{profileTypeLabel(profile.profession_type) || copy.labels.designer}{profile.location ? ` · ${profileLocationLabel(profile.location)}` : ""}</p>
+                    <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">{profile.bio || copy.labels.memberBioFallback}</p>
+                    <Link href={`/designers/${profile.id}${selectedBriefId ? `?brief=${encodeURIComponent(selectedBriefId)}` : ""}`} className="mt-5 inline-flex rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary">{copy.labels.openDesigner}</Link>
                   </article>
                 );
               })}
             </div>
-          ) : <div className="mt-5 rounded-lg border border-dashed border-line bg-background p-6 text-muted">Zespół pracowni przygotowuje publiczne profile projektantów.</div>}
+          ) : <div className="mt-5 rounded-lg border border-dashed border-line bg-background p-6 text-muted">{copy.labels.teamEmpty}</div>}
         </section>
 
         <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
           <div className="flex items-end justify-between gap-4">
-            <div><div className="text-sm font-semibold text-primary">Wspólne portfolio</div><h2 className="mt-1 text-3xl font-bold">Projekty zespołu pracowni</h2></div>
-            <div className="text-sm font-semibold text-muted">{polishCountLabel(projects.length, "projekt", "projekty", "projektów")}</div>
+            <div><div className="text-sm font-semibold text-primary">{copy.labels.sharedPortfolio}</div><h2 className="mt-1 text-3xl font-bold">{copy.labels.teamProjects}</h2></div>
+            <div className="text-sm font-semibold text-muted">{copy.labels.projectCount(projects.length)}</div>
           </div>
           {projects.length ? (
             <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -410,11 +413,11 @@ export default async function PublicStudioPage({
                 const designer = profilesById.get(project.profile_id);
                 return (
                   <article key={project.id} className="overflow-hidden rounded-lg border border-line bg-background">
-                    <ProjectGallery category={project.category ? professionalOptionLabel(project.category) : "Portfolio"} description={project.description} images={project.image_urls ?? [fallbackImage]} title={project.title || "Projekt bez tytułu"} />
+                    <ProjectGallery category={project.category ? professionalOptionLabel(project.category) : copy.labels.projects} description={project.description} images={project.image_urls ?? [fallbackImage]} title={project.title || copy.labels.untitledProject} />
                     <div className="p-5">
-                      <div className="text-sm text-muted">Autor: {designer?.full_name || "Projektant z pracowni"}</div>
+                      <div className="text-sm text-muted">{copy.labels.author(designer?.full_name || copy.labels.memberProjectAuthor)}</div>
                       <div className="mt-4 flex flex-wrap gap-2">
-                        <Link href={`/projects/${project.id}`} className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">Zobacz projekt</Link>
+                        <Link href={`/projects/${project.id}`} className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">{copy.labels.viewProject}</Link>
                         <FavoriteButton entityType="project" entityKey={project.id} initialSaved={savedFavorites.has(`project:${project.id}`)} />
                       </div>
                     </div>
@@ -422,7 +425,7 @@ export default async function PublicStudioPage({
                 );
               })}
             </div>
-          ) : <div className="mt-5 rounded-lg border border-dashed border-line bg-background p-6 text-muted">Projekty aktywnych członków zespołu pojawią się tutaj automatycznie.</div>}
+          ) : <div className="mt-5 rounded-lg border border-dashed border-line bg-background p-6 text-muted">{copy.labels.projectsEmpty}</div>}
         </section>
       </section>
     </main>
