@@ -13,6 +13,7 @@ import {
 } from "@/lib/designer-matching";
 import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createPublicContentClient } from "@/lib/public-content-client";
 import { requiredServiceCapabilities, serviceCapabilities, serviceCapabilityLabel } from "@/lib/service-capabilities";
 import { availabilityLabel, availabilityStatuses, pricingLabel, pricingModelLabel, workModeLabel, workModes } from "@/lib/profile-pricing";
 import {
@@ -699,8 +700,9 @@ export default async function DesignersPage({
   const maxProjectBudget = maxProjectBudgetRaw ? Number(maxProjectBudgetRaw) : NaN;
 
   const supabase = await createSupabaseServerClient();
+  const publicSupabase = createPublicContentClient();
 
-  const query = supabase
+  const query = publicSupabase
     .from("profiles")
     .select(
       "id, avatar_url, profile_logo_path, full_name, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, service_categories, languages, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at"
@@ -710,7 +712,7 @@ export default async function DesignersPage({
     .limit(60);
 
   const { data, error } = await query;
-  const { data: studioData } = await supabase
+  const { data: studioData } = await publicSupabase
     .from("studios")
     .select("id, name, profile_logo_path, bio, bio_pl, bio_en, location, specialties, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at")
     .eq("published", true)
@@ -739,7 +741,7 @@ export default async function DesignersPage({
       .map((item) => item.entity_key)
   );
   const profileMediaUrl = (path: string | null) =>
-    path ? supabase.storage.from("profile-media").getPublicUrl(path).data.publicUrl : null;
+    path ? publicSupabase.storage.from("profile-media").getPublicUrl(path).data.publicUrl : null;
   const designerIdentityImages = new Map(
     ((data ?? []) as Profile[]).map((profile) => [
       profile.id,
@@ -893,22 +895,35 @@ export default async function DesignersPage({
         .in("studio_id", studioIds)
         .eq("status", "active")
     : { data: [] };
-  const studioMemberCounts = new Map<string, number>();
-  const studioMemberProfileIds = new Map<string, string[]>();
+  const memberProfileIds = Array.from(
+    new Set((studioMemberData ?? []).map((member) => member.user_id))
+  );
+  const { data: visibleMemberProfileData } = memberProfileIds.length
+    ? await publicSupabase
+        .from("profiles")
+        .select("id")
+        .in("id", memberProfileIds)
+    : { data: [] };
+  const visibleMemberProfileIds = new Set(
+    (visibleMemberProfileData ?? []).map((profile) => profile.id)
+  );
+  const visibleStudioMemberCounts = new Map<string, number>();
+  const visibleStudioMemberProfileIds = new Map<string, string[]>();
   (studioMemberData ?? []).forEach((member) => {
-    studioMemberCounts.set(
+    if (!visibleMemberProfileIds.has(member.user_id)) return;
+    visibleStudioMemberCounts.set(
       member.studio_id,
-      (studioMemberCounts.get(member.studio_id) ?? 0) + 1
+      (visibleStudioMemberCounts.get(member.studio_id) ?? 0) + 1
     );
-    studioMemberProfileIds.set(member.studio_id, [
-      ...(studioMemberProfileIds.get(member.studio_id) ?? []),
+    visibleStudioMemberProfileIds.set(member.studio_id, [
+      ...(visibleStudioMemberProfileIds.get(member.studio_id) ?? []),
       member.user_id,
     ]);
   });
 
   const profileIds = profiles.map((profile) => profile.id);
   const { data: portfolioProjectData } = profileIds.length
-    ? await supabase
+    ? await publicSupabase
         .from("projects")
         .select("profile_id, title, category, description, image_url, image_urls, created_at")
         .in("profile_id", profileIds)
@@ -942,7 +957,7 @@ export default async function DesignersPage({
       );
     });
     studios.forEach((studio) => {
-      const memberProjects = (studioMemberProfileIds.get(studio.id) ?? []).flatMap(
+      const memberProjects = (visibleStudioMemberProfileIds.get(studio.id) ?? []).flatMap(
         (profileId) => portfolioProjects.get(profileId) ?? []
       );
       studioMatchResults.set(
@@ -1480,7 +1495,7 @@ export default async function DesignersPage({
                     briefId={briefId}
                     studio={studio}
                     matchResult={studioMatchResults.get(studio.id) ?? null}
-                    memberCount={studioMemberCounts.get(studio.id) ?? 0}
+                    memberCount={visibleStudioMemberCounts.get(studio.id) ?? 0}
                     initialSaved={savedStudioIds.has(studio.id)}
                     canSendBrief={canSendBrief}
                     identityImage={studioIdentityImages.get(studio.id) ?? null}

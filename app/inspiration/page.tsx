@@ -7,6 +7,7 @@ import { applyPolishArticleCopy } from "@/content/pl/copy";
 import { getSiteCopy } from "@/content/site-copy";
 import { localizedCount } from "@/lib/localized-count";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createPublicContentClient } from "@/lib/public-content-client";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { professionalOptionLabel } from "@/lib/professional-options";
 
@@ -35,6 +36,9 @@ type Article = {
 
 type NewDesigner = {
   id: string;
+  avatar_url: string | null;
+  profile_logo_path: string | null;
+  profile_banner_path: string | null;
   full_name: string | null;
   location: string | null;
   profession_type: string | null;
@@ -88,6 +92,7 @@ export default async function InspirationPage({
   const selectedCategory = first(sp.category).trim() || "All";
   const q = first(sp.q).trim();
   const supabase = await createSupabaseServerClient();
+  const publicSupabase = createPublicContentClient();
   const { data, error } = await supabase
     .from("inspiration_articles")
     .select("id, slug, title, excerpt, category, image_url, author_name, featured, published_at")
@@ -96,13 +101,13 @@ export default async function InspirationPage({
     .order("published_at", { ascending: false });
   const allArticles = ((data ?? []) as Article[]).map(localizedArticle);
   const [{ data: newDesignerData }, { data: recentProjectData }] = await Promise.all([
-    supabase
+    publicSupabase
       .from("profiles")
-      .select("id, full_name, location, profession_type, google_rating, google_review_count")
+      .select("id, avatar_url, profile_logo_path, profile_banner_path, full_name, location, profession_type, google_rating, google_review_count")
       .eq("user_type", "professional")
       .order("created_at", { ascending: false })
       .limit(4),
-    supabase
+    publicSupabase
       .from("projects")
       .select("id, title, category, image_url, image_urls")
       .order("created_at", { ascending: false })
@@ -110,6 +115,13 @@ export default async function InspirationPage({
   ]);
   const newDesigners = (newDesignerData ?? []) as NewDesigner[];
   const recentProjects = (recentProjectData ?? []) as RecentProject[];
+  const profileMediaUrl = (path: string | null) =>
+    path ? publicSupabase.storage.from("profile-media").getPublicUrl(path).data.publicUrl : null;
+  const designerIdentityImage = (designer: NewDesigner) =>
+    profileMediaUrl(designer.profile_logo_path)
+    || designer.avatar_url
+    || profileMediaUrl(designer.profile_banner_path)
+    || "/brand/archicompass-mark.png";
   const normalizedQuery = normalize(q);
   const articles = allArticles.filter((article) => {
     const categoryMatch = selectedCategory === "All" || article.category === selectedCategory;
@@ -202,8 +214,15 @@ export default async function InspirationPage({
                   {newDesigners.map((designer) => (
                     <article key={designer.id} className="rounded-lg border border-line bg-card p-5 shadow-sm">
                       <div className="flex items-start justify-between gap-3">
-                        <div className="grid h-12 w-12 place-items-center rounded-lg bg-primary text-sm font-bold text-white">
-                          {(designer.full_name || "AC").split(" ").map((part) => part[0]).slice(0, 2).join("").toUpperCase()}
+                        <div className="h-12 w-12 overflow-hidden rounded-lg border border-line bg-primary-soft">
+                          <Image
+                            src={designerIdentityImage(designer)}
+                            alt={designer.full_name || inspirationCopy.labels.designerFallback}
+                            width={96}
+                            height={96}
+                            unoptimized
+                            className="h-full w-full object-cover"
+                          />
                         </div>
                         <FavoriteButton compact entityType="designer" entityKey={designer.id} initialSaved={savedKeys.has(`designer:${designer.id}`)} />
                       </div>

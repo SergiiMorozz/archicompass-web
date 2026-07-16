@@ -11,6 +11,7 @@ import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { availabilityLabel, pricingLabel, workModeLabel } from "@/lib/profile-pricing";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
+import { createPublicContentClient } from "@/lib/public-content-client";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { localizeProfileContent, localizedProfileText } from "@/lib/localized-profile-content";
 import { professionalOptionLabel } from "@/lib/professional-options";
@@ -150,10 +151,11 @@ export default async function PublicStudioPage({
   if (!isUuid(id)) notFound();
 
   const supabase = await createSupabaseServerClient();
+  const publicSupabase = createPublicContentClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
 
-  const { data: studioData } = await supabase
+  const { data: studioData } = await publicSupabase
     .from("studios")
     .select("id, owner_id, name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, specialties, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_rating, google_review_count, published")
     .eq("id", id)
@@ -171,13 +173,13 @@ export default async function PublicStudioPage({
 
   const [{ data: profileData }, { data: projectData }] = await Promise.all([
     memberIds.length
-      ? supabase
+      ? publicSupabase
           .from("profiles")
           .select("id, full_name, bio, bio_pl, bio_en, location, profession_type, specialties, years_experience")
           .in("id", memberIds)
       : Promise.resolve({ data: [] }),
     memberIds.length
-      ? supabase
+      ? publicSupabase
           .from("projects")
           .select("id, profile_id, title, category, description, image_url, image_path, image_urls, image_paths, created_at")
           .in("profile_id", memberIds)

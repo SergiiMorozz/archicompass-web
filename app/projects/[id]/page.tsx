@@ -12,6 +12,7 @@ import {
   getDemoProjectPresentation,
 } from "@/lib/public-demo-profiles";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
+import { createPublicContentClient } from "@/lib/public-content-client";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { professionalOptionLabel } from "@/lib/professional-options";
 
@@ -158,13 +159,14 @@ export default async function ProjectDetailPage({
   }
 
   const supabase = await createSupabaseServerClient();
+  const publicSupabase = createPublicContentClient();
   const { data: userData } = await supabase.auth.getUser();
   const viewerRole = userData.user
     ? await getAccountRole(supabase, userData.user.id)
     : "client";
   const canSendBrief = !userData.user || viewerRole === "client";
 
-  const { data: projectData, error: projectError } = await supabase
+  const { data: projectData, error: projectError } = await publicSupabase
     .from("projects")
     .select(
       "id, profile_id, title, category, description, project_url, image_url, image_path, image_urls, image_paths, created_at"
@@ -177,7 +179,7 @@ export default async function ProjectDetailPage({
   }
 
   let project = hydrateProjectImages(supabase, projectData as Project);
-  const { data: profileData } = await supabase
+  const { data: profileData } = await publicSupabase
     .from("profiles")
     .select("id, full_name, profession_type, user_type, location, email, phone, website")
     .eq("id", project.profile_id)

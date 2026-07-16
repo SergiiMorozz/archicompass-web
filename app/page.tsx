@@ -3,7 +3,7 @@ import Link from "next/link";
 import { applyPolishArticleCopy } from "@/content/pl/copy";
 import { getSiteCopy } from "@/content/site-copy";
 import { isEnglishSite, localeMetadata, siteLocale } from "@/lib/site-locale";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createPublicContentClient } from "@/lib/public-content-client";
 import { pageMetadata } from "@/lib/seo";
 
 const copy = getSiteCopy();
@@ -61,7 +61,7 @@ function projectCategoryLabel(value: string | null) {
 }
 
 async function homeData() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createPublicContentClient();
   const [designers, studios, projects, profilesWithReviews, studiosWithReviews, featured, articles] =
     await Promise.all([
       supabase.from("profiles").select("id", { count: "exact", head: true }).eq("user_type", "professional"),

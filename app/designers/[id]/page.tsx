@@ -14,6 +14,7 @@ import { availabilityLabel, pricingLabel, workModeLabel } from "@/lib/profile-pr
 import { professionalOptionLabel } from "@/lib/professional-options";
 import { serviceCapabilityLabel } from "@/lib/service-capabilities";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
+import { createPublicContentClient } from "@/lib/public-content-client";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import {
   applyDemoProfilePresentation,
@@ -295,6 +296,7 @@ export default async function DesignerProfilePage({
   }
 
   const supabase = await createSupabaseServerClient();
+  const publicSupabase = createPublicContentClient();
   const { data: userData } = await supabase.auth.getUser();
   const isOwner = userData.user?.id === id;
   const viewerRole = userData.user
@@ -302,7 +304,7 @@ export default async function DesignerProfilePage({
     : "client";
   const canSendBrief = !userData.user || viewerRole === "client";
 
-  const { data: profileData, error: pErr } = await supabase
+  const { data: profileData, error: pErr } = await publicSupabase
     .from("profiles")
     .select(
       "id, avatar_url, full_name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, languages, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_rating, google_review_count, is_demo"
@@ -323,7 +325,7 @@ export default async function DesignerProfilePage({
 
   const profile = localizeProfileContent(applyDemoProfilePresentation(profileData as Profile));
 
-  const { data: projectsData, error: prErr } = await supabase
+  const { data: projectsData, error: prErr } = await publicSupabase
     .from("projects")
     .select("id, profile_id, title, category, description, project_url, image_url, image_path, image_urls, image_paths, created_at")
     .eq("profile_id", id)
