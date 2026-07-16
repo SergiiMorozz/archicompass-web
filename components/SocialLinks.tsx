@@ -1,3 +1,5 @@
+import { getInteractiveCopy } from "@/content/interactive-copy";
+
 type SocialLinksProps = {
   behanceUrl?: string | null;
   compact?: boolean;
@@ -35,6 +37,7 @@ export default function SocialLinks({
   instagramUrl,
   linkedinUrl,
 }: SocialLinksProps) {
+  const copy = getInteractiveCopy().social;
   const values = { behanceUrl, facebookUrl, instagramUrl, linkedinUrl };
   const links = socials.flatMap((social) => {
     const href = socialHref(values[social.key]);
@@ -44,7 +47,7 @@ export default function SocialLinks({
   if (!links.length) return null;
 
   return (
-    <div className="flex flex-wrap gap-2" aria-label="Linki społecznościowe profilu">
+    <div className="flex flex-wrap gap-2" aria-label={copy.profileLinks}>
       {links.map((social) => (
         <a
           key={social.key}

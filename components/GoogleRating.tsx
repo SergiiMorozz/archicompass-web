@@ -1,3 +1,5 @@
+import { getInteractiveCopy } from "@/content/interactive-copy";
+
 type GoogleRatingProps = {
   compact?: boolean;
   count: number | null;
@@ -13,6 +15,7 @@ function googleHref(value: string | null) {
 }
 
 export default function GoogleRating({ compact = false, count, rating, url }: GoogleRatingProps) {
+  const copy = getInteractiveCopy().googleRating;
   const href = googleHref(url);
   if (typeof rating !== "number" || typeof count !== "number") return null;
 
@@ -20,11 +23,9 @@ export default function GoogleRating({ compact = false, count, rating, url }: Go
     <>
       <span aria-hidden="true" className="text-sun">&#9733;</span>
       <span className="font-bold text-foreground">{rating.toFixed(1)}</span>
-      <span className="text-muted">
-        {count} {count === 1 ? "opinia" : count < 5 ? "opinie" : "opinii"} Google
-      </span>
+      <span className="text-muted">{copy.reviewCount(count)}</span>
       <span className="rounded-full bg-white px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
-        zweryfikowano
+        {copy.verified}
       </span>
     </>
   );

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { getInteractiveCopy } from "@/content/interactive-copy";
 
 export default function FavoriteButton({
   compact = false,
@@ -16,6 +17,7 @@ export default function FavoriteButton({
   initialSaved?: boolean;
   refreshOnChange?: boolean;
 }) {
+  const copy = getInteractiveCopy().favorite;
   const router = useRouter();
   const [saved, setSaved] = useState(initialSaved);
   const [isBusy, setIsBusy] = useState(false);
@@ -43,13 +45,13 @@ export default function FavoriteButton({
         return;
       }
       if (!response.ok || typeof payload.saved !== "boolean") {
-        throw new Error(payload.error || "Nie udało się zaktualizować ulubionych.");
+        throw new Error(payload.error || copy.updateError);
       }
 
       setSaved(payload.saved);
       if (refreshOnChange) router.refresh();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Nie udało się zaktualizować ulubionych.");
+      setError(caught instanceof Error ? caught.message : copy.updateError);
     } finally {
       setIsBusy(false);
     }
@@ -62,7 +64,7 @@ export default function FavoriteButton({
         onClick={toggleFavorite}
         disabled={isBusy}
         aria-pressed={saved}
-        title={saved ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
+        title={saved ? copy.removeTitle : copy.addTitle}
         className={[
           "rounded-xl border text-sm font-semibold transition disabled:cursor-wait disabled:opacity-60",
           compact ? "h-10 px-3" : "px-4 py-3",
@@ -71,7 +73,7 @@ export default function FavoriteButton({
             : "border-line bg-background text-foreground hover:border-primary hover:text-primary",
         ].join(" ")}
       >
-        {isBusy ? "Zapisywanie..." : saved ? "Zapisano" : "Zapisz"}
+        {isBusy ? copy.saving : saved ? copy.saved : copy.save}
       </button>
       {error ? <div className="mt-1 max-w-48 text-xs text-red-700">{error}</div> : null}
     </div>

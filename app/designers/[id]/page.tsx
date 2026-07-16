@@ -28,8 +28,8 @@ import {
   profileProjectCountLabel,
   profileTypeLabel,
 } from "@/lib/profile-system-labels";
-import { siteLocale } from "@/lib/site-locale";
 import { getPublicProfileCopy } from "@/content/public-profile-copy";
+import { getDesignerProfileCopy } from "@/content/designer-profile-copy";
 
 export const revalidate = 0;
 
@@ -129,8 +129,9 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
+  const copy = getDesignerProfileCopy();
   if (!isUuid(id)) {
-    return pageMetadata({ title: "Nie znaleziono projektanta", description: "Ten profil projektanta jest niedostępny.", path: `/designers/${id}`, noIndex: true });
+    return pageMetadata({ title: copy.metadata.notFoundTitle, description: copy.metadata.notFoundDescription, path: `/designers/${id}`, noIndex: true });
   }
   const supabase = createPublicSupabaseClient();
   const [{ data: profile }, { data: projects }] = await Promise.all([
@@ -148,11 +149,12 @@ export async function generateMetadata({
       .limit(1),
   ]);
   if (!profile) {
-    return pageMetadata({ title: "Nie znaleziono projektanta", description: "Ten profil projektanta jest niedostępny.", path: `/designers/${id}`, noIndex: true });
+    return pageMetadata({ title: copy.metadata.notFoundTitle, description: copy.metadata.notFoundDescription, path: `/designers/${id}`, noIndex: true });
   }
   const demo = getDemoProfilePresentation(id);
-  const name = demo?.profile.full_name || profile.full_name || "Specjalista ArchiCompass";
-  const profession = demo?.profile.profession_type || profile.profession_type || "Projektant wnętrz";
+  const name = demo?.profile.full_name || profile.full_name || copy.metadata.defaultName;
+  const rawProfession = demo?.profile.profession_type || profile.profession_type;
+  const profession = rawProfession ? profileTypeLabel(rawProfession) : copy.metadata.defaultProfession;
   const locationValue = demo?.profile.location || profile.location;
   const location = locationValue ? ` – ${locationValue}` : "";
   const banner = profile.profile_banner_path
@@ -161,7 +163,7 @@ export async function generateMetadata({
   const image = banner || projects?.[0]?.image_url || projects?.[0]?.image_urls?.[0] || null;
   return pageMetadata({
     title: `${name} – ${profession}${location}`,
-    description: demo?.profile.bio || localizedProfileText(profile, "bio") || `Zobacz profil ${name}, portfolio, specjalizacje, usługi, dostępność i dopasowanie do projektu w ArchiCompass.`,
+    description: demo?.profile.bio || localizedProfileText(profile, "bio") || copy.metadata.defaultDescription(name),
     path: `/designers/${id}`,
     image,
     type: "profile",
@@ -169,8 +171,8 @@ export async function generateMetadata({
   });
 }
 
-function profileTitle(profile: Profile) {
-  return profile.full_name || "Profil bez nazwy";
+function profileTitle(profile: Profile, copy = getDesignerProfileCopy()) {
+  return profile.full_name || copy.defaults.untitledProfile;
 }
 
 function profileType(profile: Profile) {
@@ -239,11 +241,11 @@ function websiteHref(value: string | null) {
     : `https://${value}`;
 }
 
-function contactLabel(profile: Profile) {
+function contactLabel(profile: Profile, copy = getDesignerProfileCopy()) {
   if (profile.email) return profile.email;
   if (profile.phone) return profile.phone;
   if (profile.website) return profile.website;
-  return "Udostępniane po wysłaniu briefu";
+  return copy.defaults.contactAfterBrief;
 }
 
 function briefRequestHref(profileId: string, briefId: string) {
@@ -252,27 +254,27 @@ function briefRequestHref(profileId: string, briefId: string) {
   return `/account/briefs?${params.toString()}`;
 }
 
-function serviceCards(profile: Profile) {
+function serviceCards(profile: Profile, copy = getDesignerProfileCopy()) {
   const type = profileType(profile);
   const specialties = profile.specialties?.filter(Boolean) ?? [];
-  const primaryStyle = professionalOptionLabel(specialties[0] || "Wnętrza na miarę");
-  const secondaryStyle = professionalOptionLabel(specialties[1] || "Planowanie projektu");
+  const primaryStyle = professionalOptionLabel(specialties[0] || copy.defaults.primarySpecialty);
+  const secondaryStyle = professionalOptionLabel(specialties[1] || copy.defaults.secondarySpecialty);
 
   return [
     {
-      title: `Konsultacja: ${type}`,
-      copy: "Doprecyzuj brief, budżet, zakres i najlepszy sposób działania przed rozpoczęciem pełnego projektu.",
+      title: copy.services.consultation(type),
+      copy: copy.services.consultationBody,
       price: pricingLabel(profile),
     },
     {
-      title: `Koncepcja: ${primaryStyle}`,
-      copy: "Przekształć inspiracje i potrzeby w spójny kierunek wizualny, moodboard oraz strategię dla pomieszczeń.",
+      title: copy.services.concept(primaryStyle),
+      copy: copy.services.conceptBody,
       price: pricingLabel(profile),
     },
     {
-      title: `Wsparcie: ${secondaryStyle}`,
-      copy: "Uzyskaj praktyczną pomoc przy układzie funkcjonalnym, materiałach, priorytetach i planowaniu kolejnych etapów.",
-      price: "Wycena indywidualna",
+      title: copy.services.support(secondaryStyle),
+      copy: copy.services.supportBody,
+      price: copy.services.customQuote,
     },
   ];
 }
@@ -383,7 +385,8 @@ export default async function DesignerProfilePage({
   const savedFavorites = new Set(
     (favoriteData ?? []).map((item) => `${item.entity_type}:${item.entity_key}`)
   );
-  const title = profileTitle(profile);
+  const copy = getDesignerProfileCopy();
+  const title = profileTitle(profile, copy);
   const profileCopy = getPublicProfileCopy();
   const type = profileType(profile);
   const location = profileLocation(profile);
@@ -410,7 +413,7 @@ export default async function DesignerProfilePage({
     ? projects.filter((project) => project.category === selectedCategory)
     : projects;
   const portfolioCountText = selectedCategory
-    ? `${visibleProjects.length} ${siteLocale === "pl" ? "z" : "of"} ${profileProjectCountLabel(projects.length)}`
+    ? copy.portfolio.selectedCount(visibleProjects.length, projects.length)
     : profileProjectCountLabel(projects.length);
 
   return (
@@ -418,8 +421,8 @@ export default async function DesignerProfilePage({
       <JsonLd
         data={[
           breadcrumbJsonLd([
-            { name: "Strona główna", path: "/" },
-            { name: "Katalog Projektantów", path: "/designers" },
+            { name: copy.metadata.home, path: "/" },
+            { name: copy.metadata.directory, path: "/designers" },
             { name: title, path: `/designers/${profile.id}` },
           ]),
           {
@@ -459,7 +462,7 @@ export default async function DesignerProfilePage({
           href="/designers"
           className="inline-flex rounded-full border border-line bg-card px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
         >
-          Wróć do projektantów
+          {copy.navigation.backToDirectory}
         </Link>
 
         <div
@@ -471,7 +474,7 @@ export default async function DesignerProfilePage({
           <div className="flex min-h-[360px] items-end px-5 py-7 sm:px-8 lg:px-10">
             <div className="max-w-3xl text-white">
               <div className="inline-flex rounded-full bg-white/16 px-4 py-2 text-sm font-semibold backdrop-blur">
-                {profile.is_demo ? "Profil demonstracyjny ArchiCompass" : "Profil specjalisty ArchiCompass"}
+                {profile.is_demo ? copy.badges.demoProfileLong : copy.badges.professionalProfileLong}
               </div>
               <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-6xl">
                 {title}
@@ -492,7 +495,7 @@ export default async function DesignerProfilePage({
                     <Image src={logoUrl || profile.avatar_url!} alt={`${title} logo`} width={72} height={72} unoptimized className="h-full w-full rounded-xl object-cover" />
                   ) : initials(title)}
                   <span className="absolute -right-3 -top-3 rounded-full border-2 border-white bg-[#fff3df] px-2 py-1 text-xs font-bold text-[#b56b08]">
-                    {profile.is_demo ? "Demo" : "Nowy"}
+                    {profile.is_demo ? copy.badges.demo : copy.badges.new}
                   </span>
                 </div>
                 <div className="min-w-0">
@@ -500,11 +503,11 @@ export default async function DesignerProfilePage({
                   <p className="mt-1 text-muted">{type}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span className="rounded-full bg-[#fff3df] px-3 py-1 text-xs font-semibold text-[#b56b08]">
-                      {profile.is_demo ? "Profil demonstracyjny" : "Profil specjalisty"}
+                      {profile.is_demo ? copy.badges.demoProfile : copy.badges.professionalProfile}
                     </span>
                     {projects.length ? (
                       <span className="rounded-full bg-[#eaf2ff] px-3 py-1 text-xs font-semibold text-[#2563eb]">
-                        Dodano portfolio
+                        {copy.badges.portfolioAdded}
                       </span>
                     ) : null}
                   </div>
@@ -517,13 +520,13 @@ export default async function DesignerProfilePage({
                     href="/account/profile"
                     className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
                   >
-                    Edytuj profil
+                    {copy.actions.editProfile}
                   </Link>
                   <Link
                     href="/account/projects"
                     className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
                   >
-                    Zarządzaj projektami
+                    {copy.actions.manageProjects}
                   </Link>
                 </div>
               ) : (
@@ -537,22 +540,22 @@ export default async function DesignerProfilePage({
                     href="#portfolio"
                     className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
                   >
-                    Zobacz portfolio
+                    {copy.actions.viewPortfolio}
                   </a>
                   {canSendBrief && !profile.is_demo ? (
                     <Link
                       href={briefRequestHref(profile.id, selectedBriefId)}
                       className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                     >
-                      Wyślij brief
+                      {copy.actions.sendBrief}
                     </Link>
                   ) : profile.is_demo ? (
                     <span className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold text-muted">
-                      Profil demonstracyjny
+                      {copy.badges.demoProfile}
                     </span>
                   ) : (
                     <span className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold text-muted">
-                      Konto projektanta
+                      {copy.actions.designerAccount}
                     </span>
                   )}
                 </div>
@@ -608,21 +611,20 @@ export default async function DesignerProfilePage({
             id="contact"
             className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24"
           >
-            <div className="text-sm font-semibold text-primary">Chcesz rozpocząć współpracę?</div>
-            <h2 className="mt-2 text-2xl font-bold">Skontaktuj się z {title}</h2>
+            <div className="text-sm font-semibold text-primary">{copy.contact.eyebrow}</div>
+            <h2 className="mt-2 text-2xl font-bold">{copy.contact.heading(title)}</h2>
             <p className="mt-3 text-sm leading-6 text-muted">
-              Opisz cele, termin i budżet. Specjalista będzie mógł ocenić, czy projekt
-              odpowiada jego doświadczeniu i dostępności.
+              {copy.contact.body}
             </p>
 
             <div className="mt-5 grid gap-3 text-sm">
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
                 <span className="text-muted">{profileCopy.labels.platformResponses}</span>
-                <span className="text-right font-semibold">Mierzone od pierwszej odpowiedzi w aplikacji</span>
+                <span className="text-right font-semibold">{copy.contact.platformResponseValue}</span>
               </div>
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
                 <span className="text-muted">{profileCopy.labels.contact}</span>
-                <span className="truncate text-right font-semibold">{profile.is_demo ? profileCopy.values.demoContactUnavailable : contactLabel(profile)}</span>
+                <span className="truncate text-right font-semibold">{profile.is_demo ? profileCopy.values.demoContactUnavailable : contactLabel(profile, copy)}</span>
               </div>
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
                 <span className="text-muted">{profileCopy.labels.availability}</span>
@@ -639,7 +641,7 @@ export default async function DesignerProfilePage({
               <div className="flex items-center justify-between gap-4">
                 <span className="text-muted">{profileCopy.labels.languages}</span>
                 <span className="font-semibold">
-                  {profile.languages?.map((language) => profileLanguageLabel(language)).join(" / ") || (siteLocale === "pl" ? "polski / angielski" : "Polish / English")}
+                  {profile.languages?.map((language) => profileLanguageLabel(language)).join(" / ") || copy.defaults.polishEnglish}
                 </span>
               </div>
             </div>
@@ -650,13 +652,13 @@ export default async function DesignerProfilePage({
                   href="/account/profile"
                   className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
                 >
-                  Edytuj dane publiczne
+                  {copy.actions.editPublicDetails}
                 </Link>
                 <Link
                   href="/account/projects"
                   className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
                 >
-                  Dodaj projekt do portfolio
+                  {copy.actions.addPortfolioProject}
                 </Link>
               </div>
             ) : canSendBrief && !profile.is_demo ? (
@@ -664,15 +666,15 @@ export default async function DesignerProfilePage({
                 href={briefRequestHref(profile.id, selectedBriefId)}
                 className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
               >
-                <span className="w-full">Wyślij brief projektowy</span>
+                <span className="w-full">{copy.actions.sendBrief}</span>
               </Link>
             ) : profile.is_demo ? (
               <div className="mt-6 rounded-lg border border-primary/20 bg-primary-soft p-4 text-sm leading-6 text-muted">
-                Ten przykładowy profil pokazuje, jak może wyglądać kompletne portfolio w ArchiCompass. Nie może otrzymywać briefów projektowych.
+                {copy.contact.demoNotice}
               </div>
             ) : (
               <div className="mt-6 rounded-lg border border-line bg-background p-4 text-sm leading-6 text-muted">
-                Konta projektantów otrzymują zapytania projektowe i nie mogą wysyłać briefów jako klienci.
+                {copy.contact.designerNotice}
               </div>
             )}
 
@@ -683,7 +685,7 @@ export default async function DesignerProfilePage({
                 rel="noreferrer"
                 className="mt-3 flex rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
               >
-                <span className="w-full">Otwórz stronę internetową</span>
+                <span className="w-full">{copy.actions.openWebsite}</span>
               </a>
             ) : null}
             <div className="mt-4">
@@ -701,10 +703,9 @@ export default async function DesignerProfilePage({
       {isOwner ? (
         <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
-            <div className="font-semibold">Widok właściciela</div>
+            <div className="font-semibold">{copy.owner.title}</div>
             <p className="mt-1">
-              Oglądasz własny profil publiczny. Korzystaj z narzędzi profilu i projektów,
-              aby informacje na tej stronie były zawsze aktualne.
+              {copy.owner.body}
             </p>
           </div>
         </section>
@@ -713,9 +714,9 @@ export default async function DesignerProfilePage({
       {studios.length ? (
         <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
           <div className="rounded-lg border border-line bg-card p-6 shadow-sm">
-            <div className="text-sm font-semibold text-primary">Powiązane pracownie</div>
+            <div className="text-sm font-semibold text-primary">{copy.studios.eyebrow}</div>
             <h2 className="mt-1 text-2xl font-bold">
-              {siteLocale === "pl" ? `${title} należy do: ${studios.length} pracowni` : `${title} belongs to ${studios.length} studios`}
+              {copy.studios.heading(title, studios.length)}
             </h2>
             <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {studios.map((studio) => (
@@ -726,7 +727,7 @@ export default async function DesignerProfilePage({
                 >
                   <div className="font-bold">{studio.name}</div>
                   <div className="mt-1 text-sm text-muted">
-                    {studio.location || "Pracownia pracująca zdalnie"}
+                    {profileLocationLabel(studio.location) || copy.defaults.remoteStudio}
                   </div>
                   {studio.specialties?.length ? (
                     <div className="mt-3 text-sm font-semibold text-primary">
@@ -745,23 +746,22 @@ export default async function DesignerProfilePage({
           <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-sm font-semibold text-primary">O profilu</div>
-                <h2 className="mt-1 text-3xl font-bold">Podejście do projektowania</h2>
+                <div className="text-sm font-semibold text-primary">{copy.about.eyebrow}</div>
+                <h2 className="mt-1 text-3xl font-bold">{copy.about.heading}</h2>
               </div>
               <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
                 {type}
               </span>
             </div>
             <p className="mt-5 max-w-3xl text-base leading-8 text-muted">
-              {profile.bio ||
-                "Ten specjalista nie dodał jeszcze pełnego opisu. Profil jest gotowy na portfolio, szczegóły usług i opinie klientów."}
+              {profile.bio || copy.defaults.noBio}
             </p>
           </section>
 
           <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div>
-              <div className="text-sm font-semibold text-primary">Oferowane usługi</div>
-              <h2 className="mt-1 text-3xl font-bold">Możliwe formy współpracy</h2>
+              <div className="text-sm font-semibold text-primary">{copy.services.eyebrow}</div>
+              <h2 className="mt-1 text-3xl font-bold">{copy.services.heading}</h2>
             </div>
 
             {serviceCapabilities.length ? (
@@ -774,20 +774,19 @@ export default async function DesignerProfilePage({
               </div>
             ) : (
               <p className="mt-4 text-sm leading-6 text-muted">
-                Zakres usług nie został jeszcze potwierdzony. Wyślij brief i zapytaj
-                o wizualizacje 3D, dokumentację lub nadzór.
+                {copy.services.unavailable}
               </p>
             )}
 
             {profile.cooperation_terms ? (
               <div className="mt-5 rounded-2xl border border-line bg-background p-5">
-                <div className="text-sm font-semibold text-primary">Warunki współpracy</div>
+                <div className="text-sm font-semibold text-primary">{copy.services.terms}</div>
                 <p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted">{profile.cooperation_terms}</p>
               </div>
             ) : null}
 
             <div className="mt-6 grid gap-4 md:grid-cols-3">
-              {serviceCards(profile).map((service) => (
+              {serviceCards(profile, copy).map((service) => (
                 <article
                   key={service.title}
                   className="rounded-2xl border border-line bg-background p-5"
@@ -805,8 +804,8 @@ export default async function DesignerProfilePage({
           <section id="portfolio" className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-sm font-semibold text-primary">Portfolio</div>
-                <h2 className="mt-1 text-3xl font-bold">Wybrane projekty</h2>
+                <div className="text-sm font-semibold text-primary">{copy.portfolio.eyebrow}</div>
+                <h2 className="mt-1 text-3xl font-bold">{copy.portfolio.heading}</h2>
               </div>
               <div className="text-sm font-semibold text-muted">{portfolioCountText}</div>
             </div>
@@ -818,7 +817,7 @@ export default async function DesignerProfilePage({
                   aria-current={selectedCategory ? undefined : "true"}
                   className={selectedCategory ? inactiveFilterClass : activeFilterClass}
                 >
-                  Wszystkie
+                  {copy.portfolio.all}
                 </Link>
                 {categoryFilters.map((category) => (
                   <Link
@@ -839,7 +838,7 @@ export default async function DesignerProfilePage({
 
             {prErr ? (
               <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700">
-                <div className="font-semibold">Nie udało się wczytać projektów</div>
+                <div className="font-semibold">{copy.portfolio.loadError}</div>
                 <div className="mt-1 text-sm">{prErr.message}</div>
               </div>
             ) : !projects.length ? (
@@ -851,17 +850,16 @@ export default async function DesignerProfilePage({
                   }}
                 >
                   <div className="flex min-h-[220px] max-w-xl flex-col justify-end p-6 text-white">
-                    <h3 className="text-2xl font-bold">Portfolio pojawi się wkrótce</h3>
+                    <h3 className="text-2xl font-bold">{copy.portfolio.comingSoon}</h3>
                     <p className="mt-2 text-sm leading-6 text-white/80">
-                      Dodane projekty pojawią się tutaj jako karty ze zdjęciami,
-                      kategoriami, opisami i szczegółami realizacji.
+                      {copy.portfolio.comingSoonBody}
                     </p>
                     {isOwner ? (
                       <Link
                         href="/account/projects"
                         className="mt-4 w-fit rounded-xl bg-white px-4 py-3 text-sm font-semibold text-foreground"
                       >
-                        Dodaj pierwszy projekt
+                        {copy.actions.addFirstProject}
                       </Link>
                     ) : null}
                   </div>
@@ -869,15 +867,15 @@ export default async function DesignerProfilePage({
               </div>
             ) : !visibleProjects.length ? (
               <div className="mt-5 rounded-2xl border border-dashed border-line bg-background p-6">
-                <h3 className="text-xl font-bold">W tej kategorii nie ma jeszcze projektów</h3>
+                <h3 className="text-xl font-bold">{copy.portfolio.emptyCategory}</h3>
                 <p className="mt-2 text-sm leading-6 text-muted">
-                  Pokaż wszystkie projekty lub wybierz inną kategorię.
+                  {copy.portfolio.emptyCategoryBody}
                 </p>
                 <Link
                   href={portfolioHref(id, selectedBriefId)}
                   className="mt-4 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                 >
-                  Pokaż wszystkie projekty
+                  {copy.actions.showAllProjects}
                 </Link>
               </div>
             ) : (
@@ -888,10 +886,10 @@ export default async function DesignerProfilePage({
                     className="group overflow-hidden rounded-2xl border border-line bg-background"
                   >
                     <ProjectGallery
-                      category={project.category ? professionalOptionLabel(project.category) : "Portfolio"}
+                      category={project.category ? professionalOptionLabel(project.category) : copy.portfolio.eyebrow}
                       description={project.description}
                       images={projectGallery(project, index)}
-                      title={project.title || "Projekt bez tytułu"}
+                      title={project.title || copy.defaults.untitledProject}
                     />
                     <div className="p-5">
                       {project.description ? (
@@ -902,7 +900,7 @@ export default async function DesignerProfilePage({
                           href={`/projects/${project.id}`}
                           className="inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
                         >
-                          Zobacz projekt
+                          {copy.actions.viewProject}
                         </Link>
                         <FavoriteButton
                           entityType="project"
@@ -916,7 +914,7 @@ export default async function DesignerProfilePage({
                             rel="noreferrer"
                             className="inline-flex rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
                           >
-                            Otwórz stronę projektu
+                          {copy.actions.openProjectWebsite}
                           </a>
                         ) : null}
                       </div>
@@ -930,14 +928,14 @@ export default async function DesignerProfilePage({
           <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <div className="text-sm font-semibold text-primary">Opinie</div>
-                <h2 className="mt-1 text-3xl font-bold">Opinie klientów</h2>
+                <div className="text-sm font-semibold text-primary">{copy.reviews.eyebrow}</div>
+                <h2 className="mt-1 text-3xl font-bold">{copy.reviews.heading}</h2>
               </div>
               {hasVerifiedGoogleRating ? (
                 <GoogleRating rating={profile.google_rating} count={profile.google_review_count} url={profile.google_business_url} />
               ) : (
                 <span className="rounded-full bg-background px-4 py-2 text-sm font-semibold text-muted">
-                  Brak połączonych opinii Google
+                  {copy.reviews.noGoogleReviews}
                 </span>
               )}
             </div>
@@ -945,25 +943,24 @@ export default async function DesignerProfilePage({
             <div className="mt-6 grid gap-4 md:grid-cols-[220px_1fr]">
               <div className="rounded-lg border border-line bg-background p-5 text-center">
                 <div className="text-5xl font-bold text-primary">
-                  {profile.google_rating ? profile.google_rating.toFixed(1) : "Nowy"}
+                  {profile.google_rating ? profile.google_rating.toFixed(1) : copy.reviews.new}
                 </div>
                 <div className="mt-2 text-sm text-muted">
                   {profile.google_review_count
-                    ? `${profile.google_review_count} ${profile.google_review_count === 1 ? "opinia Google" : "opinii Google"}`
-                    : "Brak połączonej oceny"}
+                    ? copy.reviews.reviewCount(profile.google_review_count)
+                    : copy.reviews.noLinkedRating}
                 </div>
               </div>
               <div className="rounded-lg border border-dashed border-line bg-background p-5">
                 <h3 className="text-lg font-bold">
-                  {hasVerifiedGoogleRating ? "Zobacz źródło w połączonym profilu Google" : "Tutaj można połączyć opinie Google"}
+                  {hasVerifiedGoogleRating ? copy.reviews.linkedHeading : copy.reviews.unlinkedHeading}
                 </h3>
                 <p className="mt-2 text-sm leading-6 text-muted">
-                  ArchiCompass pokazuje podsumowanie publicznej oceny, a pełna treść opinii
-                  pozostaje w Google. Opinie zebrane bezpośrednio na platformie będą prezentowane osobno.
+                  {copy.reviews.body}
                 </p>
                 {websiteHref(profile.google_business_url) ? (
                   <a href={websiteHref(profile.google_business_url)!} target="_blank" rel="noreferrer" className="mt-4 inline-flex rounded-lg bg-primary px-4 py-3 text-sm font-bold text-white">
-                    Czytaj opinie w Google
+                    {copy.reviews.readOnGoogle}
                   </a>
                 ) : null}
               </div>
@@ -974,19 +971,18 @@ export default async function DesignerProfilePage({
             <div className="grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-center">
               <div>
                 <div className="text-sm font-semibold text-white/72">
-                  Potrzebujesz pomocy w wyborze?
+                  {copy.compass.eyebrow}
                 </div>
-                <h2 className="mt-2 text-3xl font-bold">Porównaj tego projektanta z Twoim briefem</h2>
+                <h2 className="mt-2 text-3xl font-bold">{copy.compass.heading}</h2>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75">
-                  ArchiCompass pomaga zamienić gust, budżet i typ projektu w precyzyjny
-                  brief jeszcze przed kontaktem ze specjalistami.
+                  {copy.compass.body}
                 </p>
               </div>
               <Link
                 href="/project-compass"
                 className="rounded-xl bg-white px-5 py-3 text-center text-sm font-semibold text-foreground"
               >
-                Utwórz brief projektowy
+                {copy.actions.createBrief}
               </Link>
             </div>
           </section>
@@ -998,7 +994,7 @@ export default async function DesignerProfilePage({
             <div>
               <div className="text-sm text-muted">{profileCopy.labels.bestMatch}</div>
               <div className="mt-1 font-semibold">
-                {specialties[0] ? professionalOptionLabel(specialties[0]) : "Projekty wnętrz"}
+                {specialties[0] ? professionalOptionLabel(specialties[0]) : copy.defaults.interiorProjects}
               </div>
             </div>
             <div>
@@ -1020,10 +1016,9 @@ export default async function DesignerProfilePage({
           </div>
 
           <div className="mt-6 border-t border-line pt-6">
-            <h3 className="text-lg font-bold">Polecani wykonawcy</h3>
+            <h3 className="text-lg font-bold">{copy.summary.contractorsHeading}</h3>
             <p className="mt-2 text-sm leading-6 text-muted">
-              Rekomendacje wykonawców pojawią się tutaj po połączeniu profili partnerów
-              z realizacjami projektanta.
+              {copy.summary.contractorsBody}
             </p>
           </div>
         </aside>
@@ -1033,25 +1028,25 @@ export default async function DesignerProfilePage({
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="truncate text-sm font-bold">{title}</div>
-            <div className="truncate text-xs text-muted">Odpowiedzi telefoniczne i e-mailowe nie są mierzone</div>
+            <div className="truncate text-xs text-muted">{copy.contact.mobileResponseNote}</div>
           </div>
           {isOwner ? (
             <Link
               href="/account/projects"
               className="shrink-0 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
             >
-              Zarządzaj
+              {copy.actions.manage}
             </Link>
           ) : canSendBrief && !profile.is_demo ? (
             <Link
               href={briefRequestHref(profile.id, selectedBriefId)}
               className="shrink-0 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
             >
-              Wyślij brief
+              {copy.actions.sendBrief}
             </Link>
           ) : (
             <span className="shrink-0 rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold text-muted">
-              {profile.is_demo ? "Profil demonstracyjny" : "Konto projektanta"}
+              {profile.is_demo ? copy.badges.demoProfile : copy.actions.designerAccount}
             </span>
           )}
         </div>

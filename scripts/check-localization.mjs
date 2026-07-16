@@ -37,6 +37,12 @@ const workspaceSourceFiles = [
 ];
 
 const publicProfileSourceFiles = ["components/ProjectGallery.tsx"];
+const designerProfileSourceFiles = ["app/designers/[id]/page.tsx"];
+const interactiveSourceFiles = [
+  "components/FavoriteButton.tsx",
+  "components/GoogleRating.tsx",
+  "components/SocialLinks.tsx",
+];
 const projectCompassSourceFiles = [
   "app/project-compass/page.tsx",
   "app/ai-style-finder/ProjectCompass.tsx",
@@ -72,6 +78,20 @@ for (const file of publicProfileSourceFiles) {
   }
 }
 
+for (const file of designerProfileSourceFiles) {
+  const source = readFileSync(file, "utf8");
+  if (!source.includes("@/content/designer-profile-copy")) {
+    failures.push(`${file}: missing the designer profile locale contract`);
+  }
+}
+
+for (const file of interactiveSourceFiles) {
+  const source = readFileSync(file, "utf8");
+  if (!source.includes("@/content/interactive-copy")) {
+    failures.push(`${file}: missing the shared interactive locale contract`);
+  }
+}
+
 for (const file of projectCompassSourceFiles) {
   const source = readFileSync(file, "utf8");
   if (!source.includes("@/content/project-compass-copy")) {
@@ -84,4 +104,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Locale architecture check passed for ${sharedSourceFiles.length + workspaceSourceFiles.length + publicProfileSourceFiles.length + projectCompassSourceFiles.length} shared source files.`);
+console.log(`Locale architecture check passed for ${sharedSourceFiles.length + workspaceSourceFiles.length + publicProfileSourceFiles.length + designerProfileSourceFiles.length + interactiveSourceFiles.length + projectCompassSourceFiles.length} shared source files.`);
