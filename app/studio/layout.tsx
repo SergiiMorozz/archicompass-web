@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import StudioNav from "@/components/StudioNav";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 import { getActiveAdminRole } from "@/lib/admin";
 import { currentRequestPath } from "@/lib/request-path";
 import {
@@ -12,12 +12,14 @@ import {
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
+const workspaceCopy = getWorkspaceCopy();
 export const metadata: Metadata = {
-  title: "Studio projektanta",
+  title: `${workspaceCopy.studioNav.studio} | ArchiCompass`,
   robots: { index: false, follow: false, nocache: true },
 };
 
 export default async function StudioLayout({ children }: { children: React.ReactNode }) {
+  const copy = getWorkspaceCopy().studioNav;
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
@@ -38,28 +40,7 @@ export default async function StudioLayout({ children }: { children: React.React
 
   if (!accountRole && !adminRole) redirect(`/onboarding?next=${encodeURIComponent(requestedPath)}`);
 
-  if (accountRole !== "designer" && !adminRole) {
-    return (
-      <main className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-        <div className="rounded-lg border border-line bg-card p-8 shadow-sm">
-          <div className="text-sm font-semibold text-primary">Dostęp dla specjalistów</div>
-          <h1 className="mt-2 text-4xl font-bold">To jest konto klienta</h1>
-          <p className="mt-4 max-w-2xl leading-7 text-muted">
-            Konta klientów tworzą i wysyłają briefy. Studio projektanta jest dostępne
-            tylko dla kont utworzonych z rolą projektanta.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/account/profile" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
-              Sprawdź rolę konta
-            </Link>
-            <Link href="/account" className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold">
-              Wróć do konta
-            </Link>
-          </div>
-        </div>
-      </main>
-    );
-  }
+  if (accountRole !== "designer" && !adminRole) redirect("/client");
 
   const { data: memberships } = await getStudioMemberships(supabase, user.id, "active");
   const studioIds = memberships.map((membership) => membership.studio_id);
@@ -84,7 +65,7 @@ export default async function StudioLayout({ children }: { children: React.React
     <div className="min-h-screen bg-background">
       <StudioNav
         profileId={profile ? user.id : null}
-        profileName={profile?.full_name || user.email || "Profil projektanta"}
+        profileName={profile?.full_name || user.email || copy.defaultProfileName}
         unreadCount={(unreadCount ?? 0) + newRequestCount}
       />
       {children}

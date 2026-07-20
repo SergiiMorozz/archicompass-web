@@ -5,14 +5,17 @@ import { getActiveAdminRole } from "@/lib/admin";
 import { currentRequestPath } from "@/lib/request-path";
 import { getExplicitAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 
 export const revalidate = 0;
+const workspaceCopy = getWorkspaceCopy();
 export const metadata: Metadata = {
-  title: "Strefa klienta | ArchiCompass",
+  title: `${workspaceCopy.clientNav.workspace} | ArchiCompass`,
   robots: { index: false, follow: false, nocache: true },
 };
 
 export default async function ClientLayout({ children }: { children: React.ReactNode }) {
+  const copy = getWorkspaceCopy().clientNav;
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
@@ -42,7 +45,7 @@ export default async function ClientLayout({ children }: { children: React.React
   return (
     <div className="min-h-screen bg-background">
       <ClientNav
-        accountName={profile?.full_name || user.email || "Twoja strefa projektu"}
+        accountName={profile?.full_name || user.email || copy.defaultWorkspaceName}
         unreadCount={unreadCount ?? 0}
       />
       {children}

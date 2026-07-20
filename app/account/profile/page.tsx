@@ -20,6 +20,11 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { publicTextError } from "@/lib/content-moderation";
 import { fetchGooglePlaceSummary } from "@/lib/google-places";
 import { profileReadinessScore } from "@/lib/profile-readiness";
+import {
+  profileProfessionTypes,
+  profileProfessionTypeValue,
+  profileTypeLabel,
+} from "@/lib/profile-system-labels";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
 
@@ -247,7 +252,7 @@ async function updateProfile(formData: FormData) {
         bio: bioPl ?? bioEn,
         bio_pl: bioPl,
         bio_en: bioEn,
-        profession_type: textValue(formData, "profession_type"),
+        profession_type: profileProfessionTypeValue(textValue(formData, "profession_type")) || null,
         user_type: "professional",
         specialties,
         service_capabilities: serviceCapabilityValues(formData),
@@ -399,6 +404,10 @@ export default async function EditProfilePage({
   const backHref = isProfessional ? "/studio" : "/client";
   const isOnboarding = sp.onboarding === "1";
   const isStudioOnboarding = isOnboarding && isProfessional && sp.studio === "1";
+  const normalizedProfessionType = profileProfessionTypeValue(p.profession_type);
+  const hasCustomProfessionType =
+    Boolean(normalizedProfessionType) &&
+    !profileProfessionTypes.includes(normalizedProfessionType as (typeof profileProfessionTypes)[number]);
 
   return (
     <main className="bg-background">
@@ -518,12 +527,23 @@ export default async function EditProfilePage({
               {isProfessional ? (
                 <>
                   <Field label={copy.profession}>
-                    <input
+                    <select
                       name="profession_type"
-                      defaultValue={p.profession_type ?? ""}
-                      placeholder={copy.professionPlaceholder}
+                      defaultValue={normalizedProfessionType}
                       className={fieldClass}
-                    />
+                    >
+                      <option value="">{copy.professionPlaceholder}</option>
+                      {hasCustomProfessionType ? (
+                        <option value={normalizedProfessionType}>
+                          {profileTypeLabel(normalizedProfessionType)}
+                        </option>
+                      ) : null}
+                      {profileProfessionTypes.map((professionType) => (
+                        <option key={professionType} value={professionType}>
+                          {profileTypeLabel(professionType)}
+                        </option>
+                      ))}
+                    </select>
                   </Field>
                   <div className="sm:col-span-2 grid gap-5 sm:grid-cols-2">
                     <Field label={copy.logo} hint={copy.logoHint}>

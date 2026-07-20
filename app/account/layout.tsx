@@ -4,10 +4,12 @@ import { getActiveAdminRole } from "@/lib/admin";
 import { currentRequestPath } from "@/lib/request-path";
 import { getExplicitAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 
 export const revalidate = 0;
+const workspaceCopy = getWorkspaceCopy();
 export const metadata: Metadata = {
-  title: "Konto | ArchiCompass",
+  title: `${workspaceCopy.account.account} | ArchiCompass`,
   robots: { index: false, follow: false, nocache: true },
 };
 

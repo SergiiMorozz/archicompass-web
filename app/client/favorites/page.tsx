@@ -7,6 +7,7 @@ import {
   getDemoProjectPresentation,
 } from "@/lib/public-demo-profiles";
 import { localizeProfileContent } from "@/lib/localized-profile-content";
+import { profileLocationLabel, profileTypeLabel } from "@/lib/profile-system-labels";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -154,7 +155,7 @@ export default async function ClientFavoritesPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <Link href={`/designers/${designer.id}`} className="text-xl font-bold hover:text-primary">{designer.full_name || copy.defaultProfessional}</Link>
-                      <div className="mt-1 text-sm text-muted">{designer.profession_type === "Studio" ? copy.studio : copy.defaultProfessional}{designer.location ? ` · ${designer.location}` : ""}</div>
+                      <div className="mt-1 text-sm text-muted">{designer.profession_type ? profileTypeLabel(designer.profession_type) : copy.defaultProfessional}{designer.location ? ` · ${profileLocationLabel(designer.location)}` : ""}</div>
                     </div>
                     <FavoriteButton compact entityType="designer" entityKey={designer.id} initialSaved refreshOnChange />
                   </div>
@@ -181,7 +182,7 @@ export default async function ClientFavoritesPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <Link href={`/studios/${studio.id}`} className="text-xl font-bold hover:text-primary">{studio.name}</Link>
-                      <div className="mt-1 text-sm text-muted">{copy.studio}{studio.location ? ` · ${studio.location}` : ""}</div>
+                      <div className="mt-1 text-sm text-muted">{copy.studio}{studio.location ? ` · ${profileLocationLabel(studio.location)}` : ""}</div>
                     </div>
                     <FavoriteButton compact entityType="studio" entityKey={studio.id} initialSaved refreshOnChange />
                   </div>

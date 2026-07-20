@@ -554,6 +554,30 @@ type AdminUserDetailCopy = {
 };
 
 type WorkspaceCopy = {
+  clientNav: {
+    workspace: string;
+    dashboard: string;
+    messages: string;
+    savedBriefs: string;
+    favorites: string;
+    contactDetails: string;
+    defaultWorkspaceName: string;
+    ariaLabel: string;
+    unreadMessages: (count: number) => string;
+  };
+  studioNav: {
+    studio: string;
+    dashboard: string;
+    enquiries: string;
+    analytics: string;
+    studioAndTeam: string;
+    publicProfile: string;
+    portfolio: string;
+    defaultProfileName: string;
+    ariaLabel: string;
+    unreadUpdates: (count: number) => string;
+    openPublicProfile: string;
+  };
   account: AccountCopy;
   accountProfile: AccountProfileCopy;
   accountPortfolio: AccountPortfolioCopy;
@@ -765,6 +789,30 @@ type WorkspaceCopy = {
 
 const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
   pl: {
+    clientNav: {
+      workspace: "Strefa klienta",
+      dashboard: "Pulpit",
+      messages: "Wiadomości",
+      savedBriefs: "Zapisane briefy",
+      favorites: "Ulubione",
+      contactDetails: "Dane kontaktowe",
+      defaultWorkspaceName: "Twoja strefa projektu",
+      ariaLabel: "Nawigacja strefy klienta",
+      unreadMessages: (count) => `${count} nieprzeczytanych wiadomości`,
+    },
+    studioNav: {
+      studio: "Studio projektanta",
+      dashboard: "Pulpit",
+      enquiries: "Zapytania",
+      analytics: "Statystyki",
+      studioAndTeam: "Pracownia i zespół",
+      publicProfile: "Profil publiczny",
+      portfolio: "Portfolio",
+      defaultProfileName: "Profil projektanta",
+      ariaLabel: "Nawigacja Studio projektanta",
+      unreadUpdates: (count) => `${count} nowych aktualizacji`,
+      openPublicProfile: "Zobacz profil publiczny",
+    },
     account: {
       defaultName: "Twoje konto ArchiCompass",
       settingsEyebrow: "Ustawienia konta",
@@ -1474,6 +1522,30 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
     },
   },
   en: {
+    clientNav: {
+      workspace: "Client Workspace",
+      dashboard: "Dashboard",
+      messages: "Messages",
+      savedBriefs: "Saved briefs",
+      favorites: "Favorites",
+      contactDetails: "Contact details",
+      defaultWorkspaceName: "Your project workspace",
+      ariaLabel: "Client Workspace navigation",
+      unreadMessages: (count) => `${count} unread messages`,
+    },
+    studioNav: {
+      studio: "Designer Studio",
+      dashboard: "Dashboard",
+      enquiries: "Enquiries",
+      analytics: "Analytics",
+      studioAndTeam: "Studio and team",
+      publicProfile: "Public profile",
+      portfolio: "Portfolio",
+      defaultProfileName: "Designer profile",
+      ariaLabel: "Designer Studio navigation",
+      unreadUpdates: (count) => `${count} new updates`,
+      openPublicProfile: "View public profile",
+    },
     account: {
       defaultName: "Your ArchiCompass account",
       settingsEyebrow: "Account settings",

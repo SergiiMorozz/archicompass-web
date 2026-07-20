@@ -8,6 +8,7 @@ import {
   inquiryRecipientFilter,
 } from "@/lib/studios";
 import { profileReadinessScore } from "@/lib/profile-readiness";
+import { profileTypeLabel } from "@/lib/profile-system-labels";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
 
 export const revalidate = 0;
@@ -146,7 +147,7 @@ export default async function AccountPage({
                 ) : null}
                 {profile.profession_type ? (
                   <span className="rounded-full border border-line bg-background px-3 py-1 text-sm font-semibold text-muted">
-                    {profile.profession_type}
+                    {profileTypeLabel(profile.profession_type)}
                   </span>
                 ) : null}
               </div>

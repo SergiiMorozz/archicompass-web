@@ -20,6 +20,7 @@ import {
   workModes,
   workModeValues,
 } from "@/lib/profile-pricing";
+import { profileTypeLabel } from "@/lib/profile-system-labels";
 
 export const revalidate = 0;
 
@@ -524,7 +525,7 @@ export default async function StudioTeamPage({
                         <div>
                           <div className="font-bold">{memberName(member, profiles, copy)}</div>
                           <div className="mt-1 text-sm text-muted">
-                            {profiles.get(member.user_id)?.profession_type || copy.designer} · {memberRoleLabel(member.role, copy)} · {memberStatusLabel(member.status, copy)}
+                            {profiles.get(member.user_id)?.profession_type ? profileTypeLabel(profiles.get(member.user_id)?.profession_type) : copy.designer} · {memberRoleLabel(member.role, copy)} · {memberStatusLabel(member.status, copy)}
                           </div>
                         </div>
                         <div className="flex gap-2">

@@ -2,15 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const studioLinks = [
-  { href: "/studio", label: "Pulpit" },
-  { href: "/studio/inbox", label: "Zapytania" },
-  { href: "/studio/analytics", label: "Statystyki" },
-  { href: "/studio/team", label: "Pracownia i zespół" },
-  { href: "/account/profile", label: "Profil publiczny" },
-  { href: "/account/projects", label: "Portfolio" },
-];
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 
 export default function StudioNav({
   profileId,
@@ -22,16 +14,25 @@ export default function StudioNav({
   unreadCount: number;
 }) {
   const pathname = usePathname();
+  const copy = getWorkspaceCopy().studioNav;
+  const studioLinks = [
+    { href: "/studio", label: copy.dashboard },
+    { href: "/studio/inbox", label: copy.enquiries },
+    { href: "/studio/analytics", label: copy.analytics },
+    { href: "/studio/team", label: copy.studioAndTeam },
+    { href: "/account/profile", label: copy.publicProfile },
+    { href: "/account/projects", label: copy.portfolio },
+  ];
 
   return (
     <section className="border-b border-line bg-card">
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <div className="text-xs font-semibold uppercase text-primary">Studio projektanta</div>
+            <div className="text-xs font-semibold uppercase text-primary">{copy.studio}</div>
             <div className="mt-1 text-xl font-bold">{profileName}</div>
           </div>
-          <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Studio projektanta">
+          <nav className="flex gap-2 overflow-x-auto pb-1" aria-label={copy.ariaLabel}>
             {studioLinks.map((item) => {
               const active =
                 pathname === item.href ||
@@ -52,7 +53,7 @@ export default function StudioNav({
                   {item.label}
                   {messageCount ? (
                     <span
-                      aria-label={`${messageCount} nieprzeczytanych zapytań`}
+                      aria-label={copy.unreadUpdates(messageCount)}
                       className={[
                         "ml-2 rounded-full px-2 py-0.5 text-xs",
                         active ? "bg-white/20" : "bg-foreground text-white",
@@ -69,7 +70,7 @@ export default function StudioNav({
                 href={`/designers/${profileId}`}
                 className="shrink-0 rounded-xl border border-line bg-background px-4 py-2.5 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
               >
-                Profil publiczny
+                {copy.openPublicProfile}
               </Link>
             ) : null}
           </nav>

@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const clientLinks = [
-  { href: "/client", label: "Pulpit" },
-  { href: "/client/messages", label: "Wiadomości" },
-  { href: "/client/briefs", label: "Zapisane briefy" },
-  { href: "/client/favorites", label: "Ulubione" },
-  { href: "/account/profile", label: "Dane kontaktowe" },
-];
+import { getWorkspaceCopy } from "@/content/workspace-copy";
 
 export default function ClientNav({
   accountName,
@@ -19,16 +12,24 @@ export default function ClientNav({
   unreadCount: number;
 }) {
   const pathname = usePathname();
+  const copy = getWorkspaceCopy().clientNav;
+  const clientLinks = [
+    { href: "/client", label: copy.dashboard },
+    { href: "/client/messages", label: copy.messages },
+    { href: "/client/briefs", label: copy.savedBriefs },
+    { href: "/client/favorites", label: copy.favorites },
+    { href: "/account/profile", label: copy.contactDetails },
+  ];
 
   return (
     <section className="border-b border-line bg-card">
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <div className="text-xs font-semibold uppercase text-primary">Strefa klienta</div>
+            <div className="text-xs font-semibold uppercase text-primary">{copy.workspace}</div>
             <div className="mt-1 text-xl font-bold">{accountName}</div>
           </div>
-          <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Strefa klienta">
+          <nav className="flex gap-2 overflow-x-auto pb-1" aria-label={copy.ariaLabel}>
             {clientLinks.map((item) => {
               const active =
                 pathname === item.href ||
@@ -49,7 +50,7 @@ export default function ClientNav({
                   {item.label}
                   {messageCount ? (
                     <span
-                      aria-label={`${messageCount} nieprzeczytanych wiadomości`}
+                      aria-label={copy.unreadMessages(messageCount)}
                       className={[
                         "ml-2 rounded-full px-2 py-0.5 text-xs",
                         active ? "bg-white/20" : "bg-foreground text-white",

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
 import { briefInquirySubject } from "@/lib/brief-labels";
+import { profileTypeLabel } from "@/lib/profile-system-labels";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -156,7 +157,7 @@ export default async function ClientOverviewPage({
                           </div>
                           <h3 className="mt-1 text-xl font-bold">{briefInquirySubject(inquiry.brief_snapshot)}</h3>
                           <div className="mt-2 text-sm text-muted">
-                            {designer?.profession_type === "Studio" ? copy.studio : copy.defaultProfessional} · {formatDate(inquiry.created_at, copy.dateLocale)}
+                            {designer?.profession_type ? profileTypeLabel(designer.profession_type) : copy.defaultProfessional} · {formatDate(inquiry.created_at, copy.dateLocale)}
                           </div>
                         </div>
                         <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusClass(inquiry.status)}`}>

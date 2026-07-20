@@ -5,6 +5,7 @@ import UnreadPageTitle from "@/components/UnreadPageTitle";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
 import { briefInquirySubject } from "@/lib/brief-labels";
 import { clientUnreadByInquiry, unreadTotal } from "@/lib/inquiry-unread";
+import { profileLocationLabel, profileTypeLabel } from "@/lib/profile-system-labels";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -182,8 +183,8 @@ export default async function ClientMessagesPage({
                       <h2 className="mt-3 text-2xl font-bold">{briefInquirySubject(inquiry.brief_snapshot)}</h2>
                       <div className="mt-2 text-sm text-muted">
                         {recipientName}
-                        {studio ? ` · ${copy.studio}` : profile?.profession_type ? ` · ${profile.profession_type}` : ""}
-                        {studio?.location || profile?.location ? ` · ${studio?.location || profile?.location}` : ""}
+                        {studio ? ` · ${copy.studio}` : profile?.profession_type ? ` · ${profileTypeLabel(profile.profession_type)}` : ""}
+                        {studio?.location || profile?.location ? ` · ${profileLocationLabel(studio?.location || profile?.location)}` : ""}
                       </div>
                       <div className="mt-4 rounded-lg bg-background p-4 text-sm leading-6 text-muted">
                         <div className="font-semibold text-foreground">

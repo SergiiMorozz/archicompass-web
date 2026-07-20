@@ -1,5 +1,21 @@
 import { siteLocale, type SiteLocale } from "@/lib/site-locale";
 
+export const profileProfessionTypes = [
+  "Interior architect",
+  "Interior designer",
+  "Interior design studio",
+  "Interior design practice",
+  "Interior architecture studio",
+] as const;
+
+const professionAliases: Record<string, (typeof profileProfessionTypes)[number]> = {
+  "Architekt wnętrz": "Interior architect",
+  "Projektant wnętrz": "Interior designer",
+  "Pracownia projektowania wnętrz": "Interior design studio",
+  "Pracownia architektury wnętrz": "Interior architecture studio",
+  Studio: "Interior design studio",
+};
+
 const professionLabels = {
   pl: {
     "Interior architect": "Architekt wnętrz",
@@ -64,7 +80,13 @@ const locationReplacements = {
 export function profileTypeLabel(value: string | null | undefined, locale: SiteLocale = siteLocale) {
   const fallback = locale === "pl" ? "Specjalista" : "Professional";
   if (!value) return fallback;
-  return professionLabels[locale][value as keyof typeof professionLabels[typeof locale]] || value;
+  const normalized = profileProfessionTypeValue(value);
+  return professionLabels[locale][normalized as keyof typeof professionLabels[typeof locale]] || normalized;
+}
+
+export function profileProfessionTypeValue(value: string | null | undefined) {
+  if (!value) return "";
+  return professionAliases[value] || value;
 }
 
 export function profileLocationLabel(value: string | null | undefined, locale: SiteLocale = siteLocale) {
