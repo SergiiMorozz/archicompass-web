@@ -5,7 +5,7 @@ import ConversationAutoRefresh from "@/components/ConversationAutoRefresh";
 import PendingSubmitButton from "@/components/PendingSubmitButton";
 import ReferencePhotoGrid from "@/components/ReferencePhotoGrid";
 import MessageAttachments from "@/components/MessageAttachments";
-import { briefSnapshotLabel } from "@/lib/brief-labels";
+import { briefInquirySubject, briefSnapshotLabel } from "@/lib/brief-labels";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
 import { sendConversationNotificationEmail } from "@/lib/email/conversation-notification";
 import {
@@ -93,7 +93,7 @@ async function sendMessage(formData: FormData) {
 
   const { data: inquiry } = await supabase
     .from("designer_inquiries")
-    .select("id, client_id, designer_id, status, subject")
+    .select("id, client_id, designer_id, status, subject, brief_snapshot")
     .eq("id", inquiryId)
     .maybeSingle();
   if (!inquiry) actionError(inquiryId, copy.errors.unavailable);
@@ -138,7 +138,7 @@ async function sendMessage(formData: FormData) {
       role: "client",
     },
     senderName: senderProfile?.full_name || user.email || copy.professional,
-    subject: inquiry.subject,
+    subject: briefInquirySubject(inquiry.brief_snapshot),
   });
   if (notification.error) {
     console.error("Conversation email notification failed", notification.error);
@@ -182,7 +182,7 @@ async function updateStatus(formData: FormData) {
   const [{ data: inquiry }, { data: senderProfile }] = await Promise.all([
     supabase
       .from("designer_inquiries")
-      .select("client_id, subject, status")
+      .select("client_id, status, brief_snapshot")
       .eq("id", inquiryId)
       .maybeSingle(),
     supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
@@ -215,7 +215,7 @@ async function updateStatus(formData: FormData) {
       role: "client",
     },
     senderName: senderProfile?.full_name || user.email || copy.professional,
-    subject: inquiry.subject,
+    subject: briefInquirySubject(inquiry.brief_snapshot),
   });
   if (notification.error) {
     console.error("Status email notification failed", notification.error);
@@ -365,7 +365,7 @@ export default async function StudioConversationPage({
           <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <div className="text-sm font-semibold text-primary">{copy.conversationWith(clientName)}</div>
-              <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">{inquiry.subject}</h1>
+              <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">{briefInquirySubject(inquiry.brief_snapshot)}</h1>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted">
                 <span>{client?.location || snapshotValue(inquiry.brief_snapshot, "location")}</span>
                 <span>{formatDate(inquiry.created_at, copy.dateLocale)}</span>

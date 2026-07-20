@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
+import { briefInquirySubject } from "@/lib/brief-labels";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -10,6 +11,7 @@ type Inquiry = {
   designer_id: string;
   subject: string;
   status: string;
+  brief_snapshot: Record<string, unknown> | null;
   created_at: string;
 };
 
@@ -56,7 +58,7 @@ export default async function ClientOverviewPage({
     supabase.from("favorites").select("id").eq("user_id", user.id),
     supabase
       .from("designer_inquiries")
-      .select("id, designer_id, subject, status, created_at")
+      .select("id, designer_id, subject, status, brief_snapshot, created_at")
       .eq("client_id", user.id)
       .order("created_at", { ascending: false })
       .limit(30),
@@ -152,7 +154,7 @@ export default async function ClientOverviewPage({
                           <div className="text-sm font-semibold text-primary">
                             {designer?.full_name || copy.defaultProfessional}
                           </div>
-                          <h3 className="mt-1 text-xl font-bold">{inquiry.subject}</h3>
+                          <h3 className="mt-1 text-xl font-bold">{briefInquirySubject(inquiry.brief_snapshot)}</h3>
                           <div className="mt-2 text-sm text-muted">
                             {designer?.profession_type === "Studio" ? copy.studio : copy.defaultProfessional} · {formatDate(inquiry.created_at, copy.dateLocale)}
                           </div>

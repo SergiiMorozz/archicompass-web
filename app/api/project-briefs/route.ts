@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { briefTitle } from "@/lib/brief-labels";
 import { getExplicitAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -138,16 +139,14 @@ export async function POST(request: Request) {
     uploadedNames.push(photo.name);
   }
 
-  const titleParts = [
-    textValue(formData, "project_type") ?? "Projekt",
-    textValue(formData, "location") ?? null,
-  ].filter(Boolean);
+  const projectType = textValue(formData, "project_type");
+  const location = textValue(formData, "location");
 
   const { error } = await supabase.from("project_briefs").insert({
     id: briefId,
     user_id: user.id,
-    title: titleParts.join(" w "),
-    project_type: textValue(formData, "project_type"),
+    title: briefTitle({ project_type: projectType, location }),
+    project_type: projectType,
     goal: textValue(formData, "goal"),
     style_direction: textValue(formData, "style_direction"),
     support_scope: textValue(formData, "support_scope"),
@@ -159,7 +158,7 @@ export async function POST(request: Request) {
     property_status: textValue(formData, "property_status"),
     visualization_need: textValue(formData, "visualization_need"),
     supervision_need: textValue(formData, "supervision_need"),
-    location: textValue(formData, "location"),
+    location,
     notes: textValue(formData, "notes"),
     visual_cues: stringArrayValue(formData, "visual_cues"),
     reference_photo_names: uploadedNames,

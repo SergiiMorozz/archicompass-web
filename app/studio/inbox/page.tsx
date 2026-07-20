@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import ConversationAutoRefresh from "@/components/ConversationAutoRefresh";
 import UnreadPageTitle from "@/components/UnreadPageTitle";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
-import { briefSnapshotLabel } from "@/lib/brief-labels";
+import { briefInquirySubject, briefSnapshotLabel } from "@/lib/brief-labels";
 import { professionalUnreadByInquiry, unreadTotal } from "@/lib/inquiry-unread";
 import { getStudioMemberships, inquiryRecipientFilter } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -211,7 +211,7 @@ export default async function StudioInboxPage({
                             : copy.personalProfile}
                         </span>
                       </div>
-                      <h2 className="mt-3 text-2xl font-bold">{inquiry.subject}</h2>
+                      <h2 className="mt-3 text-2xl font-bold">{briefInquirySubject(inquiry.brief_snapshot)}</h2>
                       <div className="mt-2 text-sm text-muted">
                         {client?.full_name || client?.email || copy.newClient}
                         {client?.location ? ` · ${client.location}` : ""}

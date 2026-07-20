@@ -1,6 +1,12 @@
 import { polishVisualCue } from "@/lib/visual-cues";
 import { siteLocale, type SiteLocale } from "@/lib/site-locale";
 
+export type BriefTitleSource = {
+  title?: string | null;
+  project_type?: string | null;
+  location?: string | null;
+};
+
 const briefLabels: Record<string, string> = {
   Apartment: "Mieszkanie",
   House: "Dom",
@@ -91,6 +97,32 @@ export function briefStyleLabel(value: string | null | undefined, locale: SiteLo
 
 export function briefListLabel(values: string[] | null | undefined, locale: SiteLocale = siteLocale) {
   return values?.map((value) => briefLabel(value, locale)).filter(Boolean).join(", ") ?? "";
+}
+
+export function briefTitle(source: BriefTitleSource, locale: SiteLocale = siteLocale) {
+  const projectType = briefLabel(source.project_type, locale);
+  const location = source.location?.trim();
+  const title = source.title?.trim();
+
+  if (projectType && location) return `${projectType} — ${location}`;
+  if (projectType) return projectType;
+  return title || (locale === "pl" ? "Brief projektowy" : "Project brief");
+}
+
+export function briefSnapshotTitle(snapshot: Record<string, unknown> | null, locale: SiteLocale = siteLocale) {
+  return briefTitle(
+    {
+      title: typeof snapshot?.title === "string" ? snapshot.title : null,
+      project_type: typeof snapshot?.project_type === "string" ? snapshot.project_type : null,
+      location: typeof snapshot?.location === "string" ? snapshot.location : null,
+    },
+    locale
+  );
+}
+
+export function briefInquirySubject(snapshot: Record<string, unknown> | null, locale: SiteLocale = siteLocale) {
+  const title = briefSnapshotTitle(snapshot, locale);
+  return locale === "pl" ? `Zapytanie projektowe: ${title}` : `Project inquiry: ${title}`;
 }
 
 export function briefSnapshotLabel(snapshot: Record<string, unknown> | null, key: string, locale: SiteLocale = siteLocale) {

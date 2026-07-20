@@ -6,7 +6,7 @@ import {
   referencePhotoPreviews,
   type ReferencePhotoPreview,
 } from "@/lib/reference-photos";
-import { briefSnapshotLabel } from "@/lib/brief-labels";
+import { briefInquirySubject, briefSnapshotLabel } from "@/lib/brief-labels";
 import { getAccountFlowCopy } from "@/content/account-flow-copy";
 import { profileLocationLabel, profileTypeLabel } from "@/lib/profile-system-labels";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -182,7 +182,7 @@ function InquiryCard({
       </div>
 
       <div className="mt-5 text-sm text-muted">{copy.inquiries.sentOn(createdLabel(inquiry.created_at))}</div>
-      <h3 className="mt-2 text-xl font-bold">{inquiry.subject}</h3>
+      <h3 className="mt-2 text-xl font-bold">{briefInquirySubject(inquiry.brief_snapshot)}</h3>
 
       {inquiry.message ? (
         <div className="mt-4 rounded-2xl border border-line bg-background p-4 text-sm leading-6">
@@ -238,7 +238,7 @@ function InquiryCard({
           </Link>
         ) : profile?.email ? (
           <a
-            href={`mailto:${profile.email}?subject=${encodeURIComponent(`Re: ${inquiry.subject}`)}`}
+            href={`mailto:${profile.email}?subject=${encodeURIComponent(`Re: ${briefInquirySubject(inquiry.brief_snapshot)}`)}`}
             className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
           >
             {copy.inquiries.replyByEmail}

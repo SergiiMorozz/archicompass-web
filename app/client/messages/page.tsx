@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import ConversationAutoRefresh from "@/components/ConversationAutoRefresh";
 import UnreadPageTitle from "@/components/UnreadPageTitle";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
+import { briefInquirySubject } from "@/lib/brief-labels";
 import { clientUnreadByInquiry, unreadTotal } from "@/lib/inquiry-unread";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -15,6 +16,7 @@ type Inquiry = {
   subject: string;
   message: string | null;
   status: string;
+  brief_snapshot: Record<string, unknown> | null;
   created_at: string;
 };
 
@@ -70,7 +72,7 @@ export default async function ClientMessagesPage({
 
   const { data: inquiryData, error } = await supabase
     .from("designer_inquiries")
-    .select("id, designer_id, studio_id, subject, message, status, created_at")
+      .select("id, designer_id, studio_id, subject, message, status, brief_snapshot, created_at")
     .eq("client_id", user.id)
     .order("created_at", { ascending: false })
     .limit(100);
@@ -177,7 +179,7 @@ export default async function ClientMessagesPage({
                         </span>
                         {unread ? <span className="rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-white">{unread} {copy.newMessages}</span> : null}
                       </div>
-                      <h2 className="mt-3 text-2xl font-bold">{inquiry.subject}</h2>
+                      <h2 className="mt-3 text-2xl font-bold">{briefInquirySubject(inquiry.brief_snapshot)}</h2>
                       <div className="mt-2 text-sm text-muted">
                         {recipientName}
                         {studio ? ` · ${copy.studio}` : profile?.profession_type ? ` · ${profile.profession_type}` : ""}

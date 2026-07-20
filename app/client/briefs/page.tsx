@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
-import { briefLabel, briefListLabel, briefStyleLabel } from "@/lib/brief-labels";
+import { briefLabel, briefListLabel, briefStyleLabel, briefTitle } from "@/lib/brief-labels";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -87,7 +87,7 @@ export default async function ClientBriefsPage() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <div className="text-sm font-semibold text-primary">{briefLabel(brief.project_type) || copy.defaultType}</div>
-                    <h2 className="mt-1 text-2xl font-bold">{brief.title || copy.untitled}</h2>
+                    <h2 className="mt-1 text-2xl font-bold">{briefTitle(brief)}</h2>
                     <div className="mt-2 text-sm text-muted">{copy.savedOn} {formatDate(brief.created_at, copy.dateLocale)}</div>
                   </div>
                   <span className="w-fit rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import ReferencePhotoGrid from "@/components/ReferencePhotoGrid";
-import { briefLabel, briefListLabel, briefStyleLabel } from "@/lib/brief-labels";
+import { briefLabel, briefListLabel, briefStyleLabel, briefTitle } from "@/lib/brief-labels";
 import { sendInquiryNotificationEmail } from "@/lib/email/inquiry-notification";
 import {
   referencePhotoPreviews,
@@ -190,7 +190,7 @@ async function sendBriefInquiry(formData: FormData) {
     }
     designer = designerData as Designer;
   }
-  const subject = copy.brief.subject(brief.title || briefLabel(brief.project_type) || copy.common.projectBrief);
+  const subject = copy.brief.subject(briefTitle(brief));
   let duplicateQuery = supabase
     .from("designer_inquiries")
     .select("id")
@@ -544,7 +544,7 @@ export default async function SavedBriefsPage({
                         {briefLabel(brief.project_type) || copy.common.projectBrief}
                       </div>
                       <h2 className="mt-1 text-2xl font-bold">
-                        {brief.title || copy.common.projectBrief}
+                        {briefTitle(brief)}
                       </h2>
                       <div className="mt-2 text-sm text-muted">
                         {copy.brief.created(createdLabel(brief.created_at))}

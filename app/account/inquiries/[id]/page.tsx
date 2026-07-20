@@ -13,6 +13,7 @@ import {
   type MessageAttachment,
 } from "@/lib/message-attachments";
 import { referencePhotoPreviews } from "@/lib/reference-photos";
+import { briefInquirySubject } from "@/lib/brief-labels";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getAccountFlowCopy } from "@/content/account-flow-copy";
 
@@ -83,7 +84,7 @@ async function sendParticipantMessage(formData: FormData) {
 
   const { data: inquiry } = await supabase
     .from("designer_inquiries")
-    .select("id, client_id, designer_id, studio_id, subject")
+    .select("id, client_id, designer_id, studio_id, subject, brief_snapshot")
     .eq("id", inquiryId)
     .maybeSingle();
   if (!inquiry) redirect("/client/messages");
@@ -130,7 +131,7 @@ async function sendParticipantMessage(formData: FormData) {
       role: "designer",
     },
     senderName: senderProfile?.full_name || user.email || copy.conversation.client,
-    subject: inquiry.subject,
+    subject: briefInquirySubject(inquiry.brief_snapshot),
   });
   if (notification.error) {
     console.error("Conversation email notification failed", notification.error);
@@ -239,7 +240,7 @@ export default async function AccountConversationPage({
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="text-sm font-semibold text-primary">{copy.conversation.with(otherName)}</div>
-              <h1 className="mt-2 text-4xl font-bold">{inquiry.subject}</h1>
+              <h1 className="mt-2 text-4xl font-bold">{briefInquirySubject(inquiry.brief_snapshot)}</h1>
               <Link href={studio ? `/studios/${studio.id}` : `/designers/${inquiry.designer_id}`} className="mt-3 inline-flex text-sm font-bold text-primary hover:underline">
                 {studio ? copy.conversation.openStudio : copy.conversation.openDesigner}
               </Link>

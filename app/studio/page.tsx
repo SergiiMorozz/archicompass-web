@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
-import { briefSnapshotLabel } from "@/lib/brief-labels";
+import { briefInquirySubject, briefSnapshotLabel } from "@/lib/brief-labels";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getStudioMemberships, inquiryRecipientFilter } from "@/lib/studios";
 import { profileReadinessScore } from "@/lib/profile-readiness";
@@ -176,7 +176,7 @@ export default async function StudioOverviewPage() {
                           <div className="text-sm font-semibold text-primary">
                             {client?.full_name || client?.email || copy.newClient}
                           </div>
-                          <h3 className="mt-1 text-xl font-bold">{inquiry.subject}</h3>
+                          <h3 className="mt-1 text-xl font-bold">{briefInquirySubject(inquiry.brief_snapshot)}</h3>
                         </div>
                         <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${statusClass(inquiry.status)}`}>
                           {copy.statuses[inquiry.status] || inquiry.status}

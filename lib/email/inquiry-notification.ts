@@ -1,5 +1,5 @@
 import { sendTransactionalEmail } from "@/lib/email/send-transactional-email";
-import { briefLabel, briefListLabel, briefStyleLabel } from "@/lib/brief-labels";
+import { briefLabel, briefListLabel, briefStyleLabel, briefTitle } from "@/lib/brief-labels";
 import { polishVisualCues } from "@/lib/visual-cues";
 
 type BriefForEmail = {
@@ -55,7 +55,7 @@ function briefLine(label: string, value: string | null | undefined) {
 }
 
 function emailSubject(brief: BriefForEmail) {
-  return `Nowe zapytanie ArchiCompass: ${brief.title || briefLabel(brief.project_type) || "brief projektowy"}`;
+  return `Nowe zapytanie ArchiCompass: ${briefTitle(brief)}`;
 }
 
 function emailText({
