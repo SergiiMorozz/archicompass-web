@@ -9,6 +9,8 @@ type Article = {
   id: string;
   slug: string;
   title: string;
+  title_pl: string | null;
+  title_en: string | null;
   category: string;
   status: "draft" | "published";
   featured: boolean;
@@ -39,7 +41,9 @@ async function createArticle(formData: FormData) {
   "use server";
 
   const { supabase, user } = await requireAdmin("content");
-  const title = textValue(formData, "title");
+  const titlePl = textValue(formData, "title_pl");
+  const titleEn = textValue(formData, "title_en");
+  const title = titlePl || titleEn;
   const category = textValue(formData, "category") || "Design";
   const slug = slugValue(textValue(formData, "slug") || title);
 
@@ -51,6 +55,8 @@ async function createArticle(formData: FormData) {
     .insert({
       slug,
       title,
+      title_pl: titlePl || null,
+      title_en: titleEn || null,
       category,
       excerpt: "",
       body: "",
@@ -86,7 +92,7 @@ export default async function AdminContentPage({
   const { supabase } = await requireAdmin("content");
   const query = supabase
     .from("inspiration_articles")
-    .select("id, slug, title, category, status, featured, published_at, updated_at")
+    .select("id, slug, title, title_pl, title_en, category, status, featured, published_at, updated_at")
     .order("updated_at", { ascending: false });
   const { data, error } = await query;
   const allArticles = (data ?? []) as Article[];
@@ -157,7 +163,7 @@ export default async function AdminContentPage({
                 >
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold">{article.title}</span>
+                      <span className="font-semibold">{article.title_pl || article.title || article.title_en}</span>
                       {article.featured ? (
                         <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary">Wyróżniony</span>
                       ) : null}
@@ -187,15 +193,19 @@ export default async function AdminContentPage({
           <h2 className="mt-1 text-2xl font-bold">Utwórz artykuł</h2>
           <form action={createArticle} className="mt-5 grid gap-4">
             <label className="text-sm font-semibold">
-              Tytuł
-              <input name="title" required minLength={3} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
+              Tytuł — PL
+              <input name="title_pl" minLength={3} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
+            </label>
+            <label className="text-sm font-semibold">
+              Title — EN <span className="font-normal text-muted">opcjonalnie</span>
+              <input name="title_en" minLength={3} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
             <label className="text-sm font-semibold">
               Kategoria
               <input name="category" defaultValue="Design" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
             <label className="text-sm font-semibold">
-              Adres URL <span className="font-normal text-muted">opcjonalnie</span>
+              Adres URL <span className="font-normal text-muted">opcjonalnie, wspólny dla PL i EN</span>
               <input name="slug" placeholder="generowany-z-tytulu" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
             <button className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">

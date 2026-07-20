@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { applyPolishArticleCopy } from "@/content/pl/copy";
 import { getSiteCopy } from "@/content/site-copy";
-import { isEnglishSite, localeMetadata, siteLocale } from "@/lib/site-locale";
+import { localizeArticle, type ArticleLocalizationFields } from "@/lib/article-content";
+import { localeMetadata, siteLocale } from "@/lib/site-locale";
 import { createPublicContentClient } from "@/lib/public-content-client";
 import { pageMetadata } from "@/lib/seo";
 
@@ -41,12 +42,9 @@ type FeaturedProject = {
   title: string | null;
 };
 
-type FeaturedArticle = {
+type FeaturedArticle = ArticleLocalizationFields & {
   category: string;
-  excerpt: string;
-  image_url: string | null;
   slug: string;
-  title: string;
 };
 
 function metricValue(value: number) {
@@ -76,8 +74,9 @@ async function homeData() {
         .limit(3),
       supabase
         .from("inspiration_articles")
-        .select("slug, title, excerpt, category, image_url")
+        .select("slug, title, excerpt, body, category, image_url, author_name, title_pl, title_en, excerpt_pl, excerpt_en, author_name_pl, author_name_en, cover_alt_pl, cover_alt_en, meta_title_pl, meta_title_en, meta_description_pl, meta_description_en, focus_keyword_pl, focus_keyword_en, content_blocks")
         .eq("status", "published")
+        .eq("noindex", false)
         .order("featured", { ascending: false })
         .order("published_at", { ascending: false })
         .limit(3),
@@ -105,9 +104,10 @@ async function homeData() {
       [metricValue(reviewCount), homeCopy.metrics.reviews],
     ],
     featuredProjects,
-    featuredArticles: isEnglishSite
-      ? ((articles.data ?? []) as FeaturedArticle[])
-      : ((articles.data ?? []) as FeaturedArticle[]).map(applyPolishArticleCopy),
+    featuredArticles: ((articles.data ?? []) as FeaturedArticle[]).map((article) => {
+      const legacy = siteLocale === "pl" ? applyPolishArticleCopy(article) : article;
+      return localizeArticle(legacy, siteLocale);
+    }),
   };
 }
 
@@ -418,7 +418,7 @@ export default async function Home() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={article.image_url}
-                        alt={article.title}
+                        alt={article.cover_alt}
                         width="1000"
                         height="700"
                         loading="lazy"

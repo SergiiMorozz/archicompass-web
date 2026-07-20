@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import FavoriteButton from "@/components/FavoriteButton";
+import { applyPolishArticleCopy } from "@/content/pl/copy";
+import { getSiteCopy } from "@/content/site-copy";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
 import {
   applyDemoProfilePresentation,
@@ -8,6 +10,8 @@ import {
 } from "@/lib/public-demo-profiles";
 import { localizeProfileContent } from "@/lib/localized-profile-content";
 import { profileLocationLabel, profileTypeLabel } from "@/lib/profile-system-labels";
+import { localizeArticle, type ArticleLocalizationFields } from "@/lib/article-content";
+import { siteLocale } from "@/lib/site-locale";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
@@ -49,13 +53,10 @@ type Studio = {
   specialties: string[] | null;
 };
 
-type Article = {
+type Article = ArticleLocalizationFields & {
   id: string;
   slug: string;
-  title: string;
-  excerpt: string;
   category: string;
-  image_url: string | null;
 };
 
 const fallbackProjectImage =
@@ -63,6 +64,7 @@ const fallbackProjectImage =
 
 export default async function ClientFavoritesPage() {
   const copy = getWorkspaceCopy().clientFavorites;
+  const siteCopy = getSiteCopy();
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
@@ -101,7 +103,7 @@ export default async function ClientFavoritesPage() {
     articleIds.length
       ? supabase
           .from("inspiration_articles")
-          .select("id, slug, title, excerpt, category, image_url")
+          .select("id, slug, title, excerpt, body, category, image_url, author_name, title_pl, title_en, excerpt_pl, excerpt_en, author_name_pl, author_name_en, cover_alt_pl, cover_alt_en, meta_title_pl, meta_title_en, meta_description_pl, meta_description_en, focus_keyword_pl, focus_keyword_en, content_blocks")
           .in("id", articleIds)
       : Promise.resolve({ data: [] }),
   ]);
@@ -113,7 +115,10 @@ export default async function ClientFavoritesPage() {
     const presentation = getDemoProjectPresentation(project.profile_id, project.id);
     return presentation ? { ...project, ...presentation } : project;
   });
-  const articles = (articleData ?? []) as Article[];
+  const articles = ((articleData ?? []) as Article[]).map((article) => {
+    const legacy = siteLocale === "pl" ? applyPolishArticleCopy(article) : article;
+    return localizeArticle(legacy, siteLocale);
+  });
   const ownerIds = Array.from(new Set(projects.map((project) => project.profile_id)));
   const { data: ownerData } = ownerIds.length
     ? await supabase.from("profiles").select("id, full_name").in("id", ownerIds)
@@ -242,7 +247,7 @@ export default async function ClientFavoritesPage() {
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <span className="text-xs font-semibold text-primary">{article.category}</span>
+                        <span className="text-xs font-semibold text-primary">{siteCopy.inspiration.categoryLabels[article.category as keyof typeof siteCopy.inspiration.categoryLabels] || article.category}</span>
                         <Link href={`/inspiration/${article.slug}`} className="mt-1 block text-xl font-bold hover:text-primary">{article.title}</Link>
                       </div>
                       <FavoriteButton compact entityType="article" entityKey={article.id} initialSaved refreshOnChange />

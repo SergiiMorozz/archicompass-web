@@ -5,6 +5,7 @@ import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
 import { applyPolishArticleCopy } from "@/content/pl/copy";
 import { getSiteCopy } from "@/content/site-copy";
+import { localizeArticle, type ArticleLocalizationFields } from "@/lib/article-content";
 import { localizedCount } from "@/lib/localized-count";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createPublicContentClient } from "@/lib/public-content-client";
@@ -22,14 +23,10 @@ export const metadata: Metadata = pageMetadata({
   path: "/inspiration",
 });
 
-type Article = {
+type Article = ArticleLocalizationFields & {
   id: string;
   slug: string;
-  title: string;
-  excerpt: string;
   category: string;
-  image_url: string | null;
-  author_name: string | null;
   featured: boolean;
   published_at: string | null;
 };
@@ -74,8 +71,9 @@ function categoryLabel(value: string) {
   return inspirationCopy.categoryLabels[value as keyof typeof inspirationCopy.categoryLabels] || value;
 }
 
-function localizedArticle<T extends { slug: string }>(article: T) {
-  return siteCopy.locale === "pl" ? applyPolishArticleCopy(article) : article;
+function localizedArticle(article: Article) {
+  const legacy = siteCopy.locale === "pl" ? applyPolishArticleCopy(article) : article;
+  return localizeArticle(legacy, siteCopy.locale);
 }
 
 function projectCategoryLabel(value: string) {
@@ -95,8 +93,9 @@ export default async function InspirationPage({
   const publicSupabase = createPublicContentClient();
   const { data, error } = await supabase
     .from("inspiration_articles")
-    .select("id, slug, title, excerpt, category, image_url, author_name, featured, published_at")
+    .select("id, slug, title, excerpt, body, category, image_url, author_name, title_pl, title_en, excerpt_pl, excerpt_en, author_name_pl, author_name_en, cover_alt_pl, cover_alt_en, meta_title_pl, meta_title_en, meta_description_pl, meta_description_en, focus_keyword_pl, focus_keyword_en, content_blocks, featured, published_at")
     .eq("status", "published")
+    .eq("noindex", false)
     .order("featured", { ascending: false })
     .order("published_at", { ascending: false });
   const allArticles = ((data ?? []) as Article[]).map(localizedArticle);
@@ -296,7 +295,7 @@ export default async function InspirationPage({
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={article.image_url}
-                      alt={article.title}
+                      alt={article.cover_alt}
                       width="1000"
                       height="700"
                       loading="lazy"

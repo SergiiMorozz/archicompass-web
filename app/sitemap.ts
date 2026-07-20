@@ -40,7 +40,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       supabase
         .from("inspiration_articles")
         .select("slug, updated_at")
-        .eq("status", "published"),
+        .eq("status", "published")
+        .eq("noindex", false),
     ]);
 
     const articleEntries: MetadataRoute.Sitemap = (articles.data ?? []).map((article) => ({
