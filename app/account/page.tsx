@@ -5,7 +5,6 @@ import SignOutButton from "@/components/SignOutButton";
 import {
   getAccountRole,
   getStudioMemberships,
-  inquiryRecipientFilter,
 } from "@/lib/studios";
 import { profileReadinessScore } from "@/lib/profile-readiness";
 import { profileTypeLabel } from "@/lib/profile-system-labels";
@@ -33,14 +32,6 @@ type Profile = {
 };
 
 type Project = {
-  id: string;
-};
-
-type ProjectBrief = {
-  id: string;
-};
-
-type DesignerInquiry = {
   id: string;
 };
 
@@ -75,16 +66,6 @@ export default async function AccountPage({
     .select("id")
     .eq("profile_id", user.id);
 
-  const { data: briefsData } = await supabase
-    .from("project_briefs")
-    .select("id")
-    .eq("user_id", user.id);
-
-  const { data: sentInquiriesData } = await supabase
-    .from("designer_inquiries")
-    .select("id")
-    .eq("client_id", user.id);
-
   const accountRole = await getAccountRole(supabase, user.id);
   const { data: activeMemberships } = await getStudioMemberships(
     supabase,
@@ -93,30 +74,13 @@ export default async function AccountPage({
   );
   const studioIds = activeMemberships.map((membership) => membership.studio_id);
 
-  const { data: incomingInquiriesData } = await supabase
-    .from("designer_inquiries")
-    .select("id")
-    .or(inquiryRecipientFilter(user.id, studioIds));
-
   const profile = (profileData ?? {}) as Partial<Profile>;
   const projects = (projectsData ?? []) as Project[];
-  const briefs = (briefsData ?? []) as ProjectBrief[];
-  const sentInquiries = (sentInquiriesData ?? []) as DesignerInquiry[];
-  const incomingInquiries = (incomingInquiriesData ?? []) as DesignerInquiry[];
   const isProfessional = accountRole === "designer";
   const copy = getWorkspaceCopy().account;
   const score = profileReadinessScore(profile, isProfessional);
   const hasPublicProfile = isProfessional && Boolean(profileData);
-  const compassHref = isProfessional ? "/project-compass" : "/client/briefs";
-  const compassTitle = isProfessional ? copy.compass.professionalTitle : copy.compass.clientTitle;
-  const compassDescription = isProfessional
-    ? copy.compass.professionalBody
-    : copy.compass.clientBody;
-  const nextActionHref = isProfessional ? "/studio" : "/designers";
-  const nextActionLabel = isProfessional
-    ? copy.professionalNextCta
-    : copy.clientNextCta;
-  const steps = isProfessional ? copy.stepsProfessional : copy.stepsClient;
+  const workspaceHref = isProfessional ? "/studio" : "/client";
 
   return (
     <main className="bg-background">
@@ -125,18 +89,16 @@ export default async function AccountPage({
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
             <div>
               <div className="text-sm font-semibold text-primary">{copy.settingsEyebrow}</div>
-              <h1 className="mt-2 break-words text-4xl font-bold tracking-tight sm:text-6xl">
-                {profileName(profile, user.email ?? undefined, copy.defaultName)}
-              </h1>
-              <div className="mt-3 break-all text-sm font-semibold text-muted">
-                {user.email}
-              </div>
+              <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">{copy.settingsTitle}</h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
                 {isProfessional
                   ? copy.professionalIntro
                   : copy.clientIntro}
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
+                <span className="rounded-full border border-line bg-background px-3 py-1 text-sm font-semibold text-foreground">
+                  {profileName(profile, user.email ?? undefined, copy.defaultName)}
+                </span>
                 <span className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">
                   {isProfessional ? copy.designer : copy.client}
                 </span>
@@ -154,14 +116,12 @@ export default async function AccountPage({
             </div>
 
             <div className="flex flex-wrap gap-3 lg:justify-end">
-              {isProfessional ? (
-                <Link
-                  href="/studio"
-                  className="rounded-xl bg-foreground px-4 py-3 text-sm font-semibold text-white"
-                >
-                  {copy.openStudio}
-                </Link>
-              ) : null}
+              <Link
+                href={workspaceHref}
+                className="rounded-xl bg-foreground px-4 py-3 text-sm font-semibold text-white"
+              >
+                {copy.openWorkspace}
+              </Link>
               {hasPublicProfile ? (
                 <Link
                   href={`/designers/${myProfileId}`}
@@ -191,7 +151,7 @@ export default async function AccountPage({
               {copy.updated}
             </div>
           ) : null}
-          <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             <Link
               href="/account/profile"
               className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
@@ -255,107 +215,6 @@ export default async function AccountPage({
               </Link>
             ) : null}
 
-            <Link
-              href={compassHref}
-              className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
-            >
-              <div className="text-sm font-semibold text-primary">
-                AI Project Compass
-              </div>
-              <h2 className="mt-2 text-2xl font-bold">{compassTitle}</h2>
-              <p className="mt-3 text-sm leading-6 text-muted">
-                {compassDescription}
-              </p>
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <div className="rounded-xl border border-line bg-background p-3">
-                  <div className="text-sm text-muted">
-                    {isProfessional ? copy.aiHistory : copy.savedBriefs}
-                  </div>
-                  <div className="mt-1 text-xl font-bold">{briefs.length}</div>
-                </div>
-                <div className="rounded-xl border border-line bg-background p-3">
-                  <div className="text-sm text-muted">{copy.tool}</div>
-                  <div className="mt-1 text-xl font-bold">
-                    {isProfessional ? copy.aiAnalysis : copy.active}
-                  </div>
-                </div>
-              </div>
-            </Link>
-
-            <Link
-              href={isProfessional ? "/studio/inbox" : "/account/inquiries"}
-              className="rounded-2xl border border-line bg-card p-6 shadow-sm transition hover:border-primary"
-            >
-              <div className="text-sm font-semibold text-primary">{copy.enquiriesEyebrow}</div>
-              <h2 className="mt-2 text-2xl font-bold">{copy.enquiries}</h2>
-              <p className="mt-3 text-sm leading-6 text-muted">
-                {isProfessional
-                  ? copy.professionalEnquiriesBody
-                  : copy.clientEnquiriesBody}
-              </p>
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <div className="rounded-xl border border-line bg-background p-3">
-                  <div className="text-sm text-muted">
-                    {isProfessional ? copy.received : copy.sent}
-                  </div>
-                  <div className="mt-1 text-xl font-bold">
-                    {isProfessional ? incomingInquiries.length : sentInquiries.length}
-                  </div>
-                </div>
-                <div className="rounded-xl border border-line bg-background p-3">
-                  <div className="text-sm text-muted">
-                    {isProfessional ? copy.activeStudios : copy.role}
-                  </div>
-                  <div className="mt-1 text-xl font-bold">
-                    {isProfessional ? studioIds.length : copy.client}
-                  </div>
-                </div>
-              </div>
-            </Link>
-          </section>
-
-          <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div className="text-sm font-semibold text-primary">{copy.nextEyebrow}</div>
-                <h2 className="mt-1 text-3xl font-bold">
-                  {isProfessional ? copy.professionalNextTitle : copy.clientNextTitle}
-                </h2>
-              </div>
-              <Link
-                href={nextActionHref}
-                className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
-              >
-                {nextActionLabel}
-              </Link>
-            </div>
-
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl border border-line bg-background p-5">
-                <div className="font-bold">
-                  {steps[0]}
-                </div>
-                <p className="mt-2 text-sm leading-6 text-muted">
-                  {steps[1]}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-line bg-background p-5">
-                <div className="font-bold">
-                  {steps[2]}
-                </div>
-                <p className="mt-2 text-sm leading-6 text-muted">
-                  {steps[3]}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-line bg-background p-5">
-                <div className="font-bold">
-                  {steps[4]}
-                </div>
-                <p className="mt-2 text-sm leading-6 text-muted">
-                  {steps[5]}
-                </p>
-              </div>
-            </div>
           </section>
         </div>
 

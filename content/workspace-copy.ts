@@ -9,6 +9,11 @@ type ClientOverviewCopy = {
   intro: string;
   createBrief: string;
   openDirectory: string;
+  actionEyebrow: string;
+  actionTitle: string;
+  actionBody: string;
+  actionStep: string;
+  directoryStep: string;
   profileUpdated: string;
   activityEyebrow: string;
   conversationsTitle: string;
@@ -30,11 +35,13 @@ type ClientOverviewCopy = {
 type AccountCopy = {
   defaultName: string;
   settingsEyebrow: string;
+  settingsTitle: string;
   professionalIntro: string;
   clientIntro: string;
   designer: string;
   client: string;
   openStudio: string;
+  openWorkspace: string;
   publicProfile: string;
   deletedTitle: string;
   deletedBody: string;
@@ -669,6 +676,12 @@ type WorkspaceCopy = {
     inboxCta: string;
     addProjectCta: string;
     studioTeamCta: string;
+    focusEyebrow: string;
+    focusTitle: string;
+    focusBody: string;
+    focusProfileStep: string;
+    focusPortfolioStep: string;
+    focusProfileCta: string;
     opportunitiesEyebrow: string;
     receivedBriefs: string;
     viewAll: string;
@@ -816,11 +829,13 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
     account: {
       defaultName: "Twoje konto ArchiCompass",
       settingsEyebrow: "Ustawienia konta",
+      settingsTitle: "Ustawienia i profil",
       professionalIntro: "Tutaj aktualizujesz dane konta i profil publiczny. Codzienna praca z briefami, portfolio i zespołem jest w Studio projektanta.",
       clientIntro: "Tutaj aktualizujesz dane konta. Briefy, ulubione i rozmowy znajdziesz w Strefie klienta.",
       designer: "Projektant",
       client: "Klient",
       openStudio: "Przejdź do Studio",
+      openWorkspace: "Otwórz swoją strefę pracy",
       publicProfile: "Zobacz profil publiczny",
       deletedTitle: "Profil profesjonalisty został usunięty",
       deletedBody: "Publiczny profil i portfolio zostały usunięte. Konto projektanta, rozmowy i członkostwa w pracowniach pozostają aktywne.",
@@ -1082,6 +1097,11 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       intro: "Trzymaj inspiracje, briefy, ulubionych specjalistów i wszystkie rozmowy w jednym miejscu: od pierwszego pomysłu do wyboru projektanta.",
       createBrief: "Utwórz brief",
       openDirectory: "Otwórz Katalog Projektantów",
+      actionEyebrow: "Zacznij od kierunku",
+      actionTitle: "Co chcesz zrobić teraz?",
+      actionBody: "AI Project Compass zamieni inspiracje w uporządkowany brief. Katalog pozwoli od razu sprawdzić profile i portfolio projektantów.",
+      actionStep: "1. Analiza inspiracji",
+      directoryStep: "2. Wybór projektanta",
       profileUpdated: "Dane konta zostały zaktualizowane.",
       activityEyebrow: "Ostatnia aktywność",
       conversationsTitle: "Rozmowy z projektantami",
@@ -1186,6 +1206,12 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       inboxCta: "Otwórz zapytania",
       addProjectCta: "Dodaj projekt",
       studioTeamCta: "Pracownia i zespół",
+      focusEyebrow: "Profil, który pracuje na zapytania",
+      focusTitle: "Ułatw klientom wybór Twojej pracowni",
+      focusBody: "Kompletny profil, czytelne ceny i aktualne portfolio sprawiają, że briefy trafiają do właściwego specjalisty.",
+      focusProfileStep: "Uzupełnij profil i usługi",
+      focusPortfolioStep: "Dodaj lub odśwież portfolio",
+      focusProfileCta: "Edytuj profil publiczny",
       opportunitiesEyebrow: "Najnowsze możliwości",
       receivedBriefs: "Otrzymane briefy",
       viewAll: "Zobacz wszystkie",
@@ -1549,11 +1575,13 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
     account: {
       defaultName: "Your ArchiCompass account",
       settingsEyebrow: "Account settings",
+      settingsTitle: "Settings and profile",
       professionalIntro: "Update your account and public profile here. Your daily brief, portfolio, and team work lives in Designer Studio.",
       clientIntro: "Update your account details here. Find briefs, favorites, and conversations in Client Workspace.",
       designer: "Designer",
       client: "Client",
       openStudio: "Open Designer Studio",
+      openWorkspace: "Open your workspace",
       publicProfile: "View public profile",
       deletedTitle: "Professional profile deleted",
       deletedBody: "The public profile and portfolio have been removed. Your designer account, conversations, and studio memberships remain active.",
@@ -1815,6 +1843,11 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       intro: "Keep inspiration, briefs, favorite professionals, and every conversation in one place: from the first idea to choosing a designer.",
       createBrief: "Create a brief",
       openDirectory: "Open Designer Directory",
+      actionEyebrow: "Start with direction",
+      actionTitle: "What would you like to do now?",
+      actionBody: "AI Project Compass turns inspiration into a clear brief. The directory lets you compare designer profiles and portfolios right away.",
+      actionStep: "1. Analyze inspiration",
+      directoryStep: "2. Choose a designer",
       profileUpdated: "Your account details have been updated.",
       activityEyebrow: "Recent activity",
       conversationsTitle: "Conversations with designers",
@@ -1919,6 +1952,12 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       inboxCta: "Open enquiries",
       addProjectCta: "Add a project",
       studioTeamCta: "Studio and team",
+      focusEyebrow: "A profile that helps win enquiries",
+      focusTitle: "Make it easier for clients to choose your studio",
+      focusBody: "A complete profile, clear pricing, and an up-to-date portfolio help the right briefs reach the right professional.",
+      focusProfileStep: "Complete your profile and services",
+      focusPortfolioStep: "Add or refresh your portfolio",
+      focusProfileCta: "Edit public profile",
       opportunitiesEyebrow: "Latest opportunities",
       receivedBriefs: "Received briefs",
       viewAll: "View all",

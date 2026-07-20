@@ -110,12 +110,12 @@ export default async function StudioOverviewPage() {
   ];
 
   return (
-    <main>
+    <main className="bg-background">
       <section className="border-b border-line bg-card px-4 py-10 sm:px-6">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="text-sm font-semibold text-primary">{copy.eyebrow}</div>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">{copy.title}</h1>
+            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">{copy.title}</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
               {copy.intro}
             </p>
@@ -137,13 +137,36 @@ export default async function StudioOverviewPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map(([label, value, detail]) => (
-            <article key={label} className="rounded-lg border border-line bg-card p-5 shadow-sm">
+            <article key={label} className="rounded-2xl border border-line bg-card p-5 shadow-sm">
               <div className="text-sm font-semibold text-muted">{label}</div>
-              <div className="mt-2 text-4xl font-bold text-primary">{value}</div>
+              <div className="mt-2 text-4xl font-bold tracking-tight text-primary">{value}</div>
               <div className="mt-2 text-sm text-muted">{detail}</div>
             </article>
           ))}
         </div>
+
+        <section className="mt-7 overflow-hidden rounded-2xl border border-[#39224b] bg-[#281735] p-6 text-white shadow-[0_20px_45px_rgba(54,31,73,0.14)] sm:p-8">
+          <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.8fr)] lg:items-center">
+            <div>
+              <div className="text-sm font-bold text-[#51d7c9]">{copy.focusEyebrow}</div>
+              <h2 className="mt-2 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">{copy.focusTitle}</h2>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-white/75">{copy.focusBody}</p>
+            </div>
+            <div className="grid gap-3 rounded-xl border border-white/15 bg-white/10 p-4 sm:p-5">
+              <div className="flex items-center gap-3 rounded-lg bg-white/10 px-4 py-3 text-sm font-semibold">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#51d7c9] text-xs font-bold text-[#281735]">1</span>
+                {copy.focusProfileStep}
+              </div>
+              <div className="flex items-center gap-3 rounded-lg bg-white/10 px-4 py-3 text-sm font-semibold">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white text-xs font-bold text-[#281735]">2</span>
+                {copy.focusPortfolioStep}
+              </div>
+              <Link href="/account/profile" className="mt-1 rounded-xl bg-primary px-4 py-3 text-center text-sm font-bold text-white transition hover:brightness-110">
+                {copy.focusProfileCta}
+              </Link>
+            </div>
+          </div>
+        </section>
 
         <div className="mt-8 grid gap-7 lg:grid-cols-[minmax(0,1fr)_340px]">
           <section>
@@ -169,7 +192,7 @@ export default async function StudioOverviewPage() {
                     <Link
                       key={inquiry.id}
                       href={`/studio/inbox/${inquiry.id}`}
-                      className="rounded-lg border border-line bg-card p-5 shadow-sm transition hover:border-primary"
+                      className="rounded-2xl border border-line bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
                     >
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
@@ -193,8 +216,9 @@ export default async function StudioOverviewPage() {
                 })}
               </div>
             ) : (
-              <div className="mt-5 rounded-lg border border-dashed border-line bg-card p-8">
-                <h3 className="text-xl font-bold">{copy.emptyTitle}</h3>
+              <div className="mt-5 rounded-2xl border border-dashed border-primary/35 bg-card p-8 sm:p-10">
+                <div className="inline-flex rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary">{copy.readinessEyebrow}</div>
+                <h3 className="mt-4 text-xl font-bold">{copy.emptyTitle}</h3>
                 <p className="mt-2 max-w-xl leading-7 text-muted">
                   {copy.emptyBody}
                 </p>
@@ -205,7 +229,7 @@ export default async function StudioOverviewPage() {
             )}
           </section>
 
-          <aside className="h-fit rounded-lg border border-line bg-card p-6 shadow-sm lg:sticky lg:top-40">
+          <aside className="h-fit rounded-2xl border border-primary/20 bg-card p-6 shadow-sm lg:sticky lg:top-40">
             <div className="text-sm font-semibold text-primary">{copy.readinessEyebrow}</div>
             <div className="mt-2 text-4xl font-bold">{readiness}%</div>
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-primary-soft">
