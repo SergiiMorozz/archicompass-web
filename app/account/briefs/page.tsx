@@ -364,6 +364,7 @@ export default async function SavedBriefsPage({
     .from("profiles")
     .select("id, email, full_name, profession_type, user_type, location")
     .neq("id", user.id)
+    .eq("user_type", "professional")
     .order("full_name", { ascending: true })
     .limit(100);
 
