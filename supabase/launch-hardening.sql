@@ -9,6 +9,12 @@ revoke all on table public.companies, public.reviews, public.saved_designers, pu
 -- Mutating helpers require a signed-in account. The server-only quota helper is
 -- intentionally not callable from browser clients.
 revoke all on function public.consume_style_analysis_quota(text, integer) from public, anon, authenticated;
+revoke all on function public.can_access_inquiry(uuid) from public, anon;
+grant execute on function public.can_access_inquiry(uuid) to authenticated;
+revoke all on function public.can_manage_inquiry(uuid) from public, anon;
+grant execute on function public.can_manage_inquiry(uuid) to authenticated;
+revoke all on function public.current_account_role() from public, anon;
+grant execute on function public.current_account_role() to authenticated;
 revoke all on function public.delete_my_professional_profile() from public, anon;
 grant execute on function public.delete_my_professional_profile() to authenticated;
 revoke all on function public.invite_studio_member(uuid, text, text) from public, anon;
