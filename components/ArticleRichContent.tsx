@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ArticleBlock } from "@/lib/article-content";
-import { localizedBlockText, localizedText } from "@/lib/article-content";
+import { localizedBlockText, localizedRichArticleHtml, localizedText } from "@/lib/article-content";
 import type { SiteLocale } from "@/lib/site-locale";
 
 function InlineText({ value }: { value: string }) {
@@ -47,6 +47,10 @@ export default function ArticleRichContent({ blocks, locale }: { blocks: Article
   return (
     <div className="grid gap-7 text-lg leading-9 text-foreground">
       {blocks.map((block) => {
+        if (block.type === "rich_text") {
+          const html = localizedRichArticleHtml(block, locale);
+          return html ? <div key={block.id} className="article-rich-content" dangerouslySetInnerHTML={{ __html: html }} /> : null;
+        }
         if (block.type === "divider") return <hr key={block.id} className="border-line" />;
         if (block.type === "heading") {
           const value = localizedBlockText(block, locale);

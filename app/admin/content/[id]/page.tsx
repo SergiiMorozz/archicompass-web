@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
-import ArticleBlockEditor from "@/components/ArticleBlockEditor";
+import ArticleRichTextEditor from "@/components/ArticleRichTextEditor";
 import { applyPolishArticleCopy } from "@/content/pl/copy";
 import { articleBlocksPlainText, articleImagePaths, parseArticleBlocks } from "@/lib/article-content";
 import { requireAdmin } from "@/lib/admin";
@@ -274,7 +274,7 @@ export default async function AdminArticleEditorPage({
             </div>
           </section>
 
-          <ArticleBlockEditor articleId={article.id} initialBlocks={article.content_blocks} />
+          <ArticleRichTextEditor articleId={article.id} initialBlocks={article.content_blocks} />
 
           <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
             <div className="text-sm font-semibold text-primary">Okładka i autor</div><h2 className="mt-1 text-2xl font-bold">Materiały wizualne</h2>

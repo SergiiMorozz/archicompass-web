@@ -1,7 +1,7 @@
 import type { SiteLocale } from "@/lib/site-locale";
 
 export type ContentTone = "body" | "lead" | "small";
-export type ArticleBlockType = "paragraph" | "heading" | "image" | "table" | "quote" | "callout" | "faq" | "divider";
+export type ArticleBlockType = "paragraph" | "heading" | "image" | "table" | "quote" | "callout" | "faq" | "divider" | "rich_text";
 
 export type ArticleTable = {
   caption_pl: string;
@@ -33,6 +33,9 @@ export type ArticleBlock = {
   link_url?: string;
   link_label_pl?: string;
   link_label_en?: string;
+  html_pl?: string;
+  html_en?: string;
+  storage_paths?: string[];
 };
 
 export type ArticleLocalizationFields = {
@@ -84,6 +87,69 @@ function safeUrl(value: unknown) {
   }
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function decodeBasicEntities(value: string) {
+  return value
+    .replace(/&quot;/gi, "\"")
+    .replace(/&#0*39;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&amp;/gi, "&");
+}
+
+const allowedRichTags = new Set([
+  "p", "br", "h2", "h3", "h4", "strong", "b", "em", "i", "ul", "ol", "li", "blockquote", "hr",
+  "figure", "img", "figcaption", "table", "thead", "tbody", "tr", "th", "td", "a", "font", "span", "div",
+]);
+
+function safeRichAttributes(tag: string, source: string) {
+  const attributes: Record<string, string> = {};
+  const attributePattern = /([a-zA-Z:-]+)\s*=\s*(?:\"([^\"]*)\"|'([^']*)'|([^\s\"'=<>`]+))/g;
+  let match: RegExpExecArray | null;
+  while ((match = attributePattern.exec(source))) {
+    const name = match[1].toLowerCase();
+    const value = decodeBasicEntities(match[2] ?? match[3] ?? match[4] ?? "");
+    if ((name === "href" || name === "src") && safeUrl(value)) attributes[name] = safeUrl(value);
+    if ((tag === "img" && name === "alt") || (tag === "a" && name === "title")) attributes[name] = value.slice(0, 500);
+    if (tag === "font" && name === "size" && /^[1-7]$/.test(value)) attributes[name] = value;
+  }
+  return Object.entries(attributes).map(([name, value]) => ` ${name}="${escapeHtml(value)}"`).join("");
+}
+
+// The document editor stores only a deliberately small HTML subset. It is safe
+// to render on the server while retaining the familiar Word-like experience.
+export function sanitizeRichArticleHtml(value: unknown, maxLength = 120000) {
+  const source = typeof value === "string" ? value.slice(0, maxLength) : "";
+  if (!source) return "";
+  return source.replace(/<[^>]*>|[^<]+/g, (token) => {
+    if (!token.startsWith("<")) return escapeHtml(decodeBasicEntities(token));
+    const closing = /^<\s*\/\s*([a-zA-Z0-9]+)/.exec(token);
+    if (closing) return allowedRichTags.has(closing[1].toLowerCase()) ? `</${closing[1].toLowerCase()}>` : "";
+    const opening = /^<\s*([a-zA-Z0-9]+)/.exec(token);
+    if (!opening) return "";
+    const tag = opening[1].toLowerCase();
+    if (!allowedRichTags.has(tag)) return "";
+    if (tag === "img") {
+      const attributes = safeRichAttributes(tag, token);
+      return /\ssrc=/.test(attributes) ? `<img${attributes}>` : "";
+    }
+    if (tag === "br" || tag === "hr") return `<${tag}>`;
+    return `<${tag}${safeRichAttributes(tag, token)}>`;
+  }).trim();
+}
+
+export function richArticlePlainText(value: string) {
+  return decodeBasicEntities(value.replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+}
+
 function safeBlockId(value: unknown, index: number) {
   const id = cleanText(value, 80);
   return /^[a-zA-Z0-9_-]{4,80}$/.test(id) ? id : `block-${index + 1}`;
@@ -120,10 +186,16 @@ export function parseArticleBlocks(value: unknown): ArticleBlock[] {
     if (!raw || typeof raw !== "object") return [];
     const block = raw as Record<string, unknown>;
     const type = cleanText(block.type, 24) as ArticleBlockType;
-    if (!(["paragraph", "heading", "image", "table", "quote", "callout", "faq", "divider"] as ArticleBlockType[]).includes(type)) return [];
+    if (!(["paragraph", "heading", "image", "table", "quote", "callout", "faq", "divider", "rich_text"] as ArticleBlockType[]).includes(type)) return [];
     const base: ArticleBlock = { id: safeBlockId(block.id, index), type };
 
     if (type === "divider") return [base];
+    if (type === "rich_text") return [{
+      ...base,
+      html_pl: sanitizeRichArticleHtml(block.html_pl),
+      html_en: sanitizeRichArticleHtml(block.html_en),
+      storage_paths: cleanStringArray(block.storage_paths, 80).filter((path) => path.includes("/inspiration/")),
+    }];
     if (type === "table") return [{ ...base, table: normalizedTable(block.table) }];
     if (type === "image") {
       const imageUrl = safeUrl(block.image_url);
@@ -176,6 +248,63 @@ export function localizedBlockText(block: ArticleBlock, locale: SiteLocale, fiel
   );
 }
 
+export function localizedRichArticleHtml(block: ArticleBlock, locale: SiteLocale) {
+  return localizedText(locale, block.html_pl, block.html_en);
+}
+
+function legacyInlineHtml(value: string) {
+  return escapeHtml(value)
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/_([^_]+)_/g, "<em>$1</em>");
+}
+
+export function articleBlocksToRichHtml(blocks: ArticleBlock[], locale: SiteLocale) {
+  return blocks.map((block) => {
+    if (block.type === "rich_text") return localizedRichArticleHtml(block, locale);
+    if (block.type === "divider") return "<hr>";
+    if (block.type === "paragraph") {
+      const value = localizedBlockText(block, locale);
+      return value ? `<p>${legacyInlineHtml(value)}</p>` : "";
+    }
+    if (block.type === "heading") {
+      const value = localizedBlockText(block, locale);
+      const level = block.level || 2;
+      return value ? `<h${level}>${legacyInlineHtml(value)}</h${level}>` : "";
+    }
+    if (block.type === "image" && block.image_url) {
+      const alt = localizedText(locale, block.alt_pl, block.alt_en, "ArchiCompass Inspiration Hub");
+      const caption = localizedText(locale, block.caption_pl, block.caption_en);
+      return `<figure><img src="${escapeHtml(block.image_url)}" alt="${escapeHtml(alt)}">${caption ? `<figcaption>${legacyInlineHtml(caption)}</figcaption>` : ""}</figure>`;
+    }
+    if (block.type === "table" && block.table) {
+      const headers = locale === "pl" ? block.table.headers_pl : block.table.headers_en;
+      const fallbackHeaders = locale === "pl" ? block.table.headers_en : block.table.headers_pl;
+      const rows = locale === "pl" ? block.table.rows_pl : block.table.rows_en;
+      const fallbackRows = locale === "pl" ? block.table.rows_en : block.table.rows_pl;
+      const displayHeaders = headers.map((header, index) => header || fallbackHeaders[index] || "");
+      const displayRows = rows.length ? rows : fallbackRows;
+      const caption = localizedText(locale, block.table.caption_pl, block.table.caption_en);
+      return `<table>${caption ? `<caption>${legacyInlineHtml(caption)}</caption>` : ""}<thead><tr>${displayHeaders.map((header) => `<th>${legacyInlineHtml(header)}</th>`).join("")}</tr></thead><tbody>${displayRows.map((row) => `<tr>${displayHeaders.map((_, index) => `<td>${legacyInlineHtml(row[index] || "")}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    }
+    if (block.type === "quote") {
+      const value = localizedBlockText(block, locale);
+      return value ? `<blockquote>${legacyInlineHtml(value)}</blockquote>` : "";
+    }
+    if (block.type === "faq") {
+      const question = localizedBlockText(block, locale, "question");
+      const answer = localizedBlockText(block, locale, "answer");
+      return question && answer ? `<h3>${legacyInlineHtml(question)}</h3><p>${legacyInlineHtml(answer)}</p>` : "";
+    }
+    if (block.type === "callout") {
+      const value = localizedBlockText(block, locale);
+      const label = localizedText(locale, block.link_label_pl, block.link_label_en);
+      const link = safeUrl(block.link_url);
+      return `${value ? `<blockquote>${legacyInlineHtml(value)}</blockquote>` : ""}${link && label ? `<p><a href="${escapeHtml(link)}">${legacyInlineHtml(label)}</a></p>` : ""}`;
+    }
+    return "";
+  }).filter(Boolean).join("\n");
+}
+
 export function localizeArticle<T extends ArticleLocalizationFields>(article: T, locale: SiteLocale) {
   const blocks = parseArticleBlocks(article.content_blocks);
   const title = localizedText(locale, article.title_pl, article.title_en, article.title);
@@ -196,6 +325,7 @@ export function localizeArticle<T extends ArticleLocalizationFields>(article: T,
 export function articleBlocksPlainText(blocks: ArticleBlock[], locale: SiteLocale) {
   return blocks
     .flatMap((block) => {
+      if (block.type === "rich_text") return [richArticlePlainText(localizedRichArticleHtml(block, locale))];
       if (block.type === "table" && block.table) {
         const headers = locale === "pl" ? block.table.headers_pl : block.table.headers_en;
         const rows = locale === "pl" ? block.table.rows_pl : block.table.rows_en;
@@ -223,6 +353,7 @@ export function articleFaqItems(blocks: ArticleBlock[], locale: SiteLocale) {
 
 export function hasRenderableArticleBlocks(blocks: ArticleBlock[], locale: SiteLocale) {
   return blocks.some((block) => {
+    if (block.type === "rich_text") return Boolean(richArticlePlainText(localizedRichArticleHtml(block, locale)) || /<img\b/i.test(localizedRichArticleHtml(block, locale)));
     if (block.type === "image") return Boolean(block.image_url);
     if (block.type === "table") return Boolean(block.table?.headers_pl.some(Boolean) || block.table?.headers_en.some(Boolean) || block.table?.rows_pl.some((row) => row.some(Boolean)) || block.table?.rows_en.some((row) => row.some(Boolean)));
     if (block.type === "divider") return true;
@@ -232,7 +363,6 @@ export function hasRenderableArticleBlocks(blocks: ArticleBlock[], locale: SiteL
 }
 
 export function articleImagePaths(blocks: ArticleBlock[], userId: string) {
-  return blocks
-    .map((block) => block.storage_path || "")
-    .filter((path) => path.startsWith(`${userId}/inspiration/`));
+  return Array.from(new Set(blocks.flatMap((block) => [block.storage_path || "", ...(block.storage_paths || [])])
+    .filter((path) => path.startsWith(`${userId}/inspiration/`))));
 }
