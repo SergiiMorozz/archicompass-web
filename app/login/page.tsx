@@ -14,7 +14,7 @@ type Status =
   | { type: "idle" }
   | { type: "loading" }
   | { type: "success"; message: string }
-  | { type: "error"; message: string };
+  | { type: "error"; message: string; canResetPassword?: boolean };
 
 function intentFromNext(next: string): Intent {
   if (next.includes("intent=designer") || next.startsWith("/studio")) return "designer";
@@ -103,6 +103,7 @@ function LoginContent() {
         setStatus({
           type: "error",
           message: authErrorMessage(error.message),
+          canResetPassword: error.message === "Invalid login credentials",
         });
         return;
       }
@@ -246,7 +247,19 @@ function LoginContent() {
                 ) : null}
               </div>
             ) : null}
-            {status.type === "error" ? <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">{status.message}</div> : null}
+            {status.type === "error" ? (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
+                <p>{status.message}</p>
+                {status.canResetPassword ? (
+                  <Link
+                    href={`/forgot-password?email=${encodeURIComponent(email.trim().toLowerCase())}`}
+                    className="mt-3 inline-flex rounded-lg bg-red-700 px-3 py-2 text-xs font-bold text-white transition hover:bg-red-800"
+                  >
+                    {authCopy.form.resetPasswordCta}
+                  </Link>
+                ) : null}
+              </div>
+            ) : null}
           </form>
 
           {mode === "signin" ? (

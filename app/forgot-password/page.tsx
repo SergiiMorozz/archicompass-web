@@ -1,14 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { getSiteCopy } from "@/content/site-copy";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordContent() {
   const copy = getSiteCopy().auth.passwordRecovery;
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
-  const [email, setEmail] = useState("");
+  const searchParams = useSearchParams();
+  const [email, setEmail] = useState(() => searchParams.get("email") ?? "");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -41,4 +43,8 @@ export default function ForgotPasswordPage() {
       </section>
     </main>
   );
+}
+
+export default function ForgotPasswordPage() {
+  return <Suspense fallback={<main className="min-h-screen bg-background" />}><ForgotPasswordContent /></Suspense>;
 }

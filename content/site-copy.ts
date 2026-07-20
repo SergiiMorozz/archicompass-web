@@ -178,6 +178,7 @@ export type SiteCopy = {
       resendSending: string;
       resend: string;
       forgotPassword: string;
+      resetPasswordCta: string;
       termsPrefix: string;
       terms: string;
       and: string;
@@ -347,6 +348,7 @@ const pl: SiteCopy = {
       resendSending: "Wysyłanie...",
       resend: "Wyślij link ponownie",
       forgotPassword: "Nie pamiętasz hasła?",
+      resetPasswordCta: "Zresetuj hasło",
       termsPrefix: "Tworząc konto, akceptujesz",
       terms: "Regulamin",
       and: "i",
@@ -611,6 +613,7 @@ const en: SiteCopy = {
       resendSending: "Sending...",
       resend: "Resend confirmation link",
       forgotPassword: "Forgot your password?",
+      resetPasswordCta: "Reset password",
       termsPrefix: "By creating an account, you accept the",
       terms: "Terms of Service",
       and: "and the",
