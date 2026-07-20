@@ -293,10 +293,6 @@ export default async function StudioConversationPage({
       .maybeSingle();
     if (opened) {
       inquiry.status = "reviewing";
-      revalidatePath("/studio");
-      revalidatePath("/studio/inbox");
-      revalidatePath("/client");
-      revalidatePath("/client/messages");
     }
   }
 
