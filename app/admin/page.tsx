@@ -16,6 +16,11 @@ type AdminStats = {
   signups_30?: number;
   active_30?: number;
   profile_views_30?: number;
+  registrations_30?: number;
+  ai_analyses_30?: number;
+  briefs_saved_30?: number;
+  inquiries_sent_30?: number;
+  messages_sent_30?: number;
   hidden_profiles?: number;
   hidden_projects?: number;
 };
@@ -86,6 +91,13 @@ export default async function AdminOverviewPage() {
     [copy.cards[7], numberValue(stats.hidden_profiles) + numberValue(stats.hidden_projects), copy.details.hidden(numberValue(stats.hidden_profiles), numberValue(stats.hidden_projects))],
     [copy.cards[8], numberValue(stats.profile_views_30), copy.details.last30Days],
   ];
+  const funnelCards = [
+    [copy.funnel.cards[0], numberValue(stats.registrations_30)],
+    [copy.funnel.cards[1], numberValue(stats.ai_analyses_30)],
+    [copy.funnel.cards[2], numberValue(stats.briefs_saved_30)],
+    [copy.funnel.cards[3], numberValue(stats.inquiries_sent_30)],
+    [copy.funnel.cards[4], numberValue(stats.messages_sent_30)],
+  ];
 
   return (
     <main>
@@ -123,6 +135,19 @@ export default async function AdminOverviewPage() {
             </article>
           ))}
         </div>
+
+        <section className="mt-8 rounded-lg border border-line bg-primary-soft/40 p-5 sm:p-6">
+          <div className="text-sm font-semibold text-primary">{copy.funnel.eyebrow}</div>
+          <h2 className="mt-1 text-2xl font-bold">{copy.funnel.title}</h2>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            {funnelCards.map(([label, value]) => (
+              <div key={String(label)} className="rounded-lg border border-line bg-card p-4">
+                <div className="text-sm font-semibold text-muted">{label}</div>
+                <div className="mt-2 text-3xl font-bold text-primary">{value}</div>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <div className="mt-8 grid gap-7 lg:grid-cols-[minmax(0,1fr)_340px]">
           <section>

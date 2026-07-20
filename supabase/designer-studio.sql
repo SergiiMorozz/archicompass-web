@@ -93,18 +93,9 @@ on public.profile_views (profile_id, created_at desc);
 
 alter table public.profile_views enable row level security;
 
+-- Profile views are written through the server endpoint only. This prevents
+-- third parties from inflating public analytics with direct database writes.
 drop policy if exists "profile_views_insert_public" on public.profile_views;
-create policy "profile_views_insert_public"
-on public.profile_views
-for insert
-to anon, authenticated
-with check (
-  char_length(session_key) between 20 and 100
-  and char_length(source_path) <= 500
-  and exists (
-    select 1 from public.profiles where profiles.id = profile_views.profile_id
-  )
-);
 
 drop policy if exists "profile_views_select_owner" on public.profile_views;
 create policy "profile_views_select_owner"
@@ -121,8 +112,7 @@ to authenticated
 using (profile_id = auth.uid());
 
 revoke all on public.profile_views from anon, authenticated;
-grant insert on public.profile_views to anon, authenticated;
 grant select, delete on public.profile_views to authenticated;
-grant usage, select on sequence public.profile_views_id_seq to anon, authenticated;
+grant usage, select on sequence public.profile_views_id_seq to authenticated;
 
 commit;

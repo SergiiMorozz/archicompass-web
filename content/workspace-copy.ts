@@ -738,6 +738,11 @@ type WorkspaceCopy = {
       hidden: (profiles: number, projects: number) => string;
       last30Days: string;
     };
+    funnel: {
+      eyebrow: string;
+      title: string;
+      cards: [string, string, string, string, string];
+    };
     eyebrow: string;
     title: string;
     intro: string;
@@ -1444,6 +1449,11 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
         hidden: (profiles, projects) => `${profiles} profili, ${projects} projektów`,
         last30Days: "Ostatnie 30 dni",
       },
+      funnel: {
+        eyebrow: "Lejek uruchomienia",
+        title: "Aktywność z ostatnich 30 dni",
+        cards: ["Założone konta", "Analizy AI", "Zapisane briefy", "Wysłane zapytania", "Wiadomości"],
+      },
       eyebrow: "Operacje platformy",
       title: "Admin",
       intro: "Monitoruj platformę, sprawdzaj konta i obserwuj, jak użytkownicy przechodzą od inspiracji do rozmowy z projektantem.",
@@ -2147,6 +2157,11 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
         published: (count) => `${count} published`,
         hidden: (profiles, projects) => `${profiles} profiles, ${projects} projects`,
         last30Days: "Last 30 days",
+      },
+      funnel: {
+        eyebrow: "Launch funnel",
+        title: "Activity from the last 30 days",
+        cards: ["New accounts", "AI analyses", "Saved briefs", "Sent enquiries", "Messages"],
       },
       eyebrow: "Platform operations",
       title: "Admin",

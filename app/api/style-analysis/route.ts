@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import { siteLocale } from "@/lib/site-locale";
+import { logError, logInfo } from "@/lib/observability";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -167,14 +169,15 @@ async function consumeAnalysisQuota(request: Request) {
     : `guest:${requestIp(request)}:${request.headers.get("user-agent")?.slice(0, 160) || "unknown"}`;
   const actorHash = createHash("sha256").update(identity).digest("hex");
   const dailyLimit = user ? accountDailyLimit : anonymousDailyLimit;
-  const { data: quotaData, error } = await supabase.rpc("consume_style_analysis_quota", {
+  const admin = createSupabaseAdminClient();
+  const { data: quotaData, error } = await admin.rpc("consume_style_analysis_quota", {
     target_actor_hash: actorHash,
     daily_limit: dailyLimit,
   });
 
-  if (error) return { error, quota: null };
+  if (error) return { error, quota: null, actorId: user?.id ?? null };
   const quota = Array.isArray(quotaData) ? (quotaData[0] as QuotaResult | undefined) : null;
-  return { error: null, quota };
+  return { error: null, quota, actorId: user?.id ?? null };
 }
 
 const analysisSchema = {
@@ -620,6 +623,7 @@ async function analyzeWithGemini(input: AnalysisInput) {
 }
 
 export async function POST(request: Request) {
+  const startedAt = Date.now();
   let formData: FormData;
   try {
     formData = await request.formData();
@@ -661,15 +665,27 @@ export async function POST(request: Request) {
     }
   }
 
-  const { error: quotaError, quota } = await consumeAnalysisQuota(request);
+  let quotaResult: Awaited<ReturnType<typeof consumeAnalysisQuota>>;
+  try {
+    quotaResult = await consumeAnalysisQuota(request);
+  } catch {
+    logError("ai_analysis_quota_unavailable", { durationMs: Date.now() - startedAt });
+    return NextResponse.json(
+      { error: localized("Analiza AI jest chwilowo niedostępna. Spróbuj ponownie za moment.", "AI analysis is temporarily unavailable. Please try again in a moment.") },
+      { status: 503 }
+    );
+  }
+
+  const { error: quotaError, quota, actorId } = quotaResult;
   if (quotaError || !quota) {
-    console.error("Style analysis quota check failed", quotaError);
+    logError("ai_analysis_quota_failed", { durationMs: Date.now() - startedAt, code: quotaError?.code ?? null });
     return NextResponse.json(
       { error: localized("Analiza AI jest chwilowo niedostępna. Spróbuj ponownie za moment.", "AI analysis is temporarily unavailable. Please try again in a moment.") },
       { status: 503 }
     );
   }
   if (!quota.allowed) {
+    logInfo("ai_analysis_rate_limited", { authenticated: Boolean(actorId), durationMs: Date.now() - startedAt });
     return NextResponse.json(
       {
         code: "AI_DAILY_LIMIT_REACHED",
@@ -697,6 +713,27 @@ export async function POST(request: Request) {
   const response = styleProvider === "gemini"
     ? await analyzeWithGemini(input)
     : await analyzeWithOpenAi(input);
+
+  if (response.ok) {
+    try {
+      const admin = createSupabaseAdminClient();
+      await admin.from("product_events").insert({
+        event_type: "ai_analysis_completed",
+        actor_id: actorId,
+        metadata: { authenticated: Boolean(actorId), photo_count: photos.length, provider: styleProvider },
+      });
+    } catch {
+      logError("ai_analysis_metric_write_failed", { durationMs: Date.now() - startedAt });
+    }
+    logInfo("ai_analysis_completed", {
+      authenticated: Boolean(actorId),
+      durationMs: Date.now() - startedAt,
+      photoCount: photos.length,
+      provider: styleProvider,
+    });
+  } else {
+    logError("ai_analysis_failed", { durationMs: Date.now() - startedAt, status: response.status, provider: styleProvider });
+  }
   response.headers.set("X-RateLimit-Remaining", String(quota.remaining));
   return response;
 }

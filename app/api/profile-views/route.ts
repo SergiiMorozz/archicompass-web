@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { logError } from "@/lib/observability";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -30,16 +33,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, skipped: "owner" });
   }
 
+  const publicClient = createPublicSupabaseClient();
+  const { data: publicProfile } = await publicClient
+    .from("profiles")
+    .select("id")
+    .eq("id", profileId)
+    .maybeSingle();
+  if (!publicProfile) return NextResponse.json({ ok: true, skipped: "not_public" });
+
   const viewDate = new Date().toISOString().slice(0, 10);
-  const { error } = await supabase.from("profile_views").insert({
-    profile_id: profileId,
-    session_key: sessionKey,
-    source_path: sourcePath,
-    view_date: viewDate,
-  });
+  let error: { code: string } | null = null;
+  try {
+    const admin = createSupabaseAdminClient();
+    ({ error } = await admin.from("profile_views").insert({
+      profile_id: profileId,
+      session_key: sessionKey,
+      source_path: sourcePath,
+      view_date: viewDate,
+    }));
+  } catch {
+    logError("profile_view_recording_unavailable", { profileId });
+    return NextResponse.json({ ok: true, skipped: "unavailable" });
+  }
 
   if (error && error.code !== "23505") {
-    return NextResponse.json({ error: "Profile view was not recorded." }, { status: 503 });
+    logError("profile_view_recording_failed", { profileId, code: error.code });
+    return NextResponse.json({ ok: true, skipped: "unavailable" });
   }
 
   return NextResponse.json({ ok: true });

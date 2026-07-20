@@ -62,6 +62,8 @@ end;
 $$;
 
 revoke all on function public.consume_style_analysis_quota(text, integer) from public;
-grant execute on function public.consume_style_analysis_quota(text, integer) to anon, authenticated;
+revoke all on function public.consume_style_analysis_quota(text, integer) from anon, authenticated;
+-- The public AI endpoint calls this only with the service-role key.
+-- Keeping it server-only prevents clients from bypassing the daily limit.
 
 commit;

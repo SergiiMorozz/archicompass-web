@@ -3,6 +3,8 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { getSiteCopy } from "@/content/site-copy";
 import { localeMetadata, localePublicUrl, siteLocale } from "@/lib/site-locale";
 import { absoluteUrl, siteUrl } from "@/lib/seo";
@@ -117,6 +119,8 @@ export default function RootLayout({
           {children}
           <Footer />
         </div>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -23,12 +23,9 @@ set
   file_size_limit = excluded.file_size_limit,
   allowed_mime_types = excluded.allowed_mime_types;
 
+-- The bucket is public, so direct image URLs remain readable. No broad SELECT
+-- policy is needed; removing it prevents listing the entire bucket through the API.
 drop policy if exists "project_images_select_public" on storage.objects;
-create policy "project_images_select_public"
-on storage.objects
-for select
-to public
-using (bucket_id = 'project-images');
 
 drop policy if exists "project_images_insert_owner" on storage.objects;
 create policy "project_images_insert_owner"

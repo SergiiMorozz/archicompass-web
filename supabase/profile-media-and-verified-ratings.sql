@@ -38,10 +38,9 @@ on conflict (id) do update set
   file_size_limit = excluded.file_size_limit,
   allowed_mime_types = excluded.allowed_mime_types;
 
+-- The bucket is public, so direct image URLs remain readable. No broad SELECT
+-- policy is needed; removing it prevents listing the entire bucket through the API.
 drop policy if exists "Public profile media is readable" on storage.objects;
-create policy "Public profile media is readable"
-on storage.objects for select
-using (bucket_id = 'profile-media');
 
 drop policy if exists "Professionals upload own profile media" on storage.objects;
 create policy "Professionals upload own profile media"

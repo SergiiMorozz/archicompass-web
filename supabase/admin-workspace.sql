@@ -212,6 +212,26 @@ begin
     'profile_views_30', (
       select count(*) from public.profile_views where created_at >= now() - interval '30 days'
     ),
+    'registrations_30', (
+      select count(*) from public.product_events
+      where event_type = 'account_registered' and created_at >= now() - interval '30 days'
+    ),
+    'ai_analyses_30', (
+      select count(*) from public.product_events
+      where event_type = 'ai_analysis_completed' and created_at >= now() - interval '30 days'
+    ),
+    'briefs_saved_30', (
+      select count(*) from public.product_events
+      where event_type = 'brief_saved' and created_at >= now() - interval '30 days'
+    ),
+    'inquiries_sent_30', (
+      select count(*) from public.product_events
+      where event_type = 'inquiry_sent' and created_at >= now() - interval '30 days'
+    ),
+    'messages_sent_30', (
+      select count(*) from public.product_events
+      where event_type = 'message_sent' and created_at >= now() - interval '30 days'
+    ),
     'hidden_profiles', (
       select count(*) from public.content_moderation
       where entity_type = 'profile' and visibility = 'hidden'
