@@ -270,7 +270,7 @@ export default function Header() {
                 href={appHref("/login")}
                 className="rounded-xl px-4 py-2 text-sm font-medium text-foreground transition hover:bg-primary-soft hover:text-primary"
               >
-                Zaloguj się
+                {copy.header.signIn}
               </Link>
 
               <Link
@@ -280,7 +280,7 @@ export default function Header() {
                   isGetStartedActive ? "bg-foreground" : "bg-primary hover:opacity-90",
                 ].join(" ")}
               >
-                Dołącz
+                {copy.header.join}
               </Link>
             </>
           )}
