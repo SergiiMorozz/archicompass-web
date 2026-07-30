@@ -20,6 +20,13 @@ export const revalidate = 0;
 
 const fieldClass = "mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary";
 
+type StudioBillingCoverage = {
+  studio_id: string;
+  studio_name: string;
+  plan_code: string | null;
+  current_period_end: string | null;
+};
+
 function textValue(formData: FormData, key: string, limit = 240) {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim().slice(0, limit) : "";
@@ -85,6 +92,8 @@ export default async function StudioBillingPage({
     .eq("owner_user_id", user.id)
     .order("subject_type", { ascending: true });
   const accounts = (accountData ?? []) as Array<BillingAccount & { stripe_customer_id: string | null }>;
+  const { data: coverageData } = await supabase.rpc("current_user_studio_billing_coverage");
+  const studioCoverage = ((coverageData ?? []) as StudioBillingCoverage[])[0] ?? null;
   const accountIds = accounts.map((account) => account.id);
   const { data: invoiceData } = accountIds.length
     ? await supabase
@@ -125,7 +134,8 @@ export default async function StudioBillingPage({
         {accounts.length ? (
           <div className="mt-7 grid gap-7">
             {accounts.map((account) => {
-              const hasAccess = billingHasAccess(account);
+              const coverage = account.subject_type === "designer" ? studioCoverage : null;
+              const hasAccess = Boolean(coverage) || billingHasAccess(account);
               const planOptions = (Object.entries(billingPlans) as Array<[BillingPlanCode, (typeof billingPlans)[BillingPlanCode]]>).filter(([, plan]) => plan.subjectType === account.subject_type);
               const invoices = invoicesByAccount.get(account.id) ?? [];
               const nextDate = account.status === "trialing" ? account.trial_ends_at : account.current_period_end;
@@ -136,45 +146,54 @@ export default async function StudioBillingPage({
                   <div className="flex flex-col gap-4 border-b border-line px-6 py-6 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <div className="text-sm font-semibold text-primary">{account.subject_type === "studio" ? copy.plans.studio_monthly.label : copy.plans.designer_monthly.label}</div>
-                      <h2 className="mt-1 text-2xl font-bold">{selectedPlan ? `${selectedPlan.label} · ${selectedPlan.interval}` : copy.billing.selectPlan}</h2>
+                      <h2 className="mt-1 text-2xl font-bold">{coverage ? copy.billing.includedWithStudio : selectedPlan ? `${selectedPlan.label} · ${selectedPlan.interval}` : copy.billing.selectPlan}</h2>
                       <div className="mt-3 flex flex-wrap gap-2">
                         <span className={`rounded-full border px-3 py-1 text-xs font-bold ${statusClass(account.status)}`}>{copy.statuses[account.status]}</span>
                         <span className={`rounded-full border px-3 py-1 text-xs font-bold ${hasAccess ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-red-200 bg-red-50 text-red-700"}`}>{hasAccess ? copy.billing.accessActive : copy.billing.accessRestricted}</span>
                       </div>
                     </div>
-                    {account.stripe_customer_id ? <BillingPortalButton accountId={account.id} errorLabel={copy.checkout.error} label={copy.billing.managePayment} /> : null}
+                    {!coverage && account.stripe_customer_id ? <BillingPortalButton accountId={account.id} errorLabel={copy.checkout.error} label={copy.billing.managePayment} /> : null}
                   </div>
 
-                  <div className="grid gap-7 p-6 lg:grid-cols-[minmax(0,1fr)_390px]">
+                  <div className={coverage ? "p-6" : "grid gap-7 p-6 lg:grid-cols-[minmax(0,1fr)_390px]"}>
                     <div>
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="rounded-xl border border-line bg-background p-4">
                           <div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{copy.billing.plan}</div>
-                          <div className="mt-2 font-bold">{selectedPlan ? `${selectedPlan.label} · ${selectedPlan.interval}` : copy.billing.notAvailable}</div>
+                          <div className="mt-2 font-bold">{coverage ? copy.billing.includedWithStudio : selectedPlan ? `${selectedPlan.label} · ${selectedPlan.interval}` : copy.billing.notAvailable}</div>
                         </div>
                         <div className="rounded-xl border border-line bg-background p-4">
-                          <div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{account.status === "trialing" ? copy.billing.trialEnds : copy.billing.nextPayment}</div>
-                          <div className="mt-2 font-bold">{formatBillingDate(nextDate) || copy.billing.notAvailable}</div>
+                          <div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{coverage ? copy.billing.nextPayment : account.status === "trialing" ? copy.billing.trialEnds : copy.billing.nextPayment}</div>
+                          <div className="mt-2 font-bold">{formatBillingDate(coverage?.current_period_end || nextDate) || copy.billing.notAvailable}</div>
                         </div>
                       </div>
 
-                      <h3 className="mt-7 text-xl font-bold">{copy.billing.selectPlan}</h3>
-                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                        {planOptions.map(([planCode, plan]) => (
-                          <div key={planCode} className="rounded-xl border border-line bg-background p-4">
-                            <div className="text-sm font-bold">{copy.plans[planCode].label}</div>
-                            <div className="mt-1 text-sm text-muted">{copy.plans[planCode].interval}</div>
-                            <div className="mt-3 text-2xl font-bold text-primary">{formatBillingAmount(plan.amount)}</div>
-                            <div className="mt-1 text-xs text-muted">{copy.billing.net}</div>
-                            <div className="mt-4">
-                              <BillingCheckoutButton accountId={account.id} errorLabel={copy.checkout.error} label={copy.billing.activatePlan} planCode={planCode} unavailableLabel={copy.checkout.unavailable} />
-                            </div>
+                      {coverage ? (
+                        <section className="mt-7 rounded-xl border border-emerald-200 bg-emerald-50 p-5">
+                          <h3 className="text-xl font-bold text-emerald-900">{copy.billing.includedWithStudio}</h3>
+                          <p className="mt-2 max-w-3xl text-sm leading-6 text-emerald-900/80">{copy.billing.includedWithStudioBody(coverage.studio_name)}</p>
+                        </section>
+                      ) : (
+                        <>
+                          <h3 className="mt-7 text-xl font-bold">{copy.billing.selectPlan}</h3>
+                          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                            {planOptions.map(([planCode, plan]) => (
+                              <div key={planCode} className="rounded-xl border border-line bg-background p-4">
+                                <div className="text-sm font-bold">{copy.plans[planCode].label}</div>
+                                <div className="mt-1 text-sm text-muted">{copy.plans[planCode].interval}</div>
+                                <div className="mt-3 text-2xl font-bold text-primary">{formatBillingAmount(plan.amount)}</div>
+                                <div className="mt-1 text-xs text-muted">{copy.billing.net}</div>
+                                <div className="mt-4">
+                                  <BillingCheckoutButton accountId={account.id} errorLabel={copy.checkout.error} label={copy.billing.activatePlan} planCode={planCode} unavailableLabel={copy.checkout.unavailable} />
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
+                        </>
+                      )}
                     </div>
 
-                    <form action={saveBillingProfile} className="h-fit rounded-xl border border-line bg-background p-5">
+                    {!coverage ? <form action={saveBillingProfile} className="h-fit rounded-xl border border-line bg-background p-5">
                       <input type="hidden" name="billing_account_id" value={account.id} />
                       <div className="text-lg font-bold">{copy.billing.billingProfileTitle}</div>
                       <p className="mt-2 text-sm leading-6 text-muted">{copy.billing.billingProfileBody}</p>
@@ -190,7 +209,7 @@ export default async function StudioBillingPage({
                         <label className="text-sm font-semibold">{copy.billing.country}<input name="billing_country" defaultValue={account.billing_country || "PL"} maxLength={2} className={fieldClass} /></label>
                         <button className="rounded-xl border border-primary bg-card px-4 py-3 text-sm font-bold text-primary transition hover:bg-primary hover:text-white">{copy.billing.saveBillingProfile}</button>
                       </div>
-                    </form>
+                    </form> : null}
                   </div>
 
                   <section className="border-t border-line bg-background px-6 py-6">

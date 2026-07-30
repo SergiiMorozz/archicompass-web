@@ -264,6 +264,36 @@ as $$
     or (account_status = 'active' and (account_period_end is null or account_period_end > now()));
 $$;
 
+-- A paid studio plan covers the personal profiles of its active team members.
+-- The studio must have an active paid subscription; a personal plan is not
+-- required while the membership remains active.
+create or replace function public.is_designer_covered_by_active_studio(target_designer_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select exists (
+    select 1
+    from public.studio_members member_record
+    join public.billing_accounts studio_billing
+      on studio_billing.subject_type = 'studio'
+      and studio_billing.subject_id = member_record.studio_id
+    where member_record.user_id = target_designer_id
+      and member_record.status = 'active'
+      and studio_billing.status = 'active'
+      and public.billing_access_active(
+        studio_billing.status,
+        studio_billing.trial_ends_at,
+        studio_billing.current_period_end,
+        studio_billing.manual_access_until
+      )
+  );
+$$;
+
+revoke all on function public.is_designer_covered_by_active_studio(uuid) from public;
+
 create or replace function public.is_billing_subject_accessible(
   requested_subject_type text,
   requested_subject_id uuid
@@ -274,22 +304,85 @@ stable
 security definer
 set search_path = public, pg_temp
 as $$
-  select not exists (
-    select 1
-    from public.billing_accounts account_record
-    where account_record.subject_type = requested_subject_type
-      and account_record.subject_id = requested_subject_id
-      and not public.billing_access_active(
-        account_record.status,
-        account_record.trial_ends_at,
-        account_record.current_period_end,
-        account_record.manual_access_until
+  select case
+    when requested_subject_type = 'designer' then
+      not exists (
+        select 1
+        from public.billing_accounts account_record
+        where account_record.subject_type = 'designer'
+          and account_record.subject_id = requested_subject_id
+          and account_record.status = 'suspended'
       )
-  );
+      and (
+        public.is_designer_covered_by_active_studio(requested_subject_id)
+        or not exists (
+          select 1
+          from public.billing_accounts account_record
+          where account_record.subject_type = 'designer'
+            and account_record.subject_id = requested_subject_id
+            and not public.billing_access_active(
+              account_record.status,
+              account_record.trial_ends_at,
+              account_record.current_period_end,
+              account_record.manual_access_until
+            )
+        )
+      )
+    else not exists (
+      select 1
+      from public.billing_accounts account_record
+      where account_record.subject_type = requested_subject_type
+        and account_record.subject_id = requested_subject_id
+        and not public.billing_access_active(
+          account_record.status,
+          account_record.trial_ends_at,
+          account_record.current_period_end,
+          account_record.manual_access_until
+        )
+    )
+  end;
 $$;
 
 revoke all on function public.is_billing_subject_accessible(text, uuid) from public;
 grant execute on function public.is_billing_subject_accessible(text, uuid) to anon, authenticated;
+
+create or replace function public.current_user_studio_billing_coverage()
+returns table (
+  studio_id uuid,
+  studio_name text,
+  plan_code text,
+  current_period_end timestamptz
+)
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select
+    studio_record.id,
+    studio_record.name,
+    studio_billing.plan_code,
+    studio_billing.current_period_end
+  from public.studio_members member_record
+  join public.studios studio_record on studio_record.id = member_record.studio_id
+  join public.billing_accounts studio_billing
+    on studio_billing.subject_type = 'studio'
+    and studio_billing.subject_id = studio_record.id
+  where member_record.user_id = auth.uid()
+    and member_record.status = 'active'
+    and studio_billing.status = 'active'
+    and public.billing_access_active(
+      studio_billing.status,
+      studio_billing.trial_ends_at,
+      studio_billing.current_period_end,
+      studio_billing.manual_access_until
+    )
+  order by studio_billing.current_period_end desc nulls last, studio_billing.created_at asc
+  limit 1;
+$$;
+
+revoke all on function public.current_user_studio_billing_coverage() from public;
+grant execute on function public.current_user_studio_billing_coverage() to authenticated;
 
 -- Keep unpaid professional profiles out of the public catalogue while retaining
 -- their private account, history, and an administrator's ability to restore access.
@@ -400,8 +493,8 @@ begin
   return jsonb_build_object(
     'trialing', (select count(*) from public.billing_accounts where status = 'trialing' and trial_ends_at > now()),
     'active', (select count(*) from public.billing_accounts where status = 'active' and public.billing_access_active(status, trial_ends_at, current_period_end, manual_access_until)),
-    'payment_issue', (select count(*) from public.billing_accounts where status in ('past_due', 'trial_expired', 'cancelled')),
-    'restricted', (select count(*) from public.billing_accounts where not public.billing_access_active(status, trial_ends_at, current_period_end, manual_access_until))
+    'payment_issue', (select count(*) from public.billing_accounts where status in ('past_due', 'trial_expired', 'cancelled') and not public.is_billing_subject_accessible(subject_type, subject_id)),
+    'restricted', (select count(*) from public.billing_accounts where not public.is_billing_subject_accessible(subject_type, subject_id))
   );
 end;
 $$;
@@ -451,11 +544,9 @@ begin
         when billing_record.status = 'trialing' and billing_record.trial_ends_at <= now() then 'trial_expired'
         else billing_record.status
       end as resolved_status,
-      public.billing_access_active(
-        billing_record.status,
-        billing_record.trial_ends_at,
-        billing_record.current_period_end,
-        billing_record.manual_access_until
+      public.is_billing_subject_accessible(
+        billing_record.subject_type,
+        billing_record.subject_id
       ) as access_active
     from public.billing_accounts billing_record
     join auth.users user_record on user_record.id = billing_record.owner_user_id

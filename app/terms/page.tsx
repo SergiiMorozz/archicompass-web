@@ -43,7 +43,7 @@ const sections = [
   },
   {
     title: "9. Opłaty",
-    body: "Konta klientów pozostają bezpłatne. Pierwszym profesjonalistom oferujemy 3-miesięczny okres bezpłatnego dostępu do profilu, portfolio i zapytań. Po jego zakończeniu utrzymanie aktywnego profilu profesjonalisty wymaga wybrania płatnej subskrypcji przedstawionej przed zakupem. Cena, okres rozliczeniowy, podatki oraz ewentualne warunki promocyjne są widoczne przed płatnością. W przypadku braku płatności możemy ograniczyć widoczność profilu, portfolio i możliwość otrzymywania nowych zapytań, zachowując dostęp do danych konta zgodnie z Regulaminem. Płatności są obsługiwane przez zewnętrznego operatora płatności. Faktury i dane rozliczeniowe są udostępniane zgodnie z konfiguracją płatności oraz właściwymi przepisami podatkowymi.",
+    body: "Konta klientów pozostają bezpłatne. Pierwszym profesjonalistom oferujemy 3-miesięczny okres bezpłatnego dostępu do profilu, portfolio i zapytań. Po jego zakończeniu utrzymanie aktywnego profilu profesjonalisty wymaga wybrania płatnej subskrypcji przedstawionej przed zakupem. Aktywna płatna subskrypcja pracowni obejmuje bez dodatkowej opłaty osobiste profile jej aktywnych członków zespołu. Cena, okres rozliczeniowy, podatki oraz ewentualne warunki promocyjne są widoczne przed płatnością. W przypadku braku płatności możemy ograniczyć widoczność profilu, portfolio i możliwość otrzymywania nowych zapytań, zachowując dostęp do danych konta zgodnie z Regulaminem. Płatności są obsługiwane przez zewnętrznego operatora płatności. Faktury i dane rozliczeniowe są udostępniane zgodnie z konfiguracją płatności oraz właściwymi przepisami podatkowymi.",
   },
   {
     title: "10. Dostępność i zmiany",

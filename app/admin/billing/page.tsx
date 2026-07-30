@@ -2,7 +2,7 @@ import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getBillingCopy } from "@/content/billing-copy";
-import { billingHasAccess, formatBillingDate, isBillingPlanCode, type BillingStatus } from "@/lib/billing";
+import { formatBillingDate, isBillingPlanCode, type BillingStatus } from "@/lib/billing";
 import { requireAdmin } from "@/lib/admin";
 
 export const revalidate = 0;
@@ -101,7 +101,7 @@ export default async function AdminBillingPage({
               </thead>
               <tbody>
                 {rows.map((row) => {
-                  const hasAccess = billingHasAccess({ status: row.effective_status, trial_ends_at: row.trial_ends_at, current_period_end: row.current_period_end, manual_access_until: row.manual_access_until });
+                  const hasAccess = row.has_access;
                   const date = row.effective_status === "trialing" ? row.trial_ends_at : row.current_period_end;
                   return (
                     <tr key={row.billing_account_id} className="border-b border-line align-top last:border-b-0">

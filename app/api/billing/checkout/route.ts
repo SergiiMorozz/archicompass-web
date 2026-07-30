@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { billingPlans, configuredStripePrice, isBillingPlanCode } from "@/lib/billing";
+import { getBillingCopy } from "@/content/billing-copy";
 import { billingAppUrl, createStripeClient } from "@/lib/stripe";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -37,6 +38,16 @@ export async function POST(request: Request) {
     .maybeSingle();
   if (accountError || !account || account.subject_type !== plan.subjectType) {
     return NextResponse.json({ error: "Billing account was not found." }, { status: 404 });
+  }
+
+  if (plan.subjectType === "designer") {
+    const { data: coverage } = await supabase.rpc("current_user_studio_billing_coverage");
+    if (Array.isArray(coverage) && coverage.length) {
+      return NextResponse.json(
+        { code: "PROFILE_COVERED_BY_STUDIO", error: getBillingCopy().billing.includedWithStudio },
+        { status: 409 }
+      );
+    }
   }
 
   const address = account.billing_address_line1

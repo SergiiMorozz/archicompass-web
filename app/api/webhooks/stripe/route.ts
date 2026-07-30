@@ -33,6 +33,44 @@ async function syncSubscription(subscription: Stripe.Subscription, accountId?: s
   } else {
     await supabase.from("billing_accounts").update(update).eq("stripe_subscription_id", subscription.id);
   }
+  return targetAccountId;
+}
+
+async function stopCoveredPersonalRenewals(accountId: string | null, stripe: Stripe) {
+  if (!accountId) return;
+  const supabase = createSupabaseAdminClient();
+  const { data: studioAccount } = await supabase
+    .from("billing_accounts")
+    .select("subject_id, subject_type, status, trial_ends_at, current_period_end, manual_access_until")
+    .eq("id", accountId)
+    .maybeSingle();
+  if (!studioAccount || studioAccount.subject_type !== "studio" || studioAccount.status !== "active") return;
+
+  const { data: members } = await supabase
+    .from("studio_members")
+    .select("user_id")
+    .eq("studio_id", studioAccount.subject_id)
+    .eq("status", "active");
+  const memberIds = (members ?? []).map((member) => member.user_id);
+  if (!memberIds.length) return;
+
+  const { data: personalAccounts } = await supabase
+    .from("billing_accounts")
+    .select("id, stripe_subscription_id, cancel_at_period_end, status")
+    .eq("subject_type", "designer")
+    .in("subject_id", memberIds)
+    .not("stripe_subscription_id", "is", null)
+    .eq("cancel_at_period_end", false)
+    .in("status", ["active", "trialing", "past_due"]);
+
+  for (const personalAccount of personalAccounts ?? []) {
+    if (!personalAccount.stripe_subscription_id) continue;
+    await stripe.subscriptions.update(personalAccount.stripe_subscription_id, { cancel_at_period_end: true });
+    await supabase
+      .from("billing_accounts")
+      .update({ cancel_at_period_end: true })
+      .eq("id", personalAccount.id);
+  }
 }
 
 async function syncInvoice(invoice: Stripe.Invoice) {
@@ -92,10 +130,17 @@ export async function POST(request: Request) {
     const subscriptionId = stringId(session.subscription);
     if (accountId && subscriptionId) {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-      await syncSubscription(subscription, accountId);
+      const syncedAccountId = await syncSubscription(subscription, accountId);
+      if (stripeStatusToBillingStatus(subscription.status) === "active") {
+        await stopCoveredPersonalRenewals(syncedAccountId, stripe);
+      }
     }
   } else if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted") {
-    await syncSubscription(event.data.object as Stripe.Subscription);
+    const subscription = event.data.object as Stripe.Subscription;
+    const syncedAccountId = await syncSubscription(subscription);
+    if (stripeStatusToBillingStatus(subscription.status) === "active") {
+      await stopCoveredPersonalRenewals(syncedAccountId, stripe);
+    }
   } else if (event.type === "invoice.payment_succeeded" || event.type === "invoice.payment_failed" || event.type === "invoice.finalized") {
     await syncInvoice(event.data.object as Stripe.Invoice);
   }
