@@ -1,12 +1,12 @@
 import Link from "next/link";
 import BrandLogo from "@/components/BrandLogo";
 import { getSiteCopy } from "@/content/site-copy";
-import { getBillingCopy } from "@/content/billing-copy";
+import { getServicesPricingCopy } from "@/content/services-pricing-copy";
 import { localeAppPath } from "@/lib/site-locale";
 
 export default function Footer() {
   const copy = getSiteCopy().footer;
-  const billingCopy = getBillingCopy();
+  const servicesPricingCopy = getServicesPricingCopy();
   const appHref = (path: string) => localeAppPath(path);
 
   return (
@@ -31,8 +31,8 @@ export default function Footer() {
                 {item.label}
               </Link>
             ))}
-            <Link href={appHref("/pricing")} className="hover:text-white">
-              {billingCopy.admin.navLabel}
+            <Link href={appHref("/services-and-pricing")} className="hover:text-white">
+              {servicesPricingCopy.footerLabel}
             </Link>
           </div>
         </div>

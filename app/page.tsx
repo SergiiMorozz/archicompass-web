@@ -166,6 +166,14 @@ export default async function Home() {
               <span className="transition group-hover:translate-x-1" aria-hidden="true">&#8594;</span>
             </Link>
 
+            <div className="mt-4 max-w-3xl rounded-xl border border-white/18 bg-[#120b1e]/42 px-4 py-3 text-sm leading-6 text-white/78 backdrop-blur-sm">
+              <span className="font-semibold text-[#5de1d1]">{homeCopy.hero.professionalAccess.label}</span>{" "}
+              {homeCopy.hero.professionalAccess.body}{" "}
+              <Link href="/services-and-pricing" className="font-semibold text-white underline decoration-white/35 underline-offset-4 transition hover:text-[#5de1d1]">
+                {homeCopy.hero.professionalAccess.cta}
+              </Link>
+            </div>
+
             <div className="mt-9 flex flex-wrap gap-x-5 gap-y-3 text-sm text-white/82">
               {homeCopy.hero.benefits.map((benefit) => (
                 <span key={benefit} className="inline-flex items-center gap-2">

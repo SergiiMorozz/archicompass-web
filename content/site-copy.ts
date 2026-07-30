@@ -10,6 +10,7 @@ type HomeCopy = {
     primaryCta: string;
     secondaryCta: string;
     designerCta: string;
+    professionalAccess: { label: string; body: string; cta: string };
     benefits: string[];
   };
   metrics: { designers: string; projects: string; reviews: string; caption: string };
@@ -479,6 +480,11 @@ const pl: SiteCopy = {
       primaryCta: "Poznaj swój styl i znajdź projektanta z AI",
       secondaryCta: "Katalog projektantów",
       designerCta: "Jesteś projektantem lub architektem? Utwórz swój profil",
+      professionalAccess: {
+        label: "Dla projektantów i pracowni:",
+        body: "pierwsze 3 miesiące pełnego dostępu są bezpłatne, a aktywny plan pracowni obejmuje osobiste profile jej aktywnych członków.",
+        cta: "Ceny i usługi",
+      },
       benefits: ["Sprawdzone portfolio", "Bezpośredni kontakt", "Bezpłatny start"],
     },
     metrics: { designers: "Projektanci i pracownie", projects: "Opublikowane realizacje", reviews: "Połączone opinie Google", caption: "Aktualne dane platformy" },
@@ -744,6 +750,11 @@ const en: SiteCopy = {
       primaryCta: "Explore your style and find your designer with AI",
       secondaryCta: "Designer directory",
       designerCta: "Are you a designer or architect? Create your profile",
+      professionalAccess: {
+        label: "For designers and studios:",
+        body: "the first 3 months of full access are free, and an active studio plan includes the personal profiles of its active members.",
+        cta: "Prices and services",
+      },
       benefits: ["Verified portfolios", "Direct contact", "Free to start"],
     },
     metrics: { designers: "Designers and studios", projects: "Published projects", reviews: "Linked Google reviews", caption: "Live platform count" },
