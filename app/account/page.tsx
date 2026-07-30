@@ -9,6 +9,7 @@ import {
 import { profileReadinessScore } from "@/lib/profile-readiness";
 import { profileTypeLabel } from "@/lib/profile-system-labels";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
+import { getBillingCopy } from "@/content/billing-copy";
 
 export const revalidate = 0;
 
@@ -78,6 +79,7 @@ export default async function AccountPage({
   const projects = (projectsData ?? []) as Project[];
   const isProfessional = accountRole === "designer";
   const copy = getWorkspaceCopy().account;
+  const billingCopy = getBillingCopy();
   const score = profileReadinessScore(profile, isProfessional);
   const hasPublicProfile = isProfessional && Boolean(profileData);
   const workspaceHref = isProfessional ? "/studio" : "/client";
@@ -195,6 +197,18 @@ export default async function AccountPage({
                     </div>
                   </div>
                 </div>
+              </Link>
+            ) : null}
+
+            {isProfessional ? (
+              <Link
+                href="/studio/billing"
+                className="rounded-2xl border border-primary/20 bg-primary-soft p-6 shadow-sm transition hover:border-primary"
+              >
+                <div className="text-sm font-semibold text-primary">{billingCopy.accountCard.eyebrow}</div>
+                <h2 className="mt-2 text-2xl font-bold">{billingCopy.accountCard.title}</h2>
+                <p className="mt-3 text-sm leading-6 text-muted">{billingCopy.accountCard.body}</p>
+                <div className="mt-6 text-sm font-bold text-primary">{billingCopy.accountCard.cta}</div>
               </Link>
             ) : null}
 

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSiteCopy } from "@/content/site-copy";
+import { getBillingCopy } from "@/content/billing-copy";
 import { pageMetadata } from "@/lib/seo";
 
 const authCopy = getSiteCopy().auth;
+const billingCopy = getBillingCopy();
 
 export const metadata: Metadata = pageMetadata({
   title: authCopy.metadata.getStartedTitle,
@@ -34,8 +36,10 @@ export default function Page() {
               {authCopy.getStarted.designerDescription}
             </p>
             <div className="mt-5 text-sm font-semibold text-primary">{authCopy.getStarted.designerCta}</div>
+            <div className="mt-3 text-xs font-semibold text-accent">{billingCopy.pricing.founderTitle}</div>
           </Link>
         </div>
+        <p className="mt-6 text-center text-sm text-muted"><Link href="/pricing" className="font-semibold text-primary hover:underline">{billingCopy.pricing.metadata.title}</Link></p>
       </section>
     </main>
   );

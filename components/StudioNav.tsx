@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
+import { getBillingCopy } from "@/content/billing-copy";
 
 export default function StudioNav({
   profileId,
@@ -15,11 +16,13 @@ export default function StudioNav({
 }) {
   const pathname = usePathname();
   const copy = getWorkspaceCopy().studioNav;
+  const billingCopy = getBillingCopy();
   const studioLinks = [
     { href: "/studio", label: copy.dashboard },
     { href: "/studio/inbox", label: copy.enquiries },
     { href: "/studio/analytics", label: copy.analytics },
     { href: "/studio/team", label: copy.studioAndTeam },
+    { href: "/studio/billing", label: billingCopy.studioNav },
     { href: "/account/profile", label: copy.publicProfile },
     { href: "/account/projects", label: copy.portfolio },
   ];

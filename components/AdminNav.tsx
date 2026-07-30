@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
+import { getBillingCopy } from "@/content/billing-copy";
 import type { AdminPermission } from "@/lib/admin";
 
 export default function AdminNav({
@@ -15,12 +16,14 @@ export default function AdminNav({
   permissions: AdminPermission[];
 }) {
   const copy = getWorkspaceCopy().adminNav;
+  const billingCopy = getBillingCopy();
   const pathname = usePathname();
   const adminLinks: Array<{ href: string; label: string; permission?: AdminPermission }> = [
     { href: "/admin", label: copy.dashboard },
     { href: "/admin/users", label: copy.users, permission: "users" },
     { href: "/admin/content", label: copy.content, permission: "content" },
     { href: "/admin/activity", label: copy.activity, permission: "analytics" },
+    { href: "/admin/billing", label: billingCopy.admin.navLabel, permission: "finance" },
   ];
   const visibleLinks = adminLinks.filter((item) => !item.permission || permissions.includes(item.permission));
 
