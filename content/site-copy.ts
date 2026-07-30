@@ -482,7 +482,7 @@ const pl: SiteCopy = {
       designerCta: "Jesteś projektantem lub architektem? Utwórz swój profil",
       professionalAccess: {
         label: "Dla projektantów i pracowni:",
-        body: "pierwsze 3 miesiące pełnego dostępu są bezpłatne, a aktywny plan pracowni obejmuje osobiste profile jej aktywnych członków.",
+        body: "pierwsze trzy miesiące pełnego dostępu otrzymujesz bezpłatnie. Aktywny plan pracowni obejmuje także osobiste profile aktywnych członków zespołu.",
         cta: "Ceny i usługi",
       },
       benefits: ["Sprawdzone portfolio", "Bezpośredni kontakt", "Bezpłatny start"],
@@ -752,7 +752,7 @@ const en: SiteCopy = {
       designerCta: "Are you a designer or architect? Create your profile",
       professionalAccess: {
         label: "For designers and studios:",
-        body: "the first 3 months of full access are free, and an active studio plan includes the personal profiles of its active members.",
+        body: "you receive the first three months of full access at no cost. An active studio plan also includes the personal profiles of active team members.",
         cta: "Prices and services",
       },
       benefits: ["Verified portfolios", "Direct contact", "Free to start"],
