@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import ShareableStyleResult from "@/components/ShareableStyleResult";
 import { getProjectCompassCopy } from "@/content/project-compass-copy";
 import { copyText } from "@/lib/copy-text";
+import { siteLocale } from "@/lib/site-locale";
 
 type Option = {
   label: string;
@@ -777,13 +778,14 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
     setAnalysisError(null);
 
     const formData = new FormData();
+    formData.set("analysis_locale", siteLocale);
     formData.set("project_type", optionLabel(projectTypes, projectType));
     formData.set("style_direction", styleLabels(primaryStyleValue(style)));
     formData.set(
       "visual_cues",
       selectedVisualCues.length
         ? selectedVisualCues.map((item) => optionLabel(visualCues, item)).join(", ")
-        : "Brak wybranych cech"
+        : copy.ui.none
     );
 
     referencePhotos.slice(0, maxAnalysisPhotos).forEach((photo) => {
@@ -794,6 +796,9 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       const response = await fetch("/api/style-analysis", {
         method: "POST",
         body: formData,
+        headers: {
+          "X-ArchiCompass-Analysis-Locale": siteLocale,
+        },
       });
       const payload = (await response.json()) as {
         analysis?: StyleAnalysis;

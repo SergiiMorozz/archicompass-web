@@ -16,6 +16,12 @@ const geminiStyleModel = process.env.GEMINI_STYLE_MODEL || "gemini-3.1-flash-lit
 const anonymousDailyLimit = positiveLimit(process.env.STYLE_ANALYSIS_DAILY_ANON_LIMIT, 5);
 const accountDailyLimit = positiveLimit(process.env.STYLE_ANALYSIS_DAILY_ACCOUNT_LIMIT, 15);
 const isEnglish = siteLocale === "en";
+type AnalysisLocale = "pl" | "en";
+const defaultAnalysisLocale: AnalysisLocale = isEnglish ? "en" : "pl";
+
+function requestedAnalysisLocale(value: string | null | undefined): AnalysisLocale {
+  return value === "en" || value === "pl" ? value : defaultAnalysisLocale;
+}
 
 function localized(pl: string, en: string) {
   return isEnglish ? en : pl;
@@ -141,6 +147,7 @@ type AnalysisInput = {
   currentCues: string;
   currentStyle: string;
   images: ImageInput[];
+  locale: AnalysisLocale;
   projectType: string;
 };
 
@@ -259,18 +266,28 @@ function arrayOfStrings(value: unknown, fallback: string[] = []) {
     : fallback;
 }
 
-function localizedKnownTerm(value: string) {
+function localizedKnownTerm(value: string, locale: AnalysisLocale = defaultAnalysisLocale) {
   const trimmed = value.trim();
-  return isEnglish ? trimmed : polishKnownTerms[trimmed] ?? trimmed;
+  return locale === "en" ? trimmed : polishKnownTerms[trimmed] ?? trimmed;
 }
 
-function cleanUserTextList(value: unknown, maxItems: number) {
+function cleanUserTextList(
+  value: unknown,
+  maxItems: number,
+  locale: AnalysisLocale = defaultAnalysisLocale
+) {
   return arrayOfStrings(value)
-    .map(localizedKnownTerm)
+    .map((item) => localizedKnownTerm(item, locale))
     .slice(0, maxItems);
 }
 
-function cleanAnalysis(value: unknown, imageCount: number): StyleAnalysis {
+function cleanAnalysis(
+  value: unknown,
+  imageCount: number,
+  locale: AnalysisLocale = defaultAnalysisLocale
+): StyleAnalysis {
+  const isEnglish = locale === "en";
+  const localize = (pl: string, en: string) => (isEnglish ? en : pl);
   const data = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
   const styleDirection =
     typeof data.styleDirection === "string" && allowedStyles.includes(data.styleDirection)
@@ -295,24 +312,24 @@ function cleanAnalysis(value: unknown, imageCount: number): StyleAnalysis {
     summary:
       typeof data.summary === "string" && data.summary.trim()
         ? data.summary.trim()
-        : localized(
+        : localize(
             "Zdjęcia wskazują na spójny kierunek wnętrza, ale do precyzyjnego określenia stylu potrzeba nieco więcej kontekstu.",
             "The photos point to a coherent interior direction, but a little more context is needed to identify the style precisely."
           ),
-    colorPalette: cleanUserTextList(data.colorPalette, 6),
-    materials: cleanUserTextList(data.materials, 6),
-    styleClues: cleanUserTextList(data.styleClues, 6),
+    colorPalette: cleanUserTextList(data.colorPalette, 6, locale),
+    materials: cleanUserTextList(data.materials, 6, locale),
+    styleClues: cleanUserTextList(data.styleClues, 6, locale),
     visualCues: visualCues.slice(0, 5),
     searchSpecialty:
       typeof data.searchSpecialty === "string" ? data.searchSpecialty.trim() : "",
     designerPrompt:
       typeof data.designerPrompt === "string" && data.designerPrompt.trim()
         ? data.designerPrompt.trim()
-        : localized(
+        : localize(
             "Szukaj projektantów, których portfolio pokazuje podobny nastrój, materiały i sposób pracy ze światłem.",
             "Look for designers whose portfolios show a similar mood, material palette, and approach to light."
           ),
-    watchOuts: cleanUserTextList(data.watchOuts, 4),
+    watchOuts: cleanUserTextList(data.watchOuts, 4, locale),
   };
 }
 
@@ -402,8 +419,9 @@ function analysisPrompt({
   currentStyle,
   projectType,
   images,
+  locale,
 }: AnalysisInput) {
-  const prompt = isEnglish
+  const prompt = locale === "en"
     ? [
         "Analyse these interior reference photos for ArchiCompass.",
         "Prepare practical style guidance for a client looking for the right interior designer.",
@@ -512,7 +530,7 @@ async function analyzeWithOpenAi(input: AnalysisInput) {
   }
 
   try {
-    return NextResponse.json({ analysis: cleanAnalysis(JSON.parse(text), input.images.length) });
+    return NextResponse.json({ analysis: cleanAnalysis(JSON.parse(text), input.images.length, input.locale) });
   } catch {
     return NextResponse.json(
       { error: localized("Usługa AI zwróciła nieczytelny wynik analizy.", "The AI service returned an unreadable analysis.") },
@@ -613,7 +631,7 @@ async function analyzeWithGemini(input: AnalysisInput) {
   }
 
   try {
-    return NextResponse.json({ analysis: cleanAnalysis(JSON.parse(text), input.images.length) });
+    return NextResponse.json({ analysis: cleanAnalysis(JSON.parse(text), input.images.length, input.locale) });
   } catch {
     return NextResponse.json(
       { error: localized("Usługa AI zwróciła nieczytelny wynik analizy.", "The AI service returned an unreadable analysis.") },
@@ -633,6 +651,7 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
+  const analysisLocale = requestedAnalysisLocale(textValue(formData, "analysis_locale"));
   const photos = fileValues(formData, "reference_photos");
 
   if (!photos.length) {
@@ -708,7 +727,7 @@ export async function POST(request: Request) {
   const currentStyle = textValue(formData, "style_direction") ?? "Not sure yet";
   const currentCues = textValue(formData, "visual_cues") ?? "None selected yet";
   const images = await Promise.all(photos.map(fileToImageInput));
-  const input = { currentCues, currentStyle, images, projectType };
+  const input = { currentCues, currentStyle, images, locale: analysisLocale, projectType };
 
   const response = styleProvider === "gemini"
     ? await analyzeWithGemini(input)
