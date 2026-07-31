@@ -348,7 +348,7 @@ export default async function DesignerProfilePage({
   const { data: projectsData, error: prErr } = await publicSupabase
     .from("projects")
     .select("id, profile_id, title, category, description, project_url, image_url, image_path, image_urls, image_paths, created_at")
-    .eq("profile_id", id)
+    .eq("profile_id", profile.id)
     .order("created_at", { ascending: false })
     .limit(24);
 
