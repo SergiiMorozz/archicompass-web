@@ -44,6 +44,7 @@ export const metadata: Metadata = pageMetadata({
 
 type Profile = {
   id: string;
+  public_slug: string | null;
   avatar_url: string | null;
   profile_logo_path: string | null;
   full_name: string | null;
@@ -213,8 +214,13 @@ function profileLocation(profile: Profile) {
   return profileLocationLabel(profile.location);
 }
 
-function professionalHref(type: "designer" | "studio", id: string, briefId: string) {
-  const base = type === "studio" ? `/studios/${id}` : `/designers/${id}`;
+function professionalHref(
+  type: "designer" | "studio",
+  id: string,
+  briefId: string,
+  publicSlug?: string | null
+) {
+  const base = type === "studio" ? `/studios/${id}` : `/designers/${publicSlug || id}`;
   return briefId ? `${base}?brief=${encodeURIComponent(briefId)}` : base;
 }
 
@@ -424,7 +430,7 @@ function DesignerCard({
   const matchItems = matchResult
     ? matchResult.reasons.map((reason) => [reason.label, reason.value])
     : fallbackMatchItems;
-  const profileHref = professionalHref("designer", profile.id, briefId);
+  const profileHref = professionalHref("designer", profile.id, briefId, profile.public_slug);
   const sendBriefHref = `/account/briefs?designer=${profile.id}${briefId ? `&brief=${briefId}` : ""}`;
 
   if (view === "list") {
@@ -705,7 +711,7 @@ export default async function DesignersPage({
   const query = publicSupabase
     .from("profiles")
     .select(
-      "id, avatar_url, profile_logo_path, full_name, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, service_categories, languages, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at"
+      "id, public_slug, avatar_url, profile_logo_path, full_name, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, service_categories, languages, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at"
     )
     .eq("user_type", "professional")
     .order("created_at", { ascending: false })
@@ -1096,7 +1102,7 @@ export default async function DesignersPage({
                   "@type": "ListItem",
                   position: studios.length + index + 1,
                   name: profileTitle(profile),
-                  url: absoluteUrl(`/designers/${profile.id}`),
+                  url: absoluteUrl(`/designers/${profile.public_slug || profile.id}`),
                 })),
               ],
             },

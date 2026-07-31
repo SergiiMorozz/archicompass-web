@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import FavoriteButton from "@/components/FavoriteButton";
 import ProjectGallery from "@/components/ProjectGallery";
@@ -36,6 +36,7 @@ export const revalidate = 0;
 
 type Profile = {
   id: string;
+  public_slug: string | null;
   avatar_url: string | null;
   full_name: string | null;
   profile_headline: string | null;
@@ -124,6 +125,14 @@ function isUuid(v: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 }
 
+function isPublicSlug(v: string) {
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(v);
+}
+
+function isPublicProfileIdentifier(v: string) {
+  return isUuid(v) || isPublicSlug(v);
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -131,28 +140,28 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const copy = getDesignerProfileCopy();
-  if (!isUuid(id)) {
+  const identifier = isUuid(id) ? id : id.toLowerCase();
+  if (!isPublicProfileIdentifier(identifier)) {
     return pageMetadata({ title: copy.metadata.notFoundTitle, description: copy.metadata.notFoundDescription, path: `/designers/${id}`, noIndex: true });
   }
   const supabase = createPublicSupabaseClient();
-  const [{ data: profile }, { data: projects }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("full_name, profile_headline, profile_headline_pl, profile_headline_en, profile_banner_path, bio, bio_pl, bio_en, location, profession_type, is_demo")
-      .eq("id", id)
-      .eq("user_type", "professional")
-      .maybeSingle(),
-    supabase
-      .from("projects")
-      .select("image_url, image_urls")
-      .eq("profile_id", id)
-      .order("created_at", { ascending: false })
-      .limit(1),
-  ]);
+  const profileQuery = supabase
+    .from("profiles")
+    .select("id, public_slug, full_name, profile_headline, profile_headline_pl, profile_headline_en, profile_banner_path, bio, bio_pl, bio_en, location, profession_type, is_demo")
+    .eq("user_type", "professional");
+  const { data: profile } = isUuid(identifier)
+    ? await profileQuery.eq("id", identifier).maybeSingle()
+    : await profileQuery.eq("public_slug", identifier).maybeSingle();
   if (!profile) {
     return pageMetadata({ title: copy.metadata.notFoundTitle, description: copy.metadata.notFoundDescription, path: `/designers/${id}`, noIndex: true });
   }
-  const demo = getDemoProfilePresentation(id);
+  const { data: projects } = await supabase
+    .from("projects")
+    .select("image_url, image_urls")
+    .eq("profile_id", profile.id)
+    .order("created_at", { ascending: false })
+    .limit(1);
+  const demo = getDemoProfilePresentation(profile.id);
   const name = demo?.profile.full_name || profile.full_name || copy.metadata.defaultName;
   const rawProfession = demo?.profile.profession_type || profile.profession_type;
   const profession = rawProfession ? profileTypeLabel(rawProfession) : copy.metadata.defaultProfession;
@@ -165,7 +174,7 @@ export async function generateMetadata({
   return pageMetadata({
     title: `${name} – ${profession}${location}`,
     description: demo?.profile.bio || localizedProfileText(profile, "bio") || copy.metadata.defaultDescription(name),
-    path: `/designers/${id}`,
+    path: `/designers/${profile.public_slug || profile.id}`,
     image,
     type: "profile",
     noIndex: profile.is_demo,
@@ -227,12 +236,12 @@ function profileMediaUrl(supabase: SupabaseServerClient, imagePath: string | nul
   return supabase.storage.from(profileMediaBucket).getPublicUrl(imagePath).data.publicUrl;
 }
 
-function portfolioHref(profileId: string, briefId: string, category?: string) {
+function portfolioHref(profilePath: string, briefId: string, category?: string) {
   const params = new URLSearchParams();
   if (briefId) params.set("brief", briefId);
   if (category) params.set("category", category);
   const query = params.toString();
-  return `/designers/${profileId}${query ? `?${query}` : ""}#portfolio`;
+  return `${profilePath}${query ? `?${query}` : ""}#portfolio`;
 }
 
 function websiteHref(value: string | null) {
@@ -290,27 +299,29 @@ export default async function DesignerProfilePage({
   const { id } = await params;
   const sp = (await searchParams) ?? {};
   const selectedBriefId = typeof sp.brief === "string" && isUuid(sp.brief) ? sp.brief : "";
+  const identifier = isUuid(id) ? id : id.toLowerCase();
 
-  if (!id || !isUuid(id)) {
+  if (!id || !isPublicProfileIdentifier(identifier)) {
     notFound();
   }
 
   const supabase = await createSupabaseServerClient();
   const publicSupabase = createPublicContentClient();
   const { data: userData } = await supabase.auth.getUser();
-  const isOwner = userData.user?.id === id;
   const viewerRole = userData.user
     ? await getAccountRole(supabase, userData.user.id)
     : "client";
   const canSendBrief = !userData.user || viewerRole === "client";
 
-  const { data: profileData, error: pErr } = await publicSupabase
+  const profileQuery = publicSupabase
     .from("profiles")
     .select(
-      "id, avatar_url, full_name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, languages, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_rating, google_review_count, is_demo"
+      "id, public_slug, avatar_url, full_name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, languages, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_rating, google_review_count, is_demo"
     )
-    .eq("id", id)
-    .single();
+    .eq("user_type", "professional");
+  const { data: profileData, error: pErr } = isUuid(identifier)
+    ? await profileQuery.eq("id", identifier).single()
+    : await profileQuery.eq("public_slug", identifier).single();
 
   if (pErr || !profileData) {
     notFound();
@@ -318,12 +329,21 @@ export default async function DesignerProfilePage({
 
   if (!profileData.is_demo) {
     const { data: isDesignerAccount } = await supabase.rpc("is_designer_account", {
-      target_user_id: id,
+      target_user_id: profileData.id,
     });
     if (!isDesignerAccount) notFound();
   }
 
+  const profilePath = `/designers/${profileData.public_slug || profileData.id}`;
+  if (isUuid(identifier) && profileData.public_slug) {
+    const query = new URLSearchParams();
+    if (typeof sp.brief === "string") query.set("brief", sp.brief);
+    if (typeof sp.category === "string") query.set("category", sp.category);
+    permanentRedirect(`${profilePath}${query.size ? `?${query}` : ""}`);
+  }
+
   const profile = localizeProfileContent(applyDemoProfilePresentation(profileData as Profile));
+  const isOwner = userData.user?.id === profile.id;
 
   const { data: projectsData, error: prErr } = await publicSupabase
     .from("projects")
@@ -425,14 +445,14 @@ export default async function DesignerProfilePage({
           breadcrumbJsonLd([
             { name: copy.metadata.home, path: "/" },
             { name: copy.metadata.directory, path: "/designers" },
-            { name: title, path: `/designers/${profile.id}` },
+            { name: title, path: profilePath },
           ]),
           {
             "@context": "https://schema.org",
             "@type": "Person",
-            "@id": absoluteUrl(`/designers/${profile.id}#professional`),
+            "@id": absoluteUrl(`${profilePath}#professional`),
             name: title,
-            url: absoluteUrl(`/designers/${profile.id}`),
+            url: absoluteUrl(profilePath),
             image: profileHero,
             description: profile.bio || undefined,
             jobTitle: type,
@@ -815,7 +835,7 @@ export default async function DesignerProfilePage({
             {categoryFilters.length ? (
               <div className="mt-5 flex flex-wrap gap-2">
                 <Link
-                  href={portfolioHref(id, selectedBriefId)}
+                  href={portfolioHref(profilePath, selectedBriefId)}
                   aria-current={selectedCategory ? undefined : "true"}
                   className={selectedCategory ? inactiveFilterClass : activeFilterClass}
                 >
@@ -824,7 +844,7 @@ export default async function DesignerProfilePage({
                 {categoryFilters.map((category) => (
                   <Link
                     key={category}
-                    href={portfolioHref(id, selectedBriefId, category)}
+                    href={portfolioHref(profilePath, selectedBriefId, category)}
                     aria-current={selectedCategory === category ? "true" : undefined}
                     className={
                       selectedCategory === category
@@ -874,7 +894,7 @@ export default async function DesignerProfilePage({
                   {copy.portfolio.emptyCategoryBody}
                 </p>
                 <Link
-                  href={portfolioHref(id, selectedBriefId)}
+                  href={portfolioHref(profilePath, selectedBriefId)}
                   className="mt-4 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                 >
                   {copy.actions.showAllProjects}

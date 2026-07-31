@@ -31,6 +31,7 @@ import { getWorkspaceCopy } from "@/content/workspace-copy";
 export const revalidate = 0;
 
 type Profile = {
+  public_slug: string | null;
   full_name: string | null;
   profile_headline: string | null;
   profile_headline_pl: string | null;
@@ -389,7 +390,7 @@ export default async function EditProfilePage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "full_name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_place_id, google_rating, google_review_count, google_rating_updated_at"
+      "public_slug, full_name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_place_id, google_rating, google_review_count, google_rating_updated_at"
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -399,6 +400,7 @@ export default async function EditProfilePage({
   if (!accountRole) redirect("/onboarding?next=%2Faccount%2Fprofile");
   const isProfessional = accountRole === "designer";
   const hasProfile = Boolean(profile);
+  const publicProfilePath = `/designers/${p.public_slug || user.id}`;
   const score = profileReadinessScore(p, isProfessional);
   const specialtyCount = p.specialties?.length ?? 0;
   const backHref = isProfessional ? "/studio" : "/client";
@@ -443,7 +445,7 @@ export default async function EditProfilePage({
                 </div>
                 {isProfessional && hasProfile ? (
                   <Link
-                    href={`/designers/${user.id}`}
+                    href={publicProfilePath}
                     className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                   >
                     {copy.viewProfile}
@@ -811,7 +813,7 @@ export default async function EditProfilePage({
               {isProfessional ? copy.saveProfessional : copy.saveClient}
             </button>
             <Link
-              href={hasProfile && isProfessional ? `/designers/${user.id}` : backHref}
+              href={hasProfile && isProfessional ? publicProfilePath : backHref}
               className="rounded-xl border border-line bg-card px-6 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
             >
               {copy.cancel}

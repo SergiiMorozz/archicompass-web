@@ -14,6 +14,7 @@ import { getBillingCopy } from "@/content/billing-copy";
 export const revalidate = 0;
 
 type Profile = {
+  public_slug: string | null;
   full_name: string | null;
   profile_headline: string | null;
   location: string | null;
@@ -58,7 +59,7 @@ export default async function AccountPage({
 
   const { data: profileData } = await supabase
     .from("profiles")
-    .select("full_name, profile_headline, location, profession_type, user_type, specialties, bio, email, phone, service_capabilities, pricing_model, price_from, price_to, work_modes, availability_status, years_experience")
+    .select("public_slug, full_name, profile_headline, location, profession_type, user_type, specialties, bio, email, phone, service_capabilities, pricing_model, price_from, price_to, work_modes, availability_status, years_experience")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -82,6 +83,7 @@ export default async function AccountPage({
   const billingCopy = getBillingCopy();
   const score = profileReadinessScore(profile, isProfessional);
   const hasPublicProfile = isProfessional && Boolean(profileData);
+  const publicProfilePath = `/designers/${profile.public_slug || myProfileId}`;
   const workspaceHref = isProfessional ? "/studio" : "/client";
 
   return (
@@ -126,7 +128,7 @@ export default async function AccountPage({
               </Link>
               {hasPublicProfile ? (
                 <Link
-                  href={`/designers/${myProfileId}`}
+                  href={publicProfilePath}
                   className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                 >
                   {copy.publicProfile}
@@ -257,7 +259,7 @@ export default async function AccountPage({
             <div className="mt-6 border-t border-line pt-6">
               <div className="font-bold">{copy.publicProfileLink}</div>
               <Link
-                href={`/designers/${myProfileId}`}
+                href={publicProfilePath}
                 className="mt-3 flex rounded-xl bg-primary-soft px-4 py-3 text-center text-sm font-semibold text-primary hover:bg-primary hover:text-white"
               >
                 <span className="w-full">{copy.openProfile}</span>
