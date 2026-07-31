@@ -16,7 +16,9 @@ export const metadata: Metadata = pageMetadata({
   path: "/",
 });
 
-export const revalidate = 0;
+// The homepage shows public catalogue data only. Refresh it periodically instead
+// of rendering it for every visitor and crawler request.
+export const revalidate = 300;
 
 const heroImage =
   "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1800&q=85";
