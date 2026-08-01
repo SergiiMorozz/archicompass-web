@@ -9,6 +9,7 @@ export const runtime = "nodejs";
 
 const maxAnalysisPhotos = 6;
 const maxImageSize = 8 * 1024 * 1024;
+const maxAnalysisPayloadSize = 3 * 1024 * 1024;
 const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
 const styleProvider = process.env.STYLE_ANALYSIS_PROVIDER || "openai";
 const openAiStyleModel = process.env.OPENAI_STYLE_MODEL || "gpt-4.1-mini";
@@ -403,6 +404,17 @@ function userFacingGeminiError(message: string) {
     );
   }
 
+  if (
+    normalized.includes("expected pattern") ||
+    normalized.includes("could not decode") ||
+    normalized.includes("invalid image")
+  ) {
+    return localized(
+      "Jedno lub kilka zdjęć nie mogło zostać odczytane przez usługę AI. Usuń je, dodaj ponownie jako JPEG, PNG lub WebP i spróbuj jeszcze raz.",
+      "One or more photos could not be read by the AI service. Remove them, add them again as JPEG, PNG, or WebP, then try once more."
+    );
+  }
+
   return message || localized("Nie udało się przeprowadzić analizy AI.", "The AI analysis could not be completed.");
 }
 
@@ -665,6 +677,19 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: localized(`Jednocześnie możesz przeanalizować maksymalnie ${maxAnalysisPhotos} zdjęć.`, `You can analyse up to ${maxAnalysisPhotos} photos at a time.`) },
       { status: 400 }
+    );
+  }
+
+  const totalPhotoSize = photos.reduce((total, photo) => total + photo.size, 0);
+  if (totalPhotoSize > maxAnalysisPayloadSize) {
+    return NextResponse.json(
+      {
+        error: localized(
+          "Zdjęcia do analizy są zbyt duże jako zestaw. Dodaj je ponownie - ArchiCompass automatycznie przygotuje lżejsze kopie do analizy AI.",
+          "The selected photos are too large as a set. Add them again - ArchiCompass will automatically prepare lighter copies for AI analysis."
+        ),
+      },
+      { status: 413 }
     );
   }
 

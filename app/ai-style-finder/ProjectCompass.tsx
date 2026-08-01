@@ -38,7 +38,83 @@ type StyleAnalysis = {
 
 const maxReferencePhotos = 10;
 const maxAnalysisPhotos = 6;
+const maxPreparedPhotoBytes = 425 * 1024;
+const preparedPhotoDimensions = [1440, 1280, 1024, 800];
+const preparedPhotoQualities = [0.82, 0.72, 0.62, 0.52];
 const projectCompassDraftKey = "archicompass-project-compass-draft";
+
+function canvasBlob(canvas: HTMLCanvasElement, quality: number) {
+  return new Promise<Blob | null>((resolve) => {
+    canvas.toBlob(resolve, "image/jpeg", quality);
+  });
+}
+
+function sourceImage(file: File) {
+  return new Promise<{ image: HTMLImageElement; url: string }>((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => resolve({ image, url });
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Unable to prepare image"));
+    };
+    image.src = url;
+  });
+}
+
+async function prepareReferencePhoto(file: File, sequence: number) {
+  const safeName = `reference-${sequence}-${crypto.randomUUID()}.jpg`;
+
+  if (file.size <= maxPreparedPhotoBytes && file.type === "image/jpeg") {
+    return new File([file], safeName, { type: "image/jpeg", lastModified: file.lastModified });
+  }
+
+  try {
+    const { image, url } = await sourceImage(file);
+    try {
+      let smallest: Blob | null = null;
+
+      for (const maxDimension of preparedPhotoDimensions) {
+        const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+        const width = Math.max(1, Math.round(image.naturalWidth * scale));
+        const height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d");
+        if (!context) continue;
+
+        context.drawImage(image, 0, 0, width, height);
+        for (const quality of preparedPhotoQualities) {
+          const blob = await canvasBlob(canvas, quality);
+          if (!blob) continue;
+          if (!smallest || blob.size < smallest.size) smallest = blob;
+          if (blob.size <= maxPreparedPhotoBytes) {
+            return new File([blob], safeName, { type: "image/jpeg", lastModified: Date.now() });
+          }
+        }
+      }
+
+      if (smallest) {
+        return new File([smallest], safeName, { type: "image/jpeg", lastModified: Date.now() });
+      }
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  } catch {
+    // The server will still validate an uncommon browser image format before analysis.
+  }
+
+  return file;
+}
+
+function responseError(error: string | undefined, fallback: string) {
+  if (!error) return fallback;
+  return /string did not match the expected pattern|unexpected token|syntaxerror|<html/i.test(error)
+    ? fallback
+    : error;
+}
 
 let projectTypes: Option[] = [
   {
@@ -582,6 +658,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   const [styleAnalysis, setStyleAnalysis] = useState<StyleAnalysis | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isPreparingPhotos, setIsPreparingPhotos] = useState(false);
   const objectUrls = useRef<string[]>([]);
 
   const selectedStyles = styleValues(style);
@@ -725,33 +802,44 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
     }
   }
 
-  function addReferencePhotos(event: ChangeEvent<HTMLInputElement>) {
+  async function addReferencePhotos(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []).filter((file) =>
-      file.type.startsWith("image/")
+      ["image/jpeg", "image/png", "image/webp"].includes(file.type)
     );
+    event.currentTarget.value = "";
 
     if (!files.length) return;
 
-    setReferencePhotos((current) => {
-      const remainingSlots = Math.max(0, maxReferencePhotos - current.length);
-      const nextPhotos = files.slice(0, remainingSlots).map((file) => {
-        const url = URL.createObjectURL(file);
-        objectUrls.current.push(url);
+    const remainingSlots = Math.max(0, maxReferencePhotos - referencePhotos.length);
+    if (!remainingSlots) return;
 
-        return {
-          file,
-          id: `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
-          name: file.name,
-          url,
-        };
-      });
+    setIsPreparingPhotos(true);
+    try {
+      const nextPhotos = await Promise.all(
+        files.slice(0, remainingSlots).map(async (file, index) => {
+          const preparedFile = await prepareReferencePhoto(file, referencePhotos.length + index + 1);
+          const url = URL.createObjectURL(preparedFile);
+          objectUrls.current.push(url);
 
-      return [...current, ...nextPhotos];
-    });
+          return {
+            file: preparedFile,
+            id: `${preparedFile.name}-${preparedFile.lastModified}-${crypto.randomUUID()}`,
+            name: file.name || preparedFile.name,
+            url,
+          };
+        })
+      );
 
-    setStyleAnalysis(null);
-    setAnalysisError(null);
-    event.currentTarget.value = "";
+      setReferencePhotos((current) => [
+        ...current,
+        ...nextPhotos.slice(0, Math.max(0, maxReferencePhotos - current.length)),
+      ]);
+      setStyleAnalysis(null);
+      setAnalysisError(null);
+    } finally {
+      setIsPreparingPhotos(false);
+    }
+
   }
 
   function removeReferencePhoto(photoId: string) {
@@ -793,21 +881,21 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
     });
 
     try {
-      const response = await fetch("/api/style-analysis", {
+      const response = await fetch(new URL("/api/style-analysis", window.location.origin).toString(), {
         method: "POST",
         body: formData,
         headers: {
           "X-ArchiCompass-Analysis-Locale": siteLocale,
         },
       });
-      const payload = (await response.json()) as {
+      const payload = (await response.json().catch(() => ({}))) as {
         analysis?: StyleAnalysis;
         code?: string;
         error?: string;
       };
 
       if (!response.ok || !payload.analysis) {
-        throw new Error(payload.error ?? copy.ui.errors.analysis);
+        throw new Error(responseError(payload.error, copy.ui.errors.analysis));
       }
 
       setStyleAnalysis(payload.analysis);
@@ -1120,7 +1208,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
             <label
               className={[
                 "mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-background px-4 py-8 text-center transition hover:border-primary",
-                referencePhotos.length >= maxReferencePhotos
+                referencePhotos.length >= maxReferencePhotos || isPreparingPhotos
                   ? "pointer-events-none opacity-60"
                   : "",
               ].join(" ")}
@@ -1129,12 +1217,14 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 multiple
-                disabled={referencePhotos.length >= maxReferencePhotos}
+                disabled={referencePhotos.length >= maxReferencePhotos || isPreparingPhotos}
                 onChange={addReferencePhotos}
                 className="sr-only"
               />
               <span className="text-sm font-bold">
-                {referencePhotos.length >= maxReferencePhotos
+                {isPreparingPhotos
+                  ? copy.ui.steps.preparingPhotos
+                  : referencePhotos.length >= maxReferencePhotos
                   ? copy.ui.steps.photoLimitReached
                   : copy.ui.steps.addPhotos}
               </span>
@@ -1191,7 +1281,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                 <button
                   type="button"
                   onClick={analyzeReferencePhotos}
-                  disabled={!referencePhotos.length || isAnalyzing}
+                  disabled={!referencePhotos.length || isAnalyzing || isPreparingPhotos}
                   className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isAnalyzing ? copy.ui.steps.analyzing : copy.ui.steps.analyze}
