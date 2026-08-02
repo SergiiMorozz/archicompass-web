@@ -2,6 +2,7 @@ import { requiredServiceCapabilities } from "@/lib/service-capabilities";
 import { distanceBetweenLocations } from "@/lib/location-distance";
 import { briefLabel, briefStyleLabel } from "@/lib/brief-labels";
 import { availabilityLabel } from "@/lib/profile-pricing";
+import { siteLocale, type SiteLocale } from "@/lib/site-locale";
 
 export type MatchBrief = {
   projectType: string;
@@ -49,8 +50,120 @@ export type MatchReason = {
 
 export type ProfessionalMatch = {
   percent: number;
-  label: "Bardzo dobre dopasowanie" | "Obiecujące dopasowanie" | "Warto sprawdzić";
+  label: string;
   reasons: MatchReason[];
+};
+
+type MatchCopy = {
+  labels: {
+    style: string;
+    projectScope: string;
+    projectScale: string;
+    services: string;
+    support: string;
+    location: string;
+    budget: string;
+    timeline: string;
+    portfolio: string;
+  };
+  matchLabel: (percent: number) => string;
+  styleInProfile: (value: string) => string;
+  visualCues: (count: number) => string;
+  checkPortfolio: (value: string) => string;
+  signalsMatched: (matched: number, total: number, size: string) => string;
+  confirmExperience: (project: string, size: string) => string;
+  compactScaleMatch: string;
+  largeScaleMatch: string;
+  confirmScale: (value: string) => string;
+  allServicesConfirmed: (count: number) => string;
+  servicesConfirmed: (confirmed: number, requested: number) => string;
+  profileExperience: (value: string) => string;
+  confirmationNeeded: (value: string) => string;
+  localMatch: (location: string) => string;
+  nearbyMatch: (location: string, distance: number) => string;
+  remoteMatch: (location: string) => string;
+  checkServiceArea: (location: string) => string;
+  budgetNeedsConfirmation: (value: string) => string;
+  budgetPartialMatch: (value: string) => string;
+  budgetStrongMatch: (value: string) => string;
+  minimumBudget: (value: string) => string;
+  unknownAvailability: string;
+  portfolioCount: (count: number) => string;
+};
+
+const matchCopy: Record<SiteLocale, MatchCopy> = {
+  pl: {
+    labels: {
+      style: "Styl",
+      projectScope: "Zakres projektu",
+      projectScale: "Skala projektu",
+      services: "Usługi",
+      support: "Wsparcie",
+      location: "Lokalizacja",
+      budget: "Budżet",
+      timeline: "Termin",
+      portfolio: "Portfolio",
+    },
+    matchLabel: (percent) => percent >= 75 ? "Bardzo dobre dopasowanie" : percent >= 50 ? "Obiecujące dopasowanie" : "Warto sprawdzić",
+    styleInProfile: (value) => `${value} pojawia się w profilu lub portfolio`,
+    visualCues: (count) => `Dopasowano ${count} ${count === 1 ? "cechę wizualną" : "cechy wizualne"}`,
+    checkPortfolio: (value) => `${value} wymaga sprawdzenia portfolio`,
+    signalsMatched: (matched, total, size) => `Znaleziono ${matched}/${total} sygnałów z briefu${size}`,
+    confirmExperience: (project, size) => `${project}${size} · potwierdź podobne doświadczenie`,
+    compactScaleMatch: "Profil lub portfolio potwierdza doświadczenie w małych przestrzeniach",
+    largeScaleMatch: "Profil lub portfolio potwierdza doświadczenie w większych domach",
+    confirmScale: (value) => `${value} · potwierdź podobną skalę realizacji`,
+    allServicesConfirmed: (count) => `Potwierdzono wszystkie wymagane usługi (${count})`,
+    servicesConfirmed: (confirmed, requested) => `Potwierdzono ${confirmed}/${requested} wymaganych usług`,
+    profileExperience: (value) => `W profilu widać doświadczenie: ${value}`,
+    confirmationNeeded: (value) => `Do potwierdzenia: ${value}`,
+    localMatch: (location) => `Dopasowanie lokalne · ${location}`,
+    nearbyMatch: (location, distance) => `Bliska lokalizacja · ${location} (${distance} km)`,
+    remoteMatch: (location) => `Możliwa współpraca zdalna lub hybrydowa · ${location}`,
+    checkServiceArea: (location) => `Sprawdź obszar działania · ${location}`,
+    budgetNeedsConfirmation: (value) => `${value} · wycena wymaga potwierdzenia`,
+    budgetPartialMatch: (value) => `Zakres cen częściowo pokrywa się z budżetem: ${value}`,
+    budgetStrongMatch: (value) => `Poziom startowy mieści się w budżecie: ${value}`,
+    minimumBudget: (value) => `Minimalny budżet projektu: ${value} PLN`,
+    unknownAvailability: "dostępność do potwierdzenia",
+    portfolioCount: (count) => `${count} ${count === 1 ? "publiczny projekt" : "publicznych projektów"}`,
+  },
+  en: {
+    labels: {
+      style: "Style",
+      projectScope: "Project scope",
+      projectScale: "Project scale",
+      services: "Services",
+      support: "Support",
+      location: "Location",
+      budget: "Budget",
+      timeline: "Timeline",
+      portfolio: "Portfolio",
+    },
+    matchLabel: (percent) => percent >= 75 ? "Strong fit" : percent >= 50 ? "Promising fit" : "Worth checking",
+    styleInProfile: (value) => `${value} appears in the profile or portfolio`,
+    visualCues: (count) => `${count} visual ${count === 1 ? "cue" : "cues"} matched`,
+    checkPortfolio: (value) => `${value} needs a portfolio check`,
+    signalsMatched: (matched, total, size) => `${matched}/${total} signals from the brief matched${size}`,
+    confirmExperience: (project, size) => `${project}${size} · confirm comparable experience`,
+    compactScaleMatch: "The profile or portfolio confirms experience with compact spaces",
+    largeScaleMatch: "The profile or portfolio confirms experience with larger homes",
+    confirmScale: (value) => `${value} · confirm comparable project scale`,
+    allServicesConfirmed: (count) => `All ${count} requested services are confirmed`,
+    servicesConfirmed: (confirmed, requested) => `${confirmed}/${requested} requested services are confirmed`,
+    profileExperience: (value) => `The profile indicates experience with: ${value}`,
+    confirmationNeeded: (value) => `To confirm: ${value}`,
+    localMatch: (location) => `Local match · ${location}`,
+    nearbyMatch: (location, distance) => `Nearby location · ${location} (${distance} km)`,
+    remoteMatch: (location) => `Remote or hybrid collaboration possible · ${location}`,
+    checkServiceArea: (location) => `Confirm service area · ${location}`,
+    budgetNeedsConfirmation: (value) => `${value} · quote needs confirmation`,
+    budgetPartialMatch: (value) => `The price range partly overlaps the budget: ${value}`,
+    budgetStrongMatch: (value) => `The starting level fits the budget: ${value}`,
+    minimumBudget: (value) => `Minimum project budget: ${value} PLN`,
+    unknownAvailability: "availability to be confirmed",
+    portfolioCount: (count) => `${count} public ${count === 1 ? "project" : "projects"}`,
+  },
 };
 
 function normalize(value: string) {
@@ -155,15 +268,17 @@ function budgetRange(value: string) {
   return null;
 }
 
-function formatAmount(value: number) {
-  return new Intl.NumberFormat("pl-PL", { maximumFractionDigits: 0 }).format(value);
+function formatAmount(value: number, locale: SiteLocale) {
+  return new Intl.NumberFormat(locale === "pl" ? "pl-PL" : "en-GB", { maximumFractionDigits: 0 }).format(value);
 }
 
 export function scoreProfessionalMatch(
   professional: MatchableProfessional,
   brief: MatchBrief,
-  portfolio: PortfolioSignal[] = []
+  portfolio: PortfolioSignal[] = [],
+  locale: SiteLocale = siteLocale
 ): ProfessionalMatch {
+  const copy = matchCopy[locale];
   const professionalText = normalize(
     [
       professional.bio,
@@ -195,12 +310,12 @@ export function scoreProfessionalMatch(
       (matchedStyles.length ? Math.min(14, matchedStyles.length * 7) : specialtyMatch ? 10 : 0) +
       Math.min(8, cueMatches.length * 2);
     reasons.push({
-      label: "Styl",
+      label: copy.labels.style,
       value: styleMatch
-        ? `${matchedStyles.length ? briefStyleLabel(matchedStyles.join("|")) : briefLabel(brief.searchSpecialty)} pojawia się w profilu lub portfolio`
+        ? copy.styleInProfile(matchedStyles.length ? briefStyleLabel(matchedStyles.join("|"), locale) : briefLabel(brief.searchSpecialty, locale))
         : cueMatches.length
-          ? `Dopasowano ${cueMatches.length} ${cueMatches.length === 1 ? "cechę wizualną" : "cechy wizualne"}`
-          : `${briefStyleLabel(styleValues.join("|")) || "Kierunek wizualny"} wymaga sprawdzenia portfolio`,
+          ? copy.visualCues(cueMatches.length)
+          : copy.checkPortfolio(briefStyleLabel(styleValues.join("|"), locale) || (locale === "pl" ? "Kierunek wizualny" : "Visual direction")),
       status: styleMatch ? "strong" : cueMatches.length ? "partial" : "check",
     });
   }
@@ -214,10 +329,10 @@ export function scoreProfessionalMatch(
     points += Math.round((matchedSignals.length / projectSignals.length) * 15);
     const size = brief.area ? ` · ${brief.area} m²` : "";
     reasons.push({
-      label: "Zakres projektu",
+      label: copy.labels.projectScope,
       value: matchedSignals.length
-        ? `Znaleziono ${matchedSignals.length}/${projectSignals.length} sygnałów z briefu${size}`
-        : `${brief.projectType || "Projekt"}${size} · potwierdź podobne doświadczenie`,
+        ? copy.signalsMatched(matchedSignals.length, projectSignals.length, size)
+        : copy.confirmExperience(briefLabel(brief.projectType, locale) || (locale === "pl" ? "Projekt" : "Project"), size),
       status:
         matchedSignals.length >= Math.ceil(projectSignals.length / 2)
           ? "strong"
@@ -240,12 +355,12 @@ export function scoreProfessionalMatch(
     const scaleMatch = matchesTerms(professionalText, scaleTerms);
     points += scaleMatch ? 8 : 2;
     reasons.push({
-      label: "Skala projektu",
+      label: copy.labels.projectScale,
       value: scaleMatch
         ? compactProject
-          ? "Profil lub portfolio potwierdza doświadczenie w małych przestrzeniach"
-          : "Profil lub portfolio potwierdza doświadczenie w większych domach"
-        : `${brief.area ? `${brief.area} m²` : `${brief.roomCount} pomieszczeń`} · potwierdź podobną skalę realizacji`,
+          ? copy.compactScaleMatch
+          : copy.largeScaleMatch
+        : copy.confirmScale(brief.area ? `${brief.area} m²` : `${brief.roomCount} ${locale === "pl" ? "pomieszczeń" : "rooms"}`),
       status: scaleMatch ? "strong" : "check",
     });
   }
@@ -261,11 +376,11 @@ export function scoreProfessionalMatch(
     const confirmed = requiredCapabilities.filter((capability) => available.includes(capability));
     points += Math.round((confirmed.length / requiredCapabilities.length) * 20);
     reasons.push({
-      label: "Usługi",
+      label: copy.labels.services,
       value:
         confirmed.length === requiredCapabilities.length
-          ? `Potwierdzono wszystkie wymagane usługi (${requiredCapabilities.length})`
-          : `Potwierdzono ${confirmed.length}/${requiredCapabilities.length} wymaganych usług`,
+          ? copy.allServicesConfirmed(requiredCapabilities.length)
+          : copy.servicesConfirmed(confirmed.length, requiredCapabilities.length),
       status:
         confirmed.length === requiredCapabilities.length
           ? "strong"
@@ -278,10 +393,10 @@ export function scoreProfessionalMatch(
     const supportMatch = matchesTerms(professionalText, termsFor(brief.support));
     points += supportMatch ? 8 : 2;
     reasons.push({
-      label: "Wsparcie",
+      label: copy.labels.support,
       value: supportMatch
-        ? `W profilu widać doświadczenie: ${briefLabel(brief.support)}`
-        : `Do potwierdzenia: ${briefLabel(brief.support)}`,
+        ? copy.profileExperience(briefLabel(brief.support, locale))
+        : copy.confirmationNeeded(briefLabel(brief.support, locale)),
       status: supportMatch ? "strong" : "check",
     });
   }
@@ -300,14 +415,14 @@ export function scoreProfessionalMatch(
     const remote = (professional.work_modes ?? []).some((mode) => mode === "Remote" || mode === "Hybrid");
     points += local ? 12 : nearby ? 10 : remote ? 7 : 2;
     reasons.push({
-      label: "Lokalizacja",
+      label: copy.labels.location,
       value: local
-        ? `Dopasowanie lokalne · ${professional.location}`
+        ? copy.localMatch(professional.location || (locale === "pl" ? "nie podano" : "not specified"))
         : nearby
-          ? `Bliska lokalizacja · ${professional.location} (${distance} km)`
+          ? copy.nearbyMatch(professional.location || (locale === "pl" ? "nie podano" : "not specified"), distance)
         : remote
-          ? `Możliwa współpraca zdalna lub hybrydowa · ${professional.location || "lokalizacja do ustalenia"}`
-          : `Sprawdź obszar działania · ${professional.location || "nie podano"}`,
+          ? copy.remoteMatch(professional.location || (locale === "pl" ? "lokalizacja do ustalenia" : "location to be agreed"))
+          : copy.checkServiceArea(professional.location || (locale === "pl" ? "nie podano" : "not specified")),
       status: local || nearby ? "strong" : remote ? "partial" : "check",
     });
   }
@@ -319,24 +434,24 @@ export function scoreProfessionalMatch(
     if (minimum === null) {
       points += 6;
       reasons.push({
-        label: "Budżet",
-        value: `${briefLabel(brief.budget)} · wycena wymaga potwierdzenia`,
+        label: copy.labels.budget,
+        value: copy.budgetNeedsConfirmation(briefLabel(brief.budget, locale)),
         status: "check",
       });
     } else if (minimum <= clientBudget.max) {
       const partlyAbove = professional.price_to !== null && professional.price_to > clientBudget.max;
       points += partlyAbove ? 14 : 18;
       reasons.push({
-        label: "Budżet",
+        label: copy.labels.budget,
         value: partlyAbove
-          ? `Zakres cen częściowo pokrywa się z budżetem: ${briefLabel(brief.budget)}`
-          : `Poziom startowy mieści się w budżecie: ${briefLabel(brief.budget)}`,
+          ? copy.budgetPartialMatch(briefLabel(brief.budget, locale))
+          : copy.budgetStrongMatch(briefLabel(brief.budget, locale)),
         status: partlyAbove ? "partial" : "strong",
       });
     } else {
       reasons.push({
-        label: "Budżet",
-        value: `Minimalny budżet projektu: ${formatAmount(minimum)} PLN`,
+        label: copy.labels.budget,
+        value: copy.minimumBudget(formatAmount(minimum, locale)),
         status: "check",
       });
     }
@@ -359,8 +474,8 @@ export function scoreProfessionalMatch(
             : 3;
     points += availabilityPoints;
     reasons.push({
-      label: "Termin",
-      value: `${briefLabel(brief.timeline)} · ${availability ? availabilityLabel(availability) : "dostępność do potwierdzenia"}`,
+      label: copy.labels.timeline,
+      value: `${briefLabel(brief.timeline, locale)} · ${availability ? availabilityLabel(availability, locale) : copy.unknownAvailability}`,
       status: availabilityPoints >= 7 ? "strong" : availabilityPoints >= 3 ? "partial" : "check",
     });
   }
@@ -369,8 +484,8 @@ export function scoreProfessionalMatch(
     possible += 5;
     points += 5;
     reasons.push({
-      label: "Portfolio",
-      value: `${portfolio.length} ${portfolio.length === 1 ? "publiczny projekt" : "publicznych projektów"}`,
+      label: copy.labels.portfolio,
+      value: copy.portfolioCount(portfolio.length),
       status: "strong",
     });
   }
@@ -378,7 +493,7 @@ export function scoreProfessionalMatch(
   const percent = possible ? Math.round((points / possible) * 100) : 0;
   return {
     percent,
-    label: percent >= 75 ? "Bardzo dobre dopasowanie" : percent >= 50 ? "Obiecujące dopasowanie" : "Warto sprawdzić",
+    label: copy.matchLabel(percent),
     reasons,
   };
 }

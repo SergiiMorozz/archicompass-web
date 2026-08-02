@@ -6,6 +6,7 @@ import GoogleRating from "@/components/GoogleRating";
 import JsonLd from "@/components/JsonLd";
 import { getDirectoryCopy } from "@/content/directory-copy";
 import { briefLabel, briefStyleLabel } from "@/lib/brief-labels";
+import { siteLocale } from "@/lib/site-locale";
 import {
   type MatchBrief,
   type ProfessionalMatch,
@@ -959,7 +960,7 @@ export default async function DesignersPage({
     profiles.forEach((profile) => {
       profileMatchResults.set(
         profile.id,
-        scoreProfessionalMatch(profile, briefContext, portfolioProjects.get(profile.id) ?? [])
+        scoreProfessionalMatch(profile, briefContext, portfolioProjects.get(profile.id) ?? [], siteLocale)
       );
     });
     studios.forEach((studio) => {
@@ -968,7 +969,7 @@ export default async function DesignersPage({
       );
       studioMatchResults.set(
         studio.id,
-        scoreProfessionalMatch(studio, briefContext, memberProjects)
+        scoreProfessionalMatch(studio, briefContext, memberProjects, siteLocale)
       );
     });
   }
