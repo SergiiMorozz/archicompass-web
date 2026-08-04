@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/seo";
+import { seoIndexingEnabled } from "@/lib/seo-indexing";
 
 export default function robots(): MetadataRoute.Robots {
   const base = siteUrl();
-  return {
+  const robots: MetadataRoute.Robots = {
     rules: {
       userAgent: "*",
       allow: "/",
@@ -30,7 +31,11 @@ export default function robots(): MetadataRoute.Robots {
         "/en/studio/",
       ],
     },
-    sitemap: `${base}/sitemap.xml`,
     host: base,
   };
+
+  // A sitemap is a direct invitation to index URLs. During the editorial
+  // pre-launch, pages can still be viewed, but crawlers are not sent a list.
+  if (seoIndexingEnabled) robots.sitemap = `${base}/sitemap.xml`;
+  return robots;
 }

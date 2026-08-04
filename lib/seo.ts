@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { localeMetadata, localePublicUrl, siteLocale } from "@/lib/site-locale";
+import { robotsMetadata } from "@/lib/seo-indexing";
 
 export const SITE_NAME = "ArchiCompass";
 export const DEFAULT_SITE_URL = "https://archicompass.pl";
@@ -82,19 +83,7 @@ export function pageMetadata({
       description: cleanDescription,
       images: [socialImage],
     },
-    robots: noIndex
-      ? { index: false, follow: false, nocache: true }
-      : {
-          index: true,
-          follow: true,
-          googleBot: {
-            index: true,
-            follow: true,
-            "max-image-preview": "large",
-            "max-snippet": -1,
-            "max-video-preview": -1,
-          },
-        },
+    robots: robotsMetadata(noIndex),
   };
 }
 

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { absoluteUrl } from "@/lib/seo";
+import { seoIndexingEnabled } from "@/lib/seo-indexing";
 import { locationPath, seoLocations } from "@/lib/seo-locations";
 
 export const revalidate = 3600;
@@ -10,6 +11,10 @@ function englishPath(path: string) {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // The SEO launch is intentionally held until the planned bilingual guide
+  // library has been reviewed and published as a coherent first release.
+  if (!seoIndexingEnabled) return [];
+
   const now = new Date();
   const staticEntries: MetadataRoute.Sitemap = [
     ["/", "daily", 1],

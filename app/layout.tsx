@@ -8,6 +8,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { getSiteCopy } from "@/content/site-copy";
 import { localeMetadata, localePublicUrl, siteLocale } from "@/lib/site-locale";
 import { absoluteUrl, siteUrl } from "@/lib/seo";
+import { robotsMetadata } from "@/lib/seo-indexing";
 
 const copy = getSiteCopy();
 
@@ -60,17 +61,7 @@ export const metadata: Metadata = {
       "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=85",
     ],
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
-    },
-  },
+  robots: robotsMetadata(),
   verification: process.env.GOOGLE_SITE_VERIFICATION
     ? { google: process.env.GOOGLE_SITE_VERIFICATION }
     : undefined,
