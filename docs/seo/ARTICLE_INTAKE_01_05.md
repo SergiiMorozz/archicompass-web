@@ -13,8 +13,8 @@ acceptance criteria in `PUBLISHING_CHECKLIST.md`.
 | # | Polish public URL | English public URL | Source status | Editorial status |
 | --- | --- | --- | --- | --- |
 | 1 | `/guides/jak-zaplanowac-projekt-wnetrza` | `/en/guides/how-to-plan-an-interior-design-project` | Useful PL source and short EN outline | Complete PL/EN guide package prepared as a protected CMS draft |
-| 2 | `/guides/jak-przygotowac-brief-dla-projektanta-wnetrz` | `/en/guides/how-to-prepare-an-interior-design-brief` | Strong bilingual draft | Expand FAQ and complete final release package |
-| 3 | `/guides/bledy-przed-rozpoczeciem-remontu` | `/en/guides/mistakes-before-starting-a-renovation` | Solid bilingual draft | Expand FAQ, practical tools and release package |
+| 2 | `/guides/jak-przygotowac-brief-dla-projektanta-wnetrz` | `/en/guides/how-to-prepare-an-interior-design-brief` | Strong bilingual draft | Complete PL/EN guide package prepared as a protected CMS draft |
+| 3 | `/guides/bledy-przed-rozpoczeciem-remontu` | `/en/guides/mistakes-before-starting-a-renovation` | Solid bilingual draft | Complete PL/EN guide package prepared as a protected CMS draft |
 | 4 | `/guides/harmonogram-projektu-wnetrza` | `/en/guides/interior-design-project-timeline` | Short PL source and short EN outline | Complete PL/EN guide package prepared as a protected CMS draft |
 | 5 | `/guides/jak-okreslic-styl-wnetrza` | `/en/guides/how-to-define-your-interior-style` | Useful PL source and short EN outline | Complete PL/EN guide package prepared as a protected CMS draft |
 
@@ -33,20 +33,23 @@ complete.
 
 **Source:** `ArchiCompass_Article_02_Brief_dla_projektanta_PL_EN.docx`
 
-This is the strongest initial draft. It already has natural PL/EN structures,
-useful brief tables and six FAQs per language. Before release, add two or more
-meaningful FAQs per locale, replace historic canonical examples with the Guides
-URLs above, add final internal links, localized cover/inline image ALT text,
-author/review information and production metadata validation.
+The final PL/EN release package is stored in
+`content/guides/launch-guides-02-03.json`. It preserves the brief structure,
+adds an eight-question FAQ, a practical input table, final internal links,
+localized cover and inline image ALT text, production metadata and one shared
+component structure for both locales. The CMS row remains a noindex draft until
+the 15-topic launch set is complete.
 
 ## Article 03 - Renovation Mistakes
 
 **Source:** `ArchiCompass_Article_03_Bledy_przed_remontem_PL_EN.docx`
 
-The two language versions cover the same reader need well. Before release,
-expand the five-question FAQ sections, ensure the checklist and any comparison
-tables are readable on mobile, replace historic canonical examples, complete
-the internal linking map and verify factual statements during editorial review.
+The final PL/EN release package is stored in
+`content/guides/launch-guides-02-03.json`. It retains the seven-error logic,
+adds a practical pre-renovation checklist, an eight-question FAQ, a mobile-safe
+two-column table, final internal links and localized cover/inline image ALT
+text. The CMS row remains a noindex draft until the 15-topic launch set is
+complete.
 
 ## Article 04 - Interior Project Timeline
 
