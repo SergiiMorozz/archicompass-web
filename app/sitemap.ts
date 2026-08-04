@@ -4,7 +4,8 @@ import { absoluteUrl } from "@/lib/seo";
 import { seoIndexingEnabled } from "@/lib/seo-indexing";
 import { locationPath, seoLocations } from "@/lib/seo-locations";
 
-export const revalidate = 3600;
+// Publish fresh guide URLs as soon as the CMS release is opened.
+export const revalidate = 0;
 
 function englishPath(path: string) {
   return path === "/" ? "/en" : `/en${path}`;
