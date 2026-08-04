@@ -6,16 +6,15 @@ import { pageMetadata } from "@/lib/seo";
 const copy = getLegalCopy();
 
 export const metadata: Metadata = pageMetadata({
-  title: copy.documents.privacy.metadata.title,
-  description: copy.documents.privacy.metadata.description,
-  path: "/privacy",
+  title: copy.documents.aiDisclaimer.metadata.title,
+  description: copy.documents.aiDisclaimer.metadata.description,
+  path: "/ai-disclaimer",
 });
 
-export default function PrivacyPage() {
-  return <LegalDocumentPage document={copy.documents.privacy} relatedTitle={copy.relatedTitle} relatedLinks={[
-    { href: "/privacy-and-ai", label: copy.links.privacyAndAi },
+export default function AiDisclaimerPage() {
+  return <LegalDocumentPage document={copy.documents.aiDisclaimer} relatedTitle={copy.relatedTitle} relatedLinks={[
     { href: "/ai-transparency", label: copy.links.aiTransparency },
+    { href: "/responsible-ai", label: copy.links.responsibleAi },
     { href: "/terms", label: copy.links.terms },
-    { href: "/cookies", label: copy.links.cookies },
   ]} contactLabel={copy.contactLabel} companyLine={copy.companyLine} />;
 }

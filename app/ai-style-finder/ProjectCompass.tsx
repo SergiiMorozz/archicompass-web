@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import ShareableStyleResult from "@/components/ShareableStyleResult";
 import { getProjectCompassCopy } from "@/content/project-compass-copy";
 import { copyText } from "@/lib/copy-text";
-import { siteLocale } from "@/lib/site-locale";
+import { localeAppPath, siteLocale } from "@/lib/site-locale";
 
 type Option = {
   label: string;
@@ -1290,7 +1290,14 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
               <p className="mt-3 text-xs leading-5 text-muted">
                 {copy.ui.steps.aiPrivacyBefore} {maxAnalysisPhotos} {copy.ui.steps.aiPrivacyAfter} {" "}
-                <Link href="/privacy" className="underline">{copy.ui.steps.privacy}</Link>.
+                <Link href={localeAppPath("/privacy")} className="underline">{copy.ui.steps.privacy}</Link>.
+              </p>
+
+              <p className="mt-2 rounded-lg border border-primary/15 bg-card/70 px-3 py-2 text-xs leading-5 text-muted">
+                {copy.ui.steps.aiTransparencyNotice} {" "}
+                <Link href={localeAppPath("/ai-transparency")} className="font-semibold text-primary underline">
+                  {copy.ui.steps.aiTransparencyLink}
+                </Link>.
               </p>
 
               {referencePhotos.length > maxAnalysisPhotos ? (

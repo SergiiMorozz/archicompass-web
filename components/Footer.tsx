@@ -2,11 +2,13 @@ import Link from "next/link";
 import BrandLogo from "@/components/BrandLogo";
 import { getSiteCopy } from "@/content/site-copy";
 import { getServicesPricingCopy } from "@/content/services-pricing-copy";
+import { getLegalCopy } from "@/content/legal-copy";
 import { localeAppPath } from "@/lib/site-locale";
 
 export default function Footer() {
   const copy = getSiteCopy().footer;
   const servicesPricingCopy = getServicesPricingCopy();
+  const legalCopy = getLegalCopy();
   const appHref = (path: string) => localeAppPath(path);
 
   return (
@@ -63,6 +65,18 @@ export default function Footer() {
             </Link>
             <Link href={appHref("/cookies")} className="hover:text-white">
               {copy.cookies}
+            </Link>
+            <Link href={appHref("/ai-transparency")} className="hover:text-white">
+              {legalCopy.links.aiTransparency}
+            </Link>
+            <Link href={appHref("/responsible-ai")} className="hover:text-white">
+              {legalCopy.links.responsibleAi}
+            </Link>
+            <Link href={appHref("/privacy-and-ai")} className="hover:text-white">
+              {legalCopy.links.privacyAndAi}
+            </Link>
+            <Link href={appHref("/ai-disclaimer")} className="hover:text-white">
+              {legalCopy.links.aiDisclaimer}
             </Link>
             <a href="mailto:contact@archicompass.pl" className="hover:text-white">
               {copy.contact}
