@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
-// Search visibility is an explicit launch decision. The public product remains
-// available while this is false, but no page is eligible for search indexing.
-export const seoIndexingEnabled = process.env.NEXT_PUBLIC_SEO_INDEXING_ENABLED === "true";
+// The bilingual launch library has passed review and is now public. Keep this
+// explicit so any future indexing hold requires a deliberate source change.
+export const seoIndexingEnabled = true;
 
 export function robotsMetadata(explicitNoIndex = false): Metadata["robots"] {
   if (explicitNoIndex) {
