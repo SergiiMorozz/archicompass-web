@@ -12,21 +12,22 @@ acceptance criteria in `PUBLISHING_CHECKLIST.md`.
 
 | # | Polish public URL | English public URL | Source status | Editorial status |
 | --- | --- | --- | --- | --- |
-| 1 | `/guides/jak-zaplanowac-projekt-wnetrza` | `/en/guides/how-to-plan-an-interior-design-project` | Useful PL source and short EN outline | Rebuild as two complete original guides |
+| 1 | `/guides/jak-zaplanowac-projekt-wnetrza` | `/en/guides/how-to-plan-an-interior-design-project` | Useful PL source and short EN outline | Complete PL/EN guide package prepared as a protected CMS draft |
 | 2 | `/guides/jak-przygotowac-brief-dla-projektanta-wnetrz` | `/en/guides/how-to-prepare-an-interior-design-brief` | Strong bilingual draft | Expand FAQ and complete final release package |
 | 3 | `/guides/bledy-przed-rozpoczeciem-remontu` | `/en/guides/mistakes-before-starting-a-renovation` | Solid bilingual draft | Expand FAQ, practical tools and release package |
-| 4 | `/guides/harmonogram-projektu-wnetrza` | `/en/guides/interior-design-project-timeline` | Short PL source and short EN outline | Rebuild as two complete original guides |
-| 5 | `/guides/jak-okreslic-styl-wnetrza` | `/en/guides/how-to-define-your-interior-style` | Useful PL source and short EN outline | Rebuild as two complete original guides |
+| 4 | `/guides/harmonogram-projektu-wnetrza` | `/en/guides/interior-design-project-timeline` | Short PL source and short EN outline | Complete PL/EN guide package prepared as a protected CMS draft |
+| 5 | `/guides/jak-okreslic-styl-wnetrza` | `/en/guides/how-to-define-your-interior-style` | Useful PL source and short EN outline | Complete PL/EN guide package prepared as a protected CMS draft |
 
 ## Article 01 - Plan an Interior Design Project
 
 **Source:** `Article_01_Jak_zaplanowac_projekt_wnetrza_ArchiCompass.docx`
 
-Keep the clear five-step logic, but rebuild it into standalone Polish and
-English guides. The English part is currently a summary rather than an
-independent article. The release version needs an executive summary, table of
-contents, practical planning table, decision checklist, examples of trade-offs,
-8-10 FAQs, verified internal links and localized image ALT text.
+The complete PL/EN release package is now stored in
+`content/guides/launch-guides-01-04-05.json`. It keeps the clear five-step
+logic and adds an executive summary, independent English copy, a practical
+planning table, decision checklist, 8 FAQs, internal links and localized cover
+ALT text. The CMS row remains a noindex draft until the 15-topic launch set is
+complete.
 
 ## Article 02 - Prepare an Interior Design Brief
 
@@ -51,20 +52,23 @@ the internal linking map and verify factual statements during editorial review.
 
 **Source:** `ArchiCompass_Article_04_Harmonogram_projektu_wnetrza_PL_EN.docx`
 
-The material is a useful outline but is not a launch-ready guide in either
-language. Build each locale into a full guide with realistic decision points,
-dependencies, a timeline example clearly marked as illustrative, delay risks,
-trade-offs, a detailed checklist and 8-10 FAQs. Avoid presenting a fixed
-project duration as a universal promise.
+The complete PL/EN release package is now stored in
+`content/guides/launch-guides-01-04-05.json`. It uses realistic decision
+points, dependencies, a clearly illustrative sequence, delay risks, a detailed
+checklist and 8 FAQs. It deliberately avoids presenting a fixed project
+duration as a universal promise. The CMS row remains a noindex draft until the
+15-topic launch set is complete.
 
 ## Article 05 - Define an Interior Style
 
 **Source:** `ArchiCompass_Article_05_Jak_okreslic_styl_wnetrza_PL_EN.docx`
 
-Keep the lifestyle-first framing and integrate it with AI Project Compass. The
-English version needs a complete original article rather than a compact list.
-Add a practical inspiration-review table, examples of compatible and conflicting
-style signals, 8-10 FAQs, related Guide links and localized image ALT text.
+The complete PL/EN release package is now stored in
+`content/guides/launch-guides-01-04-05.json`. It keeps the lifestyle-first
+framing, connects it to AI Project Compass and adds an inspiration-review
+table, compatible and conflicting style signals, 8 FAQs, internal links and
+localized cover ALT text. The CMS row remains a noindex draft until the
+15-topic launch set is complete.
 
 ## Release order
 
