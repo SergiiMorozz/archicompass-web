@@ -23,6 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ["/pricing", "monthly", 0.65],
     ["/services-and-pricing", "monthly", 0.6],
     ["/inspiration", "daily", 0.85],
+    ["/guides", "weekly", 0.85],
     ["/privacy", "yearly", 0.2],
     ["/terms", "yearly", 0.2],
     ["/cookies", "yearly", 0.2],
@@ -46,21 +47,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const [articles] = await Promise.all([
       supabase
         .from("inspiration_articles")
-        .select("slug, updated_at")
+        .select("slug, slug_pl, slug_en, content_section, updated_at")
         .eq("status", "published")
         .eq("noindex", false),
     ]);
 
-    const articleEntries: MetadataRoute.Sitemap = (articles.data ?? []).map((article) => ({
+    const inspirationArticles = (articles.data ?? []).filter((article) => article.content_section === "inspiration");
+    const guides = (articles.data ?? []).filter((article) => article.content_section === "guide");
+    const articleEntries: MetadataRoute.Sitemap = inspirationArticles.map((article) => ({
       url: absoluteUrl(`/inspiration/${article.slug}`),
       lastModified: article.updated_at ? new Date(article.updated_at) : undefined,
       changeFrequency: "monthly",
       priority: 0.75,
     }));
-
-    const englishArticleEntries: MetadataRoute.Sitemap = articleEntries.map((entry) => ({
-      ...entry,
-      url: absoluteUrl(englishPath(new URL(entry.url).pathname)),
+    const englishArticleEntries: MetadataRoute.Sitemap = inspirationArticles.map((article) => ({
+      url: absoluteUrl(englishPath(`/inspiration/${article.slug}`)),
+      lastModified: article.updated_at ? new Date(article.updated_at) : undefined,
+      changeFrequency: "monthly",
+      priority: 0.75,
+    }));
+    const guideEntries: MetadataRoute.Sitemap = guides.map((article) => ({
+      url: absoluteUrl(`/guides/${article.slug_pl || article.slug}`),
+      lastModified: article.updated_at ? new Date(article.updated_at) : undefined,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    }));
+    const englishGuideEntries: MetadataRoute.Sitemap = guides.map((article) => ({
+      url: absoluteUrl(englishPath(`/guides/${article.slug_en || article.slug}`)),
+      lastModified: article.updated_at ? new Date(article.updated_at) : undefined,
+      changeFrequency: "monthly",
+      priority: 0.8,
     }));
 
     const locationEntries: MetadataRoute.Sitemap = seoLocations
@@ -81,6 +97,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...englishStaticEntries,
       ...articleEntries,
       ...englishArticleEntries,
+      ...guideEntries,
+      ...englishGuideEntries,
       ...locationEntries,
       ...englishLocationEntries,
     ];

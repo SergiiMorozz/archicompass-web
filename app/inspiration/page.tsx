@@ -95,6 +95,7 @@ export default async function InspirationPage({
     .from("inspiration_articles")
     .select("id, slug, title, excerpt, body, category, image_url, author_name, title_pl, title_en, excerpt_pl, excerpt_en, author_name_pl, author_name_en, cover_alt_pl, cover_alt_en, meta_title_pl, meta_title_en, meta_description_pl, meta_description_en, focus_keyword_pl, focus_keyword_en, content_blocks, featured, published_at")
     .eq("status", "published")
+    .eq("content_section", "inspiration")
     .eq("noindex", false)
     .order("featured", { ascending: false })
     .order("published_at", { ascending: false });

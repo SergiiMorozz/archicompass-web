@@ -8,6 +8,9 @@ export const revalidate = 0;
 type Article = {
   id: string;
   slug: string;
+  slug_pl: string | null;
+  slug_en: string | null;
+  content_section: "inspiration" | "guide";
   title: string;
   title_pl: string | null;
   title_en: string | null;
@@ -44,16 +47,23 @@ async function createArticle(formData: FormData) {
   const titlePl = textValue(formData, "title_pl");
   const titleEn = textValue(formData, "title_en");
   const title = titlePl || titleEn;
+  const contentSection = textValue(formData, "content_section") === "guide" ? "guide" : "inspiration";
   const category = textValue(formData, "category") || "Design";
-  const slug = slugValue(textValue(formData, "slug") || title);
+  const suppliedSlug = textValue(formData, "slug");
+  const slugPl = slugValue(textValue(formData, "slug_pl") || suppliedSlug || titlePl || title);
+  const slugEn = slugValue(textValue(formData, "slug_en") || suppliedSlug || titleEn || title);
+  const slug = slugValue(suppliedSlug || slugPl || slugEn || title);
 
   if (title.length < 3) contentError("Podaj tytuł artykułu.");
-  if (!slug) contentError("Artykuł potrzebuje poprawnego adresu URL.");
+  if (!slug || !slugPl || !slugEn) contentError("Artykuł potrzebuje poprawnych adresów URL.");
 
   const { data, error } = await supabase
     .from("inspiration_articles")
     .insert({
       slug,
+      slug_pl: slugPl,
+      slug_en: slugEn,
+      content_section: contentSection,
       title,
       title_pl: titlePl || null,
       title_en: titleEn || null,
@@ -92,7 +102,7 @@ export default async function AdminContentPage({
   const { supabase } = await requireAdmin("content");
   const query = supabase
     .from("inspiration_articles")
-    .select("id, slug, title, title_pl, title_en, category, status, featured, published_at, updated_at")
+    .select("id, slug, slug_pl, slug_en, content_section, title, title_pl, title_en, category, status, featured, published_at, updated_at")
     .order("updated_at", { ascending: false });
   const { data, error } = await query;
   const allArticles = (data ?? []) as Article[];
@@ -169,7 +179,7 @@ export default async function AdminContentPage({
                       ) : null}
                     </div>
                     <div className="mt-1 text-sm text-muted">
-                      {article.category} · /{article.slug} · {formatDate(article.published_at)}
+                      {article.content_section === "guide" ? "Poradnik" : "Inspiration Hub"} · /{article.content_section === "guide" ? `guides/${article.slug_pl || article.slug}` : `inspiration/${article.slug}`} · {formatDate(article.published_at)}
                     </div>
                   </div>
                   <span className={[
@@ -200,14 +210,14 @@ export default async function AdminContentPage({
               Title — EN <span className="font-normal text-muted">opcjonalnie</span>
               <input name="title_en" minLength={3} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
+            <label className="text-sm font-semibold">Typ treści<select name="content_section" defaultValue="inspiration" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary"><option value="inspiration">Artykuł do Inspiration Hub</option><option value="guide">Poradnik SEO / Guides</option></select></label>
+            <label className="text-sm font-semibold">Kategoria<input name="category" defaultValue="Design" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label>
             <label className="text-sm font-semibold">
-              Kategoria
-              <input name="category" defaultValue="Design" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
-            </label>
-            <label className="text-sm font-semibold">
-              Adres URL <span className="font-normal text-muted">opcjonalnie, wspólny dla PL i EN</span>
+              Techniczny adres <span className="font-normal text-muted">opcjonalnie, dla obecnych artykułów</span>
               <input name="slug" placeholder="generowany-z-tytulu" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" />
             </label>
+            <label className="text-sm font-semibold">Adres PL <span className="font-normal text-muted">opcjonalnie</span><input name="slug_pl" placeholder="jak-zaplanowac-projekt-wnetrza" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label>
+            <label className="text-sm font-semibold">URL slug EN <span className="font-normal text-muted">optional</span><input name="slug_en" placeholder="how-to-plan-an-interior-design-project" className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label>
             <button className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
               Utwórz szkic
             </button>

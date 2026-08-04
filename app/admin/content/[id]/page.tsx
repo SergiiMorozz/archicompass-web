@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import ArticleRichTextEditor from "@/components/ArticleRichTextEditor";
 import { applyPolishArticleCopy } from "@/content/pl/copy";
-import { articleBlocksPlainText, articleImagePaths, parseArticleBlocks } from "@/lib/article-content";
+import { articleBlocksPlainText, articleImagePaths, hasRenderableArticleBlocks, parseArticleBlocks } from "@/lib/article-content";
 import { requireAdmin } from "@/lib/admin";
 
 export const revalidate = 0;
@@ -11,6 +11,9 @@ export const revalidate = 0;
 type Article = {
   id: string;
   slug: string;
+  slug_pl: string | null;
+  slug_en: string | null;
+  content_section: "inspiration" | "guide";
   title: string;
   excerpt: string;
   body: string;
@@ -96,8 +99,12 @@ function isSafeExternalUrl(value: string) {
   }
 }
 
-function revalidateArticlePaths(slug: string) {
-  ["/inspiration", `/inspiration/${slug}`, "/en/inspiration", `/en/inspiration/${slug}`, "/admin", "/admin/content"].forEach((path) => revalidatePath(path));
+function revalidateArticlePaths(article: Pick<Article, "slug" | "slug_pl" | "slug_en" | "content_section">) {
+  const shared = ["/", "/en", "/inspiration", "/en/inspiration", "/guides", "/en/guides", "/admin", "/admin/content"];
+  const routes = article.content_section === "guide"
+    ? [`/guides/${article.slug_pl || article.slug}`, `/en/guides/${article.slug_en || article.slug}`]
+    : [`/inspiration/${article.slug}`, `/en/inspiration/${article.slug}`];
+  [...shared, ...routes].forEach((path) => revalidatePath(path));
 }
 
 async function updateArticle(formData: FormData) {
@@ -109,21 +116,36 @@ async function updateArticle(formData: FormData) {
   const titlePl = textValue(formData, "title_pl");
   const titleEn = textValue(formData, "title_en");
   const title = titlePl || titleEn;
-  const slug = slugValue(textValue(formData, "slug") || title);
+  const contentSection = textValue(formData, "content_section") === "guide" ? "guide" : "inspiration";
+  const suppliedSlug = textValue(formData, "slug");
+  const slugPl = slugValue(textValue(formData, "slug_pl") || suppliedSlug || titlePl || title);
+  const slugEn = slugValue(textValue(formData, "slug_en") || suppliedSlug || titleEn || title);
+  const slug = slugValue(suppliedSlug || slugPl || slugEn || title);
   const status = textValue(formData, "status");
   const imageUrlInput = textValue(formData, "image_url");
   const blocks = parseArticleBlocks(textValue(formData, "content_blocks"));
   const legacyBody = textValue(formData, "legacy_body");
   const generatedBody = articleBlocksPlainText(blocks, "pl") || legacyBody;
+  const excerptPl = nullableText(formData, "excerpt_pl");
+  const excerptEn = nullableText(formData, "excerpt_en");
+  const metaTitlePl = nullableText(formData, "meta_title_pl");
+  const metaTitleEn = nullableText(formData, "meta_title_en");
+  const metaDescriptionPl = nullableText(formData, "meta_description_pl");
+  const metaDescriptionEn = nullableText(formData, "meta_description_en");
 
   if (title.length < 3) editorError(id, "Podaj tytuł co najmniej w jednej wersji językowej.");
-  if (!slug) editorError(id, "Podaj poprawny adres URL.");
+  if (!slug || !slugPl || !slugEn) editorError(id, "Podaj poprawne adresy URL dla obu wersji językowych.");
   if (status !== "draft" && status !== "published") editorError(id, "Wybierz status szkicu albo publikacji.");
-    if (!isSafeExternalUrl(imageUrlInput)) editorError(id, "Adres okładki musi zaczynać się od http://, https:// albo /.");
+  if (!isSafeExternalUrl(imageUrlInput)) editorError(id, "Adres okładki musi zaczynać się od http://, https:// albo /.");
+  if (status === "published" && contentSection === "guide") {
+    if (!titlePl || !titleEn || !excerptPl || !excerptEn) editorError(id, "Poradnik SEO wymaga tytułu i leadu w wersji PL oraz EN.");
+    if (!metaTitlePl || !metaTitleEn || !metaDescriptionPl || !metaDescriptionEn) editorError(id, "Przed publikacją poradnika uzupełnij meta title i meta description w PL oraz EN.");
+    if (!hasRenderableArticleBlocks(blocks, "pl") || !hasRenderableArticleBlocks(blocks, "en")) editorError(id, "Poradnik SEO wymaga kompletnej treści w obu wersjach językowych.");
+  }
 
   const { data: current } = await supabase
     .from("inspiration_articles")
-    .select("published_at, image_url, slug, content_blocks")
+    .select("published_at, image_url, slug, slug_pl, slug_en, content_section, content_blocks")
     .eq("id", id)
     .maybeSingle();
   if (!current) notFound();
@@ -146,12 +168,15 @@ async function updateArticle(formData: FormData) {
 
   const update = {
     slug,
+    slug_pl: slugPl,
+    slug_en: slugEn,
+    content_section: contentSection,
     title,
     title_pl: nullableText(formData, "title_pl"),
     title_en: nullableText(formData, "title_en"),
-    excerpt: textValue(formData, "excerpt_pl") || textValue(formData, "excerpt_en"),
-    excerpt_pl: nullableText(formData, "excerpt_pl"),
-    excerpt_en: nullableText(formData, "excerpt_en"),
+    excerpt: excerptPl || excerptEn || "",
+    excerpt_pl: excerptPl,
+    excerpt_en: excerptEn,
     body: generatedBody,
     content_blocks: blocks,
     category: textValue(formData, "category") || "Design",
@@ -161,10 +186,10 @@ async function updateArticle(formData: FormData) {
     author_name: nullableText(formData, "author_name_pl") || nullableText(formData, "author_name_en"),
     author_name_pl: nullableText(formData, "author_name_pl"),
     author_name_en: nullableText(formData, "author_name_en"),
-    meta_title_pl: nullableText(formData, "meta_title_pl"),
-    meta_title_en: nullableText(formData, "meta_title_en"),
-    meta_description_pl: nullableText(formData, "meta_description_pl"),
-    meta_description_en: nullableText(formData, "meta_description_en"),
+    meta_title_pl: metaTitlePl,
+    meta_title_en: metaTitleEn,
+    meta_description_pl: metaDescriptionPl,
+    meta_description_en: metaDescriptionEn,
     focus_keyword_pl: nullableText(formData, "focus_keyword_pl"),
     focus_keyword_en: nullableText(formData, "focus_keyword_en"),
     noindex: formData.get("noindex") === "on",
@@ -179,7 +204,7 @@ async function updateArticle(formData: FormData) {
     .from("inspiration_articles")
     .update(update)
     .eq("id", id)
-    .select("slug")
+    .select("slug, slug_pl, slug_en, content_section")
     .maybeSingle();
   if (error || !data) {
     if (uploadedCoverPath) await supabase.storage.from(articleImagesBucket).remove([uploadedCoverPath]);
@@ -195,7 +220,7 @@ async function updateArticle(formData: FormData) {
   ];
   if (obsoletePaths.length) await supabase.storage.from(articleImagesBucket).remove(obsoletePaths);
 
-  revalidateArticlePaths(data.slug);
+  revalidateArticlePaths(data as Pick<Article, "slug" | "slug_pl" | "slug_en" | "content_section">);
   redirect(`/admin/content/${id}?updated=1`);
 }
 
@@ -206,7 +231,7 @@ async function deleteArticle(formData: FormData) {
   const { supabase, user } = await requireAdmin("content");
   const { data: article } = await supabase
     .from("inspiration_articles")
-    .select("title, slug, image_url, content_blocks")
+    .select("title, slug, slug_pl, slug_en, content_section, image_url, content_blocks")
     .eq("id", id)
     .maybeSingle();
   if (!article) notFound();
@@ -217,7 +242,7 @@ async function deleteArticle(formData: FormData) {
 
   const paths = [ownedArticleImagePath(article.image_url, user.id), ...articleImagePaths(parseArticleBlocks(article.content_blocks), user.id)].filter(Boolean) as string[];
   if (paths.length) await supabase.storage.from(articleImagesBucket).remove(paths);
-  revalidateArticlePaths(article.slug);
+  revalidateArticlePaths(article as Pick<Article, "slug" | "slug_pl" | "slug_en" | "content_section">);
   redirect("/admin/content?deleted=1");
 }
 
@@ -234,7 +259,7 @@ export default async function AdminArticleEditorPage({
   const { supabase } = await requireAdmin("content");
   const { data } = await supabase
     .from("inspiration_articles")
-    .select("id, slug, title, excerpt, body, category, image_url, author_name, title_pl, title_en, excerpt_pl, excerpt_en, author_name_pl, author_name_en, cover_alt_pl, cover_alt_en, meta_title_pl, meta_title_en, meta_description_pl, meta_description_en, focus_keyword_pl, focus_keyword_en, content_blocks, noindex, status, featured, published_at")
+    .select("id, slug, slug_pl, slug_en, content_section, title, excerpt, body, category, image_url, author_name, title_pl, title_en, excerpt_pl, excerpt_en, author_name_pl, author_name_en, cover_alt_pl, cover_alt_en, meta_title_pl, meta_title_en, meta_description_pl, meta_description_en, focus_keyword_pl, focus_keyword_en, content_blocks, noindex, status, featured, published_at")
     .eq("id", id)
     .maybeSingle();
   if (!data) notFound();
@@ -249,7 +274,7 @@ export default async function AdminArticleEditorPage({
           <Link href="/admin/content" className="inline-flex rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted">Wróć do treści</Link>
           <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div><div className="text-sm font-semibold text-primary">Edytor SEO i treści</div><h1 className="mt-2 text-4xl font-bold">{articleName}</h1></div>
-            {article.status === "published" ? <Link href={`/inspiration/${article.slug}`} className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white">Zobacz opublikowany artykuł</Link> : null}
+            {article.status === "published" ? <Link href={article.content_section === "guide" ? `/guides/${article.slug_pl || article.slug}` : `/inspiration/${article.slug}`} className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white">Zobacz opublikowany artykuł</Link> : null}
           </div>
         </div>
       </section>
@@ -266,10 +291,13 @@ export default async function AdminArticleEditorPage({
             <div className="mt-6 grid gap-5 lg:grid-cols-2">
               <label className="text-sm font-semibold">Tytuł — PL<input name="title_pl" minLength={3} defaultValue={article.title_pl || legacyPolish.title} className={fieldClass} /></label>
               <label className="text-sm font-semibold">Title — EN<input name="title_en" minLength={3} defaultValue={article.title_en || ""} className={fieldClass} /></label>
-              <label className="text-sm font-semibold lg:col-span-2">Adres URL<input name="slug" required defaultValue={article.slug} className={fieldClass} /><span className="mt-2 block text-xs font-normal text-muted">Jeden czytelny adres wspólny dla obu wersji językowych.</span></label>
+              <label className="text-sm font-semibold">Typ treści<select name="content_section" defaultValue={article.content_section} className={fieldClass}><option value="inspiration">Artykuł do Inspiration Hub</option><option value="guide">Poradnik SEO / Guides</option></select></label>
+              <label className="text-sm font-semibold">Kategoria<input name="category" required defaultValue={article.category} className={fieldClass} /></label>
+              <label className="text-sm font-semibold lg:col-span-2">Techniczny adres URL<input name="slug" required defaultValue={article.slug} className={fieldClass} /><span className="mt-2 block text-xs font-normal text-muted">Dla Inspiration Hub pozostaje głównym adresem. Dla poradnika jest bezpiecznym identyfikatorem technicznym.</span></label>
+              <label className="text-sm font-semibold">Adres poradnika — PL<input name="slug_pl" required defaultValue={article.slug_pl || article.slug} className={fieldClass} /><span className="mt-2 block text-xs font-normal text-muted">Poradnik: /guides/...</span></label>
+              <label className="text-sm font-semibold">Guide URL slug — EN<input name="slug_en" required defaultValue={article.slug_en || article.slug} className={fieldClass} /><span className="mt-2 block text-xs font-normal text-muted">Guide: /en/guides/...</span></label>
               <label className="text-sm font-semibold">Lead — PL<textarea name="excerpt_pl" maxLength={700} rows={4} defaultValue={article.excerpt_pl || legacyPolish.excerpt} className={fieldClass} /></label>
               <label className="text-sm font-semibold">Lead — EN<textarea name="excerpt_en" maxLength={700} rows={4} defaultValue={article.excerpt_en || ""} className={fieldClass} /></label>
-              <label className="text-sm font-semibold">Kategoria<input name="category" required defaultValue={article.category} className={fieldClass} /></label>
               <label className="text-sm font-semibold">Status<select name="status" defaultValue={article.status} className={fieldClass}><option value="draft">Szkic</option><option value="published">Opublikowany</option></select></label>
             </div>
           </section>
