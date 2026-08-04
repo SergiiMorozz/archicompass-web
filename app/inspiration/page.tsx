@@ -11,6 +11,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createPublicContentClient } from "@/lib/public-content-client";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { professionalOptionLabel } from "@/lib/professional-options";
+import { articlePath, type LocalizedPublicArticle, type PublicArticle, publicArticleSelect } from "@/lib/public-articles";
+import { siteLocale } from "@/lib/site-locale";
 
 export const revalidate = 0;
 
@@ -30,6 +32,8 @@ type Article = ArticleLocalizationFields & {
   featured: boolean;
   published_at: string | null;
 };
+
+type Guide = PublicArticle & ArticleLocalizationFields;
 
 type NewDesigner = {
   id: string;
@@ -76,6 +80,10 @@ function localizedArticle(article: Article) {
   return localizeArticle(legacy, siteCopy.locale);
 }
 
+function localizedGuide(article: Guide) {
+  return localizeArticle(article, siteLocale) as LocalizedPublicArticle;
+}
+
 function projectCategoryLabel(value: string) {
   return siteCopy.home.projectCategories[value]
     || (siteCopy.locale === "pl" ? professionalOptionLabel(value) : value);
@@ -100,7 +108,7 @@ export default async function InspirationPage({
     .order("featured", { ascending: false })
     .order("published_at", { ascending: false });
   const allArticles = ((data ?? []) as Article[]).map(localizedArticle);
-  const [{ data: newDesignerData }, { data: recentProjectData }] = await Promise.all([
+  const [{ data: newDesignerData }, { data: recentProjectData }, { data: guideData }] = await Promise.all([
     publicSupabase
       .from("profiles")
       .select("id, avatar_url, profile_logo_path, profile_banner_path, full_name, location, profession_type, google_rating, google_review_count")
@@ -112,9 +120,18 @@ export default async function InspirationPage({
       .select("id, title, category, image_url, image_urls")
       .order("created_at", { ascending: false })
       .limit(6),
+    publicSupabase
+      .from("inspiration_articles")
+      .select(publicArticleSelect)
+      .eq("content_section", "guide")
+      .eq("status", "published")
+      .eq("noindex", false)
+      .order("published_at", { ascending: false })
+      .limit(3),
   ]);
   const newDesigners = (newDesignerData ?? []) as NewDesigner[];
   const recentProjects = (recentProjectData ?? []) as RecentProject[];
+  const latestGuides = ((guideData ?? []) as Guide[]).map(localizedGuide);
   const profileMediaUrl = (path: string | null) =>
     path ? publicSupabase.storage.from("profile-media").getPublicUrl(path).data.publicUrl : null;
   const designerIdentityImage = (designer: NewDesigner) =>
@@ -197,6 +214,39 @@ export default async function InspirationPage({
           ))}
         </div>
       </section>
+
+      {latestGuides.length ? (
+        <section className="border-b border-line bg-background px-4 py-14 sm:px-6">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-primary">{siteLocale === "pl" ? "Praktyczne poradniki" : "Practical guides"}</p>
+                <h2 className="mt-1 text-3xl font-bold">{siteLocale === "pl" ? "Zaplanuj wnętrze z większą pewnością" : "Plan your interior with more confidence"}</h2>
+                <p className="mt-2 max-w-2xl text-muted">{siteLocale === "pl" ? "Sprawdzone wskazówki dotyczące briefu, remontu, budżetu i wyboru projektanta." : "Clear guidance on briefs, renovations, budgets, and choosing the right designer."}</p>
+              </div>
+              <Link href="/guides" className="shrink-0 text-sm font-semibold text-primary hover:underline">{siteLocale === "pl" ? "Zobacz wszystkie poradniki" : "View all guides"}</Link>
+            </div>
+            <div className="mt-8 grid gap-5 md:grid-cols-3">
+              {latestGuides.map((guide) => {
+                const href = articlePath("guide", guide, siteLocale);
+                return (
+                  <article key={guide.id} className="overflow-hidden rounded-lg border border-line bg-card shadow-sm">
+                    <Link href={href} className="block h-52 overflow-hidden bg-primary-soft" aria-label={guide.title}>
+                      {guide.image_url ? <Image src={guide.image_url} alt={guide.cover_alt} width={1000} height={700} unoptimized className="h-full w-full object-cover transition duration-300 hover:scale-[1.02]" /> : null}
+                    </Link>
+                    <div className="p-5">
+                      <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">{guide.category}</span>
+                      <Link href={href} className="mt-4 block text-xl font-bold hover:text-primary">{guide.title}</Link>
+                      <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">{guide.excerpt}</p>
+                      <Link href={href} className="mt-5 inline-flex text-sm font-semibold text-primary hover:underline">{siteLocale === "pl" ? "Czytaj poradnik" : "Read guide"}</Link>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {newDesigners.length || recentProjects.length ? (
         <section className="border-b border-line bg-primary-soft px-4 py-14 sm:px-6">
