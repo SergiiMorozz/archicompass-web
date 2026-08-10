@@ -1,4 +1,5 @@
 import { siteLocale, type SiteLocale } from "@/lib/site-locale";
+import { polishPlural } from "@/lib/polish-plural";
 
 type InteractiveCopy = {
   favorite: {
@@ -12,6 +13,7 @@ type InteractiveCopy = {
     invalidRequest: string;
     invalidFavorite: string;
     unavailable: string;
+    rateLimited: string;
   };
   googleRating: {
     reviewCount: (count: number) => string;
@@ -46,15 +48,16 @@ const interactiveCopy: Record<SiteLocale, InteractiveCopy> = {
       invalidRequest: "Nieprawidłowe żądanie zapisu ulubionych.",
       invalidFavorite: "Nieprawidłowy element ulubionych.",
       unavailable: "Ten element nie jest już dostępny.",
+      rateLimited: "Osiągnięto dzienny limit zapisywania ulubionych. Spróbuj ponownie jutro.",
     },
     googleRating: {
-      reviewCount: (count) => `${count} ${count === 1 ? "opinia" : count < 5 ? "opinie" : "opinii"} Google`,
+      reviewCount: (count) => `${count} ${polishPlural(count, "opinia", "opinie", "opinii")} Google`,
       verified: "zweryfikowano",
     },
     social: { profileLinks: "Linki społecznościowe profilu" },
     referencePhotos: {
       defaultTitle: "Zdjęcia referencyjne",
-      photoCount: (count) => `${count} ${count === 1 ? "zdjęcie" : count < 5 ? "zdjęcia" : "zdjęć"}`,
+      photoCount: (count) => `${count} ${polishPlural(count, "zdjęcie", "zdjęcia", "zdjęć")}`,
       openFullSize: (name) => `Otwórz ${name} w pełnym rozmiarze`,
       imageAlt: (title, index, name) => `${title} ${index}: ${name}`,
       caption: (name) => `${name} - otwórz pełny rozmiar`,
@@ -73,6 +76,7 @@ const interactiveCopy: Record<SiteLocale, InteractiveCopy> = {
       invalidRequest: "The favourites request is invalid.",
       invalidFavorite: "This favourite item is invalid.",
       unavailable: "This item is no longer available.",
+      rateLimited: "You've reached today's limit for saving favourites. Please try again tomorrow.",
     },
     googleRating: {
       reviewCount: (count) => `${count} Google ${count === 1 ? "review" : "reviews"}`,

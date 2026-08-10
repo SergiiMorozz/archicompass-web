@@ -1,4 +1,5 @@
 import { siteLocale, type SiteLocale } from "@/lib/site-locale";
+import { polishPlural } from "@/lib/polish-plural";
 
 type DesignerProfileCopy = {
   metadata: {
@@ -213,7 +214,7 @@ const designerProfileCopy: Record<SiteLocale, DesignerProfileCopy> = {
       noGoogleReviews: "Brak połączonych opinii Google",
       new: "Nowy",
       noLinkedRating: "Brak połączonej oceny",
-      reviewCount: (count) => `${count} ${count === 1 ? "opinia Google" : "opinii Google"}`,
+      reviewCount: (count) => `${count} ${polishPlural(count, "opinia", "opinie", "opinii")} Google`,
       linkedHeading: "Zobacz źródło w połączonym profilu Google",
       unlinkedHeading: "Tutaj można połączyć opinie Google",
       body: "ArchiCompass pokazuje podsumowanie publicznej oceny, a pełna treść opinii pozostaje w Google. Opinie zebrane bezpośrednio na platformie będą prezentowane osobno.",

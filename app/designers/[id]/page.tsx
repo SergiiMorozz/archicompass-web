@@ -10,7 +10,7 @@ import GoogleRating from "@/components/GoogleRating";
 import JsonLd from "@/components/JsonLd";
 import SocialLinks, { socialSameAs } from "@/components/SocialLinks";
 import { getAccountRole } from "@/lib/studios";
-import { availabilityLabel, pricingLabel, workModeLabel } from "@/lib/profile-pricing";
+import { availabilityLabel, formatMinimumBudget, pricingLabel, workModeLabel } from "@/lib/profile-pricing";
 import { professionalOptionLabel } from "@/lib/professional-options";
 import { serviceCapabilityLabel } from "@/lib/service-capabilities";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
@@ -658,7 +658,7 @@ export default async function DesignerProfilePage({
               </div>
               <div className="flex items-center justify-between gap-4">
                 <span className="text-muted">{profileCopy.labels.minimumProjectBudget}</span>
-                <span className="text-right font-semibold">{profile.minimum_project_budget ? `${profile.minimum_project_budget} PLN` : profileCopy.values.notSpecified}</span>
+                <span className="text-right font-semibold">{profile.minimum_project_budget ? formatMinimumBudget(profile.minimum_project_budget) : profileCopy.values.notSpecified}</span>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <span className="text-muted">{profileCopy.labels.languages}</span>

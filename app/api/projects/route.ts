@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getAccountRole } from "@/lib/studios";
+import { consumeActionQuota } from "@/lib/action-quota";
 import { publicTextError } from "@/lib/content-moderation";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
+
+const dailyProjectCreateLimit = 20;
 
 type CreateProjectBody = {
   title?: unknown;
@@ -25,6 +28,15 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: copy.create.unauthenticated }, { status: 401 });
   if ((await getAccountRole(supabase, user.id)) !== "designer") {
     return NextResponse.json({ error: copy.errors.clientOnly }, { status: 403 });
+  }
+
+  const { error: quotaError, allowed } = await consumeActionQuota(
+    user.id,
+    "project_create",
+    dailyProjectCreateLimit
+  );
+  if (quotaError || !allowed) {
+    return NextResponse.json({ error: copy.errors.dailyLimitReached }, { status: 429 });
   }
 
   const body = (await request.json()) as CreateProjectBody;

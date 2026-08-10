@@ -20,7 +20,7 @@ type DirectoryCopy = {
     title: string;
     body: string;
     edit: string;
-    rooms: string;
+    rooms: (count: number) => string;
   };
   mobileFilters: { title: string; show: string; hide: string };
   filters: {
@@ -154,7 +154,7 @@ const pl: DirectoryCopy = {
     title: "Specjaliści dopasowani do Twojego briefu",
     body: "Wyniki uwzględniają styl, zakres, pomieszczenia, usługi, budżet, lokalizację, termin i portfolio. Brakujące informacje są oznaczane jako wymagające potwierdzenia.",
     edit: "Edytuj brief",
-    rooms: "pom.",
+    rooms: (count) => polishForm(count, "pomieszczenie", "pomieszczenia", "pomieszczeń"),
   },
   mobileFilters: { title: "Filtry", show: "Pokaż", hide: "Ukryj" },
   filters: {
@@ -187,7 +187,7 @@ const en: DirectoryCopy = {
     badge: "Designer Directory", title: "Interior designers and studios", body: "Compare profiles by style, location, services, and fit for your investment.", cta: "Create a brief with AI Project Compass →", searchPlaceholder: "Search by name, style, or speciality...", search: "Search", popular: "Popular", imageAlt: "Bright, modern interior", imageTitle: "Fit for your project", imageBody: "Style, scope, budget, and location in one place.",
   },
   brief: {
-    eyebrow: "Matched with AI Project Compass", title: "Professionals matched to your brief", body: "Results consider style, scope, rooms, services, budget, location, timing, and portfolio. Missing information is marked for confirmation.", edit: "Edit brief", rooms: "rooms",
+    eyebrow: "Matched with AI Project Compass", title: "Professionals matched to your brief", body: "Results consider style, scope, rooms, services, budget, location, timing, and portfolio. Missing information is marked for confirmation.", edit: "Edit brief", rooms: (count) => `${count} ${count === 1 ? "room" : "rooms"}`,
   },
   mobileFilters: { title: "Filters", show: "Show", hide: "Hide" },
   filters: {

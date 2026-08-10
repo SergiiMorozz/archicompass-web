@@ -9,7 +9,7 @@ import ProjectGallery from "@/components/ProjectGallery";
 import SocialLinks, { socialSameAs } from "@/components/SocialLinks";
 import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { availabilityLabel, pricingLabel, workModeLabel } from "@/lib/profile-pricing";
+import { availabilityLabel, formatMinimumBudget, pricingLabel, workModeLabel } from "@/lib/profile-pricing";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { createPublicContentClient } from "@/lib/public-content-client";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
@@ -347,7 +347,7 @@ export default async function PublicStudioPage({
               <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">{copy.labels.price}</span><span className="text-right font-semibold">{pricingLabel(studio)}</span></div>
               <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">{copy.labels.availability}</span><span className="text-right font-semibold">{studio.availability_status ? availabilityLabel(studio.availability_status) : copy.labels.onRequest}</span></div>
               <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">{copy.labels.workMode}</span><span className="text-right font-semibold">{studio.work_modes?.map((mode) => workModeLabel(mode)).join(" · ") || copy.labels.onRequest}</span></div>
-              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">{copy.labels.minimumBudget}</span><span className="text-right font-semibold">{studio.minimum_project_budget ? `${studio.minimum_project_budget} PLN` : copy.labels.onRequest}</span></div>
+              <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">{copy.labels.minimumBudget}</span><span className="text-right font-semibold">{studio.minimum_project_budget ? formatMinimumBudget(studio.minimum_project_budget) : copy.labels.onRequest}</span></div>
               <div className="flex justify-between gap-4"><span className="text-muted">{copy.labels.contact}</span><span className="truncate font-semibold">{studio.email || studio.phone || copy.labels.throughBrief}</span></div>
             </div>
             {hasVerifiedGoogleRating ? (

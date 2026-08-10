@@ -259,7 +259,7 @@ export default async function AdminUserDetailPage({
                   [copy.fields[3], profile.profession_type],
                   [copy.fields[4], profile.phone],
                   [copy.fields[5], profile.website],
-                  [copy.fields[6], profile.hourly_rate ? `${profile.hourly_rate} PLN` : null],
+                  [copy.fields[6], profile.hourly_rate ? `${profile.hourly_rate.toLocaleString("en-GB")} PLN` : null],
                   [copy.fields[7], profile.years_experience ? `${profile.years_experience} ${copy.years}` : null],
                   [copy.fields[8], formatDate(detail.created_at, copy.dateLocale, copy.never)],
                   [copy.fields[9], formatDate(detail.last_sign_in_at, copy.dateLocale, copy.never)],
