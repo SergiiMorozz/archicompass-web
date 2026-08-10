@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getInteractiveCopy } from "@/content/interactive-copy";
+import { localePublicPath, siteLocale } from "@/lib/site-locale";
 
 export default function FavoriteButton({
   compact = false,
@@ -29,7 +30,7 @@ export default function FavoriteButton({
     setError(null);
 
     try {
-      const response = await fetch("/api/favorites", {
+      const response = await fetch(localePublicPath(siteLocale, "/api/favorites"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entityKey, entityType, saved: !saved }),
@@ -41,7 +42,9 @@ export default function FavoriteButton({
       };
 
       if (response.status === 401 || payload.code === "AUTH_REQUIRED") {
-        window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+        const currentPath = window.location.pathname.replace(/^\/en(?=\/|$)/, "") || "/";
+        const next = `${currentPath}${window.location.search}${window.location.hash}`;
+        window.location.assign(`${localePublicPath(siteLocale, "/login")}?next=${encodeURIComponent(next)}`);
         return;
       }
       if (!response.ok || typeof payload.saved !== "boolean") {

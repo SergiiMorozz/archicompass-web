@@ -62,7 +62,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
       indexPath="/guides"
       sectionLabel={copy.breadcrumb}
       backToIndex={copy.backToIndex}
-      categoryLabel={(value) => value}
+      categoryLabel={() => copy.label}
       editorialTeam={copy.editorialTeam}
       cta={{ eyebrow: copy.articleCtaEyebrow, title: copy.articleCtaTitle, projectCompass: copy.articleCtaProjectCompass, directory: copy.articleCtaDirectory }}
     />

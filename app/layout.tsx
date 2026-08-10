@@ -49,7 +49,7 @@ export const metadata: Metadata = {
         url: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=85",
         width: 1600,
         height: 900,
-        alt: "Współczesne wnętrze prezentowane przez ArchiCompass",
+        alt: siteLocale === "pl" ? "Współczesne wnętrze prezentowane przez ArchiCompass" : "Contemporary interior presented by ArchiCompass",
       },
     ],
   },

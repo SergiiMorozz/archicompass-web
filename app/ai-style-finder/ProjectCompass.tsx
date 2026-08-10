@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import ShareableStyleResult from "@/components/ShareableStyleResult";
 import { getProjectCompassCopy } from "@/content/project-compass-copy";
 import { copyText } from "@/lib/copy-text";
-import { localeAppPath, siteLocale } from "@/lib/site-locale";
+import { localeAppPath, localePublicPath, siteLocale } from "@/lib/site-locale";
 
 type Option = {
   label: string;
@@ -701,6 +701,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   if (savedBriefId) designerParams.set("brief", savedBriefId);
 
   const designerHref = `/designers?${designerParams.toString()}`;
+  const designerPublicHref = localePublicPath(siteLocale, designerHref);
 
   const briefText = useMemo(
     () =>
@@ -881,13 +882,16 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
     });
 
     try {
-      const response = await fetch(new URL("/api/style-analysis", window.location.origin).toString(), {
-        method: "POST",
-        body: formData,
-        headers: {
-          "X-ArchiCompass-Analysis-Locale": siteLocale,
-        },
-      });
+      const response = await fetch(
+        new URL(localePublicPath(siteLocale, "/api/style-analysis"), window.location.origin).toString(),
+        {
+          method: "POST",
+          body: formData,
+          headers: {
+            "X-ArchiCompass-Analysis-Locale": siteLocale,
+          },
+        }
+      );
       const payload = (await response.json().catch(() => ({}))) as {
         analysis?: StyleAnalysis;
         code?: string;
@@ -917,9 +921,9 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
   async function saveBrief(openMatches = false) {
     if (openMatches && savedBriefId && savedBriefSignature === briefText) {
-      const matchesUrl = new URL(designerHref, window.location.origin);
+      const matchesUrl = new URL(designerPublicHref, window.location.origin);
       matchesUrl.searchParams.set("brief", savedBriefId);
-      window.location.href = `${matchesUrl.pathname}?${matchesUrl.searchParams.toString()}`;
+      window.location.href = matchesUrl.toString();
       return;
     }
 
@@ -955,7 +959,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
     });
 
     try {
-      const response = await fetch("/api/project-briefs", {
+      const response = await fetch(localePublicPath(siteLocale, "/api/project-briefs"), {
         method: "POST",
         body: formData,
       });
@@ -991,10 +995,11 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
             selectedVisualCues,
           })
         );
+        const next = encodeURIComponent(localeAppPath("/project-compass"));
         window.location.href =
           payload.code === "ONBOARDING_REQUIRED"
-            ? "/onboarding?intent=client&next=%2Fproject-compass"
-            : "/login?next=%2Fproject-compass";
+            ? `${localePublicPath(siteLocale, "/onboarding")}?intent=client&next=${next}`
+            : `${localePublicPath(siteLocale, "/login")}?next=${next}`;
         return;
       }
 
@@ -1008,9 +1013,9 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       window.sessionStorage.removeItem(projectCompassDraftKey);
 
       if (openMatches) {
-        const matchesUrl = new URL(designerHref, window.location.origin);
+        const matchesUrl = new URL(designerPublicHref, window.location.origin);
         matchesUrl.searchParams.set("brief", payload.id);
-        window.location.href = `${matchesUrl.pathname}?${matchesUrl.searchParams.toString()}`;
+        window.location.href = matchesUrl.toString();
       }
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : copy.ui.errors.save);

@@ -29,13 +29,13 @@ export const homeCopy = {
     primaryCta: "Poznaj swój styl i znajdź projektanta z AI",
     secondaryCta: "Katalog projektantów",
     designerCta: "Jesteś projektantem lub architektem? Utwórz swój profil",
-    benefits: ["Sprawdzone portfolio", "Bezpośredni kontakt", "Bezpłatny start"],
+    benefits: ["Profile w wersji beta", "Bezpośredni kontakt", "Bezpłatny start"],
   },
   metrics: {
     designers: "Projektanci i pracownie",
     projects: "Opublikowane realizacje",
     reviews: "Połączone opinie Google",
-    caption: "Aktualne dane platformy",
+    caption: "Dane wersji beta",
   },
   howItWorks: {
     eyebrow: "Jak to działa",

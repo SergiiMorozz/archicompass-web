@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { getExplicitAccountRole } from "@/lib/studios";
+import { localePublicPath, siteLocale } from "@/lib/site-locale";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+function localizedUrl(origin: string, path: string) {
+  return new URL(localePublicPath(siteLocale, path), origin);
+}
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -14,7 +19,7 @@ export async function GET(request: Request) {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) {
-      const loginUrl = new URL("/login", origin);
+      const loginUrl = localizedUrl(origin, "/login");
       loginUrl.searchParams.set("error", error.message);
       return NextResponse.redirect(loginUrl);
     }
@@ -27,7 +32,7 @@ export async function GET(request: Request) {
       if (!role && (metadataIntent === "client" || metadataIntent === "designer")) {
         const { error: roleError } = await supabase.rpc("set_my_account_role", { new_role: metadataIntent });
         if (roleError) {
-          const onboarding = new URL("/onboarding", origin);
+          const onboarding = localizedUrl(origin, "/onboarding");
           onboarding.searchParams.set("intent", metadataIntent);
           onboarding.searchParams.set("next", next);
           onboarding.searchParams.set("error", roleError.message);
@@ -45,7 +50,7 @@ export async function GET(request: Request) {
       }
 
       if (!role) {
-        const onboarding = new URL("/onboarding", origin);
+        const onboarding = localizedUrl(origin, "/onboarding");
         if (metadataIntent === "client" || metadataIntent === "designer") {
           onboarding.searchParams.set("intent", metadataIntent);
         }
@@ -61,15 +66,15 @@ export async function GET(request: Request) {
           .maybeSingle();
         const needsProfileSetup = !profile?.full_name || !profile?.phone || !profile?.location;
         return NextResponse.redirect(
-          `${origin}${needsProfileSetup ? "/account/profile?onboarding=1" : role === "designer" ? "/studio" : "/client"}`
+          localizedUrl(origin, needsProfileSetup ? "/account/profile?onboarding=1" : role === "designer" ? "/studio" : "/client")
         );
       }
 
       if (role && next.startsWith("/onboarding")) {
-        return NextResponse.redirect(`${origin}${role === "designer" ? "/studio" : "/client"}`);
+        return NextResponse.redirect(localizedUrl(origin, role === "designer" ? "/studio" : "/client"));
       }
     }
   }
 
-  return NextResponse.redirect(`${origin}${next}`);
+  return NextResponse.redirect(localizedUrl(origin, next));
 }

@@ -1644,8 +1644,8 @@ export default async function DesignersPage({
             {copy.locations.body}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            {seoLocations.map((item) => (
-              <Link key={`${item.countrySlug}-${item.citySlug}`} href={locationPath(item)} className="rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold hover:border-primary hover:text-primary">
+            {seoLocations.filter((item) => item.countryCode === "PL").map((item) => (
+              <Link key={`${item.countrySlug}-${item.citySlug}`} href={locationPath(item, siteLocale)} className="rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold hover:border-primary hover:text-primary">
                 {item.city}, {item.country}
               </Link>
             ))}

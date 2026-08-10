@@ -1,21 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import GoogleRating from "@/components/GoogleRating";
 import JsonLd from "@/components/JsonLd";
-import { cityDirectoryCopy } from "@/content/pl/locations";
-import { polishCountLabel } from "@/lib/count-label";
+import { getCityDirectoryCopy } from "@/content/city-directory-copy";
 import { professionalOptionLabel } from "@/lib/professional-options";
-import { createPublicSupabaseClient } from "@/lib/supabase/public";
-import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import { absoluteUrl, breadcrumbJsonLd, englishUrl, pageMetadata, polishUrl } from "@/lib/seo";
 import { localizeProfileContent } from "@/lib/localized-profile-content";
+import { siteLocale } from "@/lib/site-locale";
 import {
   getSeoLocation,
   locationPath,
   matchesSeoLocation,
+  seoLocationCountry,
+  seoLocationName,
+  seoLocationText,
   seoLocations,
   type SeoLocation,
 } from "@/lib/seo-locations";
+import { createPublicSupabaseClient } from "@/lib/supabase/public";
 
 export const revalidate = 3600;
 
@@ -31,6 +34,7 @@ type Designer = {
   google_business_url: string | null;
   google_rating: number | null;
   google_review_count: number | null;
+  is_demo: boolean;
 };
 
 type Studio = {
@@ -44,14 +48,17 @@ type Studio = {
   google_business_url: string | null;
   google_rating: number | null;
   google_review_count: number | null;
+  is_demo: boolean;
 };
 
-function cityLocative(location: SeoLocation) {
-  return location.locative ?? `w ${location.city}`;
+function cityContext(location: SeoLocation) {
+  const city = seoLocationName(location, siteLocale);
+  return siteLocale === "en" ? `in ${city}` : location.locative ?? `w ${city}`;
 }
 
-function cityGenitive(location: SeoLocation) {
-  return location.genitive ?? `z ${location.city}`;
+function cityOrigin(location: SeoLocation) {
+  const city = seoLocationName(location, siteLocale);
+  return siteLocale === "en" ? `in ${city}` : location.genitive ?? `z ${city}`;
 }
 
 async function professionalsForLocation(location: SeoLocation) {
@@ -59,63 +66,78 @@ async function professionalsForLocation(location: SeoLocation) {
   const [profiles, studios] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, full_name, bio, bio_pl, bio_en, location, profession_type, specialties, google_business_url, google_rating, google_review_count")
+      .select("id, full_name, bio, bio_pl, bio_en, location, profession_type, specialties, google_business_url, google_rating, google_review_count, is_demo")
       .eq("user_type", "professional")
       .limit(100),
     supabase
       .from("studios")
-      .select("id, name, bio, bio_pl, bio_en, location, specialties, google_business_url, google_rating, google_review_count")
+      .select("id, name, bio, bio_pl, bio_en, location, specialties, google_business_url, google_rating, google_review_count, is_demo")
       .eq("published", true)
       .limit(100),
   ]);
 
   return {
-    designers: ((profiles.data ?? []) as Designer[]).map((profile) => localizeProfileContent(profile)).filter((profile) =>
-      matchesSeoLocation(profile.location, location)
-    ),
-    studios: ((studios.data ?? []) as Studio[]).map((studio) => localizeProfileContent(studio)).filter((studio) =>
-      matchesSeoLocation(studio.location, location)
-    ),
+    designers: ((profiles.data ?? []) as Designer[])
+      .map((profile) => localizeProfileContent(profile, siteLocale))
+      .filter((profile) => !profile.is_demo && matchesSeoLocation(profile.location, location)),
+    studios: ((studios.data ?? []) as Studio[])
+      .map((studio) => localizeProfileContent(studio, siteLocale))
+      .filter((studio) => !studio.is_demo && matchesSeoLocation(studio.location, location)),
   };
 }
 
 export function generateStaticParams() {
-  return seoLocations.map((location) => ({
-    country: location.countrySlug,
-    city: location.citySlug,
-  }));
+  return seoLocations.map((location) => ({ country: location.countrySlug, city: location.citySlug }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ country: string; city: string }>;
-}): Promise<Metadata> {
-  const { country, city } = await params;
+export async function cityDirectoryMetadata(country: string, city: string): Promise<Metadata> {
   const location = getSeoLocation(country, city);
-  if (!location) return pageMetadata({ title: "Nie znaleziono lokalizacji", description: "Ta lokalizacja nie jest dostępna.", path: `/interior-designers/${country}/${city}`, noIndex: true });
+  const copy = getCityDirectoryCopy(siteLocale);
+  if (!location) {
+    return pageMetadata({
+      title: copy.notFoundTitle,
+      description: copy.notFoundDescription,
+      path: `/interior-designers/${country}/${city}`,
+      noIndex: true,
+    });
+  }
   const { designers, studios } = await professionalsForLocation(location);
+  const cityName = seoLocationName(location, siteLocale);
   const count = designers.length + studios.length;
+  const polishPath = locationPath(location, "pl");
+  const englishPath = locationPath(location, "en");
   return pageMetadata({
-    title: `Projektanci wnętrz ${location.city} | Portfolio i opinie`,
-    description: `Znajdź i porównaj projektantów wnętrz oraz pracownie działające ${cityLocative(location)}. Zobacz portfolio, zakres usług, opinie Google i wyślij dobrze przygotowany brief.`,
-    path: locationPath(location),
+    title: siteLocale === "pl"
+      ? `Projektanci wnętrz ${location.city} | Portfolio i opinie`
+      : `Interior designers in ${cityName} | Portfolios and reviews`,
+    description: siteLocale === "pl"
+      ? `Znajdź i porównaj projektantów wnętrz oraz pracownie działające ${cityContext(location)}. Zobacz portfolio, zakres usług, opinie Google i wyślij dobrze przygotowany brief.`
+      : `Find and compare interior designers and design studios working ${cityContext(location)}. Review portfolios, services, Google reviews, and send a well-prepared brief.`,
+    path: locationPath(location, siteLocale),
     noIndex: count === 0,
+    alternates: {
+      canonical: absoluteUrl(locationPath(location, siteLocale)),
+      languages: { pl: polishUrl(polishPath), en: englishUrl(englishPath), "x-default": polishUrl(polishPath) },
+    },
   });
 }
 
-export default async function InteriorDesignersLocationPage({
-  params,
-}: {
-  params: Promise<{ country: string; city: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ country: string; city: string }> }): Promise<Metadata> {
   const { country, city } = await params;
+  return cityDirectoryMetadata(country, city);
+}
+
+export async function CityDirectoryPage({ country, city }: { country: string; city: string }) {
   const location = getSeoLocation(country, city);
   if (!location) notFound();
+
+  const copy = getCityDirectoryCopy(siteLocale);
+  const context = cityContext(location);
+  const cityName = seoLocationName(location, siteLocale);
   const { designers, studios } = await professionalsForLocation(location);
   const professionals = [
     ...studios.map((studio) => ({
-      type: "Pracownia projektowa",
+      type: copy.studio,
       id: studio.id,
       name: studio.name,
       bio: studio.bio,
@@ -127,9 +149,9 @@ export default async function InteriorDesignersLocationPage({
       href: `/studios/${studio.id}`,
     })),
     ...designers.map((designer) => ({
-      type: designer.profession_type === "Studio" ? "Pracownia projektowa" : "Projektant wnętrz",
+      type: designer.profession_type === "Studio" ? copy.studio : copy.designer,
       id: designer.id,
-      name: designer.full_name || "Projektant ArchiCompass",
+      name: designer.full_name || copy.designerFallback,
       bio: designer.bio,
       location: designer.location,
       specialties: designer.specialties,
@@ -142,32 +164,30 @@ export default async function InteriorDesignersLocationPage({
   const relatedLocations = seoLocations
     .filter((item) => item.countrySlug === location.countrySlug && item.citySlug !== location.citySlug)
     .slice(0, 6);
-  const path = locationPath(location);
+  const path = locationPath(location, siteLocale);
+  const countryLabel = seoLocationCountry(location, siteLocale);
 
   return (
     <main>
       <JsonLd
         data={[
           breadcrumbJsonLd([
-            { name: "Strona główna", path: "/" },
-            { name: "Katalog Projektantów", path: "/designers" },
-            { name: location.country, path: `/interior-designers/${location.countrySlug}/${location.citySlug}` },
-            { name: location.city, path },
+            { name: copy.home, path: "/" },
+            { name: copy.directory, path: "/designers" },
+            { name: countryLabel, path },
+            { name: cityName, path },
           ]),
           {
             "@context": "https://schema.org",
             "@type": "CollectionPage",
-            name: `Projektanci wnętrz ${cityLocative(location)}`,
-            description: `Projektanci wnętrz i pracownie projektowe działające ${cityLocative(location)}, ${location.country}.`,
+            name: copy.title(context),
+            description: copy.heroIntro(context),
             url: absoluteUrl(path),
-            inLanguage: "pl",
+            inLanguage: siteLocale,
             about: {
               "@type": "City",
-              name: location.city,
-              containedInPlace: {
-                "@type": "Country",
-                name: location.country,
-              },
+              name: cityName,
+              containedInPlace: { "@type": "Country", name: countryLabel },
             },
             mainEntity: {
               "@type": "ItemList",
@@ -185,30 +205,27 @@ export default async function InteriorDesignersLocationPage({
 
       <section className="border-b border-primary/15 bg-primary-soft px-4 py-14 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <nav aria-label="Okruszki" className="text-sm font-semibold text-primary">
-            <Link href="/designers" className="hover:underline">Znajdź projektantów</Link>
+          <nav aria-label={siteLocale === "pl" ? "Okruszki" : "Breadcrumbs"} className="text-sm font-semibold text-primary">
+            <Link href="/designers" className="hover:underline">{copy.directoryLink}</Link>
             <span aria-hidden="true" className="mx-2">/</span>
-            <span>{location.country}</span>
+            <span>{countryLabel}</span>
             <span aria-hidden="true" className="mx-2">/</span>
-            <span>{location.city}</span>
+            <span>{cityName}</span>
           </nav>
           <div className="mt-7 max-w-4xl">
             <span className="inline-flex rounded-full bg-accent px-3 py-1 text-xs font-bold text-white">
-              Katalog projektantów · {location.city}
+              {copy.directoryBadge} · {cityName}
             </span>
-            <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-6xl">
-              Projektanci wnętrz {cityLocative(location)}
-            </h1>
+            <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-6xl">{copy.title(context)}</h1>
             <p className="mt-5 max-w-3xl text-lg leading-8 text-muted">
-              Porównaj projektantów wnętrz i pracownie projektowe działające {cityLocative(location)}.
-              {" "}{cityDirectoryCopy.heroLeadSuffix}
+              {copy.heroIntro(context)} {copy.heroLeadSuffix}
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link href={`/designers?location=${encodeURIComponent(location.city)}`} className="rounded-lg bg-primary px-5 py-3 font-bold text-white">
-                Zobacz projektantów {cityGenitive(location)}
+                {copy.viewProfessionals(cityOrigin(location))}
               </Link>
               <Link href="/project-compass" className="rounded-lg border border-primary/25 bg-card px-5 py-3 font-bold text-primary">
-                Utwórz brief z pomocą AI
+                {copy.createBrief}
               </Link>
             </div>
           </div>
@@ -218,10 +235,10 @@ export default async function InteriorDesignersLocationPage({
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase text-accent">{cityDirectoryCopy.localDirectoryEyebrow}</p>
-            <h2 className="mt-2 text-3xl font-bold">Specjaliści działający {cityLocative(location)}</h2>
+            <p className="text-sm font-bold uppercase text-accent">{copy.localDirectoryEyebrow}</p>
+            <h2 className="mt-2 text-3xl font-bold">{copy.professionalsHeading(context)}</h2>
           </div>
-          <p className="font-semibold text-muted">{polishCountLabel(professionals.length, "specjalista", "specjaliści", "specjalistów")}</p>
+          <p className="font-semibold text-muted">{copy.professionalsCount(professionals.length)}</p>
         </div>
 
         {professionals.length ? (
@@ -229,81 +246,63 @@ export default async function InteriorDesignersLocationPage({
             {professionals.map((professional) => (
               <article key={`${professional.type}-${professional.id}`} className="rounded-lg border border-line bg-card p-6 shadow-sm">
                 <div className="text-xs font-bold uppercase text-primary">{professional.type}</div>
-                <h3 className="mt-2 text-2xl font-bold">
-                  <Link href={professional.href} className="hover:text-primary">{professional.name}</Link>
-                </h3>
-                <p className="mt-2 text-sm font-semibold text-muted">{professional.location || location.city}</p>
-                <div className="mt-3">
-                  <GoogleRating compact rating={professional.rating} count={professional.reviewCount} url={professional.googleUrl} />
-                </div>
-                <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">
-                  {professional.bio || `Zobacz profil, portfolio i realizacje tego projektanta ${cityLocative(location)}.`}
-                </p>
+                <h3 className="mt-2 text-2xl font-bold"><Link href={professional.href} className="hover:text-primary">{professional.name}</Link></h3>
+                <p className="mt-2 text-sm font-semibold text-muted">{professional.location || cityName}</p>
+                <div className="mt-3"><GoogleRating compact rating={professional.rating} count={professional.reviewCount} url={professional.googleUrl} /></div>
+                <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">{professional.bio || copy.profileFallback(context)}</p>
                 {professional.specialties?.length ? (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {professional.specialties.slice(0, 3).map((specialty) => (
-                      <span key={specialty} className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">{professionalOptionLabel(specialty)}</span>
+                      <span key={specialty} className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">{professionalOptionLabel(specialty, siteLocale)}</span>
                     ))}
                   </div>
                 ) : null}
-                <Link href={professional.href} className="mt-6 inline-flex rounded-lg bg-primary px-4 py-3 text-sm font-bold text-white">
-                  Zobacz profil i portfolio
-                </Link>
+                <Link href={professional.href} className="mt-6 inline-flex rounded-lg bg-primary px-4 py-3 text-sm font-bold text-white">{copy.viewProfile}</Link>
               </article>
             ))}
           </div>
         ) : (
           <div className="mt-7 rounded-lg border border-dashed border-line bg-card p-8">
-            <h3 className="text-2xl font-bold">Katalog projektantów {cityLocative(location)} już wkrótce.</h3>
-            <p className="mt-3 max-w-2xl leading-7 text-muted">
-              Projektanci mogą już tworzyć profile dla tej lokalizacji. Strona pojawi się w publicznym indeksie wyszukiwania po opublikowaniu pierwszego lokalnego profilu.
-            </p>
-            <Link href="/get-started" className="mt-5 inline-flex font-bold text-primary hover:underline">Dołącz jako projektant lub pracownia</Link>
+            <h3 className="text-2xl font-bold">{copy.emptyTitle(context)}</h3>
+            <p className="mt-3 max-w-2xl leading-7 text-muted">{copy.emptyBody}</p>
+            <Link href="/get-started" className="mt-5 inline-flex font-bold text-primary hover:underline">{copy.joinCta}</Link>
           </div>
         )}
       </section>
 
       <section className="border-y border-line bg-card">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-3">
-          <article>
-            <h2 className="text-2xl font-bold">Rynek projektowania wnętrz · {location.city}</h2>
-            <p className="mt-3 leading-7 text-muted">{location.marketNote}</p>
-          </article>
-          <article>
-            <h2 className="text-2xl font-bold">Co warto porównać</h2>
-            <p className="mt-3 leading-7 text-muted">{location.planningNote}</p>
-          </article>
-          <article>
-            <h2 className="text-2xl font-bold">Styl i dopasowanie portfolio</h2>
-            <p className="mt-3 leading-7 text-muted">{location.styleNote}</p>
-          </article>
+          <article><h2 className="text-2xl font-bold">{copy.marketTitle(cityName)}</h2><p className="mt-3 leading-7 text-muted">{seoLocationText(location, "marketNote", siteLocale)}</p></article>
+          <article><h2 className="text-2xl font-bold">{copy.planningTitle}</h2><p className="mt-3 leading-7 text-muted">{seoLocationText(location, "planningNote", siteLocale)}</p></article>
+          <article><h2 className="text-2xl font-bold">{copy.styleTitle}</h2><p className="mt-3 leading-7 text-muted">{seoLocationText(location, "styleNote", siteLocale)}</p></article>
         </div>
       </section>
 
       <section className="mx-auto max-w-4xl px-4 py-14 sm:px-6">
-        <p className="text-sm font-bold uppercase text-warm">{cityDirectoryCopy.beforeContact.eyebrow}</p>
-        <h2 className="mt-2 text-3xl font-bold">{cityDirectoryCopy.beforeContact.title}</h2>
-        <div className="mt-6 grid gap-5 text-base leading-8 text-muted sm:grid-cols-2">
-          <p>{cityDirectoryCopy.beforeContact.bodyLeft}</p>
-          <p>{cityDirectoryCopy.beforeContact.bodyRight}</p>
-        </div>
-        <Link href="/project-compass" className="mt-7 inline-flex rounded-lg bg-accent px-5 py-3 font-bold text-white">{cityDirectoryCopy.beforeContact.cta}</Link>
+        <p className="text-sm font-bold uppercase text-warm">{copy.beforeContactEyebrow}</p>
+        <h2 className="mt-2 text-3xl font-bold">{copy.beforeContactTitle}</h2>
+        <div className="mt-6 grid gap-5 text-base leading-8 text-muted sm:grid-cols-2"><p>{copy.beforeContactLeft}</p><p>{copy.beforeContactRight}</p></div>
+        <Link href="/project-compass" className="mt-7 inline-flex rounded-lg bg-accent px-5 py-3 font-bold text-white">{copy.beforeContactCta}</Link>
       </section>
 
       {relatedLocations.length ? (
         <section className="border-t border-line bg-background px-4 py-10 sm:px-6">
           <div className="mx-auto max-w-7xl">
-            <h2 className="text-2xl font-bold">{location.country === "Polska" ? cityDirectoryCopy.moreLocationsTitle : `Więcej projektantów w kraju: ${location.country}`}</h2>
+            <h2 className="text-2xl font-bold">{location.countryCode === "PL" ? copy.moreLocationsPoland : copy.moreLocationsCountry(countryLabel)}</h2>
             <div className="mt-5 flex flex-wrap gap-3">
-              {relatedLocations.map((item) => (
-                <Link key={item.citySlug} href={locationPath(item)} className="rounded-full border border-line bg-card px-4 py-2 text-sm font-semibold hover:border-primary hover:text-primary">
-                  Projektanci wnętrz · {item.city}
-                </Link>
-              ))}
+              {relatedLocations.map((item) => <Link key={item.citySlug} href={locationPath(item, siteLocale)} className="rounded-full border border-line bg-card px-4 py-2 text-sm font-semibold hover:border-primary hover:text-primary">{copy.relatedLocation(seoLocationName(item, siteLocale))}</Link>)}
             </div>
           </div>
         </section>
       ) : null}
     </main>
   );
+}
+
+export default async function InteriorDesignersLocationPage({ params }: { params: Promise<{ country: string; city: string }> }) {
+  const { country, city } = await params;
+  const location = getSeoLocation(country, city);
+  if (!location) notFound();
+  if (siteLocale === "pl" && location.countryCode === "PL") permanentRedirect(locationPath(location, "pl"));
+  return <CityDirectoryPage country={country} city={city} />;
 }

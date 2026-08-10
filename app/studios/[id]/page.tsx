@@ -110,7 +110,7 @@ export async function generateMetadata({
   const supabase = createPublicSupabaseClient();
   const { data: studio } = await supabase
     .from("studios")
-    .select("name, bio, bio_pl, bio_en, location")
+    .select("name, bio, bio_pl, bio_en, location, is_demo")
     .eq("id", id)
     .eq("published", true)
     .maybeSingle();
@@ -122,6 +122,7 @@ export async function generateMetadata({
     description: localizedProfileText(studio, "bio") || copy.metadata.description(studio.name),
     path: `/studios/${id}`,
     type: "profile",
+    noIndex: studio.is_demo,
   });
 }
 
