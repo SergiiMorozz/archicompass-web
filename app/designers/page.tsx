@@ -1214,7 +1214,7 @@ export default async function DesignersPage({
                 briefLabel(briefContext.support),
                 briefLabel(briefContext.timeline),
                 briefContext.area ? `${briefContext.area} m²` : "",
-                briefContext.roomCount ? `${briefContext.roomCount} ${copy.brief.rooms}` : "",
+                briefContext.roomCount ? copy.brief.rooms(Number(briefContext.roomCount)) : "",
                 briefLabel(briefContext.propertyStatus),
                 briefLabel(briefContext.visualization),
                 briefLabel(briefContext.supervision),

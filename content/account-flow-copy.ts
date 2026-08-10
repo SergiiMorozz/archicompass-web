@@ -1,4 +1,5 @@
 import { siteLocale, type SiteLocale } from "@/lib/site-locale";
+import { polishPlural } from "@/lib/polish-plural";
 
 type AccountFlowCopy = {
   dateLocale: string;
@@ -22,6 +23,7 @@ type AccountFlowCopy = {
       designerMissing: string;
       duplicate: string;
       alreadySentCannotDelete: string;
+      dailyLimitReached: string;
     };
     studioProfession: string;
     subject: (name: string) => string;
@@ -179,6 +181,7 @@ const accountFlowCopy: Record<SiteLocale, AccountFlowCopy> = {
         designerMissing: "Nie znaleziono profilu tego projektanta.",
         duplicate: "Ten brief został już wysłany do wybranego specjalisty.",
         alreadySentCannotDelete: "Ten brief został już wysłany. Anuluj zapytanie przed usunięciem briefu.",
+        dailyLimitReached: "Osiągnięto dzienny limit wysłanych zapytań. Spróbuj ponownie jutro.",
       },
       studioProfession: "Pracownia projektowa",
       subject: (name) => `Zapytanie projektowe: ${name}`,
@@ -203,7 +206,7 @@ const accountFlowCopy: Record<SiteLocale, AccountFlowCopy> = {
       emptyBody: "Utwórz brief AI Project Compass z kierunkiem stylistycznym, wskazówkami wizualnymi i zdjęciami referencyjnymi, a następnie zapisz go tutaj.",
       created: (value) => `Zapisano ${value}`,
       selected: "Wybrany brief",
-      photoCount: (count) => `${count} ${count === 1 ? "zdjęcie" : count < 5 ? "zdjęcia" : "zdjęć"}`,
+      photoCount: (count) => `${count} ${polishPlural(count, "zdjęcie", "zdjęcia", "zdjęć")}`,
       fields: {
         goal: "Cel", style: "Style", scope: "Zakres", budget: "Budżet", timeline: "Termin", area: "Powierzchnia", roomCount: "Liczba pomieszczeń", rooms: "Pomieszczenia", propertyStatus: "Status nieruchomości", visualization: "Wizualizacja 3D", supervision: "Nadzór", location: "Lokalizacja", visualCues: "Wskazówki wizualne",
       },
@@ -313,6 +316,7 @@ const accountFlowCopy: Record<SiteLocale, AccountFlowCopy> = {
         designerMissing: "This designer profile could not be found.",
         duplicate: "This brief has already been sent to the selected professional.",
         alreadySentCannotDelete: "This brief has already been sent. Cancel the enquiry before deleting the brief.",
+        dailyLimitReached: "You've reached today's limit for sending enquiries. Please try again tomorrow.",
       },
       studioProfession: "Design studio",
       subject: (name) => `Project enquiry: ${name}`,

@@ -291,6 +291,7 @@ export type AccountPortfolioCopy = {
     imageSelectionInvalid: string;
     projectLimit: (count: number, max: number) => string;
     clientOnly: string;
+    dailyLimitReached: string;
   };
 };
 
@@ -1086,6 +1087,7 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
         imageSelectionInvalid: "Nieprawidłowy wybór zdjęcia.",
         projectLimit: (count, max) => `Ten projekt miałby ${count} zdjęć. Limit to ${max}.`,
         clientOnly: "Konto klienta nie może zarządzać portfolio projektanta.",
+        dailyLimitReached: "Osiągnięto dzienny limit dodawania projektów. Spróbuj ponownie jutro.",
       },
     },
     clientOverview: {
@@ -1832,6 +1834,7 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
         imageSelectionInvalid: "Invalid image selection.",
         projectLimit: (count, max) => `This project would have ${count} images. The limit is ${max}.`,
         clientOnly: "A client account cannot manage a designer portfolio.",
+        dailyLimitReached: "You've reached today's limit for adding projects. Please try again tomorrow.",
       },
     },
     clientOverview: {

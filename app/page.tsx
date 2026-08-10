@@ -127,7 +127,7 @@ export default async function Home() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={heroImage}
-          alt="Współczesny salon zaprojektowany przez specjalistę wnętrz"
+          alt="Współczesny salon zaprojektowany przez projektanta wnętrz"
           width="1800"
           height="1200"
           loading="eager"

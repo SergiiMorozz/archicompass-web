@@ -2,6 +2,7 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import ReferencePhotoGrid from "@/components/ReferencePhotoGrid";
+import { consumeActionQuota } from "@/lib/action-quota";
 import { briefLabel, briefListLabel, briefStyleLabel, briefTitle } from "@/lib/brief-labels";
 import { sendInquiryNotificationEmail } from "@/lib/email/inquiry-notification";
 import {
@@ -111,6 +112,8 @@ function errorRedirect(message: string): never {
   redirect(`/account/briefs?error=${encodeURIComponent(message)}`);
 }
 
+const dailyInquiryLimit = 15;
+
 async function sendBriefInquiry(formData: FormData) {
   "use server";
 
@@ -203,6 +206,15 @@ async function sendBriefInquiry(formData: FormData) {
   if (duplicateError) errorRedirect(duplicateError.message);
   if (existingInquiry) {
     errorRedirect(copy.brief.errors.duplicate);
+  }
+
+  const { error: quotaError, allowed } = await consumeActionQuota(
+    user.id,
+    "designer_inquiry",
+    dailyInquiryLimit
+  );
+  if (quotaError || !allowed) {
+    errorRedirect(copy.brief.errors.dailyLimitReached);
   }
 
   const inquiryId = crypto.randomUUID();

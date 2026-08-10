@@ -59,6 +59,10 @@ function amount(value: number, locale: SiteLocale) {
   return new Intl.NumberFormat(locale === "pl" ? "pl-PL" : "en-GB", { maximumFractionDigits: 0 }).format(value);
 }
 
+export function formatMinimumBudget(value: number, locale: SiteLocale = siteLocale) {
+  return `${amount(value, locale)} ${locale === "pl" ? "zł" : "PLN"}`;
+}
+
 export function pricingLabel(details: PricingDetails, locale: SiteLocale = siteLocale) {
   const model = details.pricing_model;
   const from = details.price_from;

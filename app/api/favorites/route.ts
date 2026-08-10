@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getInteractiveCopy } from "@/content/interactive-copy";
+import { consumeActionQuota } from "@/lib/action-quota";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+const dailyFavoriteLimit = 200;
 
 const supportedEntityTypes = ["designer", "studio", "project", "article"] as const;
 type SupportedEntityType = (typeof supportedEntityTypes)[number];
@@ -42,6 +45,15 @@ export async function POST(request: Request) {
   }
 
   if (shouldSave) {
+    const { error: quotaError, allowed } = await consumeActionQuota(
+      user.id,
+      "favorite_save",
+      dailyFavoriteLimit
+    );
+    if (quotaError || !allowed) {
+      return NextResponse.json({ error: copy.rateLimited }, { status: 429 });
+    }
+
     const targetTable =
       entityType === "designer"
         ? "profiles"

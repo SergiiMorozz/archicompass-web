@@ -1,3 +1,4 @@
+import sanitizeHtml from "sanitize-html";
 import type { SiteLocale } from "@/lib/site-locale";
 
 export type ContentTone = "body" | "lead" | "small";
@@ -105,44 +106,33 @@ function decodeBasicEntities(value: string) {
     .replace(/&amp;/gi, "&");
 }
 
-const allowedRichTags = new Set([
+const allowedRichTags = [
   "p", "br", "h2", "h3", "h4", "strong", "b", "em", "i", "ul", "ol", "li", "blockquote", "hr",
   "figure", "img", "figcaption", "table", "thead", "tbody", "tr", "th", "td", "a", "font", "span", "div",
-]);
-
-function safeRichAttributes(tag: string, source: string) {
-  const attributes: Record<string, string> = {};
-  const attributePattern = /([a-zA-Z:-]+)\s*=\s*(?:\"([^\"]*)\"|'([^']*)'|([^\s\"'=<>`]+))/g;
-  let match: RegExpExecArray | null;
-  while ((match = attributePattern.exec(source))) {
-    const name = match[1].toLowerCase();
-    const value = decodeBasicEntities(match[2] ?? match[3] ?? match[4] ?? "");
-    if ((name === "href" || name === "src") && safeUrl(value)) attributes[name] = safeUrl(value);
-    if ((tag === "img" && name === "alt") || (tag === "a" && name === "title")) attributes[name] = value.slice(0, 500);
-    if (tag === "font" && name === "size" && /^[1-7]$/.test(value)) attributes[name] = value;
-  }
-  return Object.entries(attributes).map(([name, value]) => ` ${name}="${escapeHtml(value)}"`).join("");
-}
+];
 
 // The document editor stores only a deliberately small HTML subset. It is safe
 // to render on the server while retaining the familiar Word-like experience.
 export function sanitizeRichArticleHtml(value: unknown, maxLength = 120000) {
   const source = typeof value === "string" ? value.slice(0, maxLength) : "";
   if (!source) return "";
-  return source.replace(/<[^>]*>|[^<]+/g, (token) => {
-    if (!token.startsWith("<")) return escapeHtml(decodeBasicEntities(token));
-    const closing = /^<\s*\/\s*([a-zA-Z0-9]+)/.exec(token);
-    if (closing) return allowedRichTags.has(closing[1].toLowerCase()) ? `</${closing[1].toLowerCase()}>` : "";
-    const opening = /^<\s*([a-zA-Z0-9]+)/.exec(token);
-    if (!opening) return "";
-    const tag = opening[1].toLowerCase();
-    if (!allowedRichTags.has(tag)) return "";
-    if (tag === "img") {
-      const attributes = safeRichAttributes(tag, token);
-      return /\ssrc=/.test(attributes) ? `<img${attributes}>` : "";
-    }
-    if (tag === "br" || tag === "hr") return `<${tag}>`;
-    return `<${tag}${safeRichAttributes(tag, token)}>`;
+  return sanitizeHtml(source, {
+    allowedTags: allowedRichTags,
+    allowedAttributes: { img: ["src", "alt"], a: ["href", "title"], font: ["size"] },
+    allowedSchemes: ["http", "https"],
+    allowProtocolRelative: false,
+    exclusiveFilter: (frame) => frame.tag === "img" && !frame.attribs.src,
+    transformTags: {
+      img: (tagName, attribs) => {
+        const { alt, ...rest } = attribs;
+        return { tagName, attribs: alt ? { ...rest, alt: alt.slice(0, 500) } : rest };
+      },
+      a: (tagName, attribs) => {
+        const { title, ...rest } = attribs;
+        return { tagName, attribs: title ? { ...rest, title: title.slice(0, 500) } : rest };
+      },
+      font: (tagName, attribs) => ({ tagName, attribs: /^[1-7]$/.test(attribs.size || "") ? { size: attribs.size } : ({} as Record<string, string>) }),
+    },
   }).trim();
 }
 

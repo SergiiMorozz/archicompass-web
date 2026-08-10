@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 const briefPhotosBucket = "brief-reference-photos";
 const maxReferencePhotos = 10;
 const maxImageSize = 10 * 1024 * 1024;
+const maxReferencePhotosPayload = 40 * 1024 * 1024;
 const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
 
 function textValue(formData: FormData, key: string) {
@@ -111,6 +112,14 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+  }
+
+  const totalPhotoSize = referencePhotos.reduce((total, photo) => total + photo.size, 0);
+  if (totalPhotoSize > maxReferencePhotosPayload) {
+    return NextResponse.json(
+      { error: "Zdjęcia referencyjne są zbyt duże jako zestaw. Prześlij je w mniejszej grupie." },
+      { status: 413 }
+    );
   }
 
   const briefId = crypto.randomUUID();

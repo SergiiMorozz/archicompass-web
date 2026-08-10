@@ -12,7 +12,13 @@ const nextConfig: NextConfig = {
   basePath: isEnglishZone ? "/en" : undefined,
   experimental: {
     serverActions: {
-      bodySizeLimit: "120mb",
+      // Covers the largest legitimate Server Action payload (profile logo +
+      // banner, ~10MB) with headroom for a small batch of portfolio photos.
+      // Next.js buffers the request body up to this limit before any
+      // in-action auth check runs, so it stays well under the old 120mb to
+      // bound unauthenticated-request memory/CPU cost. Larger portfolio
+      // uploads go through /api/projects in multiple batches.
+      bodySizeLimit: "25mb",
     },
   },
   async headers() {
