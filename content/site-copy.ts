@@ -5,6 +5,7 @@ type HomeCopy = {
   hero: {
     badge: string;
     headline: string;
+    accentHeadline: string;
     body: string;
     checklist: string[];
     primaryCta: string;
@@ -23,13 +24,13 @@ type HomeCopy = {
       briefValue: string;
       professionalLabel: string;
       professionalValue: string;
+      professionalSubtitle: string;
       cta: string;
     };
   };
   trust: {
     items: Array<{ icon: string; title: string; body: string }>;
   };
-  metrics: { designers: string; projects: string; reviews: string };
   howItWorks: {
     eyebrow: string;
     headline: string;
@@ -99,7 +100,6 @@ type HomeCopy = {
     fallbackCategory: string;
     fallbackTitle: string;
   };
-  midCta: { headline: string; body: string; primaryCta: string; note: string; secondaryCta: string };
   inspirationHub: {
     eyebrow: string;
     headline: string;
@@ -319,8 +319,6 @@ const pl: SiteCopy = {
       { href: "/project-compass", label: "AI Project Compass", featured: true },
       { href: "/designers", label: "Katalog projektantów" },
       { href: "/inspiration", label: "Inspiration Hub" },
-      { href: "/get-started", label: "Dla projektantów" },
-      { href: "/services-and-pricing", label: "Ceny i usługi" },
     ],
     languageSwitch: "EN",
     messages: "Wiadomości",
@@ -525,7 +523,8 @@ const pl: SiteCopy = {
     },
     hero: {
       badge: "AI Project Compass",
-      headline: "Znajdź projektanta, który zrozumie Twoją wizję",
+      headline: "Znajdź projektanta, który zrozumie",
+      accentHeadline: "Twoją wizję",
       body: "Zamień zdjęcia inspiracji w profesjonalny brief projektowy. AI pomoże rozpoznać styl i uporządkować informacje potrzebne do świadomego wyboru projektanta.",
       checklist: [
         "Dopasowanie na podstawie Twojego projektu",
@@ -544,11 +543,12 @@ const pl: SiteCopy = {
         materialsLabel: "Materiały",
         materialsValue: "Drewno, len, kamień",
         matchLabel: "Dopasowanie",
-        matchValue: "92%",
+        matchValue: "98%",
         briefLabel: "Gotowość briefu",
         briefValue: "Wstępnie uporządkowany",
         professionalLabel: "Proponowana pracownia",
-        professionalValue: "Studio Wątek",
+        professionalValue: "Studio Loft",
+        professionalSubtitle: "Portfolio i opinie Google",
         cta: "Poznaj AI Project Compass",
       },
     },
@@ -559,11 +559,6 @@ const pl: SiteCopy = {
         { icon: "💬", title: "Bezpośredni kontakt", body: "Bez pośredników" },
         { icon: "🆓", title: "Dla klientów", body: "Korzystanie z platformy bez opłat" },
       ],
-    },
-    metrics: {
-      designers: "Projektanci i pracownie",
-      projects: "Opublikowane realizacje",
-      reviews: "Połączone opinie Google",
     },
     howItWorks: {
       eyebrow: "Jak to działa",
@@ -661,13 +656,6 @@ const pl: SiteCopy = {
       fallbackCategory: "Projekt wnętrza",
       fallbackTitle: "Projekt bez tytułu",
     },
-    midCta: {
-      headline: "Masz już zapisane wnętrza, które Ci się podobają?",
-      body: "Dodaj kilka inspiracji. ArchiCompass pomoże znaleźć ich wspólny kierunek i przygotować Cię do rozmowy z projektantem.",
-      primaryCta: "Przeanalizuj inspiracje z AI",
-      note: "Wynik ma charakter pomocniczy i możesz go później doprecyzować.",
-      secondaryCta: "Zobacz, jak powstaje brief",
-    },
     inspirationHub: { eyebrow: "Inspiration Hub", headline: "Inspiracje, które pomagają podejmować lepsze decyzje projektowe.", body: "Poznaj praktyczne poradniki o stylach, materiałach, planowaniu przestrzeni, remoncie i zrównoważonych wnętrzach. Zapisuj wybrane artykuły w strefie klienta.", cta: "Odkryj Inspiration Hub", readCta: "Czytaj artykuł", emptyTitle: "Przygotowujemy pierwsze poradniki i inspiracje.", emptyCta: "Otwórz Inspiration Hub" },
     closingCta: {
       headline: "Zacznij od tego, co już masz - swoich inspiracji.",
@@ -693,8 +681,6 @@ const en: SiteCopy = {
       { href: "/project-compass", label: "AI Project Compass", featured: true },
       { href: "/designers", label: "Designer Directory" },
       { href: "/inspiration", label: "Inspiration Hub" },
-      { href: "/get-started", label: "For Designers" },
-      { href: "/services-and-pricing", label: "Pricing" },
     ],
     languageSwitch: "PL",
     messages: "Messages",
@@ -899,7 +885,8 @@ const en: SiteCopy = {
     },
     hero: {
       badge: "AI Project Compass",
-      headline: "Find a designer who understands your vision",
+      headline: "Find a designer who understands",
+      accentHeadline: "your vision",
       body: "Turn inspiration photos into a professional project brief. AI helps recognise your style and organise the details you need to choose a designer with confidence.",
       checklist: [
         "Matching based on your own project",
@@ -918,11 +905,12 @@ const en: SiteCopy = {
         materialsLabel: "Materials",
         materialsValue: "Wood, linen, stone",
         matchLabel: "Match",
-        matchValue: "92%",
+        matchValue: "98%",
         briefLabel: "Brief readiness",
         briefValue: "Structured to start",
         professionalLabel: "Suggested studio",
-        professionalValue: "Studio Wątek",
+        professionalValue: "Studio Loft",
+        professionalSubtitle: "Portfolio and Google reviews",
         cta: "Explore AI Project Compass",
       },
     },
@@ -933,11 +921,6 @@ const en: SiteCopy = {
         { icon: "💬", title: "Direct contact", body: "No middlemen" },
         { icon: "🆓", title: "For clients", body: "Free to use the platform" },
       ],
-    },
-    metrics: {
-      designers: "Designers and studios",
-      projects: "Published projects",
-      reviews: "Linked Google reviews",
     },
     howItWorks: {
       eyebrow: "How it works",
@@ -1034,13 +1017,6 @@ const en: SiteCopy = {
       emptyBody: "Each published project will automatically appear in this space.",
       fallbackCategory: "Interior project",
       fallbackTitle: "Untitled project",
-    },
-    midCta: {
-      headline: "Already have interiors you like saved somewhere?",
-      body: "Add a few inspiration photos. ArchiCompass will help find their common direction and prepare you for a conversation with a designer.",
-      primaryCta: "Analyse inspiration with AI",
-      note: "The result is supportive and you can refine it later.",
-      secondaryCta: "See how a brief takes shape",
     },
     inspirationHub: { eyebrow: "Inspiration Hub", headline: "Inspiration that supports better design decisions.", body: "Explore practical guides to styles, materials, space planning, renovation, and sustainable interiors. Save the articles you want in your client workspace.", cta: "Explore Inspiration Hub", readCta: "Read article", emptyTitle: "Our first guides and inspirations are being prepared.", emptyCta: "Open Inspiration Hub" },
     closingCta: {

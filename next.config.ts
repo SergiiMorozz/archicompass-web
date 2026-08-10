@@ -7,6 +7,9 @@ const isEnglishZone = process.env.NEXT_PUBLIC_SITE_LOCALE === "en";
 const seoIndexingEnabled = process.env.NEXT_PUBLIC_SEO_INDEXING_ENABLED === "true";
 
 const nextConfig: NextConfig = {
+  // Lets local verification use an isolated build output while a developer server is running.
+  // Production keeps Next.js' standard .next directory.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   // Both deployments build the same application. The English deployment only
   // adds the public /en prefix and reads the English copy at build time.
   basePath: isEnglishZone ? "/en" : undefined,
