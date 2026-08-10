@@ -375,6 +375,18 @@ function userFacingOpenAiError(message: string) {
     );
   }
 
+  if (
+    normalized.includes("expected pattern") ||
+    normalized.includes("could not decode") ||
+    normalized.includes("invalid image") ||
+    normalized.includes("unsupported image")
+  ) {
+    return localized(
+      "Jedno lub kilka zdjęć nie mogło zostać odczytane przez usługę AI. Usuń je, dodaj ponownie jako JPEG, PNG lub WebP i spróbuj jeszcze raz.",
+      "One or more photos could not be read by the AI service. Remove them, add them again as JPEG, PNG, or WebP, then try once more."
+    );
+  }
+
   return message || localized("Nie udało się przeprowadzić analizy AI.", "The AI analysis could not be completed.");
 }
 

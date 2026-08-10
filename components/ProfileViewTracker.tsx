@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { localePublicPath, siteLocale } from "@/lib/site-locale";
 
 const sessionStorageKey = "archicompass_profile_view_session";
 
@@ -20,7 +21,7 @@ export default function ProfileViewTracker({
       window.sessionStorage.setItem(sessionStorageKey, sessionKey);
     }
 
-    void fetch("/api/profile-views", {
+    void fetch(localePublicPath(siteLocale, "/api/profile-views"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

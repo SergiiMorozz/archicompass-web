@@ -62,13 +62,11 @@ function projectCategoryLabel(value: string | null) {
 
 async function homeData() {
   const supabase = createPublicContentClient();
-  const [designers, studios, projects, profilesWithReviews, studiosWithReviews, featured, articles] =
+  const [designers, studios, projects, featured, articles] =
     await Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("user_type", "professional"),
-      supabase.from("studios").select("id", { count: "exact", head: true }).eq("published", true),
-      supabase.from("projects").select("id", { count: "exact", head: true }),
-      supabase.from("profiles").select("google_review_count").eq("user_type", "professional"),
-      supabase.from("studios").select("google_review_count").eq("published", true),
+      supabase.from("profiles").select("id, is_demo, google_review_count").eq("user_type", "professional"),
+      supabase.from("studios").select("id, is_demo, google_review_count").eq("published", true),
+      supabase.from("projects").select("id, profile_id"),
       supabase
         .from("projects")
         .select("id, title, category, image_url, image_path, image_urls")
@@ -85,9 +83,13 @@ async function homeData() {
         .limit(3),
     ]);
 
+  const publicProfiles = (designers.data ?? []).filter((profile) => !profile.is_demo);
+  const publicStudios = (studios.data ?? []).filter((studio) => !studio.is_demo);
+  const publicProfileIds = new Set(publicProfiles.map((profile) => profile.id));
+  const publicProjects = (projects.data ?? []).filter((project) => publicProfileIds.has(project.profile_id));
   const reviewCount = [
-    ...(profilesWithReviews.data ?? []),
-    ...(studiosWithReviews.data ?? []),
+    ...publicProfiles,
+    ...publicStudios,
   ].reduce((sum, item) => sum + (Number(item.google_review_count) || 0), 0);
 
   const featuredProjects = ((featured.data ?? []) as FeaturedProject[]).map((project, index) => {
@@ -102,9 +104,11 @@ async function homeData() {
 
   return {
     metrics: [
-      [metricValue((designers.count ?? 0) + (studios.count ?? 0)), homeCopy.metrics.designers],
-      [metricValue(projects.count ?? 0), homeCopy.metrics.projects],
-      [metricValue(reviewCount), homeCopy.metrics.reviews],
+      ...(publicProfiles.length + publicStudios.length
+        ? [[metricValue(publicProfiles.length + publicStudios.length), homeCopy.metrics.designers]]
+        : []),
+      ...(publicProjects.length ? [[metricValue(publicProjects.length), homeCopy.metrics.projects]] : []),
+      ...(reviewCount ? [[metricValue(reviewCount), homeCopy.metrics.reviews]] : []),
     ],
     featuredProjects,
     featuredArticles: ((articles.data ?? []) as FeaturedArticle[]).map((article) => {
@@ -190,8 +194,11 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="border-b border-line bg-card">
-        <div className="mx-auto grid max-w-7xl sm:grid-cols-3">
+      {metrics.length ? <section className="border-b border-line bg-card">
+        <div className={[
+          "mx-auto grid max-w-7xl",
+          metrics.length === 2 ? "sm:grid-cols-2" : metrics.length >= 3 ? "sm:grid-cols-3" : "",
+        ].join(" ")}>
           {metrics.map(([value, label], index) => (
             <div key={label} className="border-b border-line px-6 py-7 text-center last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0">
               <div className={[
@@ -204,6 +211,7 @@ export default async function Home() {
           ))}
         </div>
       </section>
+      : null}
 
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
         <div className="max-w-3xl">

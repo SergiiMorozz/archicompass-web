@@ -4,6 +4,7 @@ import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getSiteCopy } from "@/content/site-copy";
+import { localePublicPath, siteLocale } from "@/lib/site-locale";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const authCopy = getSiteCopy().auth;
@@ -29,6 +30,11 @@ function authErrorMessage(message: string) {
   return message;
 }
 
+function localizedDestination(path: string) {
+  const rawPath = path.replace(/^\/en(?=\/|$)/, "") || "/";
+  return localePublicPath(siteLocale, rawPath);
+}
+
 function LoginContent() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const searchParams = useSearchParams();
@@ -47,7 +53,7 @@ function LoginContent() {
 
   function confirmationRedirectTo() {
     const next = "/account/profile?onboarding=1";
-    return `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+    return `${window.location.origin}${localizedDestination("/auth/callback")}?next=${encodeURIComponent(next)}`;
   }
 
   async function destinationAfterSignIn() {
@@ -107,7 +113,7 @@ function LoginContent() {
         });
         return;
       }
-      window.location.assign(await destinationAfterSignIn());
+      window.location.assign(localizedDestination(await destinationAfterSignIn()));
       return;
     }
 
@@ -135,7 +141,7 @@ function LoginContent() {
         },
         { onConflict: "id" }
       );
-      window.location.assign(next);
+      window.location.assign(localizedDestination(next));
       return;
     }
     setConfirmationEmail(cleanEmail);

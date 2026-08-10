@@ -7,10 +7,12 @@ import BrandLogo from "@/components/BrandLogo";
 import { getSiteCopy } from "@/content/site-copy";
 import { isProfessionalProfile } from "@/lib/professional";
 import {
+  alternateLocalePath,
   localeAppPath,
   localePublicPath,
   localePublicUrl,
   otherLocale,
+  siteLocale,
 } from "@/lib/site-locale";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -73,22 +75,40 @@ export default function Header() {
   const appHref = (path: string) => localeAppPath(path);
   const alternateHref = (path: string, suffix = "") => {
     const targetLocale = otherLocale();
-    const targetPath = localePublicPath(targetLocale, path);
+    const targetPath = localePublicPath(targetLocale, alternateLocalePath(targetLocale, path));
     return targetLocale === "en"
       ? `${targetPath}${suffix}`
-      : `${localePublicUrl("pl", path)}${suffix}`;
+      : `${localePublicUrl("pl", targetPath)}${suffix}`;
   };
   const [isOpen, setIsOpen] = useState(false);
-  const [languageHref, setLanguageHref] = useState(() => {
-    return alternateHref(currentPath);
-  });
+  const [resolvedLanguageHref, setResolvedLanguageHref] = useState<{ path: string; href: string } | null>(null);
+  const browserSuffix = typeof window === "undefined" ? "" : `${window.location.search}${window.location.hash}`;
+  const defaultLanguageHref = alternateHref(currentPath, browserSuffix);
+  const languageHref = resolvedLanguageHref?.path === currentPath
+    ? resolvedLanguageHref.href
+    : defaultLanguageHref;
   const [account, setAccount] = useState<
     { id: string; isAdmin: boolean; isProfessional: boolean; unreadCount: number } | null
   >(null);
 
   useEffect(() => {
     const path = pathname?.replace(/^\/en(?=\/|$)/, "") || "/";
-    setLanguageHref(alternateHref(path, `${window.location.search}${window.location.hash}`));
+    const suffix = `${window.location.search}${window.location.hash}`;
+    const targetLocale = otherLocale();
+    const toPublicHref = (targetPath: string) => {
+      const publicPath = localePublicPath(targetLocale, targetPath);
+      return targetLocale === "en" ? `${publicPath}${suffix}` : `${localePublicUrl("pl", publicPath)}${suffix}`;
+    };
+    if (!/^\/(guides|inspiration)\/[a-z0-9-]+$/i.test(path)) return;
+    const endpoint = localePublicPath(siteLocale, "/api/locale-path");
+    const controller = new AbortController();
+    void fetch(`${endpoint}?locale=${targetLocale}&path=${encodeURIComponent(path)}`, { signal: controller.signal })
+      .then((response) => response.ok ? response.json() as Promise<{ path?: string }> : null)
+      .then((payload) => {
+        if (payload?.path) setResolvedLanguageHref({ path, href: toPublicHref(payload.path) });
+      })
+      .catch(() => undefined);
+    return () => controller.abort();
   }, [pathname]);
 
   useEffect(() => {

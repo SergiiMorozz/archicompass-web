@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getInteractiveCopy } from "@/content/interactive-copy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const supportedEntityTypes = ["designer", "studio", "project", "article"] as const;
@@ -13,13 +14,14 @@ function isSupportedEntityType(value: unknown): value is SupportedEntityType {
 }
 
 export async function POST(request: Request) {
+  const copy = getInteractiveCopy().favorite;
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
 
   if (!user) {
     return NextResponse.json(
-      { error: "Zaloguj się, aby zapisywać ulubione.", code: "AUTH_REQUIRED" },
+      { error: copy.authRequired, code: "AUTH_REQUIRED" },
       { status: 401 }
     );
   }
@@ -28,7 +30,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Nieprawidłowe żądanie zapisu ulubionych." }, { status: 400 });
+    return NextResponse.json({ error: copy.invalidRequest }, { status: 400 });
   }
 
   const entityType = body.entityType;
@@ -36,7 +38,7 @@ export async function POST(request: Request) {
   const shouldSave = body.saved === true;
 
   if (!isSupportedEntityType(entityType) || !isUuid(entityKey)) {
-    return NextResponse.json({ error: "Nieprawidłowy element ulubionych." }, { status: 400 });
+    return NextResponse.json({ error: copy.invalidFavorite }, { status: 400 });
   }
 
   if (shouldSave) {
@@ -55,7 +57,7 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (!target) {
-      return NextResponse.json({ error: "Ten element nie jest już dostępny." }, { status: 404 });
+      return NextResponse.json({ error: copy.unavailable }, { status: 404 });
     }
 
     const { error } = await supabase.from("favorites").insert({

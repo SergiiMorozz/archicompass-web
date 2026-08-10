@@ -5,14 +5,16 @@ import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
 import { applyPolishArticleCopy } from "@/content/pl/copy";
 import { getSiteCopy } from "@/content/site-copy";
+import { getGuidesCopy } from "@/content/guides-copy";
 import { localizeArticle, type ArticleLocalizationFields } from "@/lib/article-content";
+import { inspirationCategoryKey, inspirationCategoryMatches, inspirationCategoryValues } from "@/lib/inspiration-categories";
 import { localizedCount } from "@/lib/localized-count";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createPublicContentClient } from "@/lib/public-content-client";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { professionalOptionLabel } from "@/lib/professional-options";
 import { articlePath, type LocalizedPublicArticle, type PublicArticle, publicArticleSelect } from "@/lib/public-articles";
-import { siteLocale } from "@/lib/site-locale";
+import { localePublicPath, siteLocale } from "@/lib/site-locale";
 
 export const revalidate = 0;
 
@@ -28,6 +30,8 @@ export const metadata: Metadata = pageMetadata({
 type Article = ArticleLocalizationFields & {
   id: string;
   slug: string;
+  slug_pl: string | null;
+  slug_en: string | null;
   category: string;
   featured: boolean;
   published_at: string | null;
@@ -68,11 +72,12 @@ function normalize(value: string) {
 }
 
 function categoryHref(category: string) {
-  return category === "All" ? "/inspiration" : `/inspiration?category=${encodeURIComponent(category)}`;
+  return category === "All" ? "/inspiration#results" : `/inspiration?category=${encodeURIComponent(category)}#results`;
 }
 
 function categoryLabel(value: string) {
-  return inspirationCopy.categoryLabels[value as keyof typeof inspirationCopy.categoryLabels] || value;
+  const key = inspirationCategoryKey(value);
+  return inspirationCopy.categoryLabels[key as keyof typeof inspirationCopy.categoryLabels] || value;
 }
 
 function localizedArticle(article: Article) {
@@ -89,19 +94,36 @@ function projectCategoryLabel(value: string) {
     || (siteCopy.locale === "pl" ? professionalOptionLabel(value) : value);
 }
 
+function articleSearchText(article: Article) {
+  return [
+    article.title,
+    article.title_pl,
+    article.title_en,
+    article.excerpt,
+    article.excerpt_pl,
+    article.excerpt_en,
+    article.body,
+    article.category,
+    article.focus_keyword_pl,
+    article.focus_keyword_en,
+    JSON.stringify(article.content_blocks || ""),
+  ].filter(Boolean).join(" ");
+}
+
 export default async function InspirationPage({
   searchParams,
 }: {
   searchParams?: Promise<{ category?: string; q?: string }>;
 }) {
   const sp = (await searchParams) ?? {};
-  const selectedCategory = first(sp.category).trim() || "All";
+  const inspirationFormAction = `${localePublicPath(siteLocale, "/inspiration")}#results`;
+  const selectedCategory = inspirationCategoryKey(first(sp.category));
   const q = first(sp.q).trim();
   const supabase = await createSupabaseServerClient();
   const publicSupabase = createPublicContentClient();
   const { data, error } = await supabase
     .from("inspiration_articles")
-    .select("id, slug, title, excerpt, body, category, image_url, author_name, title_pl, title_en, excerpt_pl, excerpt_en, author_name_pl, author_name_en, cover_alt_pl, cover_alt_en, meta_title_pl, meta_title_en, meta_description_pl, meta_description_en, focus_keyword_pl, focus_keyword_en, content_blocks, featured, published_at")
+    .select("id, slug, slug_pl, slug_en, title, excerpt, body, category, image_url, author_name, title_pl, title_en, excerpt_pl, excerpt_en, author_name_pl, author_name_en, cover_alt_pl, cover_alt_en, meta_title_pl, meta_title_en, meta_description_pl, meta_description_en, focus_keyword_pl, focus_keyword_en, content_blocks, featured, published_at")
     .eq("status", "published")
     .eq("content_section", "inspiration")
     .eq("noindex", false)
@@ -141,11 +163,11 @@ export default async function InspirationPage({
     || "/brand/archicompass-mark.png";
   const normalizedQuery = normalize(q);
   const articles = allArticles.filter((article) => {
-    const categoryMatch = selectedCategory === "All" || article.category === selectedCategory;
-    const queryMatch = !normalizedQuery || normalize(`${article.title} ${article.excerpt} ${article.category}`).includes(normalizedQuery);
+    const categoryMatch = inspirationCategoryMatches(article.category, selectedCategory);
+    const queryMatch = !normalizedQuery || normalize(articleSearchText(article)).includes(normalizedQuery);
     return categoryMatch && queryMatch;
   });
-  const categories = ["All", ...Array.from(new Set(allArticles.map((article) => article.category))).sort()];
+  const categories = inspirationCategoryValues(allArticles.map((article) => article.category));
   const { data: userData } = await supabase.auth.getUser();
   const { data: favoriteData } = userData.user
     ? await supabase
@@ -176,7 +198,7 @@ export default async function InspirationPage({
                 "@type": "ListItem",
                 position: index + 1,
                 name: article.title,
-                url: absoluteUrl(`/inspiration/${article.slug}`),
+                url: absoluteUrl(articlePath("inspiration", article, siteLocale)),
               })),
             },
           },
@@ -189,11 +211,12 @@ export default async function InspirationPage({
         <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-muted">
           {inspirationCopy.hero.subtitle}
         </p>
-        <form action="/inspiration" className="mx-auto mt-8 flex max-w-2xl flex-col gap-3 rounded-2xl border border-line bg-card p-3 shadow-sm sm:flex-row">
+        <form action={inspirationFormAction} className="mx-auto mt-8 flex max-w-2xl flex-col gap-3 rounded-2xl border border-line bg-card p-3 shadow-sm sm:flex-row">
           {selectedCategory !== "All" ? <input type="hidden" name="category" value={selectedCategory} /> : null}
           <input name="q" defaultValue={q} placeholder={inspirationCopy.hero.searchPlaceholder} className="min-h-12 flex-1 rounded-xl bg-background px-4 outline-none" />
           <button className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white">{inspirationCopy.hero.searchButton}</button>
         </form>
+        <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted">{inspirationCopy.hero.searchHelp}</p>
       </section>
 
       <section className="border-y border-line bg-card px-4 py-7 sm:px-6">
@@ -235,7 +258,7 @@ export default async function InspirationPage({
                       {guide.image_url ? <Image src={guide.image_url} alt={guide.cover_alt} width={1000} height={700} unoptimized className="h-full w-full object-cover transition duration-300 hover:scale-[1.02]" /> : null}
                     </Link>
                     <div className="p-5">
-                      <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">{guide.category}</span>
+                      <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">{getGuidesCopy(siteLocale).label}</span>
                       <Link href={href} className="mt-4 block text-xl font-bold hover:text-primary">{guide.title}</Link>
                       <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">{guide.excerpt}</p>
                       <Link href={href} className="mt-5 inline-flex text-sm font-semibold text-primary hover:underline">{siteLocale === "pl" ? "Czytaj poradnik" : "Read guide"}</Link>
@@ -286,7 +309,7 @@ export default async function InspirationPage({
             ) : null}
 
             {recentProjects.length ? (
-              <div className={newDesigners.length ? "mt-12" : ""}>
+              <div id="recent-projects" className={newDesigners.length ? "mt-12 scroll-mt-28" : "scroll-mt-28"}>
                 <div>
                   <div className="text-sm font-semibold text-primary">{inspirationCopy.latestProjects.eyebrow}</div>
                   <h2 className="mt-1 text-3xl font-bold">{inspirationCopy.latestProjects.title}</h2>
@@ -296,13 +319,13 @@ export default async function InspirationPage({
                     const image = project.image_urls?.[0] || project.image_url;
                     return (
                       <article key={project.id} className="overflow-hidden rounded-lg border border-line bg-card shadow-sm">
-                        <Link href={`/projects/${project.id}`} className="block h-52 bg-card">
+                        <Link href={`/projects/${project.id}?from=inspiration`} className="block h-52 bg-card">
                           {image ? <Image src={image} alt={project.title || inspirationCopy.labels.untitledProject} width={900} height={600} unoptimized className="h-full w-full object-cover" /> : null}
                         </Link>
                         <div className="flex items-start justify-between gap-3 p-5">
                           <div>
                             <div className="text-xs font-semibold uppercase text-primary">{project.category ? projectCategoryLabel(project.category) : inspirationCopy.labels.portfolio}</div>
-                            <Link href={`/projects/${project.id}`} className="mt-1 block text-lg font-bold hover:text-primary">{project.title || inspirationCopy.labels.untitledProject}</Link>
+                            <Link href={`/projects/${project.id}?from=inspiration`} className="mt-1 block text-lg font-bold hover:text-primary">{project.title || inspirationCopy.labels.untitledProject}</Link>
                           </div>
                           <FavoriteButton compact entityType="project" entityKey={project.id} initialSaved={savedKeys.has(`project:${project.id}`)} />
                         </div>
@@ -316,7 +339,7 @@ export default async function InspirationPage({
         </section>
       ) : null}
 
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+      <section id="results" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-14 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-3xl font-bold">{selectedCategory === "All" ? inspirationCopy.featured.title : categoryLabel(selectedCategory)}</h2>
@@ -338,7 +361,7 @@ export default async function InspirationPage({
             {articles.map((article) => (
               <article key={article.id} className="overflow-hidden rounded-lg border border-line bg-card shadow-sm">
                 <Link
-                  href={`/inspiration/${article.slug}`}
+                  href={articlePath("inspiration", article, siteLocale)}
                   className="block h-60 overflow-hidden bg-primary-soft"
                   aria-label={`${inspirationCopy.labels.openArticle}: ${article.title}`}
                 >
@@ -361,13 +384,13 @@ export default async function InspirationPage({
                     </span>
                     <FavoriteButton compact entityType="article" entityKey={article.id} initialSaved={savedKeys.has(`article:${article.id}`)} />
                   </div>
-                  <Link href={`/inspiration/${article.slug}`} className="mt-4 block text-xl font-bold hover:text-primary">
+                  <Link href={articlePath("inspiration", article, siteLocale)} className="mt-4 block text-xl font-bold hover:text-primary">
                     {article.title}
                   </Link>
                   <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">{article.excerpt}</p>
                   <div className="mt-5 flex items-center justify-between gap-3 text-xs text-muted">
                     <span>{article.author_name || inspirationCopy.labels.editorialTeam}</span>
-                    <Link href={`/inspiration/${article.slug}`} className="font-semibold text-primary">{inspirationCopy.featured.readCta}</Link>
+                    <Link href={articlePath("inspiration", article, siteLocale)} className="font-semibold text-primary">{inspirationCopy.featured.readCta}</Link>
                   </div>
                 </div>
               </article>

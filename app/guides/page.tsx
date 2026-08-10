@@ -87,7 +87,7 @@ export default async function GuidesPage() {
                     {guide.image_url ? <Image src={guide.image_url} alt={guide.cover_alt} width={1000} height={700} unoptimized className="h-full w-full object-cover transition duration-300 hover:scale-[1.02]" /> : null}
                   </Link>
                   <div className="p-5">
-                    <div className="flex items-start justify-between gap-3"><span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">{guide.category}</span><FavoriteButton compact entityType="article" entityKey={guide.id} initialSaved={savedKeys.has(guide.id)} /></div>
+                    <div className="flex items-start justify-between gap-3"><span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">{copy.label}</span><FavoriteButton compact entityType="article" entityKey={guide.id} initialSaved={savedKeys.has(guide.id)} /></div>
                     <Link href={href} className="mt-4 block text-xl font-bold hover:text-primary">{guide.title}</Link>
                     <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted">{guide.excerpt}</p>
                     <div className="mt-5 flex items-center justify-between gap-3 text-xs text-muted"><span>{formatDate(guide.published_at)}</span><Link href={href} className="font-semibold text-primary">{copy.readCta}</Link></div>

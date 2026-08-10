@@ -8,6 +8,10 @@ type InteractiveCopy = {
     addTitle: string;
     removeTitle: string;
     updateError: string;
+    authRequired: string;
+    invalidRequest: string;
+    invalidFavorite: string;
+    unavailable: string;
   };
   googleRating: {
     reviewCount: (count: number) => string;
@@ -38,6 +42,10 @@ const interactiveCopy: Record<SiteLocale, InteractiveCopy> = {
       addTitle: "Dodaj do ulubionych",
       removeTitle: "Usuń z ulubionych",
       updateError: "Nie udało się zaktualizować ulubionych.",
+      authRequired: "Zaloguj się, aby zapisywać ulubione.",
+      invalidRequest: "Nieprawidłowe żądanie zapisu ulubionych.",
+      invalidFavorite: "Nieprawidłowy element ulubionych.",
+      unavailable: "Ten element nie jest już dostępny.",
     },
     googleRating: {
       reviewCount: (count) => `${count} ${count === 1 ? "opinia" : count < 5 ? "opinie" : "opinii"} Google`,
@@ -61,6 +69,10 @@ const interactiveCopy: Record<SiteLocale, InteractiveCopy> = {
       addTitle: "Add to favourites",
       removeTitle: "Remove from favourites",
       updateError: "Your favourites could not be updated.",
+      authRequired: "Sign in to save favourites.",
+      invalidRequest: "The favourites request is invalid.",
+      invalidFavorite: "This favourite item is invalid.",
+      unavailable: "This item is no longer available.",
     },
     googleRating: {
       reviewCount: (count) => `${count} Google ${count === 1 ? "review" : "reviews"}`,

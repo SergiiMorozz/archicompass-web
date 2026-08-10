@@ -4,6 +4,7 @@ const englishZoneUrl = (
   process.env.ENGLISH_ZONE_URL || "https://archicompass-web-en.vercel.app"
 ).replace(/\/$/, "");
 const isEnglishZone = process.env.NEXT_PUBLIC_SITE_LOCALE === "en";
+const seoIndexingEnabled = process.env.NEXT_PUBLIC_SEO_INDEXING_ENABLED === "true";
 
 const nextConfig: NextConfig = {
   // Both deployments build the same application. The English deployment only
@@ -13,6 +14,16 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "120mb",
     },
+  },
+  async headers() {
+    if (seoIndexingEnabled) return [];
+
+    return [
+      {
+        source: "/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
+      },
+    ];
   },
   async redirects() {
     if (!isEnglishZone) {

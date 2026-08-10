@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
+import { localePublicPath, siteLocale } from "@/lib/site-locale";
 
 const maxImages = 30;
 const maxImageSize = 10 * 1024 * 1024;
@@ -53,7 +54,9 @@ export default function ProjectCreateForm() {
     const { data: userData } = await supabase.auth.getUser();
     const user = userData.user;
     if (!user) {
-      window.location.assign("/login?next=/account/projects");
+      window.location.assign(
+        `${localePublicPath(siteLocale, "/login")}?next=${encodeURIComponent("/account/projects")}`
+      );
       return;
     }
 
@@ -72,7 +75,7 @@ export default function ProjectCreateForm() {
         setProgress(index + 1);
       }
 
-      const response = await fetch("/api/projects", {
+      const response = await fetch(localePublicPath(siteLocale, "/api/projects"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -86,7 +89,7 @@ export default function ProjectCreateForm() {
       });
       const payload = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(payload.error || copy.createFailed);
-      window.location.assign("/account/projects?created=1");
+      window.location.assign(`${localePublicPath(siteLocale, "/account/projects")}?created=1`);
     } catch (reason) {
       if (paths.length) await supabase.storage.from("project-images").remove(paths);
       setError(reason instanceof Error ? reason.message : copy.createFailed);

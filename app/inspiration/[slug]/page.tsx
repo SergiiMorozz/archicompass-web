@@ -4,6 +4,7 @@ import PublicArticlePage from "@/components/PublicArticlePage";
 import { applyPolishArticleCopy } from "@/content/pl/copy";
 import { getSiteCopy } from "@/content/site-copy";
 import { localizeArticle } from "@/lib/article-content";
+import { inspirationCategoryKey } from "@/lib/inspiration-categories";
 import { articlePath, type LocalizedPublicArticle, type PublicArticle, publicArticleSelect } from "@/lib/public-articles";
 import { absoluteUrl, englishUrl, pageMetadata, polishUrl } from "@/lib/seo";
 import { siteLocale } from "@/lib/site-locale";
@@ -15,7 +16,8 @@ const siteCopy = getSiteCopy();
 const inspirationCopy = siteCopy.inspiration;
 
 function categoryLabel(value: string) {
-  return inspirationCopy.categoryLabels[value as keyof typeof inspirationCopy.categoryLabels] || value;
+  const key = inspirationCategoryKey(value);
+  return inspirationCopy.categoryLabels[key as keyof typeof inspirationCopy.categoryLabels] || value;
 }
 
 function localizedArticle(article: PublicArticle) {
@@ -25,14 +27,24 @@ function localizedArticle(article: PublicArticle) {
 
 async function findArticle(slug: string) {
   const supabase = createPublicSupabaseClient();
+  const slugColumn = siteLocale === "pl" ? "slug_pl" : "slug_en";
   const { data } = await supabase
+    .from("inspiration_articles")
+    .select(publicArticleSelect)
+    .eq("content_section", "inspiration")
+    .eq(slugColumn, slug)
+    .eq("status", "published")
+    .maybeSingle();
+  if (data) return localizedArticle(data as PublicArticle);
+
+  const { data: legacyData } = await supabase
     .from("inspiration_articles")
     .select(publicArticleSelect)
     .eq("content_section", "inspiration")
     .eq("slug", slug)
     .eq("status", "published")
     .maybeSingle();
-  return data ? localizedArticle(data as PublicArticle) : null;
+  return legacyData ? localizedArticle(legacyData as PublicArticle) : null;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {

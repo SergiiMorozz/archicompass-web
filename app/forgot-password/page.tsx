@@ -4,6 +4,7 @@ import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getSiteCopy } from "@/content/site-copy";
+import { localePublicPath, siteLocale } from "@/lib/site-locale";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 function ForgotPasswordContent() {
@@ -20,7 +21,7 @@ function ForgotPasswordContent() {
     setBusy(true);
     setError(null);
     setMessage(null);
-    const redirectTo = `${window.location.origin}/auth/callback?next=%2Freset-password`;
+    const redirectTo = `${window.location.origin}${localePublicPath(siteLocale, "/auth/callback")}?next=%2Freset-password`;
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo });
     if (resetError) setError(resetError.message);
     else setMessage(copy.sent);

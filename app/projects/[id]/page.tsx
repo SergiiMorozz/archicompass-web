@@ -14,7 +14,9 @@ import {
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { createPublicContentClient } from "@/lib/public-content-client";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import { getProjectDetailCopy } from "@/content/project-detail-copy";
 import { professionalOptionLabel } from "@/lib/professional-options";
+import { siteLocale } from "@/lib/site-locale";
 
 export const revalidate = 0;
 
@@ -63,8 +65,9 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
+  const copy = getProjectDetailCopy(siteLocale);
   if (!isUuid(id)) {
-    return pageMetadata({ title: "Nie znaleziono projektu", description: "Ten projekt wnętrza nie jest dostępny.", path: `/projects/${id}`, noIndex: true });
+    return pageMetadata({ title: copy.notFoundTitle, description: copy.notFoundDescription, path: `/projects/${id}`, noIndex: true });
   }
   const supabase = createPublicSupabaseClient();
   const { data: project } = await supabase
@@ -73,22 +76,23 @@ export async function generateMetadata({
     .eq("id", id)
     .maybeSingle();
   if (!project) {
-    return pageMetadata({ title: "Nie znaleziono projektu", description: "Ten projekt wnętrza nie jest dostępny.", path: `/projects/${id}`, noIndex: true });
+    return pageMetadata({ title: copy.notFoundTitle, description: copy.notFoundDescription, path: `/projects/${id}`, noIndex: true });
   }
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, location")
+    .select("full_name, location, is_demo")
     .eq("id", project.profile_id)
     .maybeSingle();
-  const title = project.title || "Projekt wnętrza";
+  const title = project.title || copy.projectFallback;
   const byline = profile?.full_name ? ` · ${profile.full_name}` : "";
   const location = profile?.location ? ` · ${profile.location}` : "";
   return pageMetadata({
     title: `${title}${byline}${location}`,
-    description: project.description || `Zobacz projekt, galerię i profil autora w ArchiCompass. Kategoria: ${project.category ? professionalOptionLabel(project.category) : "projektowanie wnętrz"}.`,
+    description: project.description || copy.metadataDescription(project.category ? professionalOptionLabel(project.category, siteLocale) : copy.projectFallback),
     path: `/projects/${id}`,
     image: project.image_url || project.image_urls?.[0] || null,
     type: "article",
+    noIndex: Boolean(profile?.is_demo),
   });
 }
 
@@ -133,11 +137,12 @@ function projectGallery(project: Project) {
 }
 
 function profileTitle(profile: Profile | null) {
-  return profile?.full_name || "Projektant ArchiCompass";
+  return profile?.full_name || getProjectDetailCopy(siteLocale).designerFallback;
 }
 
 function profileType(profile: Profile | null) {
-  return profile?.profession_type === "Studio" ? "Pracownia projektowa" : "Projektant wnętrz";
+  const copy = getProjectDetailCopy(siteLocale);
+  return profile?.profession_type === "Studio" ? copy.studio : copy.designer;
 }
 
 function websiteHref(value: string | null | undefined) {
@@ -149,10 +154,14 @@ function websiteHref(value: string | null | undefined) {
 
 export default async function ProjectDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ from?: string }>;
 }) {
   const { id } = await params;
+  const from = (await searchParams)?.from;
+  const copy = getProjectDetailCopy(siteLocale);
 
   if (!id || !isUuid(id)) {
     notFound();
@@ -203,18 +212,21 @@ export default async function ProjectDetailPage({
         .eq("entity_key", project.id)
         .maybeSingle()
     : { data: null };
-  const title = project.title || "Projekt bez tytułu";
+  const title = project.title || copy.titleFallback;
   const designerName = profileTitle(profile);
   const designerWebsite = websiteHref(profile?.website);
   const gallery = projectGallery(project);
+  const returnsToInspiration = from === "inspiration";
+  const backHref = returnsToInspiration ? "/inspiration#recent-projects" : `/designers/${project.profile_id}#portfolio`;
+  const backLabel = returnsToInspiration ? copy.backToInspiration : copy.backToPortfolio;
 
   return (
     <main className="bg-background">
       <JsonLd
         data={[
           breadcrumbJsonLd([
-            { name: "Strona główna", path: "/" },
-            { name: "Katalog Projektantów", path: "/designers" },
+            { name: siteLocale === "pl" ? "Strona główna" : "Home", path: "/" },
+            { name: copy.directory, path: "/designers" },
             { name: designerName, path: `/designers/${project.profile_id}` },
             { name: title, path: `/projects/${project.id}` },
           ]),
@@ -226,7 +238,7 @@ export default async function ProjectDetailPage({
             url: absoluteUrl(`/projects/${project.id}`),
             description: project.description || undefined,
             image: gallery,
-            genre: project.category ? professionalOptionLabel(project.category) : "Projektowanie wnętrz",
+            genre: project.category ? professionalOptionLabel(project.category, siteLocale) : copy.projectFallback,
             dateCreated: project.created_at,
             creator: {
               "@type": "Person",
@@ -240,17 +252,17 @@ export default async function ProjectDetailPage({
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-wrap gap-3">
             <Link
-              href={`/designers/${project.profile_id}#portfolio`}
+              href={backHref}
               className="rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
             >
-              Wróć do portfolio projektanta
+              {backLabel}
             </Link>
             {isOwner ? (
               <Link
                 href="/account/projects"
                 className="rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
               >
-                Zarządzaj tym projektem
+                {copy.manageProject}
               </Link>
             ) : null}
           </div>
@@ -258,11 +270,11 @@ export default async function ProjectDetailPage({
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
               <div className="text-sm font-semibold text-primary">
-                {project.category ? professionalOptionLabel(project.category) : "Projekt portfolio"}
+                {project.category ? professionalOptionLabel(project.category, siteLocale) : copy.portfolioProject}
               </div>
               {demo ? (
                 <div className="mt-3 inline-flex rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-                  Przykładowy projekt portfolio
+                  {copy.demoProject}
                 </div>
               ) : null}
               <h1 className="mt-2 max-w-4xl text-4xl font-bold tracking-tight sm:text-6xl">
@@ -270,21 +282,21 @@ export default async function ProjectDetailPage({
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
                 {project.description ||
-                  "Publiczna strona projektu w ArchiCompass z galerią, informacjami o autorze i kontekstem realizacji."}
+                  copy.publicDescription}
               </p>
             </div>
 
             <div className="rounded-2xl border border-line bg-background p-5 shadow-sm">
-              <div className="text-sm font-semibold text-muted">Informacje o projekcie</div>
+              <div className="text-sm font-semibold text-muted">{copy.projectInformation}</div>
               <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-xl border border-line bg-card p-3">
-                  <div className="text-muted">Zdjęcia</div>
+                  <div className="text-muted">{copy.photos}</div>
                   <div className="mt-1 text-xl font-bold">{gallery.length}</div>
                 </div>
                 <div className="rounded-xl border border-line bg-card p-3">
-                  <div className="text-muted">Kategoria</div>
+                  <div className="text-muted">{copy.category}</div>
                   <div className="mt-1 truncate font-bold">
-                    {project.category ? professionalOptionLabel(project.category) : "Portfolio"}
+                    {project.category ? professionalOptionLabel(project.category, siteLocale) : copy.portfolio}
                   </div>
                 </div>
               </div>
@@ -297,7 +309,7 @@ export default async function ProjectDetailPage({
         <div className="grid gap-7">
           <section className="overflow-hidden rounded-2xl border border-line bg-card shadow-sm">
             <ProjectGallery
-              category={project.category ? professionalOptionLabel(project.category) : "Portfolio"}
+              category={project.category ? professionalOptionLabel(project.category, siteLocale) : copy.portfolio}
               description={project.description}
               images={gallery}
               title={title}
@@ -305,11 +317,11 @@ export default async function ProjectDetailPage({
           </section>
 
           <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
-            <div className="text-sm font-semibold text-primary">Historia projektu</div>
-            <h2 className="mt-1 text-3xl font-bold">Szczegóły</h2>
+            <div className="text-sm font-semibold text-primary">{copy.projectStory}</div>
+            <h2 className="mt-1 text-3xl font-bold">{copy.details}</h2>
             <p className="mt-5 max-w-3xl text-base leading-8 text-muted">
               {project.description ||
-                "Ten projekt może zostać uzupełniony o brief, cele, materiały, rodzaj pomieszczeń, zakres i opis efektu dla klienta."}
+                copy.detailsFallback}
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -320,14 +332,14 @@ export default async function ProjectDetailPage({
                   rel="noreferrer"
                   className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90"
                 >
-                  Otwórz zewnętrzną stronę projektu
+                  {copy.externalProject}
                 </a>
               ) : null}
               <Link
                 href={`/designers/${project.profile_id}#portfolio`}
                 className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
               >
-                Zobacz portfolio projektanta
+                {copy.viewPortfolio}
               </Link>
             </div>
           </section>
@@ -337,26 +349,26 @@ export default async function ProjectDetailPage({
           id="designer"
           className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24"
         >
-          <div className="text-sm font-semibold text-primary">Projektant</div>
+          <div className="text-sm font-semibold text-primary">{copy.designer}</div>
           <h2 className="mt-2 text-2xl font-bold">{designerName}</h2>
           <p className="mt-1 text-muted">{profileType(profile)}</p>
 
           <div className="mt-5 grid gap-3 text-sm">
             <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
-              <span className="text-muted">Lokalizacja</span>
+              <span className="text-muted">{copy.location}</span>
               <span className="truncate text-right font-semibold">
-                {profile?.location || "Zdalnie / lokalizacja do ustalenia"}
+                {profile?.location || copy.remoteLocation}
               </span>
             </div>
             <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
-              <span className="text-muted">Projekt</span>
+              <span className="text-muted">{copy.project}</span>
               <span className="truncate text-right font-semibold">
-                {project.category ? professionalOptionLabel(project.category) : "Portfolio"}
+                {project.category ? professionalOptionLabel(project.category, siteLocale) : copy.portfolio}
               </span>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <span className="text-muted">Udostępnianie</span>
-              <span className="font-semibold">Skopiuj adres tej strony</span>
+              <span className="text-muted">{copy.sharing}</span>
+              <span className="font-semibold">{copy.copyAddress}</span>
             </div>
           </div>
 
@@ -365,14 +377,14 @@ export default async function ProjectDetailPage({
               href={`/designers/${project.profile_id}`}
               className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
             >
-              Otwórz profil projektanta
+              {copy.viewDesigner}
             </Link>
             {isOwner ? (
               <Link
                 href="/account/projects"
                 className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
               >
-                Edytuj w swoim koncie
+                {copy.editAccount}
               </Link>
             ) : (
               <>
@@ -386,11 +398,11 @@ export default async function ProjectDetailPage({
                     href={`/account/briefs?designer=${project.profile_id}`}
                     className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
                   >
-                    Wyślij brief projektantowi
+                    {copy.sendBrief}
                   </Link>
                 ) : (
                   <div className="rounded-lg border border-line bg-background p-4 text-sm leading-6 text-muted">
-                    Konta projektantów otrzymują briefy i nie mogą wysyłać zapytań klientów.
+                    {copy.designerAccountNote}
                   </div>
                 )}
               </>
@@ -402,7 +414,7 @@ export default async function ProjectDetailPage({
                 rel="noreferrer"
                 className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
               >
-                Otwórz stronę internetową
+                {copy.openWebsite}
               </a>
             ) : null}
           </div>

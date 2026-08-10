@@ -25,8 +25,23 @@ function normalizedUrl(value: string) {
 
 function normalizedRoutePath(path = "/") {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  if (normalizedPath === "/en") return "/";
+  if (normalizedPath === "/en" || normalizedPath === "/index" || normalizedPath === "/en/index") return "/";
   if (normalizedPath.startsWith("/en/")) return normalizedPath.slice(3) || "/";
+  return normalizedPath;
+}
+
+export function alternateLocalePath(targetLocale: SiteLocale, path = "/") {
+  const normalizedPath = normalizedRoutePath(path);
+  const polishCity = normalizedPath.match(/^\/projektanci-wnetrz\/([^/]+)$/);
+  if (targetLocale === "en" && polishCity) {
+    return `/interior-designers/poland/${polishCity[1]}`;
+  }
+
+  const englishPolishCity = normalizedPath.match(/^\/interior-designers\/poland\/([^/]+)$/);
+  if (targetLocale === "pl" && englishPolishCity) {
+    return `/projektanci-wnetrz/${englishPolishCity[1]}`;
+  }
+
   return normalizedPath;
 }
 

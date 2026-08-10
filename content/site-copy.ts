@@ -73,7 +73,7 @@ type CountWords = {
 type InspirationCopy = {
   metadata: { title: string; description: string };
   breadcrumbs: { home: string; hub: string };
-  hero: { title: string; subtitle: string; searchPlaceholder: string; searchButton: string };
+  hero: { title: string; subtitle: string; searchPlaceholder: string; searchHelp: string; searchButton: string };
   categoryLabels: Record<string, string>;
   newDesigners: { eyebrow: string; title: string; seeAll: string };
   latestProjects: { eyebrow: string; title: string };
@@ -300,10 +300,10 @@ const pl: SiteCopy = {
       { href: "/get-started", label: "Dołącz do ArchiCompass" },
     ],
     locations: [
-      { href: "/interior-designers/poland/warsaw", label: "Projektanci w Warszawie" },
-      { href: "/interior-designers/poland/krakow", label: "Projektanci w Krakowie" },
-      { href: "/interior-designers/poland/wroclaw", label: "Projektanci we Wrocławiu" },
-      { href: "/interior-designers/poland/gdansk", label: "Projektanci w Gdańsku" },
+      { href: "/projektanci-wnetrz/warsaw", label: "Projektanci w Warszawie" },
+      { href: "/projektanci-wnetrz/krakow", label: "Projektanci w Krakowie" },
+      { href: "/projektanci-wnetrz/wroclaw", label: "Projektanci we Wrocławiu" },
+      { href: "/projektanci-wnetrz/gdansk", label: "Projektanci w Gdańsku" },
     ],
     privacy: "Polityka prywatności",
     terms: "Regulamin",
@@ -431,6 +431,7 @@ const pl: SiteCopy = {
       title: "Inspiration Hub",
       subtitle: "Odkrywaj praktyczne porady, materiały, wnętrza i pomysły przygotowane przez redakcję ArchiCompass.",
       searchPlaceholder: "Szukaj artykułów i inspiracji...",
+      searchHelp: "Szukaj po tytule, temacie lub słowie kluczowym, np. „budżet remontu”, „japandi”, „brief”.",
       searchButton: "Szukaj",
     },
     categoryLabels: { All: "Wszystkie", Inspiration: "Inspiracje", Trends: "Trendy", Guides: "Poradniki", Materials: "Materiały", Rooms: "Pomieszczenia", Sustainability: "Zrównoważone wnętrza" },
@@ -485,9 +486,9 @@ const pl: SiteCopy = {
         body: "pierwsze trzy miesiące pełnego dostępu otrzymujesz bezpłatnie. Aktywny plan pracowni obejmuje także osobiste profile aktywnych członków zespołu.",
         cta: "Ceny i usługi",
       },
-      benefits: ["Sprawdzone portfolio", "Bezpośredni kontakt", "Bezpłatny start"],
+      benefits: ["Profile w wersji beta", "Bezpośredni kontakt", "Bezpłatny start"],
     },
-    metrics: { designers: "Projektanci i pracownie", projects: "Opublikowane realizacje", reviews: "Połączone opinie Google", caption: "Aktualne dane platformy" },
+    metrics: { designers: "Projektanci i pracownie", projects: "Opublikowane realizacje", reviews: "Połączone opinie Google", caption: "Dane wersji beta" },
     howItWorks: {
       eyebrow: "Jak to działa",
       headline: "Od zapisanych inspiracji do konkretnej pierwszej rozmowy.",
@@ -498,7 +499,7 @@ const pl: SiteCopy = {
         { number: "03", title: "Otrzymaj trafne dopasowania", body: "Otrzymujesz projektantów dopasowanych do stylu, zakresu, budżetu, lokalizacji i charakteru inwestycji - z portfolio, które możesz od razu porównać." },
       ],
     },
-    matching: { title: "Precyzyjne dopasowanie zamiast przypadkowego szukania", body: "Z całej bazy projektantów w Polsce otrzymujesz osoby najlepiej dopasowane do Twojego stylu, zakresu prac, budżetu i lokalizacji.", cta: "Zacznij z AI" },
+    matching: { title: "Precyzyjne dopasowanie zamiast przypadkowego szukania", body: "ArchiCompass porównuje dostępne profile według stylu, zakresu prac, budżetu i lokalizacji.", cta: "Zacznij z AI" },
     aiProjectCompass: {
       eyebrow: "AI Project Compass",
       headline: "Z inspiracji powstaje konkretny kierunek.",
@@ -701,6 +702,7 @@ const en: SiteCopy = {
       title: "Inspiration Hub",
       subtitle: "Explore practical advice, materials, interiors, and ideas curated by the ArchiCompass editorial team.",
       searchPlaceholder: "Search articles and inspiration...",
+      searchHelp: "Search by title, topic, or keyword, for example “renovation budget”, “Japandi”, or “brief”.",
       searchButton: "Search",
     },
     categoryLabels: { All: "All", Inspiration: "Inspiration", Trends: "Trends", Guides: "Guides", Materials: "Materials", Rooms: "Rooms", Sustainability: "Sustainable interiors" },
@@ -755,9 +757,9 @@ const en: SiteCopy = {
         body: "you receive the first three months of full access at no cost. An active studio plan also includes the personal profiles of active team members.",
         cta: "Prices and services",
       },
-      benefits: ["Verified portfolios", "Direct contact", "Free to start"],
+      benefits: ["Profiles in beta", "Direct contact", "Free to start"],
     },
-    metrics: { designers: "Designers and studios", projects: "Published projects", reviews: "Linked Google reviews", caption: "Live platform count" },
+    metrics: { designers: "Designers and studios", projects: "Published projects", reviews: "Linked Google reviews", caption: "Beta data" },
     howItWorks: {
       eyebrow: "How it works",
       headline: "From saved inspiration to a useful first conversation.",
@@ -768,7 +770,7 @@ const en: SiteCopy = {
         { number: "03", title: "Get relevant matches", body: "Receive designers suited to your style, scope, budget, location, and project character, with portfolios you can compare immediately." },
       ],
     },
-    matching: { title: "A precise match instead of a random search", body: "From the full designer directory in Poland, you receive professionals best suited to your style, scope, budget, and location.", cta: "Start with AI" },
+    matching: { title: "A precise match instead of a random search", body: "ArchiCompass compares available profiles by style, scope, budget, and location.", cta: "Start with AI" },
     aiProjectCompass: {
       eyebrow: "AI Project Compass",
       headline: "Inspiration becomes a clear direction.",

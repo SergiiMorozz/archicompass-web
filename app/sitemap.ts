@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { absoluteUrl } from "@/lib/seo";
 import { seoIndexingEnabled } from "@/lib/seo-indexing";
-import { locationPath, seoLocations } from "@/lib/seo-locations";
+import { locationPath, matchesSeoLocation, seoLocations } from "@/lib/seo-locations";
 
 // Publish fresh guide URLs as soon as the CMS release is opened.
 export const revalidate = 0;
@@ -49,12 +49,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const supabase = createPublicSupabaseClient();
-    const [articles] = await Promise.all([
+    const [articles, profiles, projects, studios] = await Promise.all([
       supabase
         .from("inspiration_articles")
         .select("slug, slug_pl, slug_en, content_section, updated_at")
         .eq("status", "published")
         .eq("noindex", false),
+      supabase
+        .from("profiles")
+        .select("id, public_slug, location, is_demo")
+        .eq("user_type", "professional"),
+      supabase
+        .from("projects")
+        .select("id, profile_id"),
+      supabase
+        .from("studios")
+        .select("id, location, is_demo")
+        .eq("published", true),
     ]);
 
     const inspirationArticles = (articles.data ?? []).filter((article) => article.content_section === "inspiration");
@@ -84,18 +95,64 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-    const locationEntries: MetadataRoute.Sitemap = seoLocations
-      .filter((location) => location.countryCode === "PL")
-      .map((location) => ({
-        url: absoluteUrl(locationPath(location)),
-        changeFrequency: "weekly",
-        priority: location.countryCode === "PL" ? 0.85 : 0.75,
-      }));
-
-    const englishLocationEntries: MetadataRoute.Sitemap = locationEntries.map((entry) => ({
+    const publicProfiles = (profiles.data ?? []).filter((profile) => !profile.is_demo);
+    const publicProfileIds = new Set(publicProfiles.map((profile) => profile.id));
+    const publicStudios = (studios.data ?? []).filter((studio) => !studio.is_demo);
+    const profileEntries: MetadataRoute.Sitemap = publicProfiles.map((profile) => ({
+      url: absoluteUrl(`/designers/${profile.public_slug || profile.id}`),
+      changeFrequency: "weekly",
+      priority: 0.85,
+    }));
+    const englishProfileEntries: MetadataRoute.Sitemap = profileEntries.map((entry) => ({
       ...entry,
       url: absoluteUrl(englishPath(new URL(entry.url).pathname)),
     }));
+    const projectEntries: MetadataRoute.Sitemap = (projects.data ?? [])
+      .filter((project) => publicProfileIds.has(project.profile_id))
+      .map((project) => ({
+        url: absoluteUrl(`/projects/${project.id}`),
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+      }));
+    const englishProjectEntries: MetadataRoute.Sitemap = projectEntries.map((entry) => ({
+      ...entry,
+      url: absoluteUrl(englishPath(new URL(entry.url).pathname)),
+    }));
+    const studioEntries: MetadataRoute.Sitemap = publicStudios.map((studio) => ({
+      url: absoluteUrl(`/studios/${studio.id}`),
+      changeFrequency: "weekly",
+      priority: 0.85,
+    }));
+    const englishStudioEntries: MetadataRoute.Sitemap = studioEntries.map((entry) => ({
+      ...entry,
+      url: absoluteUrl(englishPath(new URL(entry.url).pathname)),
+    }));
+
+    const locationEntries: MetadataRoute.Sitemap = seoLocations
+      .filter((location) =>
+        location.countryCode === "PL" &&
+        [...publicProfiles, ...publicStudios].some((professional) =>
+          matchesSeoLocation(professional.location, location)
+        )
+      )
+      .map((location) => ({
+        url: absoluteUrl(locationPath(location, "pl")),
+        changeFrequency: "weekly",
+        priority: 0.85,
+      }));
+
+    const englishLocationEntries: MetadataRoute.Sitemap = seoLocations
+      .filter((location) =>
+        location.countryCode === "PL" &&
+        [...publicProfiles, ...publicStudios].some((professional) =>
+          matchesSeoLocation(professional.location, location)
+        )
+      )
+      .map((location) => ({
+        url: absoluteUrl(englishPath(locationPath(location, "en"))),
+        changeFrequency: "weekly",
+        priority: 0.85,
+      }));
 
     return [
       ...staticEntries,
@@ -104,6 +161,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...englishArticleEntries,
       ...guideEntries,
       ...englishGuideEntries,
+      ...profileEntries,
+      ...englishProfileEntries,
+      ...projectEntries,
+      ...englishProjectEntries,
+      ...studioEntries,
+      ...englishStudioEntries,
       ...locationEntries,
       ...englishLocationEntries,
     ];
