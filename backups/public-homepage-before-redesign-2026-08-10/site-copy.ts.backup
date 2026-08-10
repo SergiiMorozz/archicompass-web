@@ -5,6 +5,7 @@ type HomeCopy = {
   hero: {
     badge: string;
     headline: string;
+    headlineHighlight: string;
     body: string;
     checklist: string[];
     primaryCta: string;
@@ -19,17 +20,12 @@ type HomeCopy = {
       materialsValue: string;
       matchLabel: string;
       matchValue: string;
-      briefLabel: string;
-      briefValue: string;
-      professionalLabel: string;
-      professionalValue: string;
       cta: string;
     };
   };
   trust: {
     items: Array<{ icon: string; title: string; body: string }>;
   };
-  metrics: { designers: string; projects: string; reviews: string };
   howItWorks: {
     eyebrow: string;
     headline: string;
@@ -59,7 +55,7 @@ type HomeCopy = {
       number: string;
       title: string;
       body: string;
-      designers: Array<{ name: string; tag: string; location: string; match: string; mark: string }>;
+      designers: Array<{ name: string; tag: string; location: string }>;
     };
   };
   whyExists: {
@@ -524,32 +520,29 @@ const pl: SiteCopy = {
       description: "Zamień zdjęcia inspiracji w precyzyjny brief i znajdź projektantów wnętrz oraz architektów dopasowanych do Twojego projektu, budżetu i lokalizacji.",
     },
     hero: {
-      badge: "AI Project Compass",
-      headline: "Znajdź projektanta, który zrozumie Twoją wizję",
-      body: "Zamień zdjęcia inspiracji w profesjonalny brief projektowy. AI pomoże rozpoznać styl i uporządkować informacje potrzebne do świadomego wyboru projektanta.",
+      badge: "Platforma w wersji beta",
+      headline: "Znajdź projektanta, który zrozumie",
+      headlineHighlight: "Twoją wizję",
+      body: "ArchiCompass pomaga zamienić Twoje inspiracje w konkretny kierunek projektu, a następnie znaleźć projektantów wnętrz i architektów dopasowanych do Twojego stylu, budżetu, zakresu prac i lokalizacji.",
       checklist: [
         "Dopasowanie na podstawie Twojego projektu",
         "Zweryfikowane portfolio i opinie",
         "Bezpośredni kontakt z projektantem",
-        "Własny brief w jednym miejscu",
+        "Bezpłatnie dla klientów",
       ],
-      primaryCta: "Poznaj swój styl i znajdź projektanta z AI",
-      secondaryCta: "Katalog projektantów",
-      reassurance: "Przykładowy wynik pokazuje, jak AI porządkuje inspiracje i brief.",
+      primaryCta: "Znajdź projektanta z AI",
+      secondaryCta: "Przeglądaj katalog",
+      reassurance: "Bezpłatnie • Bez zobowiązań • Bez pośredników",
       visual: {
         tag: "Przykładowy wynik",
-        directionLabel: "Kierunek stylistyczny",
+        directionLabel: "Twój kierunek",
         styleValue: "Ciepłe japandi",
         paletteLabel: "Paleta",
         materialsLabel: "Materiały",
         materialsValue: "Drewno, len, kamień",
         matchLabel: "Dopasowanie",
-        matchValue: "92%",
-        briefLabel: "Gotowość briefu",
-        briefValue: "Wstępnie uporządkowany",
-        professionalLabel: "Proponowana pracownia",
-        professionalValue: "Studio Wątek",
-        cta: "Poznaj AI Project Compass",
+        matchValue: "94%",
+        cta: "Zobacz wynik",
       },
     },
     trust: {
@@ -560,17 +553,12 @@ const pl: SiteCopy = {
         { icon: "🆓", title: "Dla klientów", body: "Korzystanie z platformy bez opłat" },
       ],
     },
-    metrics: {
-      designers: "Projektanci i pracownie",
-      projects: "Opublikowane realizacje",
-      reviews: "Połączone opinie Google",
-    },
     howItWorks: {
       eyebrow: "Jak to działa",
       headline: "Od inspiracji do właściwego projektanta.",
       body: "Nie musisz znać nazw stylów ani tworzyć profesjonalnego briefu. Zacznij od wnętrz, materiałów i detali, które Ci się podobają - ArchiCompass pomoże uporządkować Twoją wizję.",
-      cta: "Przeanalizuj inspiracje z AI",
-      secondaryCta: "Zobacz przykład wyniku",
+      cta: "Stwórz swój Project Compass",
+      secondaryCta: "Dowiedz się, jak działa ArchiCompass",
       stepOne: {
         number: "01",
         title: "Dodaj inspiracje",
@@ -600,18 +588,18 @@ const pl: SiteCopy = {
         title: "Poznaj projektantów dopasowanych do Twojego projektu",
         body: "Porównaj specjalistów dopasowanych do charakteru projektu, zakresu usług, budżetu i lokalizacji - i sprawdź ich portfolio przed pierwszą rozmową.",
         designers: [
-          { name: "Studio Wątek", tag: "Ciepłe japandi", location: "Warszawa", match: "92%", mark: "SW" },
-          { name: "Marta Wysocka", tag: "Soft minimalism", location: "Warszawa", match: "88%", mark: "MW" },
-          { name: "Piotr Zieliński", tag: "Naturalne materiały", location: "Gdańsk", match: "84%", mark: "PZ" },
+          { name: "Studio Natural", tag: "Ciepłe japandi", location: "Warszawa" },
+          { name: "KODO Architekci", tag: "Minimalizm", location: "Warszawa" },
+          { name: "Texture Design", tag: "Modern organic", location: "Warszawa" },
         ],
       },
     },
     whyExists: {
-      eyebrow: "Od inspiracji do briefu",
-      headline: "Nie tylko moodboard. Punkt wyjścia do konkretnej rozmowy.",
-      body: "Twoje inspiracje, zakres inwestycji, budżet i termin zostają uporządkowane w jednym czytelnym kontekście.",
-      body2: "Dzięki temu porównujesz projektantów z całej Polski na podstawie tego, co naprawdę ma znaczenie dla Twojego projektu.",
-      flow: ["Zdjęcia inspiracji", "Czytelny brief", "Świadomy wybór projektanta"],
+      eyebrow: "Dlaczego ArchiCompass",
+      headline: "Inspiracja to dopiero początek projektu.",
+      body: "Pinterest, Instagram i narzędzia AI sprawiły, że łatwiej niż kiedykolwiek znaleźć wnętrza, które nam się podobają. Trudniej jest jednak przełożyć te obrazy na realny projekt - z określonym budżetem, zakresem prac, terminem i możliwościami konkretnej przestrzeni.",
+      body2: "ArchiCompass pomaga uporządkować to, co masz w głowie, zanim rozpoczniesz rozmowę z projektantem.",
+      flow: ["Podoba mi się to", "Wiem, czego szukam", "Projektant rozumie mój brief"],
     },
     forClients: {
       eyebrow: "Dla klientów",
@@ -624,8 +612,8 @@ const pl: SiteCopy = {
         "Bezpośredni kontakt ze specjalistą",
         "Bez opłat dla klientów",
       ],
-      primaryCta: "Poznaj swój styl z AI",
-      secondaryCta: "Katalog projektantów",
+      primaryCta: "Znajdź projektanta z AI",
+      secondaryCta: "Przeglądaj katalog",
     },
     forDesigners: {
       eyebrow: "Dla projektantów i architektów",
@@ -664,17 +652,17 @@ const pl: SiteCopy = {
     midCta: {
       headline: "Masz już zapisane wnętrza, które Ci się podobają?",
       body: "Dodaj kilka inspiracji. ArchiCompass pomoże znaleźć ich wspólny kierunek i przygotować Cię do rozmowy z projektantem.",
-      primaryCta: "Przeanalizuj inspiracje z AI",
-      note: "Wynik ma charakter pomocniczy i możesz go później doprecyzować.",
-      secondaryCta: "Zobacz, jak powstaje brief",
+      primaryCta: "Przeanalizuj swoje inspiracje",
+      note: "Zajmuje tylko kilka minut.",
+      secondaryCta: "Zobacz przykładowy wynik",
     },
     inspirationHub: { eyebrow: "Inspiration Hub", headline: "Inspiracje, które pomagają podejmować lepsze decyzje projektowe.", body: "Poznaj praktyczne poradniki o stylach, materiałach, planowaniu przestrzeni, remoncie i zrównoważonych wnętrzach. Zapisuj wybrane artykuły w strefie klienta.", cta: "Odkryj Inspiration Hub", readCta: "Czytaj artykuł", emptyTitle: "Przygotowujemy pierwsze poradniki i inspiracje.", emptyCta: "Otwórz Inspiration Hub" },
     closingCta: {
       headline: "Zacznij od tego, co już masz - swoich inspiracji.",
       body: "ArchiCompass pomoże zamienić je w konkretny kierunek projektu i znaleźć specjalistów, którzy mogą go zrealizować.",
-      primaryCta: "Poznaj swój styl i znajdź projektanta z AI",
-      secondaryCta: "Katalog projektantów",
-      reassurance: "Zacznij od inspiracji, które już masz.",
+      primaryCta: "Stwórz swój Project Compass",
+      secondaryCta: "Przeglądaj projektantów",
+      reassurance: "Bezpłatnie dla klientów.",
     },
     projectCategories: { Apartment: "Mieszkanie", House: "Dom", Loft: "Loft", Hospitality: "Hotelarstwo i gastronomia", "Rental property": "Nieruchomość na wynajem", Kitchen: "Kuchnia", "Dining room": "Jadalnia", "Home office": "Gabinet domowy", Bedroom: "Sypialnia", Penthouse: "Penthouse", Office: "Biuro" },
   },
@@ -898,32 +886,29 @@ const en: SiteCopy = {
       description: "Turn inspiration photos into a precise brief and find interior designers and architects matched to your project, budget, and location.",
     },
     hero: {
-      badge: "AI Project Compass",
-      headline: "Find a designer who understands your vision",
-      body: "Turn inspiration photos into a professional project brief. AI helps recognise your style and organise the details you need to choose a designer with confidence.",
+      badge: "Platform in beta",
+      headline: "Find a designer who will understand",
+      headlineHighlight: "your vision",
+      body: "ArchiCompass helps you turn your inspiration into a clear project direction, then find interior designers and architects matched to your style, budget, scope, and location.",
       checklist: [
         "Matching based on your own project",
         "Verified portfolios and reviews",
         "Direct contact with the designer",
-        "Your brief in one place",
+        "Free for clients",
       ],
-      primaryCta: "Discover your style and find a designer with AI",
-      secondaryCta: "Designer Directory",
-      reassurance: "This example shows how AI helps organise inspiration and a project brief.",
+      primaryCta: "Find a designer with AI",
+      secondaryCta: "Browse the directory",
+      reassurance: "Free • No commitment • No middlemen",
       visual: {
         tag: "Example result",
-        directionLabel: "Style direction",
+        directionLabel: "Your direction",
         styleValue: "Warm Japandi",
         paletteLabel: "Palette",
         materialsLabel: "Materials",
         materialsValue: "Wood, linen, stone",
         matchLabel: "Match",
-        matchValue: "92%",
-        briefLabel: "Brief readiness",
-        briefValue: "Structured to start",
-        professionalLabel: "Suggested studio",
-        professionalValue: "Studio Wątek",
-        cta: "Explore AI Project Compass",
+        matchValue: "94%",
+        cta: "See the result",
       },
     },
     trust: {
@@ -934,17 +919,12 @@ const en: SiteCopy = {
         { icon: "🆓", title: "For clients", body: "Free to use the platform" },
       ],
     },
-    metrics: {
-      designers: "Designers and studios",
-      projects: "Published projects",
-      reviews: "Linked Google reviews",
-    },
     howItWorks: {
       eyebrow: "How it works",
       headline: "From inspiration to the right designer.",
       body: "You don't need to know style names or write a professional brief. Start with the rooms, materials, and details you like - ArchiCompass will help organise your vision.",
-      cta: "Analyse inspiration with AI",
-      secondaryCta: "See an example result",
+      cta: "Start your Project Compass",
+      secondaryCta: "See how ArchiCompass works",
       stepOne: {
         number: "01",
         title: "Add inspiration",
@@ -974,18 +954,18 @@ const en: SiteCopy = {
         title: "Meet designers matched to your project",
         body: "Compare specialists matched to the character of your project, scope of services, budget, and location - and review their portfolio before the first conversation.",
         designers: [
-          { name: "Studio Wątek", tag: "Warm Japandi", location: "Warsaw", match: "92%", mark: "SW" },
-          { name: "Marta Wysocka", tag: "Soft minimalism", location: "Warsaw", match: "88%", mark: "MW" },
-          { name: "Piotr Zieliński", tag: "Natural materials", location: "Gdańsk", match: "84%", mark: "PZ" },
+          { name: "Studio Natural", tag: "Warm Japandi", location: "Warsaw" },
+          { name: "KODO Architects", tag: "Minimalist", location: "Warsaw" },
+          { name: "Texture Design", tag: "Modern organic", location: "Warsaw" },
         ],
       },
     },
     whyExists: {
-      eyebrow: "From inspiration to a brief",
-      headline: "More than a moodboard. A starting point for a real conversation.",
-      body: "Your inspiration, project scope, budget, and timeline are organised into one clear context.",
-      body2: "That lets you compare designers from across Poland by what truly matters to your project.",
-      flow: ["Inspiration photos", "Clear brief", "Confident designer choice"],
+      eyebrow: "Why ArchiCompass",
+      headline: "Inspiration is only the beginning of a project.",
+      body: "Pinterest, Instagram, and AI tools have made it easier than ever to find interiors we like. It's harder to translate those images into a real project - with a defined budget, scope, timeline, and the possibilities of an actual space.",
+      body2: "ArchiCompass helps you organise what's in your head before you start talking to a designer.",
+      flow: ["I like this", "I know what I'm looking for", "The designer understands my brief"],
     },
     forClients: {
       eyebrow: "For clients",
@@ -998,8 +978,8 @@ const en: SiteCopy = {
         "Direct contact with the specialist",
         "No fees for clients",
       ],
-      primaryCta: "Discover your style with AI",
-      secondaryCta: "Designer Directory",
+      primaryCta: "Find a designer with AI",
+      secondaryCta: "Browse the directory",
     },
     forDesigners: {
       eyebrow: "For designers and architects",
@@ -1038,17 +1018,17 @@ const en: SiteCopy = {
     midCta: {
       headline: "Already have interiors you like saved somewhere?",
       body: "Add a few inspiration photos. ArchiCompass will help find their common direction and prepare you for a conversation with a designer.",
-      primaryCta: "Analyse inspiration with AI",
-      note: "The result is supportive and you can refine it later.",
-      secondaryCta: "See how a brief takes shape",
+      primaryCta: "Analyse your inspiration",
+      note: "Takes only a few minutes.",
+      secondaryCta: "See an example result",
     },
     inspirationHub: { eyebrow: "Inspiration Hub", headline: "Inspiration that supports better design decisions.", body: "Explore practical guides to styles, materials, space planning, renovation, and sustainable interiors. Save the articles you want in your client workspace.", cta: "Explore Inspiration Hub", readCta: "Read article", emptyTitle: "Our first guides and inspirations are being prepared.", emptyCta: "Open Inspiration Hub" },
     closingCta: {
       headline: "Start with what you already have - your inspiration.",
       body: "ArchiCompass will help turn it into a clear project direction and find specialists who can bring it to life.",
-      primaryCta: "Discover your style and find a designer with AI",
-      secondaryCta: "Designer Directory",
-      reassurance: "Start with the inspiration you already have.",
+      primaryCta: "Start your Project Compass",
+      secondaryCta: "Browse designers",
+      reassurance: "Free for clients.",
     },
     projectCategories: { Apartment: "Apartment", House: "House", Loft: "Loft", Hospitality: "Hospitality", "Rental property": "Rental property", Kitchen: "Kitchen", "Dining room": "Dining room", "Home office": "Home office", Bedroom: "Bedroom", Penthouse: "Penthouse", Office: "Office" },
   },
