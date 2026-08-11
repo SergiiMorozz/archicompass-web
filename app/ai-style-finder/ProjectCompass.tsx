@@ -760,6 +760,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
         ? copy.ui.workspace.inspirations.previewReady(referencePhotos.length)
         : copy.ui.workspace.inspirations.previewEmpty,
       complete: referencePhotos.length > 0,
+      touched: Boolean(touchedModules.inspirations),
     },
     {
       id: "analysis" as const,
@@ -769,6 +770,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
         ? styleAnalysis.primaryStyle
         : copy.ui.workspace.analysis.previewEmpty,
       complete: Boolean(styleAnalysis),
+      touched: Boolean(touchedModules.analysis),
     },
     {
       id: "details" as const,
@@ -778,6 +780,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
         ? `${optionLabel(projectTypes, projectType)}${areaM2 ? ` · ${areaM2} m²` : ""}${location.trim() ? ` · ${location.trim()}` : ""}`
         : copy.ui.workspace.details.previewEmpty,
       complete: hasProjectDetails,
+      touched: Boolean(touchedModules.details),
     },
     {
       id: "scope" as const,
@@ -785,6 +788,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       body: copy.ui.workspace.scope.body,
       preview: hasScope ? optionLabel(scopes, scope) : copy.ui.workspace.scope.previewEmpty,
       complete: hasScope,
+      touched: Boolean(touchedModules.scope),
     },
     {
       id: "budget" as const,
@@ -794,6 +798,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
         ? `${optionLabel(budgets, budget)} · ${optionLabel(timelines, timeline)}`
         : copy.ui.workspace.budget.previewEmpty,
       complete: hasBudget,
+      touched: Boolean(touchedModules.budget),
     },
     {
       id: "preferences" as const,
@@ -803,6 +808,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
         ? styleAnalysis?.primaryStyle || styleLabels(style)
         : copy.ui.workspace.preferences.previewEmpty,
       complete: hasPreferences,
+      touched: Boolean(touchedModules.preferences),
     },
   ];
 
@@ -1354,7 +1360,11 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                   <div className="flex items-start justify-between gap-3">
                     <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-2xl bg-primary text-xs font-bold text-white">{workspaceModuleMarks[module.id]}</span>
                     <span className={module.complete ? "rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800" : "rounded-full bg-background px-3 py-1 text-xs font-bold text-muted"}>
-                      {module.complete ? copy.ui.workspace.complete : copy.ui.workspace.inProgress}
+                      {module.complete
+                        ? copy.ui.workspace.complete
+                        : module.touched
+                        ? copy.ui.workspace.inProgress
+                        : copy.ui.workspace.statusEmpty}
                     </span>
                   </div>
                   <h3 className="mt-7 text-xl font-bold">{module.title}</h3>
