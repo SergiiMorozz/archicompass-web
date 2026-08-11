@@ -14,7 +14,7 @@ import { createPublicContentClient } from "@/lib/public-content-client";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { professionalOptionLabel } from "@/lib/professional-options";
 import { articlePath, type LocalizedPublicArticle, type PublicArticle, publicArticleSelect } from "@/lib/public-articles";
-import { localePublicPath, siteLocale } from "@/lib/site-locale";
+import { localeAssetPath, localePublicPath, siteLocale } from "@/lib/site-locale";
 
 export const revalidate = 0;
 
@@ -160,7 +160,7 @@ export default async function InspirationPage({
     profileMediaUrl(designer.profile_logo_path)
     || designer.avatar_url
     || profileMediaUrl(designer.profile_banner_path)
-    || "/brand/archicompass-mark.png";
+    || localeAssetPath("/brand/archicompass-mark.png");
   const normalizedQuery = normalize(q);
   const articles = allArticles.filter((article) => {
     const categoryMatch = inspirationCategoryMatches(article.category, selectedCategory);

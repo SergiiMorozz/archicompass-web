@@ -6,11 +6,35 @@ import JsonLd from "@/components/JsonLd";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { getSiteCopy } from "@/content/site-copy";
-import { localeMetadata, localePublicUrl, siteLocale } from "@/lib/site-locale";
+import { localeAssetPath, localeMetadata, localePublicUrl, siteLocale } from "@/lib/site-locale";
 import { absoluteUrl, siteUrl } from "@/lib/seo";
 import { robotsMetadata } from "@/lib/seo-indexing";
 
 const copy = getSiteCopy();
+const brandMark = localeAssetPath("/brand/archicompass-mark.png");
+const outfitFontFaceCss = `
+  @font-face {
+    font-family: "Outfit";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("${localeAssetPath("/fonts/outfit-latin-ext.woff2")}") format("woff2");
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+      U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+      U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+      U+A720-A7FF;
+  }
+  @font-face {
+    font-family: "Outfit";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("${localeAssetPath("/fonts/outfit-latin.woff2")}") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+      U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+      U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
@@ -66,8 +90,8 @@ export const metadata: Metadata = {
     ? { google: process.env.GOOGLE_SITE_VERIFICATION }
     : undefined,
   icons: {
-    icon: "/brand/archicompass-mark.png",
-    apple: "/brand/archicompass-mark.png",
+    icon: brandMark,
+    apple: brandMark,
   },
 };
 
@@ -78,6 +102,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang={localeMetadata[siteLocale].html}>
+      <head>
+        <style dangerouslySetInnerHTML={{ __html: outfitFontFaceCss }} />
+      </head>
       <body className="antialiased">
         <JsonLd
           data={[
