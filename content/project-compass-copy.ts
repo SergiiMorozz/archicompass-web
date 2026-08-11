@@ -41,6 +41,51 @@ type ProjectCompassCopy = {
       insightTitle: string;
       insightBody: string;
     };
+    workspace: {
+      back: string;
+      eyebrow: string;
+      titleBefore: string;
+      titleHighlight: string;
+      titleAfter: string;
+      body: string;
+      benefits: string[];
+      progressTitle: string;
+      progressLabel: string;
+      progressBody: string;
+      statusEmpty: string;
+      statusInProgress: string;
+      statusReady: string;
+      complete: string;
+      inProgress: string;
+      open: string;
+      close: string;
+      cardsTitle: string;
+      cardsBody: string;
+      journey: string[];
+      inspirations: { title: string; body: string; previewEmpty: string; previewReady: (count: number) => string };
+      analysis: { title: string; body: string; previewEmpty: string; previewReady: string; start: string };
+      details: { title: string; body: string; previewEmpty: string };
+      scope: { title: string; body: string; previewEmpty: string };
+      budget: { title: string; body: string; previewEmpty: string };
+      preferences: { title: string; body: string; previewEmpty: string };
+      summaryTitle: string;
+      summaryBody: string;
+      projectLabel: string;
+      moodLabel: string;
+      readinessTitle: string;
+      readinessBody: string;
+      continueTitle: string;
+      continueBody: string;
+      continue: string;
+      matchingReadyTitle: string;
+      matchingReadyBody: string;
+      saveAndReturn: string;
+      showFullBrief: string;
+      hideFullBrief: string;
+      fullBriefTitle: string;
+      supportTitle: string;
+      supportBody: string;
+    };
     steps: {
       projectType: string;
       space: string;
@@ -364,6 +409,51 @@ const projectCompassCopy: Record<SiteLocale, ProjectCompassCopy> = {
       stylesHint: "Wybierz jeden lub kilka kierunków, maksymalnie cztery. Łączenie stylów jest naturalne i pomaga w lepszym dopasowaniu projektanta.",
       confidence: { high: "wysoka", medium: "średnia", low: "niska" },
       hero: { eyebrow: "AI Project Compass", title: "Zamień niejasny pomysł w konkretny brief projektowy", body: "Styl ma znaczenie, ale trafne dopasowanie zależy także od zakresu, budżetu, rodzaju wnętrza, zdjęć referencyjnych, terminu i potrzebnego wsparcia.", insightTitle: "Dlaczego to działa lepiej", insightBody: "Zamiast zgadywać nazwę stylu ArchiCompass porządkuje informacje, których projektant potrzebuje, aby ocenić, czy inwestycja pasuje do jego specjalizacji." },
+      workspace: {
+        back: "Wróć do strony głównej",
+        eyebrow: "AI PROJECT COMPASS",
+        titleBefore: "Zamień inspiracje w",
+        titleHighlight: "konkretny kierunek",
+        titleAfter: "projektu",
+        body: "Dodaj inspiracje, odpowiedz na kilka pytań, a AI Project Compass pomoże Ci lepiej zrozumieć Twój styl, uporządkować potrzeby i znaleźć projektantów dopasowanych do Twojej inwestycji.",
+        benefits: ["Zacznij od inspiracji", "AI pomaga uporządkować kierunek", "Na końcu otrzymasz gotowy brief projektu"],
+        progressTitle: "Twój Project Compass",
+        progressLabel: "Gotowość briefu",
+        progressBody: "Im więcej informacji dodasz, tym trafniej pomożemy dopasować projektantów do Twojego projektu.",
+        statusEmpty: "Nie rozpoczęto",
+        statusInProgress: "W trakcie",
+        statusReady: "Gotowe do dopasowań",
+        complete: "Uzupełnione",
+        inProgress: "W trakcie",
+        open: "Otwórz moduł",
+        close: "Zamknij moduł",
+        cardsTitle: "Zbuduj projekt po swojemu",
+        cardsBody: "Możesz przejść przez moduły w dowolnej kolejności. Podsumowanie po prawej aktualizuje się na bieżąco.",
+        journey: ["Inspiracje", "Analiza AI", "Szczegóły projektu", "Zakres współpracy", "Budżet i termin", "Preferencje"],
+        inspirations: { title: "Inspiracje", body: "Dodaj zdjęcia wnętrz, detali i materiałów, które najlepiej pokazują oczekiwany kierunek.", previewEmpty: "Zacznij od kilku zapisanych inspiracji.", previewReady: (count) => `Dodano ${count} zdjęć referencyjnych.` },
+        analysis: { title: "Analiza AI", body: "Połącz zdjęcia z analizą stylu, materiałów, palety i wskazówek do rozmowy z projektantem.", previewEmpty: "Dodaj zdjęcia, aby uruchomić analizę AI.", previewReady: "Analiza została przygotowana na podstawie Twoich inspiracji.", start: "Uruchom analizę AI" },
+        details: { title: "Szczegóły projektu", body: "Określ nieruchomość, metraż, pomieszczenia, status inwestycji i lokalizację.", previewEmpty: "Dodaj podstawowy kontekst inwestycji." },
+        scope: { title: "Zakres współpracy", body: "Wybierz cel, zakres pomocy oraz potrzeby dotyczące wizualizacji i nadzoru.", previewEmpty: "Opisz, jakiego wsparcia potrzebujesz." },
+        budget: { title: "Budżet i termin", body: "Ustal orientacyjny budżet całej inwestycji i planowany moment rozpoczęcia.", previewEmpty: "Dodaj budżet i termin, aby poprawić dopasowanie." },
+        preferences: { title: "Preferencje", body: "Zaznacz kierunki stylu, ważne cechy wizualne i dodatkowe informacje.", previewEmpty: "Dodaj własne preferencje, jeśli są już znane." },
+        summaryTitle: "Podsumowanie AI",
+        summaryBody: "To, co uzupełniasz, od razu tworzy czytelny punkt wyjścia do rozmowy z projektantem.",
+        projectLabel: "Projekt",
+        moodLabel: "Charakter",
+        readinessTitle: "Gotowość briefu",
+        readinessBody: "Możesz przejść do dopasowań jeszcze przed uzupełnieniem wszystkich pól.",
+        continueTitle: "Gotowy na kolejny krok?",
+        continueBody: "Uzupełnij najważniejsze informacje, aby dopasowania były bardziej precyzyjne.",
+        continue: "Kontynuuj uzupełnianie",
+        matchingReadyTitle: "Twój Project Compass jest gotowy",
+        matchingReadyBody: "Masz już wystarczająco dużo informacji, aby porównać dopasowanych projektantów.",
+        saveAndReturn: "Zapisz i wróć później",
+        showFullBrief: "Zobacz pełny brief",
+        hideFullBrief: "Ukryj pełny brief",
+        fullBriefTitle: "Pełny brief projektu",
+        supportTitle: "Masz pytania?",
+        supportBody: "Wynik AI ma charakter pomocniczy. Możesz go swobodnie doprecyzować przed rozmową z projektantem.",
+      },
       steps: {
         projectType: "1. Co planujesz?", space: "2. Opowiedz o przestrzeni", spaceBody: "Wystarczą dane orientacyjne. Pomogą projektantom oszacować zakres pracy jeszcze przed pierwszą rozmową.", area: "Powierzchnia, m²", areaPlaceholder: "np. 72", roomsCount: "Liczba pomieszczeń", roomsCountPlaceholder: "np. 3", roomsIncluded: "Pomieszczenia objęte projektem", propertyStatus: "3. Jaki jest status nieruchomości?", goal: "4. Czego potrzebujesz najbardziej?", photos: "5. Dodaj zdjęcia referencyjne", photosBody: "Dodaj 4-10 zdjęć wnętrz, detali lub nastrojów, które Ci się podobają. Podgląd pozostaje w tej przeglądarce do chwili uruchomienia analizy lub zapisania briefu. Zapisane pliki trafiają do prywatnego briefu.", photoLimit: "Osiągnięto limit zdjęć", photoLimitReached: "Osiągnięto limit zdjęć", addPhotos: "Dodaj zdjęcia referencyjne", preparingPhotos: "Przygotowywanie zdjęć...", photoTypes: "JPEG, PNG lub WebP. Dodaj kilka zdjęć, aby łatwiej rozpoznać wspólne cechy.", removePhoto: "Usuń", noPhotos: "Nie dodano jeszcze zdjęć. Zacznij od obrazów, które najlepiej oddają oczekiwany nastrój, materiał, światło lub detal.", aiTitle: "Analiza stylu ze zdjęć", aiBody: "ArchiCompass przeanalizuje zdjęcia i zaproponuje nazwę stylu, materiały, kolory oraz wskazówki pomocne przy wyborze projektanta.", analyzing: "Analizowanie...", analyze: "Analizuj zdjęcia", aiPrivacyBefore: "Uruchomienie analizy wysyła maksymalnie", privacy: "Polityce prywatności", aiPrivacyAfter: "zdjęć do dostawcy usługi AI. Nie przesyłaj zdjęć osób, adresów ani informacji poufnych.", aiTransparencyNotice: "AI pomaga analizować przesłane inspiracje i przygotować sugestie. Wynik ma charakter pomocniczy — ostateczne decyzje należą do Ciebie i wybranego projektanta.", aiTransparencyLink: "Jak działa AI", manyPhotos: (count) => `Analiza AI wykorzysta pierwsze ${count} zdjęć, aby wynik był szybki i precyzyjny. Wszystkie zdjęcia nadal można zapisać w briefie.`, suggestedStyle: "Sugerowany styl", confidencePrefix: "pewność:", closestDirection: "Najbliższy kierunek", colors: "Kolory", materials: "Materiały", styleClues: "Cechy stylu", tooLittleData: "Za mało danych", describeNeeds: "Jak opisać potrzeby projektantowi", watchOuts: "Na co uważać", analysisUnavailable: "Analiza AI jest niedostępna", visualCues: "Co łączy te zdjęcia?", style: "6. Które kierunki są Ci najbliższe?", scope: "7. Jakiego zakresu pomocy potrzebujesz?", budget: "8. Całkowity budżet inwestycji (projektant + materiały + wykonanie)", timeline: "9. Kiedy chcesz rozpocząć?", visualization: "10. Czy potrzebujesz wizualizacji 3D?", supervision: "11. Jakiego nadzoru potrzebujesz?",
       },
@@ -472,6 +562,51 @@ const projectCompassCopy: Record<SiteLocale, ProjectCompassCopy> = {
       stylesHint: "Choose one or several directions, up to four. Combining styles is natural and helps us match you with the right designer.",
       confidence: { high: "high", medium: "medium", low: "low" },
       hero: { eyebrow: "AI Project Compass", title: "Turn an unfinished idea into a clear project brief", body: "Style matters, but a strong match also depends on the scope, budget, type of interior, reference photos, timeline and support you need.", insightTitle: "Why this works better", insightBody: "Instead of asking you to guess a style name, ArchiCompass structures the information a designer needs to see whether the project fits their expertise." },
+      workspace: {
+        back: "Back to home",
+        eyebrow: "AI PROJECT COMPASS",
+        titleBefore: "Turn inspiration into a",
+        titleHighlight: "clear direction",
+        titleAfter: "for your project",
+        body: "Add inspiration photos, answer a few questions and let AI Project Compass help you understand your style, organise your needs and find professionals who fit your investment.",
+        benefits: ["Start with inspiration", "AI helps organise the direction", "Finish with a designer-ready project brief"],
+        progressTitle: "Your Project Compass",
+        progressLabel: "Brief readiness",
+        progressBody: "The more context you add, the more precisely we can help match designers to your project.",
+        statusEmpty: "Not started",
+        statusInProgress: "In progress",
+        statusReady: "Ready for matching",
+        complete: "Complete",
+        inProgress: "In progress",
+        open: "Open module",
+        close: "Close module",
+        cardsTitle: "Build the project in your own order",
+        cardsBody: "Open the modules in any order. The live summary updates as you add information.",
+        journey: ["Inspiration", "AI analysis", "Project details", "Collaboration scope", "Budget and timeline", "Preferences"],
+        inspirations: { title: "Inspiration", body: "Add interior, detail and material photos that best express the direction you want.", previewEmpty: "Start with a few saved inspirations.", previewReady: (count) => `${count} reference photos added.` },
+        analysis: { title: "AI analysis", body: "Turn photos into a style, material, palette and conversation guidance for the designer.", previewEmpty: "Add photos to enable AI analysis.", previewReady: "Your analysis was prepared from the inspiration you uploaded.", start: "Run AI analysis" },
+        details: { title: "Project details", body: "Add the property, area, rooms, project stage and location.", previewEmpty: "Add the essential context for the investment." },
+        scope: { title: "Collaboration scope", body: "Choose the goal, support level, 3D visualisation and site supervision needs.", previewEmpty: "Describe the type of support you need." },
+        budget: { title: "Budget and timeline", body: "Set an indicative total investment budget and intended project start.", previewEmpty: "Add a budget and timeline for stronger matching." },
+        preferences: { title: "Preferences", body: "Add style directions, visual signals and any information important to you.", previewEmpty: "Add your preferences when you are ready." },
+        summaryTitle: "AI project summary",
+        summaryBody: "Every detail you add becomes a clearer starting point for the designer conversation.",
+        projectLabel: "Project",
+        moodLabel: "Character",
+        readinessTitle: "Brief readiness",
+        readinessBody: "You can view matches before every field is complete.",
+        continueTitle: "Ready for the next step?",
+        continueBody: "Add the key project details to make the matching more precise.",
+        continue: "Continue building the brief",
+        matchingReadyTitle: "Your Project Compass is ready",
+        matchingReadyBody: "You now have enough context to compare matched designers.",
+        saveAndReturn: "Save and return later",
+        showFullBrief: "View full brief",
+        hideFullBrief: "Hide full brief",
+        fullBriefTitle: "Full project brief",
+        supportTitle: "Have a question?",
+        supportBody: "The AI result is supportive. You can always refine it before speaking with a designer.",
+      },
       steps: {
         projectType: "1. What are you planning?", space: "2. Tell us about the space", spaceBody: "Approximate details are enough. They help designers estimate the scope before the first conversation.", area: "Area, m²", areaPlaceholder: "e.g. 72", roomsCount: "Number of rooms", roomsCountPlaceholder: "e.g. 3", roomsIncluded: "Rooms included in the project", propertyStatus: "3. What is the property status?", goal: "4. What do you need most?", photos: "5. Add reference photos", photosBody: "Add 4-10 photos of interiors, details or moods you like. The preview stays in this browser until you run the analysis or save the brief. Saved files are added to your private brief.", photoLimit: "Photo limit reached", photoLimitReached: "Photo limit reached", addPhotos: "Add reference photos", preparingPhotos: "Preparing photos...", photoTypes: "JPEG, PNG or WebP. Add several photos to make shared visual patterns easier to identify.", removePhoto: "Remove", noPhotos: "No photos have been added yet. Start with the images that best capture the mood, material, lighting or detail you want.", aiTitle: "Photo style analysis", aiBody: "ArchiCompass will analyse the photos and suggest a style name, materials, colours and cues that help you choose a designer.", analyzing: "Analysing...", analyze: "Analyse photos", aiPrivacyBefore: "Running the analysis sends up to", privacy: "Privacy Policy", aiPrivacyAfter: "photos to the AI service provider. Do not upload photos of people, addresses, or confidential information.", aiTransparencyNotice: "AI helps analyse the inspiration you upload and prepare suggestions. The result is supportive only — final decisions remain with you and your chosen designer.", aiTransparencyLink: "How AI works", manyPhotos: (count) => `The AI analysis will use the first ${count} photos to keep the result fast and focused. All photos can still be saved with the brief.`, suggestedStyle: "Suggested style", confidencePrefix: "confidence:", closestDirection: "Closest direction", colors: "Colours", materials: "Materials", styleClues: "Style clues", tooLittleData: "Not enough information", describeNeeds: "How to describe your needs to a designer", watchOuts: "What to keep in mind", analysisUnavailable: "AI analysis is unavailable", visualCues: "What do these photos have in common?", style: "6. Which directions feel closest to you?", scope: "7. What kind of help do you need?", budget: "8. Total investment budget (designer + materials + works)", timeline: "9. When would you like to begin?", visualization: "10. Do you need 3D visualisations?", supervision: "11. What level of supervision do you need?",
       },

@@ -36,12 +36,36 @@ type StyleAnalysis = {
   watchOuts: string[];
 };
 
+type WorkspaceModule =
+  | "inspirations"
+  | "analysis"
+  | "details"
+  | "scope"
+  | "budget"
+  | "preferences";
+
 const maxReferencePhotos = 10;
 const maxAnalysisPhotos = 6;
 const maxPreparedPhotoBytes = 425 * 1024;
 const preparedPhotoDimensions = [1440, 1280, 1024, 800];
 const preparedPhotoQualities = [0.82, 0.72, 0.62, 0.52];
 const projectCompassDraftKey = "archicompass-project-compass-draft";
+
+const workspaceFallbackPhotos = [
+  "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=85",
+  "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=900&q=85",
+  "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=900&q=85",
+  "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=900&q=85",
+];
+
+const workspaceModuleMarks: Record<WorkspaceModule, string> = {
+  inspirations: "01",
+  analysis: "AI",
+  details: "02",
+  scope: "03",
+  budget: "04",
+  preferences: "05",
+};
 
 function canvasBlob(canvas: HTMLCanvasElement, quality: number) {
   return new Promise<Blob | null>((resolve) => {
@@ -659,7 +683,24 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isPreparingPhotos, setIsPreparingPhotos] = useState(false);
+  const [activeModule, setActiveModule] = useState<WorkspaceModule | null>(null);
+  const [showFullBrief, setShowFullBrief] = useState(false);
+  const [touchedModules, setTouchedModules] = useState<Partial<Record<WorkspaceModule, boolean>>>({});
   const objectUrls = useRef<string[]>([]);
+
+  function markModule(module: WorkspaceModule) {
+    setTouchedModules((current) => (current[module] ? current : { ...current, [module]: true }));
+  }
+
+  function openModule(module: WorkspaceModule) {
+    setActiveModule(module);
+    window.setTimeout(() => {
+      document.getElementById("project-compass-editor")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  }
 
   const selectedStyles = styleValues(style);
   const selectedStyle = selectedOption(styles, selectedStyles[0]);
@@ -676,6 +717,94 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   const visualCueLabel = selectedVisualCues.length
     ? selectedVisualCues.slice(0, 3).map((item) => optionLabel(visualCues, item)).join(", ")
     : selectedStyle.label;
+
+  const hasProjectDetails = Boolean(areaM2 || roomCount || selectedRoomTypes.length || touchedModules.details);
+  const hasScope = Boolean(touchedModules.scope);
+  const hasBudget = Boolean(touchedModules.budget);
+  const hasPreferences = Boolean(styleAnalysis || selectedVisualCues.length || notes.trim() || touchedModules.preferences);
+  const readinessParts = [
+    { module: "inspirations" as const, weight: 20, complete: referencePhotos.length > 0 },
+    { module: "analysis" as const, weight: 15, complete: Boolean(styleAnalysis) },
+    { module: "details" as const, weight: 20, complete: hasProjectDetails },
+    { module: "scope" as const, weight: 15, complete: hasScope },
+    { module: "budget" as const, weight: 25, complete: hasBudget },
+    { module: "preferences" as const, weight: 5, complete: hasPreferences },
+  ];
+  const briefReadiness = readinessParts.reduce(
+    (total, item) => total + (item.complete ? item.weight : 0),
+    0
+  );
+  const briefStatus =
+    briefReadiness >= 65
+      ? copy.ui.workspace.statusReady
+      : briefReadiness > 0
+      ? copy.ui.workspace.statusInProgress
+      : copy.ui.workspace.statusEmpty;
+  const recommendedModule = readinessParts.find((item) => !item.complete)?.module ?? "preferences";
+  const isReadyForMatching = briefReadiness >= 65 && hasProjectDetails && hasScope && hasBudget;
+  const workspaceProjectSummary = hasProjectDetails
+    ? `${optionLabel(projectTypes, projectType)}${areaM2 ? ` · ${areaM2} m²` : ""}${location.trim() ? ` · ${location.trim()}` : ""}`
+    : copy.ui.notProvided;
+  const workspaceScopeSummary = hasScope ? optionLabel(scopes, scope) : copy.ui.notProvided;
+  const workspaceBudgetSummary = hasBudget ? optionLabel(budgets, budget) : copy.ui.notProvided;
+  const workspaceTimelineSummary = hasBudget ? optionLabel(timelines, timeline) : copy.ui.notProvided;
+  const workspacePhotos = referencePhotos.length
+    ? referencePhotos.slice(0, 4).map((photo) => photo.url)
+    : workspaceFallbackPhotos;
+  const workspaceModules = [
+    {
+      id: "inspirations" as const,
+      title: copy.ui.workspace.inspirations.title,
+      body: copy.ui.workspace.inspirations.body,
+      preview: referencePhotos.length
+        ? copy.ui.workspace.inspirations.previewReady(referencePhotos.length)
+        : copy.ui.workspace.inspirations.previewEmpty,
+      complete: referencePhotos.length > 0,
+    },
+    {
+      id: "analysis" as const,
+      title: copy.ui.workspace.analysis.title,
+      body: copy.ui.workspace.analysis.body,
+      preview: styleAnalysis
+        ? styleAnalysis.primaryStyle
+        : copy.ui.workspace.analysis.previewEmpty,
+      complete: Boolean(styleAnalysis),
+    },
+    {
+      id: "details" as const,
+      title: copy.ui.workspace.details.title,
+      body: copy.ui.workspace.details.body,
+      preview: hasProjectDetails
+        ? `${optionLabel(projectTypes, projectType)}${areaM2 ? ` · ${areaM2} m²` : ""}${location.trim() ? ` · ${location.trim()}` : ""}`
+        : copy.ui.workspace.details.previewEmpty,
+      complete: hasProjectDetails,
+    },
+    {
+      id: "scope" as const,
+      title: copy.ui.workspace.scope.title,
+      body: copy.ui.workspace.scope.body,
+      preview: hasScope ? optionLabel(scopes, scope) : copy.ui.workspace.scope.previewEmpty,
+      complete: hasScope,
+    },
+    {
+      id: "budget" as const,
+      title: copy.ui.workspace.budget.title,
+      body: copy.ui.workspace.budget.body,
+      preview: hasBudget
+        ? `${optionLabel(budgets, budget)} · ${optionLabel(timelines, timeline)}`
+        : copy.ui.workspace.budget.previewEmpty,
+      complete: hasBudget,
+    },
+    {
+      id: "preferences" as const,
+      title: copy.ui.workspace.preferences.title,
+      body: copy.ui.workspace.preferences.body,
+      preview: hasPreferences
+        ? styleAnalysis?.primaryStyle || styleLabels(style)
+        : copy.ui.workspace.preferences.previewEmpty,
+      complete: hasPreferences,
+    },
+  ];
 
   const designerParams = new URLSearchParams({
     match: "brief",
@@ -835,6 +964,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
         ...current,
         ...nextPhotos.slice(0, Math.max(0, maxReferencePhotos - current.length)),
       ]);
+      markModule("inspirations");
       setStyleAnalysis(null);
       setAnalysisError(null);
     } finally {
@@ -855,6 +985,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
     );
     setStyleAnalysis(null);
     setAnalysisError(null);
+    markModule("inspirations");
   }
 
   async function analyzeReferencePhotos() {
@@ -903,6 +1034,8 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       }
 
       setStyleAnalysis(payload.analysis);
+      markModule("analysis");
+      markModule("preferences");
       if (styles.some((option) => option.value === payload.analysis?.styleDirection)) {
         setStyle((current) => mergeStyleValue(current, payload.analysis!.styleDirection));
       }
@@ -1089,6 +1222,278 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       objectUrls.current = [];
     };
   }, []);
+
+  const workspaceLayoutEnabled = true;
+
+  if (workspaceLayoutEnabled) {
+    return (
+      <main className="bg-[#fbfaff] pb-12 text-foreground">
+        <section className="border-b border-[#ece6f7] bg-[radial-gradient(circle_at_78%_20%,rgba(125,68,232,0.13),transparent_28%),linear-gradient(180deg,#ffffff_0%,#fbfaff_100%)] px-4 py-9 sm:px-6 sm:py-14">
+          <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(380px,0.9fr)] lg:items-center">
+            <div>
+              <Link href={localeAppPath("/")} className="inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-primary">
+                <span aria-hidden="true">&larr;</span>
+                {copy.ui.workspace.back}
+              </Link>
+              <div className="mt-8 text-xs font-bold tracking-[0.16em] text-primary">{copy.ui.workspace.eyebrow}</div>
+              <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
+                {copy.ui.workspace.titleBefore}{" "}
+                <span className="text-primary">{copy.ui.workspace.titleHighlight}</span>{" "}
+                {copy.ui.workspace.titleAfter}
+              </h1>
+              <p className="mt-5 max-w-2xl text-base leading-8 text-muted sm:text-lg">
+                {copy.ui.workspace.body}
+              </p>
+              <ul className="mt-7 grid gap-3 text-sm font-semibold text-foreground sm:grid-cols-3">
+                {copy.ui.workspace.benefits.map((benefit) => (
+                  <li key={benefit} className="flex items-start gap-2">
+                    <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-primary/25 bg-primary-soft text-xs text-primary">✓</span>
+                    <span>{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="relative mx-auto h-[350px] w-full max-w-[540px] sm:h-[420px]">
+              <div className="absolute inset-x-6 top-3 h-[calc(100%-22px)] overflow-hidden rounded-[32px] border border-white bg-[#eee8df] shadow-[0_28px_65px_rgba(57,31,92,0.16)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={workspacePhotos[0]} alt="" className="h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#21172c]/35 via-transparent to-transparent" />
+              </div>
+              {workspacePhotos.slice(1, 4).map((src, index) => (
+                <div
+                  key={src}
+                  className={[
+                    "absolute overflow-hidden rounded-2xl border-4 border-white bg-card shadow-[0_16px_32px_rgba(57,31,92,0.18)]",
+                    index === 0 ? "right-0 top-9 h-24 w-24 sm:h-28 sm:w-28" : "",
+                    index === 1 ? "left-0 top-[48%] h-20 w-20 sm:h-24 sm:w-24" : "",
+                    index === 2 ? "right-8 bottom-0 h-20 w-20 sm:h-24 sm:w-24" : "",
+                  ].join(" ")}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt="" className="h-full w-full object-cover" />
+                </div>
+              ))}
+              <div className="absolute left-6 top-7 rounded-2xl border border-primary/20 bg-white/95 p-4 shadow-[0_16px_32px_rgba(57,31,92,0.13)] backdrop-blur sm:left-0 sm:top-14 sm:p-5">
+                <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">{copy.ui.workspace.analysis.title}</div>
+                <div className="mt-1 text-sm font-bold">
+                  {styleAnalysis ? styleAnalysis.primaryStyle : copy.ui.workspace.progressTitle}
+                </div>
+                {styleAnalysis?.colorPalette.length ? (
+                  <div className="mt-3 flex gap-1.5" aria-label={styleAnalysis.colorPalette.join(", ")}>
+                    {styleAnalysis.colorPalette.slice(0, 4).map((color) => (
+                      <span key={color} title={color} className="h-4 w-4 rounded-full border border-black/10 bg-[#d9c29c] odd:bg-[#f3e7d5]" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-3 h-1.5 w-24 overflow-hidden rounded-full bg-primary-soft"><span className="block h-full w-2/3 rounded-full bg-primary" /></div>
+                )}
+              </div>
+              <div className="absolute bottom-7 right-0 rounded-2xl border border-primary/20 bg-white/95 p-4 shadow-[0_18px_36px_rgba(57,31,92,0.14)] backdrop-blur sm:p-5">
+                <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">{copy.ui.workspace.readinessTitle}</div>
+                <div className="mt-1 text-3xl font-bold text-primary">{briefReadiness}%</div>
+                <div className="mt-1 text-xs font-semibold text-muted">{briefStatus}</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="px-4 py-7 sm:px-6">
+          <div className="mx-auto max-w-7xl rounded-3xl border border-[#e9e1f5] bg-white p-5 shadow-[0_14px_34px_rgba(57,31,92,0.06)] sm:p-6">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              <div className="min-w-[185px]">
+                <div className="text-sm font-bold text-foreground">{copy.ui.workspace.progressTitle}</div>
+                <div className="mt-1 text-sm text-muted">{copy.ui.workspace.progressBody}</div>
+              </div>
+              <div className="min-w-[160px]">
+                <div className="flex items-baseline justify-between gap-3 text-sm font-semibold"><span>{copy.ui.workspace.progressLabel}</span><span className="text-primary">{briefReadiness}%</span></div>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-primary-soft"><div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${briefReadiness}%` }} /></div>
+              </div>
+              <div className="flex flex-wrap gap-2 lg:justify-end">
+                {workspaceModules.map((module, index) => (
+                  <button
+                    key={module.id}
+                    type="button"
+                    onClick={() => openModule(module.id)}
+                    className={[
+                      "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition",
+                      module.complete ? "border-emerald-200 bg-emerald-50 text-emerald-800" : activeModule === module.id ? "border-primary bg-primary-soft text-primary" : "border-line bg-background text-muted hover:border-primary hover:text-primary",
+                    ].join(" ")}
+                  >
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] shadow-sm">{module.complete ? "✓" : index + 1}</span>
+                    {copy.ui.workspace.journey[index]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto grid max-w-7xl gap-7 px-4 pb-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight">{copy.ui.workspace.cardsTitle}</h2>
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-muted">{copy.ui.workspace.cardsBody}</p>
+              </div>
+              <span className="w-fit rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary">{briefStatus}</span>
+            </div>
+
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              {workspaceModules.map((module) => (
+                <button
+                  key={module.id}
+                  type="button"
+                  aria-expanded={activeModule === module.id}
+                  onClick={() => openModule(module.id)}
+                  className={[
+                    "group relative min-h-[220px] overflow-hidden rounded-3xl border bg-white p-5 text-left shadow-[0_12px_28px_rgba(57,31,92,0.05)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(57,31,92,0.10)]",
+                    activeModule === module.id ? "border-primary ring-2 ring-primary/10" : "border-[#e8e1f1] hover:border-primary/50",
+                  ].join(" ")}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-2xl bg-primary text-xs font-bold text-white">{workspaceModuleMarks[module.id]}</span>
+                    <span className={module.complete ? "rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800" : "rounded-full bg-background px-3 py-1 text-xs font-bold text-muted"}>
+                      {module.complete ? copy.ui.workspace.complete : copy.ui.workspace.inProgress}
+                    </span>
+                  </div>
+                  <h3 className="mt-7 text-xl font-bold">{module.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted">{module.body}</p>
+                  <div className="mt-5 border-t border-line pt-4 text-sm font-semibold text-primary">{module.preview}</div>
+                  <span className="absolute bottom-5 right-5 text-xl text-primary transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">&rarr;</span>
+                  {module.id === "inspirations" ? (
+                    <div className="absolute right-4 top-[76px] grid w-24 grid-cols-2 gap-1 opacity-90">
+                      {workspacePhotos.slice(0, 4).map((src) => (
+                        <span key={src} className="aspect-square overflow-hidden rounded-lg bg-primary-soft">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={src} alt="" className="h-full w-full object-cover" />
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </button>
+              ))}
+            </div>
+
+            {activeModule ? (
+              <section id="project-compass-editor" className="mt-5 scroll-mt-24 rounded-3xl border border-primary/25 bg-white p-5 shadow-[0_18px_44px_rgba(57,31,92,0.09)] sm:p-7">
+                <div className="flex flex-col gap-3 border-b border-line pb-5 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <div className="text-xs font-bold tracking-[0.14em] text-primary">{workspaceModuleMarks[activeModule]} · {copy.ui.workspace.journey[workspaceModules.findIndex((module) => module.id === activeModule)]}</div>
+                    <h2 className="mt-2 text-2xl font-bold">{workspaceModules.find((module) => module.id === activeModule)?.title}</h2>
+                  </div>
+                  <button type="button" onClick={() => setActiveModule(null)} className="w-fit rounded-xl border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary">
+                    {copy.ui.workspace.close}
+                  </button>
+                </div>
+
+                {activeModule === "inspirations" ? (
+                  <div className="mt-6">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                      <div>
+                        <p className="text-sm leading-6 text-muted">{copy.ui.steps.photosBody}</p>
+                      </div>
+                      <span className="rounded-full bg-background px-3 py-1 text-sm font-bold text-muted">{referencePhotos.length}/{maxReferencePhotos}</span>
+                    </div>
+                    <label className={["mt-5 flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-primary/35 bg-primary-soft/40 px-4 py-10 text-center transition hover:border-primary", referencePhotos.length >= maxReferencePhotos || isPreparingPhotos ? "pointer-events-none opacity-60" : ""].join(" ")}>
+                      <input type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={referencePhotos.length >= maxReferencePhotos || isPreparingPhotos} onChange={addReferencePhotos} className="sr-only" />
+                      <span className="text-base font-bold">{isPreparingPhotos ? copy.ui.steps.preparingPhotos : referencePhotos.length >= maxReferencePhotos ? copy.ui.steps.photoLimitReached : copy.ui.steps.addPhotos}</span>
+                      <span className="mt-2 text-sm text-muted">{copy.ui.steps.photoTypes}</span>
+                    </label>
+                    {referencePhotos.length ? (
+                      <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                        {referencePhotos.map((photo) => (
+                          <div key={photo.id} className="overflow-hidden rounded-2xl border border-line bg-background">
+                            <div className="aspect-[4/3] overflow-hidden bg-primary-soft">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={photo.url} alt={photo.name} className="h-full w-full object-cover" />
+                            </div>
+                            <div className="grid gap-2 p-3"><div className="truncate text-xs font-semibold">{photo.name}</div><button type="button" onClick={() => removeReferencePhoto(photo.id)} className="rounded-lg border border-line bg-card px-3 py-2 text-xs font-semibold text-muted hover:border-primary hover:text-primary">{copy.ui.steps.removePhoto}</button></div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : <p className="mt-5 rounded-2xl border border-line bg-background p-4 text-sm leading-6 text-muted">{copy.ui.steps.noPhotos}</p>}
+                    <p className="mt-5 text-xs leading-5 text-muted">{copy.ui.steps.aiPrivacyBefore} {maxAnalysisPhotos} {copy.ui.steps.aiPrivacyAfter} <Link href={localeAppPath("/privacy")} className="font-semibold underline">{copy.ui.steps.privacy}</Link>.</p>
+                  </div>
+                ) : null}
+
+                {activeModule === "analysis" ? (
+                  <div className="mt-6">
+                    <div className="rounded-2xl border border-primary/25 bg-primary-soft/55 p-5">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div><div className="flex items-center gap-2"><span className="rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-white">AI</span><h3 className="font-bold text-primary">{copy.ui.steps.aiTitle}</h3></div><p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{copy.ui.steps.aiBody}</p></div>
+                        <button type="button" onClick={analyzeReferencePhotos} disabled={!referencePhotos.length || isAnalyzing || isPreparingPhotos} className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60">{isAnalyzing ? copy.ui.steps.analyzing : copy.ui.workspace.analysis.start}</button>
+                      </div>
+                      <p className="mt-4 rounded-xl border border-primary/15 bg-white/70 px-3 py-2 text-xs leading-5 text-muted">{copy.ui.steps.aiTransparencyNotice} <Link href={localeAppPath("/ai-transparency")} className="font-semibold text-primary underline">{copy.ui.steps.aiTransparencyLink}</Link>.</p>
+                    </div>
+                    {referencePhotos.length > maxAnalysisPhotos ? <p className="mt-3 text-xs leading-5 text-muted">{copy.ui.steps.manyPhotos(maxAnalysisPhotos)}</p> : null}
+                    {styleAnalysis ? (
+                      <div className="mt-5 grid gap-4 rounded-2xl border border-primary/20 bg-[#fbfaff] p-5">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"><div><div className="text-xs font-bold uppercase tracking-[0.12em] text-primary">{copy.ui.steps.suggestedStyle}</div><div className="mt-1 text-2xl font-bold">{styleAnalysis.primaryStyle}</div></div><span className="w-fit rounded-full bg-white px-3 py-1 text-xs font-bold text-primary">{copy.ui.steps.confidencePrefix} {confidenceLabel(styleAnalysis.confidence)}</span></div>
+                        <p className="text-sm leading-6 text-muted">{styleAnalysis.summary}</p>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {[[copy.ui.steps.closestDirection, optionLabel(styles, styleAnalysis.styleDirection)], [copy.ui.steps.colors, styleAnalysis.colorPalette.join(", ") || copy.ui.steps.tooLittleData], [copy.ui.steps.materials, styleAnalysis.materials.join(", ") || copy.ui.steps.tooLittleData], [copy.ui.steps.styleClues, styleAnalysis.styleClues.join(", ") || copy.ui.steps.tooLittleData]].map(([label, value]) => <div key={label} className="rounded-xl border border-line bg-white p-4 text-sm"><div className="text-muted">{label}</div><div className="mt-1 font-semibold">{value}</div></div>)}
+                        </div>
+                        <div className="rounded-xl border border-line bg-white p-4 text-sm leading-6"><div className="font-semibold">{copy.ui.steps.describeNeeds}</div><p className="mt-1 text-muted">{styleAnalysis.designerPrompt}</p></div>
+                        {styleAnalysis.watchOuts.length ? <div><div className="text-sm font-semibold">{copy.ui.steps.watchOuts}</div><ul className="mt-2 grid gap-1 text-sm leading-6 text-muted">{styleAnalysis.watchOuts.map((item) => <li key={item}>- {item}</li>)}</ul></div> : null}
+                        <ShareableStyleResult analysis={styleAnalysis} photos={referencePhotos} />
+                      </div>
+                    ) : null}
+                    {analysisError ? <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700"><div className="font-semibold">{copy.ui.steps.analysisUnavailable}</div><p className="mt-1">{analysisError}</p></div> : null}
+                  </div>
+                ) : null}
+
+                {activeModule === "details" ? (
+                  <div className="mt-6 grid gap-7">
+                    <OptionGrid label={copy.ui.steps.projectType} onChange={(value) => { setProjectType(value); markModule("details"); }} options={projectTypes} value={projectType} />
+                    <section><h3 className="text-base font-bold">{copy.ui.steps.space}</h3><p className="mt-1 text-sm leading-6 text-muted">{copy.ui.steps.spaceBody}</p><div className="mt-4 grid gap-4 sm:grid-cols-2"><label className="text-sm font-semibold">{copy.ui.steps.area}<input type="number" min="1" max="5000" inputMode="decimal" value={areaM2} onChange={(event) => { setAreaM2(event.target.value); markModule("details"); }} placeholder={copy.ui.steps.areaPlaceholder} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label><label className="text-sm font-semibold">{copy.ui.steps.roomsCount}<input type="number" min="1" max="50" inputMode="numeric" value={roomCount} onChange={(event) => { setRoomCount(event.target.value); markModule("details"); }} placeholder={copy.ui.steps.roomsCountPlaceholder} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label></div><div className="mt-4"><div className="text-sm font-semibold">{copy.ui.steps.roomsIncluded}</div><div className="mt-3 flex flex-wrap gap-2">{roomTypes.map((room) => { const selected = selectedRoomTypes.includes(room); return <button key={room} type="button" aria-pressed={selected} onClick={() => { toggleRoomType(room); markModule("details"); }} className={selected ? "rounded-full border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white" : "rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"}>{roomTypeLabels[room] || room}</button>; })}</div></div></section>
+                    <OptionGrid label={copy.ui.steps.propertyStatus} onChange={(value) => { setPropertyStatus(value); markModule("details"); }} options={propertyStatuses} value={propertyStatus} />
+                    <label className="block max-w-xl text-sm font-semibold">{copy.ui.location}<input value={location} onChange={(event) => { setLocation(event.target.value); markModule("details"); }} placeholder={copy.ui.locationPlaceholder} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label>
+                  </div>
+                ) : null}
+
+                {activeModule === "scope" ? (
+                  <div className="mt-6 grid gap-7"><OptionGrid label={copy.ui.steps.goal} onChange={(value) => { setGoal(value); markModule("scope"); }} options={goals} value={goal} /><OptionGrid label={copy.ui.steps.scope} onChange={(value) => { setScope(value); markModule("scope"); }} options={scopes} value={scope} /><OptionGrid label={copy.ui.steps.visualization} onChange={(value) => { setVisualizationNeed(value); markModule("scope"); }} options={visualizationNeeds} value={visualizationNeed} /><OptionGrid label={copy.ui.steps.supervision} onChange={(value) => { setSupervisionNeed(value); markModule("scope"); }} options={supervisionNeeds} value={supervisionNeed} /></div>
+                ) : null}
+
+                {activeModule === "budget" ? (
+                  <div className="mt-6 grid gap-7"><OptionGrid label={copy.ui.steps.budget} onChange={(value) => { setBudget(value); markModule("budget"); }} options={budgets} value={budget} /><OptionGrid label={copy.ui.steps.timeline} onChange={(value) => { setTimeline(value); markModule("budget"); }} options={timelines} value={timeline} /></div>
+                ) : null}
+
+                {activeModule === "preferences" ? (
+                  <div className="mt-6 grid gap-7"><MultiOptionGrid label={copy.ui.steps.style} onChange={(values) => { setStyle(values.length ? values.join(" | ") : "Not sure yet"); markModule("preferences"); }} options={styles} values={selectedStyles} /><section><h3 className="text-base font-bold">{copy.ui.steps.visualCues}</h3><div className="mt-3 grid gap-3 sm:grid-cols-2">{visualCues.map((cue) => { const selected = selectedVisualCues.includes(cue.value); return <button key={cue.value} type="button" aria-pressed={selected} onClick={() => { toggleVisualCue(cue.value); markModule("preferences"); }} className={selected ? "rounded-2xl border border-primary bg-primary-soft p-4 text-left" : "rounded-2xl border border-line bg-background p-4 text-left hover:border-primary"}><span className="block text-sm font-bold">{cue.label}</span><span className="mt-1 block text-sm leading-6 text-muted">{cue.description}</span></button>; })}</div></section><label className="block text-sm font-semibold">{copy.ui.notes}<textarea value={notes} onChange={(event) => { setNotes(event.target.value); markModule("preferences"); }} placeholder={copy.ui.notesPlaceholder} rows={4} className="mt-2 w-full resize-y rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label></div>
+                ) : null}
+              </section>
+            ) : null}
+
+            {showFullBrief ? <section className="mt-5 rounded-3xl border border-line bg-white p-5 sm:p-6"><div className="flex items-center justify-between gap-4"><h2 className="text-xl font-bold">{copy.ui.workspace.fullBriefTitle}</h2><button type="button" onClick={() => setShowFullBrief(false)} className="text-sm font-semibold text-primary hover:underline">{copy.ui.workspace.hideFullBrief}</button></div><pre className="mt-4 whitespace-pre-wrap rounded-2xl bg-[#21172c] p-4 text-xs leading-6 text-white/80">{briefText}</pre></section> : null}
+          </div>
+
+          <aside className="h-fit rounded-3xl border border-primary/20 bg-white p-5 shadow-[0_18px_44px_rgba(57,31,92,0.10)] lg:sticky lg:top-24">
+            <div className="flex items-start justify-between gap-4"><div><div className="text-sm font-bold text-primary">{copy.ui.workspace.summaryTitle}</div><h2 className="mt-1 text-xl font-bold">{styleAnalysis?.primaryStyle || (hasPreferences ? styleLabels(style) : copy.ui.notProvided)}</h2></div><span className="rounded-full bg-primary px-2.5 py-1 text-xs font-bold text-white">AI</span></div>
+            <p className="mt-3 text-sm leading-6 text-muted">{styleAnalysis?.summary || copy.ui.workspace.summaryBody}</p>
+            {styleAnalysis?.colorPalette.length ? <div className="mt-4"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{copy.ui.steps.colors}</div><div className="mt-2 flex flex-wrap gap-2">{styleAnalysis.colorPalette.map((color) => <span key={color} className="rounded-full border border-line bg-background px-2.5 py-1 text-xs font-semibold">{color}</span>)}</div></div> : null}
+            <div className="mt-5 grid gap-3 border-y border-line py-5 text-sm">
+              {[[copy.ui.workspace.projectLabel, workspaceProjectSummary], [copy.ui.steps.materials, styleAnalysis?.materials.join(", ") || copy.ui.notProvided], [copy.ui.workspace.moodLabel, styleAnalysis?.styleClues.slice(0, 2).join(", ") || (selectedVisualCues.length ? selectedVisualCues.slice(0, 2).map((item) => optionLabel(visualCues, item)).join(", ") : copy.ui.notProvided)], [copy.ui.brief.support, workspaceScopeSummary], [copy.ui.brief.budget, workspaceBudgetSummary], [copy.ui.brief.timeline, workspaceTimelineSummary]].map(([label, value]) => <div key={label} className="flex items-start justify-between gap-4"><span className="text-muted">{label}</span><span className="max-w-[55%] text-right font-semibold">{value}</span></div>)}
+            </div>
+            <div className="mt-5 rounded-2xl bg-primary-soft p-4"><div className="flex items-center justify-between gap-3 text-sm font-bold"><span>{copy.ui.workspace.readinessTitle}</span><span className="text-primary">{briefReadiness}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${briefReadiness}%` }} /></div><p className="mt-3 text-xs leading-5 text-muted">{copy.ui.workspace.readinessBody}</p></div>
+            <div className="mt-5 grid gap-3">
+              {isDesigner ? <div className="rounded-xl border border-primary/25 bg-primary-soft p-3 text-sm leading-6 text-muted">{copy.ui.designerOnly}</div> : null}
+              {isReadyForMatching ? <><div><div className="text-sm font-bold">{copy.ui.workspace.matchingReadyTitle}</div><p className="mt-1 text-sm leading-6 text-muted">{copy.ui.workspace.matchingReadyBody}</p></div>{!isDesigner ? <button type="button" onClick={() => saveBrief(true)} disabled={isSaving} className="rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white hover:opacity-90 disabled:opacity-60">{isSaving ? copy.ui.saving : copy.ui.saveAndFind}</button> : null}</> : <><div><div className="text-sm font-bold">{copy.ui.workspace.continueTitle}</div><p className="mt-1 text-sm leading-6 text-muted">{copy.ui.workspace.continueBody}</p></div><button type="button" onClick={() => openModule(recommendedModule)} className="rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white hover:opacity-90">{copy.ui.workspace.continue}</button></>}
+              {!isDesigner ? <button type="button" onClick={() => saveBrief(false)} disabled={isSaving} className="rounded-xl border border-primary bg-white px-4 py-3 text-sm font-bold text-primary hover:bg-primary hover:text-white disabled:opacity-60">{isSaving ? copy.ui.saving : copy.ui.workspace.saveAndReturn}</button> : null}
+              <Link href={designerHref} className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-bold hover:border-primary hover:text-primary">{copy.ui.viewMatches}</Link>
+              <button type="button" onClick={() => setShowFullBrief((current) => !current)} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-bold hover:border-primary hover:text-primary">{showFullBrief ? copy.ui.workspace.hideFullBrief : copy.ui.workspace.showFullBrief}</button>
+              <button type="button" onClick={copyBrief} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-bold hover:border-primary hover:text-primary">{copied ? copy.ui.briefCopied : copy.ui.copyBrief}</button>
+            </div>
+            {savedBriefId ? <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900"><div className="font-semibold">{copy.ui.brief.savedTitle}</div><p className="mt-1">{copy.ui.brief.savedBody(savedReferenceCount ?? 0)}</p><Link href={localeAppPath("/client/briefs")} className="mt-2 inline-flex font-semibold underline">{copy.ui.brief.openSavedBriefs}</Link></div> : null}
+            {saveError ? <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700"><div className="font-semibold">{copy.ui.brief.saveFailed}</div><p className="mt-1">{saveError}</p></div> : null}
+          </aside>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6"><div className="grid gap-4 rounded-3xl border border-[#e7e0f2] bg-white p-5 sm:grid-cols-[1fr_auto] sm:items-center sm:p-6"><div><div className="text-sm font-bold text-primary">{copy.ui.workspace.supportTitle}</div><p className="mt-1 max-w-3xl text-sm leading-6 text-muted">{copy.ui.workspace.supportBody}</p></div><Link href={localeAppPath("/ai-transparency")} className="w-fit rounded-xl border border-primary bg-primary-soft px-4 py-3 text-sm font-bold text-primary hover:bg-primary hover:text-white">{copy.ui.steps.aiTransparencyLink}</Link></div></section>
+      </main>
+    );
+  }
 
   return (
     <main className="bg-background pb-24 lg:pb-0">
