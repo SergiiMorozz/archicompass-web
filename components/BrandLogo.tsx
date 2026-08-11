@@ -1,4 +1,4 @@
-import { siteLocale } from "@/lib/site-locale";
+import { localeAssetPath } from "@/lib/site-locale";
 
 type BrandLogoProps = {
   className?: string;
@@ -15,7 +15,7 @@ export default function BrandLogo({
   className = "h-10 w-44",
   variant = "purple",
 }: BrandLogoProps) {
-  const source = `${siteLocale === "en" ? "/en" : ""}${logoSources[variant]}`;
+  const source = localeAssetPath(logoSources[variant]);
 
   return (
     <svg

@@ -69,6 +69,13 @@ export function localeAppPath(path = "/") {
   return normalizedRoutePath(path);
 }
 
+// Files from /public do not receive Next.js' basePath automatically. Keep
+// English asset URLs under /en so the two deployments render the same brand.
+export function localeAssetPath(path: string) {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${siteLocale === "en" ? "/en" : ""}${normalizedPath}`;
+}
+
 export function localePublicUrl(locale: SiteLocale, path = "/") {
   return `${localeSiteUrl("pl")}${localePublicPath(locale, path)}`;
 }

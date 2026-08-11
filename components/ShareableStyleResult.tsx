@@ -4,6 +4,7 @@ import { useState } from "react";
 import BrandLogo from "@/components/BrandLogo";
 import { getProjectCompassCopy } from "@/content/project-compass-copy";
 import { copyText } from "@/lib/copy-text";
+import { localeAssetPath } from "@/lib/site-locale";
 
 type ShareableStyleAnalysis = {
   primaryStyle: string;
@@ -231,7 +232,7 @@ async function createResultPng({
   context.fillRect(0, 0, canvasWidth, canvasHeight);
 
   drawRoundedFill(context, 38, 38, canvasWidth - 76, canvasHeight - 76, 34, "#ffffff");
-  const brandLogo = await loadImage("/brand/archicompass-logo-purple.png");
+  const brandLogo = await loadImage(localeAssetPath("/brand/archicompass-logo-purple.png"));
   context.drawImage(
     brandLogo,
     logoCrop.x,
