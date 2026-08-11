@@ -355,13 +355,6 @@ export default async function DesignerProfilePage({
     notFound();
   }
 
-  if (!profileData.is_demo) {
-    const { data: isDesignerAccount } = await supabase.rpc("is_designer_account", {
-      target_user_id: profileData.id,
-    });
-    if (!isDesignerAccount) notFound();
-  }
-
   const profilePath = `/designers/${profileData.public_slug || profileData.id}`;
   if (isUuid(identifier) && profileData.public_slug) {
     const query = new URLSearchParams();
