@@ -16,7 +16,7 @@ import { getAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createPublicContentClient } from "@/lib/public-content-client";
 import { requiredServiceCapabilities, serviceCapabilities, serviceCapabilityLabel } from "@/lib/service-capabilities";
-import { availabilityLabel, availabilityStatuses, pricingLabel, pricingModelLabel, workModeLabel, workModes } from "@/lib/profile-pricing";
+import { availabilityLabel, availabilityStatuses, pricingLabel, pricingModelLabel, pricingModels, workModeLabel, workModes } from "@/lib/profile-pricing";
 import {
   designerStyles,
   professionalOptionLabel,
@@ -32,6 +32,13 @@ import {
 } from "@/lib/public-demo-profiles";
 import { localizeProfileContent } from "@/lib/localized-profile-content";
 import { profileExperienceLabel, profileLocationLabel, profileTypeLabel } from "@/lib/profile-system-labels";
+import { locationOptions } from "@/lib/location-options";
+import {
+  careerStages,
+  careerStageLabel,
+  localizedProfileList,
+  type ServiceOffering,
+} from "@/lib/professional-profile-details";
 
 export const revalidate = 0;
 
@@ -56,9 +63,12 @@ type Profile = {
   profession_type: string | null;
   user_type: string | null;
   specialties: string[] | null;
+  custom_specialties_pl: string[] | null;
+  custom_specialties_en: string[] | null;
   service_categories: string[] | null;
   languages: string[] | null;
   service_capabilities: string[] | null;
+  service_offerings: ServiceOffering[] | null;
   hourly_rate: number | null;
   pricing_model: string | null;
   price_from: number | null;
@@ -66,6 +76,7 @@ type Profile = {
   minimum_project_budget: number | null;
   work_modes: string[] | null;
   availability_status: string | null;
+  career_stage: string | null;
   years_experience: number | null;
   google_business_url: string | null;
   google_rating: number | null;
@@ -83,7 +94,10 @@ type Studio = {
   bio_en: string | null;
   location: string | null;
   specialties: string[] | null;
+  custom_specialties_pl: string[] | null;
+  custom_specialties_en: string[] | null;
   service_capabilities: string[] | null;
+  service_offerings: ServiceOffering[] | null;
   hourly_rate: number | null;
   pricing_model: string | null;
   price_from: number | null;
@@ -91,6 +105,7 @@ type Studio = {
   minimum_project_budget: number | null;
   work_modes: string[] | null;
   availability_status: string | null;
+  career_stage: string | null;
   years_experience: number | null;
   google_business_url: string | null;
   google_rating: number | null;
@@ -126,6 +141,7 @@ type SP = {
   projectCategories?: string | string[];
   focus?: string | string[];
   availability?: string;
+  careerStage?: string;
   workMode?: string;
   minExperience?: string;
   maxProjectBudget?: string;
@@ -215,6 +231,58 @@ function profileLocation(profile: Profile) {
   return profileLocationLabel(profile.location);
 }
 
+type DirectoryProfile = Pick<
+  Profile | Studio,
+  | "specialties"
+  | "custom_specialties_pl"
+  | "custom_specialties_en"
+  | "service_offerings"
+  | "pricing_model"
+  | "price_from"
+  | "price_to"
+  | "hourly_rate"
+>;
+
+function profileSpecialties(profile: DirectoryProfile) {
+  return localizedProfileList(
+    profile.custom_specialties_pl,
+    profile.custom_specialties_en,
+    profile.specialties
+  );
+}
+
+function optionMatches(values: string[], option: string) {
+  const normalizedOption = normalizeSearchText(option);
+  const localizedOption = normalizeSearchText(professionalOptionLabel(option));
+  return values.some((value) => {
+    const normalizedValue = normalizeSearchText(value);
+    return (
+      normalizedValue.includes(normalizedOption) ||
+      normalizedOption.includes(normalizedValue) ||
+      normalizedValue.includes(localizedOption) ||
+      localizedOption.includes(normalizedValue)
+    );
+  });
+}
+
+function profilePriceOptions(profile: DirectoryProfile) {
+  const offers = profile.service_offerings ?? [];
+  return [
+    {
+      model: profile.pricing_model,
+      values: [profile.price_from, profile.price_to, profile.hourly_rate].filter(
+        (value): value is number => typeof value === "number"
+      ),
+    },
+    ...offers.map((offer) => ({
+      model: offer.pricing_model ?? null,
+      values: [offer.price_from, offer.price_to].filter(
+        (value): value is number => typeof value === "number"
+      ),
+    })),
+  ];
+}
+
 function professionalHref(
   type: "designer" | "studio",
   id: string,
@@ -256,6 +324,7 @@ function StudioCard({
     availableCapabilities.includes(capability)
   );
   const studioHref = professionalHref("studio", studio.id, briefId);
+  const careerStage = careerStageLabel(studio.career_stage);
   return (
     <article className="overflow-hidden rounded-lg border border-line bg-card shadow-sm">
       <Link
@@ -305,11 +374,16 @@ function StudioCard({
           </div>
         ) : null}
         <div className="mt-4 flex flex-wrap gap-2">
-          {(studio.specialties ?? []).slice(0, 3).map((specialty) => (
+          {profileSpecialties(studio).slice(0, 3).map((specialty) => (
             <span key={specialty} className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
               {professionalOptionLabel(specialty)}
             </span>
           ))}
+          {careerStage ? (
+            <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
+              {careerStage}
+            </span>
+          ) : null}
         </div>
         {briefContext && requestedCapabilities.length ? (
           <div className="mt-4 rounded-lg bg-primary-soft p-4 text-sm">
@@ -377,7 +451,8 @@ function DesignerCard({
   const type = profileType(profile);
   const location = profileLocation(profile);
   const cover = portfolioCover || coverImages[index % coverImages.length];
-  const specialties = profile.specialties?.filter(Boolean).slice(0, 5) ?? [];
+  const specialties = profileSpecialties(profile).slice(0, 5);
+  const careerStage = careerStageLabel(profile.career_stage);
   const availableCapabilities = profile.service_capabilities ?? [];
   const demo = getDemoProfilePresentation(profile.id);
   const specialtyText = normalizeSearchText(specialties.join(" "));
@@ -471,6 +546,11 @@ function DesignerCard({
                   <span className="rounded-full bg-[#eaf2ff] px-3 py-1 text-xs font-semibold text-[#2563eb]">
                     {copy.cards.portfolio}
                   </span>
+                  {careerStage ? (
+                    <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
+                      {careerStage}
+                    </span>
+                  ) : null}
                 </div>
               </div>
               <FavoriteButton compact entityType="designer" entityKey={profile.id} initialSaved={initialSaved} />
@@ -581,6 +661,11 @@ function DesignerCard({
           <span className="rounded-full bg-[#fff3df] px-3 py-1 text-xs font-semibold text-[#b56b08]">
             {profile.is_demo ? copy.cards.demoProfile : copy.cards.professionalProfile}
           </span>
+          {careerStage ? (
+            <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
+              {careerStage}
+            </span>
+          ) : null}
         </div>
 
         <div className="mt-4 grid gap-2 text-sm text-muted">
@@ -650,6 +735,7 @@ export default async function DesignersPage({
   const selectedProjectCategories = many(sp.projectCategories);
   const selectedFocus = many(sp.focus);
   const availability = first(sp.availability).trim();
+  const careerStage = first(sp.careerStage).trim();
   const workMode = first(sp.workMode).trim();
   const profileType = first(sp.profileType).trim() || "all";
   const matchingMode = first(sp.match) === "brief";
@@ -712,7 +798,7 @@ export default async function DesignersPage({
   const query = publicSupabase
     .from("profiles")
     .select(
-      "id, public_slug, avatar_url, profile_logo_path, full_name, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, service_categories, languages, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at"
+      "id, public_slug, avatar_url, profile_logo_path, full_name, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, custom_specialties_pl, custom_specialties_en, service_categories, languages, service_capabilities, service_offerings, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, career_stage, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at"
     )
     .eq("user_type", "professional")
     .order("created_at", { ascending: false })
@@ -721,7 +807,7 @@ export default async function DesignersPage({
   const { data, error } = await query;
   const { data: studioData } = await publicSupabase
     .from("studios")
-    .select("id, name, profile_logo_path, bio, bio_pl, bio_en, location, specialties, service_capabilities, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at")
+    .select("id, name, profile_logo_path, bio, bio_pl, bio_en, location, specialties, custom_specialties_pl, custom_specialties_en, service_capabilities, service_offerings, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, career_stage, years_experience, google_business_url, google_rating, google_review_count, is_demo, created_at")
     .eq("published", true)
     .order("created_at", { ascending: false })
     .limit(30);
@@ -758,12 +844,48 @@ export default async function DesignersPage({
   const studioIdentityImages = new Map(
     ((studioData ?? []) as Studio[]).map((studio) => [studio.id, profileMediaUrl(studio.profile_logo_path)])
   );
+  const allProfiles = ((data ?? []) as Profile[])
+    .map(applyDemoProfilePresentation)
+    .map((profile) => localizeProfileContent(profile));
+  const allStudios = ((studioData ?? []) as Studio[]).map((studio) => localizeProfileContent(studio));
+  const allDirectoryProfiles = [...allProfiles, ...allStudios];
   const normalizedQuery = normalizeSearchText(q);
   const normalizedLocation = normalizeSearchText(location);
   const allProfileLocations = [
-    ...((data ?? []) as Profile[]).map((profile) => profile.location),
-    ...((studioData ?? []) as Studio[]).map((studio) => studio.location),
+    ...allDirectoryProfiles.map((profile) => profile.location),
   ];
+  const locationSuggestions = Array.from(
+    new Set([
+      ...locationOptions(),
+      ...allProfileLocations
+        .filter((candidate): candidate is string => Boolean(candidate?.trim()))
+        .map((candidate) => profileLocationLabel(candidate)),
+    ])
+  ).sort((left, right) => left.localeCompare(right, siteLocale === "pl" ? "pl" : "en"));
+  const allSpecialties = allDirectoryProfiles.flatMap(profileSpecialties);
+  const availableStyles = designerStyles.filter((style) => optionMatches(allSpecialties, style));
+  const availableProjectCategories = projectServiceCategories.filter((category) =>
+    allProfiles.some((profile) => (profile.service_categories ?? []).includes(category)) ||
+    optionMatches(allSpecialties, category)
+  );
+  const availableFocus = specialistFocusOptions.filter((focus) => optionMatches(allSpecialties, focus));
+  const availableServices = serviceCapabilities.filter((service) =>
+    allDirectoryProfiles.some((profile) => profile.service_capabilities?.includes(service))
+  );
+  const availableAvailability = availabilityStatuses.filter((status) =>
+    allDirectoryProfiles.some((profile) => profile.availability_status === status)
+  );
+  const availableCareerStages = careerStages.filter((stage) =>
+    allDirectoryProfiles.some((profile) => profile.career_stage === stage)
+  );
+  const availableWorkModes = workModes.filter((mode) =>
+    allDirectoryProfiles.some((profile) => profile.work_modes?.includes(mode))
+  );
+  const availablePricingModels = pricingModels.filter((model) =>
+    allDirectoryProfiles.some((profile) =>
+      profilePriceOptions(profile).some((option) => option.model === model)
+    )
+  );
   const exactLocationExists = !normalizedLocation || allProfileLocations.some((candidate) =>
     normalizeSearchText(candidate ?? "").includes(normalizedLocation)
   );
@@ -792,22 +914,30 @@ export default async function DesignersPage({
     return distance !== null && distance <= nearbyRadius;
   };
 
-  let profiles = ((data ?? []) as Profile[])
-    .map(applyDemoProfilePresentation)
-    .map((profile) => localizeProfileContent(profile))
-    .filter((profile) => {
+  const priceFilterMatches = (profile: DirectoryProfile) => {
+    const options = profilePriceOptions(profile);
+    const values = options.flatMap((option) => option.values);
+    return (
+      (!pricingModel || options.some((option) => option.model === pricingModel)) &&
+      (Number.isNaN(minRate) || values.some((value) => value >= minRate)) &&
+      (Number.isNaN(maxRate) || values.some((value) => value <= maxRate))
+    );
+  };
+
+  let profiles = allProfiles.filter((profile) => {
+      const specialties = profileSpecialties(profile);
       const searchable = normalizeSearchText(
         [
           profile.full_name,
           profile.bio,
           profile.profession_type,
-          ...(profile.specialties ?? []),
+          ...specialties,
           ...(profile.service_capabilities ?? []),
         ]
           .filter(Boolean)
           .join(" ")
       );
-      const specialtyText = normalizeSearchText((profile.specialties ?? []).join(" "));
+      const specialtyText = normalizeSearchText(specialties.join(" "));
       const categoryText = normalizeSearchText((profile.service_categories ?? []).join(" "));
       const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
       const matchesLocation = locationMatches(profile.location);
@@ -824,19 +954,12 @@ export default async function DesignersPage({
         specialtyText.includes(normalizeSearchText(item))
       );
       const matchesAvailability = !availability || profile.availability_status === availability;
+      const matchesCareerStage = !careerStage || profile.career_stage === careerStage;
       const matchesWorkMode = !workMode || (profile.work_modes ?? []).includes(workMode);
       const matchesExperience = Number.isNaN(minExperience) || (profile.years_experience ?? 0) >= minExperience;
       const matchesProjectBudget = Number.isNaN(maxProjectBudget) ||
         (profile.minimum_project_budget !== null && profile.minimum_project_budget <= maxProjectBudget);
-      const matchesPricingModel = !pricingModel || profile.pricing_model === pricingModel;
-      const matchesMinimum =
-        Number.isNaN(minRate) ||
-        ((profile.price_from ?? profile.hourly_rate) !== null &&
-          (profile.price_from ?? profile.hourly_rate)! >= minRate);
-      const matchesMaximum =
-        Number.isNaN(maxRate) ||
-        ((profile.price_from ?? profile.hourly_rate) !== null &&
-          (profile.price_from ?? profile.hourly_rate)! <= maxRate);
+      const matchesPrice = priceFilterMatches(profile);
 
       return (
         matchesQuery &&
@@ -846,22 +969,22 @@ export default async function DesignersPage({
         matchesCategories &&
         matchesFocus &&
         matchesAvailability &&
+        matchesCareerStage &&
         matchesWorkMode &&
         matchesExperience &&
         matchesProjectBudget &&
-        matchesPricingModel &&
-        matchesMinimum &&
-        matchesMaximum
+        matchesPrice
       );
     });
 
-  let studios = ((studioData ?? []) as Studio[]).map((studio) => localizeProfileContent(studio)).filter((studio) => {
+  let studios = allStudios.filter((studio) => {
+    const specialties = profileSpecialties(studio);
     const searchable = normalizeSearchText(
-      [studio.name, studio.bio, ...(studio.specialties ?? []), ...(studio.service_capabilities ?? [])]
+      [studio.name, studio.bio, ...specialties, ...(studio.service_capabilities ?? [])]
         .filter(Boolean)
         .join(" ")
     );
-    const specialtyText = normalizeSearchText((studio.specialties ?? []).join(" "));
+    const specialtyText = normalizeSearchText(specialties.join(" "));
     const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
     const matchesLocation = locationMatches(studio.location);
     const matchesSpecialty = matchingMode || selectedStyles.length === 0 || selectedStyles.some((item) =>
@@ -877,20 +1000,13 @@ export default async function DesignersPage({
       specialtyText.includes(normalizeSearchText(item))
     );
     const matchesAvailability = !availability || studio.availability_status === availability;
+    const matchesCareerStage = !careerStage || studio.career_stage === careerStage;
     const matchesWorkMode = !workMode || (studio.work_modes ?? []).includes(workMode);
     const matchesExperience = Number.isNaN(minExperience) || (studio.years_experience ?? 0) >= minExperience;
     const matchesProjectBudget = Number.isNaN(maxProjectBudget) ||
       (studio.minimum_project_budget !== null && studio.minimum_project_budget <= maxProjectBudget);
-    const matchesPricingModel = !pricingModel || studio.pricing_model === pricingModel;
-    const matchesMinimum =
-      Number.isNaN(minRate) ||
-      ((studio.price_from ?? studio.hourly_rate) !== null &&
-        (studio.price_from ?? studio.hourly_rate)! >= minRate);
-    const matchesMaximum =
-      Number.isNaN(maxRate) ||
-      ((studio.price_from ?? studio.hourly_rate) !== null &&
-        (studio.price_from ?? studio.hourly_rate)! <= maxRate);
-    return matchesQuery && matchesLocation && matchesSpecialty && matchesServices && matchesCategories && matchesFocus && matchesAvailability && matchesWorkMode && matchesExperience && matchesProjectBudget && matchesPricingModel && matchesMinimum && matchesMaximum;
+    const matchesPrice = priceFilterMatches(studio);
+    return matchesQuery && matchesLocation && matchesSpecialty && matchesServices && matchesCategories && matchesFocus && matchesAvailability && matchesCareerStage && matchesWorkMode && matchesExperience && matchesProjectBudget && matchesPrice;
   });
   if (profileType === "designer") studios = [];
   if (profileType === "studio") profiles = [];
@@ -1028,6 +1144,7 @@ export default async function DesignersPage({
     projectCategories: selectedProjectCategories.join(","),
     focus: selectedFocus.join(","),
     availability,
+    careerStage,
     workMode,
     minExperience: Number.isNaN(minExperience) ? "" : String(minExperience),
     maxProjectBudget: Number.isNaN(maxProjectBudget) ? "" : String(maxProjectBudget),
@@ -1037,7 +1154,7 @@ export default async function DesignersPage({
 
   const gridHref = "/designers" + qs({ ...base, view: "grid" });
   const listHref = "/designers" + qs({ ...base, view: "list" });
-  const hasFilters = Boolean(q || location || selectedStyles.length || selectedServices.length || selectedProjectCategories.length || selectedFocus.length || availability || workMode || minExperienceRaw || maxProjectBudgetRaw || profileType !== "all" || minRateRaw || maxRateRaw || pricingModel);
+  const hasFilters = Boolean(q || location || selectedStyles.length || selectedServices.length || selectedProjectCategories.length || selectedFocus.length || availability || careerStage || workMode || minExperienceRaw || maxProjectBudgetRaw || profileType !== "all" || minRateRaw || maxRateRaw || pricingModel);
   const activeFilterCount = [
     Boolean(q),
     Boolean(location),
@@ -1046,6 +1163,7 @@ export default async function DesignersPage({
     selectedProjectCategories.length > 0,
     selectedFocus.length > 0,
     Boolean(availability),
+    Boolean(careerStage),
     Boolean(workMode),
     Boolean(minExperienceRaw),
     Boolean(maxProjectBudgetRaw),
@@ -1262,10 +1380,16 @@ export default async function DesignersPage({
               {copy.filters.location}
               <input
                 name="location"
+                list="directory-location-options"
                 defaultValue={location}
                 placeholder={copy.filters.locationPlaceholder}
                 className="mt-2 w-full rounded-xl border border-line bg-background px-3 py-3 font-normal outline-none focus:border-primary"
               />
+              <datalist id="directory-location-options">
+                {locationSuggestions.map((suggestion) => (
+                  <option key={suggestion} value={suggestion} />
+                ))}
+              </datalist>
             </label>
 
             <label className="block text-sm font-semibold">
@@ -1280,6 +1404,22 @@ export default async function DesignersPage({
                 <option value="studio">{copy.filters.studios}</option>
               </select>
             </label>
+
+            {availableCareerStages.length ? (
+              <label className="block text-sm font-semibold">
+                {copy.filters.careerStage}
+                <select
+                  name="careerStage"
+                  defaultValue={careerStage}
+                  className="mt-2 w-full rounded-xl border border-line bg-background px-3 py-3 text-sm font-normal outline-none focus:border-primary"
+                >
+                  <option value="">{copy.filters.anyCareerStage}</option>
+                  {availableCareerStages.map((stage) => (
+                    <option key={stage} value={stage}>{careerStageLabel(stage)}</option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
 
             <details
               className="group rounded-xl border border-line bg-background px-4 py-3"
@@ -1298,7 +1438,7 @@ export default async function DesignersPage({
                 className="mt-3 w-full rounded-xl border border-line bg-background px-3 py-3 text-sm outline-none focus:border-primary"
               >
                 <option value="">{copy.filters.anyAvailability}</option>
-                {availabilityStatuses.map((status) => (
+                {availableAvailability.map((status) => (
                   <option key={status} value={status}>{availabilityLabel(status)}</option>
                 ))}
               </select>
@@ -1308,7 +1448,7 @@ export default async function DesignersPage({
                 className="mt-3 w-full rounded-xl border border-line bg-background px-3 py-3 text-sm outline-none focus:border-primary"
               >
                 <option value="">{copy.filters.anyMode}</option>
-                {workModes.map((mode) => (
+                {availableWorkModes.map((mode) => (
                   <option key={mode} value={mode}>{workModeLabel(mode)}</option>
                 ))}
               </select>
@@ -1323,10 +1463,9 @@ export default async function DesignersPage({
                 className="mt-3 w-full rounded-xl border border-line bg-background px-3 py-3 text-sm outline-none focus:border-primary"
               >
                 <option value="">{copy.filters.anyPricingModel}</option>
-                <option value="Hourly">{pricingModelLabel("Hourly")}</option>
-                <option value="Per m2">{pricingModelLabel("Per m2")}</option>
-                <option value="Fixed package">{pricingModelLabel("Fixed package")}</option>
-                <option value="Custom quote">{pricingModelLabel("Custom quote")}</option>
+                {availablePricingModels.map((model) => (
+                  <option key={model} value={model}>{pricingModelLabel(model)}</option>
+                ))}
               </select>
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <input
@@ -1359,7 +1498,7 @@ export default async function DesignersPage({
               <div className="text-sm font-semibold">{copy.filters.interiorStyles}</div>
               <p className="mt-1 text-xs leading-5 text-muted">{copy.filters.chooseStyles}</p>
               <div className="mt-3 grid gap-3">
-                {designerStyles.map((style) => (
+                {availableStyles.map((style) => (
                   <label key={style} className="flex items-center gap-3 text-sm text-muted">
                     <span className="flex items-center gap-3">
                       <input
@@ -1379,7 +1518,7 @@ export default async function DesignersPage({
             <div>
               <div className="text-sm font-semibold">{copy.filters.projectType}</div>
               <div className="mt-3 grid gap-3">
-                {projectServiceCategories.map((category) => (
+                {availableProjectCategories.map((category) => (
                   <label key={category} className="flex items-center gap-3 text-sm text-muted">
                     <input
                       type="checkbox"
@@ -1406,7 +1545,7 @@ export default async function DesignersPage({
             <div>
               <div className="text-sm font-semibold">{copy.filters.services}</div>
               <div className="mt-3 grid gap-3">
-                {serviceCapabilities.map((service) => (
+                {availableServices.map((service) => (
                   <label key={service} className="flex items-center gap-3 text-sm text-muted">
                     <input
                       type="checkbox"
@@ -1424,7 +1563,7 @@ export default async function DesignersPage({
             <div>
               <div className="text-sm font-semibold">{copy.filters.focus}</div>
               <div className="mt-3 grid gap-3">
-                {specialistFocusOptions.map((item) => (
+                {availableFocus.map((item) => (
                   <label key={item} className="flex items-center gap-3 text-sm text-muted">
                     <input
                       type="checkbox"

@@ -27,6 +27,20 @@ import {
 } from "@/lib/profile-system-labels";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
+import { siteLocale } from "@/lib/site-locale";
+import LocationInput from "@/components/LocationInput";
+import ServiceOfferingsEditor from "@/components/ServiceOfferingsEditor";
+import {
+  careerStages,
+  careerStageLabel,
+  careerStageValue,
+  checkboxValues,
+  professionalDetailsCopy,
+  profileLanguages,
+  serviceOfferingsValue,
+  stringListValue,
+  type ServiceOffering,
+} from "@/lib/professional-profile-details";
 
 export const revalidate = 0;
 
@@ -45,7 +59,11 @@ type Profile = {
   profession_type: string | null;
   user_type: string | null;
   specialties: string[] | null;
+  custom_specialties_pl: string[] | null;
+  custom_specialties_en: string[] | null;
+  languages: string[] | null;
   service_capabilities: string[] | null;
+  service_offerings: ServiceOffering[] | null;
   website: string | null;
   instagram_url: string | null;
   facebook_url: string | null;
@@ -60,6 +78,9 @@ type Profile = {
   minimum_project_budget: number | null;
   work_modes: string[] | null;
   availability_status: string | null;
+  contact_availability_pl: string | null;
+  contact_availability_en: string | null;
+  career_stage: string | null;
   cooperation_terms: string | null;
   cooperation_terms_pl: string | null;
   cooperation_terms_en: string | null;
@@ -106,15 +127,6 @@ function urlValue(formData: FormData, key: string) {
   return value.startsWith("http://") || value.startsWith("https://")
     ? value
     : `https://${value}`;
-}
-
-function specialtiesValue(formData: FormData) {
-  const value = formData.get("specialties");
-  if (typeof value !== "string") return [];
-  return value
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
 }
 
 function fileValue(formData: FormData, key: string) {
@@ -200,7 +212,14 @@ async function updateProfile(formData: FormData) {
   const bioEn = textValue(formData, "bio_en");
   const cooperationTermsPl = textValue(formData, "cooperation_terms_pl");
   const cooperationTermsEn = textValue(formData, "cooperation_terms_en");
-  const specialties = specialtiesValue(formData);
+  const customSpecialtiesPl = stringListValue(formData, "custom_specialties_pl");
+  const customSpecialtiesEn = stringListValue(formData, "custom_specialties_en");
+  const specialties = customSpecialtiesPl.length ? customSpecialtiesPl : customSpecialtiesEn;
+  const languages = checkboxValues(formData, "languages", profileLanguages);
+  const careerStage = careerStageValue(textValue(formData, "career_stage"));
+  const serviceOfferings = serviceOfferingsValue(formData);
+  const availabilityNotePl = textValue(formData, "contact_availability_pl");
+  const availabilityNoteEn = textValue(formData, "contact_availability_en");
   const moderationError = isProfessional
     ? publicTextError([
         headlinePl,
@@ -209,7 +228,16 @@ async function updateProfile(formData: FormData) {
         bioEn,
         cooperationTermsPl,
         cooperationTermsEn,
-        ...specialties,
+        availabilityNotePl,
+        availabilityNoteEn,
+        ...customSpecialtiesPl,
+        ...customSpecialtiesEn,
+        ...serviceOfferings.flatMap((offer) => [
+          offer.title_pl,
+          offer.title_en,
+          offer.description_pl,
+          offer.description_en,
+        ]),
       ])
     : null;
   if (moderationError) {
@@ -256,7 +284,11 @@ async function updateProfile(formData: FormData) {
         profession_type: profileProfessionTypeValue(textValue(formData, "profession_type")) || null,
         user_type: "professional",
         specialties,
+        custom_specialties_pl: customSpecialtiesPl,
+        custom_specialties_en: customSpecialtiesEn,
+        languages,
         service_capabilities: serviceCapabilityValues(formData),
+        service_offerings: serviceOfferings,
         website: urlValue(formData, "website"),
         instagram_url: urlValue(formData, "instagram_url"),
         facebook_url: urlValue(formData, "facebook_url"),
@@ -269,6 +301,9 @@ async function updateProfile(formData: FormData) {
         minimum_project_budget: numberValue(formData, "minimum_project_budget"),
         work_modes: workModeValues(formData),
         availability_status: textValue(formData, "availability_status"),
+        contact_availability_pl: availabilityNotePl,
+        contact_availability_en: availabilityNoteEn,
+        career_stage: careerStage,
         cooperation_terms: cooperationTermsPl ?? cooperationTermsEn,
         cooperation_terms_pl: cooperationTermsPl,
         cooperation_terms_en: cooperationTermsEn,
@@ -390,7 +425,7 @@ export default async function EditProfilePage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "public_slug, full_name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_place_id, google_rating, google_review_count, google_rating_updated_at"
+      "public_slug, full_name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, custom_specialties_pl, custom_specialties_en, languages, service_capabilities, service_offerings, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, contact_availability_pl, contact_availability_en, career_stage, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_place_id, google_rating, google_review_count, google_rating_updated_at"
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -403,6 +438,7 @@ export default async function EditProfilePage({
   const publicProfilePath = `/designers/${p.public_slug || user.id}`;
   const score = profileReadinessScore(p, isProfessional);
   const specialtyCount = p.specialties?.length ?? 0;
+  const detailsCopy = professionalDetailsCopy();
   const backHref = isProfessional ? "/studio" : "/client";
   const isOnboarding = sp.onboarding === "1";
   const isStudioOnboarding = isOnboarding && isProfessional && sp.studio === "1";
@@ -517,8 +553,9 @@ export default async function EditProfilePage({
               </Field>
 
               <Field label={copy.location} hint={copy.locationHint}>
-                <input
+                <LocationInput
                   name="location"
+                  listId="profile-location-options"
                   required
                   defaultValue={p.location ?? ""}
                   placeholder="Warszawa"
@@ -591,6 +628,15 @@ export default async function EditProfilePage({
                 />
               </Field>
 
+              <Field label={detailsCopy.careerStage} hint={detailsCopy.careerStageHint}>
+                <select name="career_stage" defaultValue={p.career_stage ?? ""} className={fieldClass}>
+                  <option value="">{siteLocale === "pl" ? "Nie podawaj" : "Do not show"}</option>
+                  {careerStages.map((stage) => (
+                    <option key={stage} value={stage}>{careerStageLabel(stage)}</option>
+                  ))}
+                </select>
+              </Field>
+
               <Field label={copy.pricing}>
                 <select name="pricing_model" defaultValue={p.pricing_model ?? "Custom quote"} className={fieldClass}>
                   {pricingModels.map((model) => <option key={model} value={model}>{pricingModelLabel(model)}</option>)}
@@ -602,6 +648,15 @@ export default async function EditProfilePage({
                   {availabilityStatuses.map((status) => <option key={status} value={status}>{availabilityLabel(status)}</option>)}
                 </select>
               </Field>
+
+              <div className="sm:col-span-2 grid gap-5 sm:grid-cols-2">
+                <Field label={detailsCopy.availabilityNotePl} hint={detailsCopy.availabilityNoteHint}>
+                  <textarea name="contact_availability_pl" rows={3} defaultValue={p.contact_availability_pl ?? ""} className={areaClass} />
+                </Field>
+                <Field label={detailsCopy.availabilityNoteEn} hint={detailsCopy.bilingualHintEn}>
+                  <textarea name="contact_availability_en" rows={3} defaultValue={p.contact_availability_en ?? ""} className={areaClass} />
+                </Field>
+              </div>
 
               <Field label={copy.priceFrom} hint={copy.priceHint}>
                 <input name="price_from" defaultValue={p.price_from ?? ""} inputMode="numeric" placeholder="5000" className={fieldClass} />
@@ -698,6 +753,19 @@ export default async function EditProfilePage({
                 </div>
               </fieldset>
 
+              <fieldset className="sm:col-span-2">
+                <legend className="text-sm font-semibold">{detailsCopy.languages}</legend>
+                <p className="mt-1 text-sm leading-6 text-muted">{detailsCopy.languagesHint}</p>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  {profileLanguages.map((language) => (
+                    <label key={language} className="flex items-center gap-3 rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold">
+                      <input type="checkbox" name="languages" value={language} defaultChecked={p.languages?.includes(language)} className="h-4 w-4 accent-primary" />
+                      {language}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
               <div className="sm:col-span-2">
                 <Field label={copy.termsPl} hint={copy.publicTextHint}>
                   <textarea
@@ -750,11 +818,20 @@ export default async function EditProfilePage({
                 />
               </Field>
 
-              <Field label={copy.specialties} hint={copy.specialtiesHint}>
+              <Field label={detailsCopy.specialtiesPl} hint={detailsCopy.bilingualHintPl}>
                 <input
-                  name="specialties"
-                  defaultValue={p.specialties?.join(", ") ?? ""}
+                  name="custom_specialties_pl"
+                  defaultValue={p.custom_specialties_pl?.join(", ") ?? p.specialties?.join(", ") ?? ""}
                   placeholder={copy.specialtiesPlaceholder}
+                  className={fieldClass}
+                />
+              </Field>
+
+              <Field label={detailsCopy.specialtiesEn} hint={detailsCopy.bilingualHintEn}>
+                <input
+                  name="custom_specialties_en"
+                  defaultValue={p.custom_specialties_en?.join(", ") ?? ""}
+                  placeholder="Japandi, small spaces, renovation planning"
                   className={fieldClass}
                 />
               </Field>
@@ -782,6 +859,12 @@ export default async function EditProfilePage({
                   ))}
                 </div>
               </fieldset>
+
+              <div className="rounded-xl border border-line bg-background p-5">
+                <div className="text-sm font-semibold">{detailsCopy.offers}</div>
+                <p className="mt-1 text-sm leading-6 text-muted">{detailsCopy.offersHint}</p>
+                <div className="mt-4"><ServiceOfferingsEditor initialValue={p.service_offerings} /></div>
+              </div>
 
               <Field label={copy.bioPl}>
                 <textarea

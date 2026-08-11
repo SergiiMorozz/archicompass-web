@@ -16,8 +16,21 @@ import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { localizeProfileContent, localizedProfileText } from "@/lib/localized-profile-content";
 import { professionalOptionLabel } from "@/lib/professional-options";
 import { serviceCapabilityLabel } from "@/lib/service-capabilities";
-import { profileExperienceLabel, profileLocationLabel, profileTypeLabel } from "@/lib/profile-system-labels";
+import {
+  profileExperienceLabel,
+  profileLanguageLabel,
+  profileLocationLabel,
+  profileTypeLabel,
+} from "@/lib/profile-system-labels";
 import { getStudioProfileCopy } from "@/content/studio-profile-copy";
+import {
+  careerStageLabel,
+  localizedProfileList,
+  localizedServiceOffering,
+  serviceOfferingPriceLabel,
+  type ServiceOffering,
+} from "@/lib/professional-profile-details";
+import { siteLocale } from "@/lib/site-locale";
 
 export const revalidate = 0;
 
@@ -35,7 +48,11 @@ type Studio = {
   bio_en: string | null;
   location: string | null;
   specialties: string[] | null;
+  custom_specialties_pl: string[] | null;
+  custom_specialties_en: string[] | null;
+  languages: string[] | null;
   service_capabilities: string[] | null;
+  service_offerings: ServiceOffering[] | null;
   website: string | null;
   instagram_url: string | null;
   facebook_url: string | null;
@@ -50,6 +67,9 @@ type Studio = {
   minimum_project_budget: number | null;
   work_modes: string[] | null;
   availability_status: string | null;
+  contact_availability_pl: string | null;
+  contact_availability_en: string | null;
+  career_stage: string | null;
   cooperation_terms: string | null;
   cooperation_terms_pl: string | null;
   cooperation_terms_en: string | null;
@@ -158,7 +178,7 @@ export default async function PublicStudioPage({
 
   const { data: studioData } = await publicSupabase
     .from("studios")
-    .select("id, owner_id, name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, specialties, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_rating, google_review_count, published")
+    .select("id, owner_id, name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, specialties, custom_specialties_pl, custom_specialties_en, languages, service_capabilities, service_offerings, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, contact_availability_pl, contact_availability_en, career_stage, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_rating, google_review_count, published")
     .eq("id", id)
     .maybeSingle();
   if (!studioData) notFound();
@@ -238,6 +258,13 @@ export default async function PublicStudioPage({
     studio.years_experience ?? 0
   );
   const copy = getStudioProfileCopy();
+  const specialties = localizedProfileList(studio.custom_specialties_pl, studio.custom_specialties_en, studio.specialties);
+  const careerStage = careerStageLabel(studio.career_stage);
+  const contactAvailability = localizedProfileText(studio, "contact_availability");
+  const serviceOfferings = studio.service_offerings?.filter((offer) => {
+    const localized = localizedServiceOffering(offer);
+    return Boolean(localized.title || localized.description);
+  }) ?? [];
 
   return (
     <main className="bg-background pb-24 lg:pb-0">
@@ -302,7 +329,7 @@ export default async function PublicStudioPage({
         </div>
 
         <section className="-mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="rounded-lg border border-line bg-card p-6 shadow-sm">
+          <div className="self-start rounded-lg border border-line bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex gap-4">
                 {logo ? (
@@ -325,9 +352,14 @@ export default async function PublicStudioPage({
               <div className="rounded-lg border border-line bg-background p-4"><div className="text-sm text-muted">{copy.labels.projects}</div><div className="mt-1 text-xl font-bold">{projects.length}</div></div>
               <div className="rounded-lg border border-line bg-background p-4"><div className="text-sm text-muted">{copy.labels.experience}</div><div className="mt-1 text-xl font-bold">{totalExperience ? profileExperienceLabel(totalExperience) : copy.labels.onRequest}</div></div>
             </div>
-            {studio.specialties?.length ? (
+            {careerStage ? (
+              <div className="mt-4">
+                <span className="rounded-full border border-primary/20 bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">{careerStage}</span>
+              </div>
+            ) : null}
+            {specialties.length ? (
               <div className="mt-5 flex flex-wrap gap-2">
-                {studio.specialties.map((specialty) => <span key={specialty} className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">{professionalOptionLabel(specialty)}</span>)}
+                {specialties.map((specialty) => <span key={specialty} className="rounded-full bg-primary-soft px-3 py-1 text-sm font-semibold text-primary">{professionalOptionLabel(specialty)}</span>)}
               </div>
             ) : null}
             {studio.service_capabilities?.length ? (
@@ -346,8 +378,10 @@ export default async function PublicStudioPage({
             <div className="mt-5 grid gap-3 text-sm">
               <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">{copy.labels.price}</span><span className="text-right font-semibold">{pricingLabel(studio)}</span></div>
               <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">{copy.labels.availability}</span><span className="text-right font-semibold">{studio.availability_status ? availabilityLabel(studio.availability_status) : copy.labels.onRequest}</span></div>
+              {contactAvailability ? <div className="grid gap-1 border-b border-line pb-3"><span className="text-muted">{siteLocale === "pl" ? "Godziny pracy" : "Working hours"}</span><span className="text-right font-semibold">{contactAvailability}</span></div> : null}
               <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">{copy.labels.workMode}</span><span className="text-right font-semibold">{studio.work_modes?.map((mode) => workModeLabel(mode)).join(" · ") || copy.labels.onRequest}</span></div>
               <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">{copy.labels.minimumBudget}</span><span className="text-right font-semibold">{studio.minimum_project_budget ? formatMinimumBudget(studio.minimum_project_budget) : copy.labels.onRequest}</span></div>
+              {studio.languages?.length ? <div className="flex justify-between gap-4 border-b border-line pb-3"><span className="text-muted">{siteLocale === "pl" ? "Języki" : "Languages"}</span><span className="text-right font-semibold">{studio.languages.map((language) => profileLanguageLabel(language)).join(" / ")}</span></div> : null}
               <div className="flex justify-between gap-4"><span className="text-muted">{copy.labels.contact}</span><span className="truncate font-semibold">{studio.email || studio.phone || copy.labels.throughBrief}</span></div>
             </div>
             {hasVerifiedGoogleRating ? (
@@ -382,6 +416,18 @@ export default async function PublicStudioPage({
             <div className="text-sm font-semibold text-primary">{copy.labels.about}</div>
             <h2 className="mt-1 text-3xl font-bold">{copy.labels.designApproach}</h2>
             <p className="mt-5 max-w-4xl whitespace-pre-line text-base leading-8 text-muted">{studio.bio}</p>
+          </section>
+        ) : null}
+        {serviceOfferings.length ? (
+          <section className="rounded-lg border border-line bg-card p-6 shadow-sm">
+            <div className="text-sm font-semibold text-primary">{siteLocale === "pl" ? "Usługi i pakiety" : "Services and packages"}</div>
+            <h2 className="mt-1 text-3xl font-bold">{siteLocale === "pl" ? "Zakres współpracy i ceny" : "Scope and pricing"}</h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {serviceOfferings.map((offer, index) => {
+                const localized = localizedServiceOffering(offer);
+                return <article key={`${localized.title}-${index}`} className="rounded-xl border border-line bg-background p-5"><h3 className="text-lg font-bold">{localized.title || (siteLocale === "pl" ? "Usługa" : "Service")}</h3>{localized.description ? <p className="mt-3 text-sm leading-6 text-muted">{localized.description}</p> : null}<div className="mt-5 text-sm font-semibold text-primary">{serviceOfferingPriceLabel(offer)}</div></article>;
+              })}
+            </div>
           </section>
         ) : null}
         <section className="rounded-lg border border-line bg-card p-6 shadow-sm">

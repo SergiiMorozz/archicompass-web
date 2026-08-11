@@ -21,6 +21,20 @@ import {
   workModeValues,
 } from "@/lib/profile-pricing";
 import { profileTypeLabel } from "@/lib/profile-system-labels";
+import LocationInput from "@/components/LocationInput";
+import ServiceOfferingsEditor from "@/components/ServiceOfferingsEditor";
+import { siteLocale } from "@/lib/site-locale";
+import {
+  careerStages,
+  careerStageLabel,
+  careerStageValue,
+  checkboxValues,
+  professionalDetailsCopy,
+  profileLanguages,
+  serviceOfferingsValue,
+  stringListValue,
+  type ServiceOffering,
+} from "@/lib/professional-profile-details";
 
 export const revalidate = 0;
 
@@ -38,7 +52,11 @@ type Studio = {
   bio_en: string | null;
   location: string | null;
   specialties: string[] | null;
+  custom_specialties_pl: string[] | null;
+  custom_specialties_en: string[] | null;
+  languages: string[] | null;
   service_capabilities: string[] | null;
+  service_offerings: ServiceOffering[] | null;
   website: string | null;
   instagram_url: string | null;
   facebook_url: string | null;
@@ -53,6 +71,9 @@ type Studio = {
   minimum_project_budget: number | null;
   work_modes: string[] | null;
   availability_status: string | null;
+  contact_availability_pl: string | null;
+  contact_availability_en: string | null;
+  career_stage: string | null;
   cooperation_terms: string | null;
   cooperation_terms_pl: string | null;
   cooperation_terms_en: string | null;
@@ -105,13 +126,6 @@ function urlValue(formData: FormData, key: string) {
     : `https://${value}`;
 }
 
-function listValue(formData: FormData, key: string) {
-  return (textValue(formData, key) ?? "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 function actionRedirect(message: string): never {
   redirect(`/studio/team?error=${encodeURIComponent(message)}`);
 }
@@ -158,7 +172,14 @@ async function studioPayload(
   const bioEn = textValue(formData, "bio_en");
   const cooperationTermsPl = textValue(formData, "cooperation_terms_pl");
   const cooperationTermsEn = textValue(formData, "cooperation_terms_en");
-  const specialties = listValue(formData, "specialties");
+  const customSpecialtiesPl = stringListValue(formData, "custom_specialties_pl");
+  const customSpecialtiesEn = stringListValue(formData, "custom_specialties_en");
+  const specialties = customSpecialtiesPl.length ? customSpecialtiesPl : customSpecialtiesEn;
+  const languages = checkboxValues(formData, "languages", profileLanguages);
+  const careerStage = careerStageValue(textValue(formData, "career_stage"));
+  const serviceOfferings = serviceOfferingsValue(formData);
+  const availabilityNotePl = textValue(formData, "contact_availability_pl");
+  const availabilityNoteEn = textValue(formData, "contact_availability_en");
   const moderationError = publicTextError([
     name,
     headlinePl,
@@ -167,7 +188,11 @@ async function studioPayload(
     bioEn,
     cooperationTermsPl,
     cooperationTermsEn,
-    ...specialties,
+    availabilityNotePl,
+    availabilityNoteEn,
+    ...customSpecialtiesPl,
+    ...customSpecialtiesEn,
+    ...serviceOfferings.flatMap((offer) => [offer.title_pl, offer.title_en, offer.description_pl, offer.description_en]),
   ]);
   if (moderationError) actionRedirect(moderationError);
   const googleInput = textValue(formData, "google_place_input");
@@ -190,7 +215,11 @@ async function studioPayload(
     bio_en: bioEn,
     location: textValue(formData, "location"),
     specialties,
+    custom_specialties_pl: customSpecialtiesPl,
+    custom_specialties_en: customSpecialtiesEn,
+    languages,
     service_capabilities: serviceCapabilityValues(formData),
+    service_offerings: serviceOfferings,
     website: urlValue(formData, "website"),
     instagram_url: urlValue(formData, "instagram_url"),
     facebook_url: urlValue(formData, "facebook_url"),
@@ -205,6 +234,9 @@ async function studioPayload(
     minimum_project_budget: numberValue(formData, "minimum_project_budget"),
     work_modes: workModeValues(formData),
     availability_status: textValue(formData, "availability_status"),
+    contact_availability_pl: availabilityNotePl,
+    contact_availability_en: availabilityNoteEn,
+    career_stage: careerStage,
     cooperation_terms: cooperationTermsPl ?? cooperationTermsEn,
     cooperation_terms_pl: cooperationTermsPl,
     cooperation_terms_en: cooperationTermsEn,
@@ -273,6 +305,44 @@ async function updateStudio(formData: FormData) {
   revalidatePath(`/studios/${studioId}`);
   revalidatePath("/designers");
   redirect(`/studio/team?updated=1&studio=${studioId}`);
+}
+
+async function deleteStudio(formData: FormData) {
+  "use server";
+
+  const studioId = textValue(formData, "studio_id");
+  const confirmation = textValue(formData, "confirmation");
+  if (!studioId || confirmation !== "DELETE") actionRedirect(
+    siteLocale === "pl" ? "Wpisz DELETE, aby usunąć pracownię." : "Type DELETE to remove the studio."
+  );
+
+  const supabase = await createSupabaseServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData.user;
+  if (!user) redirect("/login");
+
+  const { data: studio } = await supabase
+    .from("studios")
+    .select("id, owner_id, profile_logo_path, profile_banner_path")
+    .eq("id", studioId)
+    .eq("owner_id", user.id)
+    .maybeSingle();
+  if (!studio) actionRedirect(
+    siteLocale === "pl" ? "Tylko właściciel może usunąć pracownię." : "Only the studio owner can remove a studio."
+  );
+
+  const { error } = await supabase.from("studios").delete().eq("id", studio.id).eq("owner_id", user.id);
+  if (error) actionRedirect(error.message);
+
+  const mediaPaths = [studio.profile_logo_path, studio.profile_banner_path].filter(Boolean) as string[];
+  if (mediaPaths.length) await supabase.storage.from("profile-media").remove(mediaPaths);
+
+  revalidatePath("/studio");
+  revalidatePath("/studio/team");
+  revalidatePath("/studio/inbox");
+  revalidatePath("/designers");
+  revalidatePath(`/studios/${studio.id}`);
+  redirect("/studio/team?deleted=1");
 }
 
 async function inviteMember(formData: FormData) {
@@ -379,12 +449,14 @@ export default async function StudioTeamPage({
     invited?: string;
     removed?: string;
     setup?: string;
+    deleted?: string;
     studio?: string;
     updated?: string;
   }>;
 }) {
   const sp = (await searchParams) ?? {};
   const copy = getWorkspaceCopy().studioTeam;
+  const detailsCopy = professionalDetailsCopy();
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
@@ -395,7 +467,7 @@ export default async function StudioTeamPage({
   const { data: studioData } = studioIds.length
     ? await supabase
         .from("studios")
-        .select("id, owner_id, name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, specialties, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_place_id, google_rating, google_review_count, published, created_at")
+        .select("id, owner_id, name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, specialties, custom_specialties_pl, custom_specialties_en, languages, service_capabilities, service_offerings, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, contact_availability_pl, contact_availability_en, career_stage, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_place_id, google_rating, google_review_count, published, created_at")
         .in("id", studioIds)
         .order("created_at", { ascending: true })
     : { data: [] };
@@ -453,7 +525,7 @@ export default async function StudioTeamPage({
             </p>
           </div>
         ) : null}
-        {sp.created || sp.updated || sp.invited || sp.removed || sp.invitation ? (
+        {sp.created || sp.updated || sp.invited || sp.removed || sp.deleted || sp.invitation ? (
           <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
             {sp.created
               ? copy.created
@@ -463,7 +535,9 @@ export default async function StudioTeamPage({
                   ? copy.invited
                   : sp.removed
                     ? copy.removed
-                    : invitationLabel(sp.invitation, copy)}
+                    : sp.deleted
+                      ? (siteLocale === "pl" ? "Pracownia została usunięta." : "The studio was removed.")
+                      : invitationLabel(sp.invitation, copy)}
           </div>
         ) : null}
 
@@ -587,8 +661,11 @@ export default async function StudioTeamPage({
                         <label className="text-sm font-semibold">{copy.form.logo}<input name="profile_logo" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} /></label>
                         <label className="text-sm font-semibold">{copy.form.banner}<input name="profile_banner" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} /></label>
                       </div>
-                      <label className="text-sm font-semibold">{copy.form.location}<input name="location" defaultValue={studio.location ?? ""} className={fieldClass} /></label>
-                      <label className="text-sm font-semibold">{copy.form.specialties}<input name="specialties" defaultValue={studio.specialties?.join(", ") ?? ""} className={fieldClass} /></label>
+                      <label className="text-sm font-semibold">{copy.form.location}<LocationInput name="location" listId={`studio-location-options-${studio.id}`} defaultValue={studio.location ?? ""} className={fieldClass} /></label>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="text-sm font-semibold">{detailsCopy.specialtiesPl}<input name="custom_specialties_pl" defaultValue={studio.custom_specialties_pl?.join(", ") ?? studio.specialties?.join(", ") ?? ""} className={fieldClass} /></label>
+                        <label className="text-sm font-semibold">{detailsCopy.specialtiesEn}<input name="custom_specialties_en" defaultValue={studio.custom_specialties_en?.join(", ") ?? ""} className={fieldClass} /></label>
+                      </div>
                       <fieldset>
                         <legend className="text-sm font-semibold">{copy.form.services}</legend>
                         <div className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -598,6 +675,13 @@ export default async function StudioTeamPage({
                               {serviceCapabilityLabel(capability)}
                             </label>
                           ))}
+                        </div>
+                      </fieldset>
+                      <fieldset>
+                        <legend className="text-sm font-semibold">{detailsCopy.languages}</legend>
+                        <p className="mt-1 text-sm text-muted">{detailsCopy.languagesHint}</p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {profileLanguages.map((language) => <label key={language} className="flex items-center gap-2 rounded-xl border border-line bg-card px-3 py-2 text-sm font-semibold"><input type="checkbox" name="languages" value={language} defaultChecked={studio.languages?.includes(language)} className="h-4 w-4 accent-primary" />{language}</label>)}
                         </div>
                       </fieldset>
                       <label className="text-sm font-semibold">{copy.form.bioPl}<textarea name="bio_pl" rows={5} defaultValue={studio.bio_pl ?? studio.bio ?? ""} className={fieldClass} /></label>
@@ -611,7 +695,10 @@ export default async function StudioTeamPage({
                       </div>
                       <label className="text-sm font-semibold">{copy.form.publicEmail}<input name="email" type="email" defaultValue={studio.email ?? ""} className={fieldClass} /></label>
                       <label className="text-sm font-semibold">{copy.form.phone}<input name="phone" defaultValue={studio.phone ?? ""} className={fieldClass} /></label>
-                      <label className="text-sm font-semibold">{copy.form.experience}<input name="years_experience" inputMode="numeric" defaultValue={studio.years_experience ?? ""} className={fieldClass} /></label>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="text-sm font-semibold">{copy.form.experience}<input name="years_experience" inputMode="numeric" defaultValue={studio.years_experience ?? ""} className={fieldClass} /></label>
+                        <label className="text-sm font-semibold">{detailsCopy.careerStage}<select name="career_stage" defaultValue={studio.career_stage ?? ""} className={fieldClass}><option value="">{siteLocale === "pl" ? "Nie podawaj" : "Do not show"}</option>{careerStages.map((stage) => <option key={stage} value={stage}>{careerStageLabel(stage)}</option>)}</select></label>
+                      </div>
                       <div className="grid gap-3 sm:grid-cols-2">
                         <label className="text-sm font-semibold">{copy.form.pricing}<select name="pricing_model" defaultValue={studio.pricing_model ?? "Custom quote"} className={fieldClass}>{pricingModels.map((model) => <option key={model} value={model}>{pricingModelLabel(model)}</option>)}</select></label>
                         <label className="text-sm font-semibold">{copy.form.availability}<select name="availability_status" defaultValue={studio.availability_status ?? "Waitlist / ask"} className={fieldClass}>{availabilityStatuses.map((status) => <option key={status} value={status}>{availabilityLabel(status)}</option>)}</select></label>
@@ -623,8 +710,17 @@ export default async function StudioTeamPage({
                         <legend className="text-sm font-semibold">{copy.form.workModes}</legend>
                         <div className="mt-3 flex flex-wrap gap-2">{workModes.map((mode) => <label key={mode} className="flex items-center gap-2 rounded-xl border border-line bg-card px-3 py-2 text-sm font-semibold"><input type="checkbox" name="work_modes" value={mode} defaultChecked={studio.work_modes?.includes(mode)} className="h-4 w-4 accent-primary" />{workModeLabel(mode)}</label>)}</div>
                       </fieldset>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="text-sm font-semibold">{detailsCopy.availabilityNotePl}<textarea name="contact_availability_pl" rows={3} defaultValue={studio.contact_availability_pl ?? ""} className={fieldClass} /></label>
+                        <label className="text-sm font-semibold">{detailsCopy.availabilityNoteEn}<textarea name="contact_availability_en" rows={3} defaultValue={studio.contact_availability_en ?? ""} className={fieldClass} /></label>
+                      </div>
                       <label className="text-sm font-semibold">{copy.form.termsPl}<textarea name="cooperation_terms_pl" rows={4} defaultValue={studio.cooperation_terms_pl ?? studio.cooperation_terms ?? ""} className={fieldClass} /></label>
                       <label className="text-sm font-semibold">{copy.form.termsEn}<textarea name="cooperation_terms_en" rows={4} defaultValue={studio.cooperation_terms_en ?? ""} className={fieldClass} /></label>
+                      <div className="rounded-xl border border-line bg-card p-4">
+                        <div className="text-sm font-semibold">{detailsCopy.offers}</div>
+                        <p className="mt-1 text-sm text-muted">{detailsCopy.offersHint}</p>
+                        <div className="mt-4"><ServiceOfferingsEditor initialValue={studio.service_offerings} /></div>
+                      </div>
                       <div className="rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-4">
                         <div className="font-bold">{copy.form.googleTitle}</div>
                         <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -638,6 +734,17 @@ export default async function StudioTeamPage({
                       </label>
                       <button className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">{copy.form.save}</button>
                     </form>
+                    {studio.owner_id === user.id ? (
+                      <details className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4">
+                        <summary className="cursor-pointer text-sm font-semibold text-red-700">{siteLocale === "pl" ? "Usuń pracownię" : "Delete studio"}</summary>
+                        <p className="mt-3 text-sm leading-6 text-red-700">{siteLocale === "pl" ? "Usunięcie jest trwałe: zniknie profil pracowni, członkostwa oraz wspólna skrzynka. Profile osobiste projektantów pozostaną bez zmian." : "This permanently removes the studio profile, memberships, and shared inbox. Team members' personal profiles remain unchanged."}</p>
+                        <form action={deleteStudio} className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+                          <input type="hidden" name="studio_id" value={studio.id} />
+                          <label className="grid flex-1 gap-1 text-sm font-semibold text-red-800">{siteLocale === "pl" ? "Wpisz DELETE, aby potwierdzić" : "Type DELETE to confirm"}<input name="confirmation" required className={fieldClass} /></label>
+                          <button className="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white">{siteLocale === "pl" ? "Usuń pracownię" : "Delete studio"}</button>
+                        </form>
+                      </details>
+                    ) : null}
                   </details>
                 ) : (
                   <aside className="h-fit rounded-lg border border-line bg-background p-5 text-sm leading-6 text-muted">
@@ -660,8 +767,11 @@ export default async function StudioTeamPage({
             <label className="text-sm font-semibold">{copy.form.headlineEn}<input name="profile_headline_en" maxLength={140} className={fieldClass} /></label>
             <label className="text-sm font-semibold">{copy.form.logo}<input name="profile_logo" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} /></label>
             <label className="text-sm font-semibold">{copy.form.banner}<input name="profile_banner" type="file" accept="image/jpeg,image/png,image/webp" className={fileClass} /></label>
-            <label className="text-sm font-semibold">{copy.form.location}<input name="location" className={fieldClass} /></label>
-            <label className="text-sm font-semibold md:col-span-2">{copy.form.specialties}<input name="specialties" placeholder={copy.form.specialtiesPlaceholder} className={fieldClass} /></label>
+            <label className="text-sm font-semibold">{copy.form.location}<LocationInput name="location" listId="new-studio-location-options" className={fieldClass} /></label>
+            <div className="grid gap-3 md:col-span-2 sm:grid-cols-2">
+              <label className="text-sm font-semibold">{detailsCopy.specialtiesPl}<input name="custom_specialties_pl" placeholder={copy.form.specialtiesPlaceholder} className={fieldClass} /></label>
+              <label className="text-sm font-semibold">{detailsCopy.specialtiesEn}<input name="custom_specialties_en" placeholder="Japandi, renovations, small spaces" className={fieldClass} /></label>
+            </div>
             <fieldset className="md:col-span-2">
               <legend className="text-sm font-semibold">{copy.form.services}</legend>
               <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -673,6 +783,11 @@ export default async function StudioTeamPage({
                 ))}
               </div>
             </fieldset>
+            <fieldset className="md:col-span-2">
+              <legend className="text-sm font-semibold">{detailsCopy.languages}</legend>
+              <p className="mt-1 text-sm text-muted">{detailsCopy.languagesHint}</p>
+              <div className="mt-3 flex flex-wrap gap-2">{profileLanguages.map((language) => <label key={language} className="flex items-center gap-2 rounded-xl border border-line bg-background px-3 py-2 text-sm font-semibold"><input type="checkbox" name="languages" value={language} defaultChecked={language === "Polish"} className="h-4 w-4 accent-primary" />{language}</label>)}</div>
+            </fieldset>
             <label className="text-sm font-semibold md:col-span-2">{copy.form.bioPl}<textarea name="bio_pl" rows={5} className={fieldClass} /></label>
             <label className="text-sm font-semibold md:col-span-2">{copy.form.bioEn}<textarea name="bio_en" rows={5} className={fieldClass} /></label>
             <label className="text-sm font-semibold">{copy.form.website}<input name="website" placeholder="https://" className={fieldClass} /></label>
@@ -683,14 +798,20 @@ export default async function StudioTeamPage({
             <label className="text-sm font-semibold">{copy.form.publicEmail}<input name="email" type="email" defaultValue={user.email ?? ""} className={fieldClass} /></label>
             <label className="text-sm font-semibold">{copy.form.phone}<input name="phone" className={fieldClass} /></label>
             <label className="text-sm font-semibold">{copy.form.experience}<input name="years_experience" inputMode="numeric" className={fieldClass} /></label>
+            <label className="text-sm font-semibold">{detailsCopy.careerStage}<select name="career_stage" defaultValue="" className={fieldClass}><option value="">{siteLocale === "pl" ? "Nie podawaj" : "Do not show"}</option>{careerStages.map((stage) => <option key={stage} value={stage}>{careerStageLabel(stage)}</option>)}</select></label>
             <label className="text-sm font-semibold">{copy.form.pricing}<select name="pricing_model" defaultValue="Custom quote" className={fieldClass}>{pricingModels.map((model) => <option key={model} value={model}>{pricingModelLabel(model)}</option>)}</select></label>
             <label className="text-sm font-semibold">{copy.form.availability}<select name="availability_status" defaultValue="Waitlist / ask" className={fieldClass}>{availabilityStatuses.map((status) => <option key={status} value={status}>{availabilityLabel(status)}</option>)}</select></label>
             <label className="text-sm font-semibold">{copy.form.priceFrom}<input name="price_from" inputMode="numeric" className={fieldClass} /></label>
             <label className="text-sm font-semibold">{copy.form.priceTo}<input name="price_to" inputMode="numeric" className={fieldClass} /></label>
             <label className="text-sm font-semibold md:col-span-2">{copy.form.minimumBudget}<input name="minimum_project_budget" inputMode="numeric" className={fieldClass} /></label>
             <fieldset className="md:col-span-2"><legend className="text-sm font-semibold">{copy.form.workModes}</legend><div className="mt-3 flex flex-wrap gap-2">{workModes.map((mode) => <label key={mode} className="flex items-center gap-2 rounded-xl border border-line bg-background px-3 py-2 text-sm font-semibold"><input type="checkbox" name="work_modes" value={mode} className="h-4 w-4 accent-primary" />{workModeLabel(mode)}</label>)}</div></fieldset>
+            <div className="grid gap-3 md:col-span-2 sm:grid-cols-2">
+              <label className="text-sm font-semibold">{detailsCopy.availabilityNotePl}<textarea name="contact_availability_pl" rows={3} className={fieldClass} /></label>
+              <label className="text-sm font-semibold">{detailsCopy.availabilityNoteEn}<textarea name="contact_availability_en" rows={3} className={fieldClass} /></label>
+            </div>
             <label className="text-sm font-semibold md:col-span-2">{copy.form.termsPl}<textarea name="cooperation_terms_pl" rows={4} className={fieldClass} /></label>
             <label className="text-sm font-semibold md:col-span-2">{copy.form.termsEn}<textarea name="cooperation_terms_en" rows={4} className={fieldClass} /></label>
+            <div className="rounded-xl border border-line bg-background p-4 md:col-span-2"><div className="text-sm font-semibold">{detailsCopy.offers}</div><p className="mt-1 text-sm text-muted">{detailsCopy.offersHint}</p><div className="mt-4"><ServiceOfferingsEditor /></div></div>
             <div className="rounded-lg border border-[#eadbb5] bg-[#fff8e5] p-4 md:col-span-2">
               <div className="font-bold">{copy.form.googleTitle}</div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">

@@ -31,6 +31,14 @@ import {
 } from "@/lib/profile-system-labels";
 import { getPublicProfileCopy } from "@/content/public-profile-copy";
 import { getDesignerProfileCopy } from "@/content/designer-profile-copy";
+import { siteLocale } from "@/lib/site-locale";
+import {
+  careerStageLabel,
+  localizedProfileList,
+  localizedServiceOffering,
+  serviceOfferingPriceLabel,
+  type ServiceOffering,
+} from "@/lib/professional-profile-details";
 
 export const revalidate = 0;
 
@@ -51,8 +59,11 @@ type Profile = {
   profession_type: string | null;
   user_type: string | null;
   specialties: string[] | null;
+  custom_specialties_pl: string[] | null;
+  custom_specialties_en: string[] | null;
   languages: string[] | null;
   service_capabilities: string[] | null;
+  service_offerings: ServiceOffering[] | null;
   website: string | null;
   instagram_url: string | null;
   facebook_url: string | null;
@@ -67,6 +78,9 @@ type Profile = {
   minimum_project_budget: number | null;
   work_modes: string[] | null;
   availability_status: string | null;
+  contact_availability_pl: string | null;
+  contact_availability_en: string | null;
+  career_stage: string | null;
   cooperation_terms: string | null;
   cooperation_terms_pl: string | null;
   cooperation_terms_en: string | null;
@@ -265,6 +279,20 @@ function briefRequestHref(profileId: string, briefId: string) {
 }
 
 function serviceCards(profile: Profile, copy = getDesignerProfileCopy()) {
+  const offers = profile.service_offerings?.filter((offer) => {
+    const localized = localizedServiceOffering(offer);
+    return Boolean(localized.title || localized.description);
+  }) ?? [];
+  if (offers.length) {
+    return offers.map((offer) => {
+      const localized = localizedServiceOffering(offer);
+      return {
+        title: localized.title || copy.defaults.primarySpecialty,
+        copy: localized.description || copy.services.unavailable,
+        price: serviceOfferingPriceLabel(offer),
+      };
+    });
+  }
   const type = profileType(profile);
   const specialties = profile.specialties?.filter(Boolean) ?? [];
   const primaryStyle = professionalOptionLabel(specialties[0] || copy.defaults.primarySpecialty);
@@ -316,7 +344,7 @@ export default async function DesignerProfilePage({
   const profileQuery = publicSupabase
     .from("profiles")
     .select(
-      "id, public_slug, avatar_url, full_name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, languages, service_capabilities, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_rating, google_review_count, is_demo"
+      "id, public_slug, avatar_url, full_name, profile_headline, profile_headline_pl, profile_headline_en, profile_logo_path, profile_banner_path, bio, bio_pl, bio_en, location, profession_type, user_type, specialties, custom_specialties_pl, custom_specialties_en, languages, service_capabilities, service_offerings, website, instagram_url, facebook_url, behance_url, linkedin_url, phone, email, hourly_rate, pricing_model, price_from, price_to, minimum_project_budget, work_modes, availability_status, contact_availability_pl, contact_availability_en, career_stage, cooperation_terms, cooperation_terms_pl, cooperation_terms_en, years_experience, google_business_url, google_rating, google_review_count, is_demo"
     )
     .eq("user_type", "professional");
   const { data: profileData, error: pErr } = isUuid(identifier)
@@ -412,8 +440,14 @@ export default async function DesignerProfilePage({
   const profileCopy = getPublicProfileCopy();
   const type = profileType(profile);
   const location = profileLocation(profile);
-  const specialties = profile.specialties?.filter(Boolean).slice(0, 10) ?? [];
+  const specialties = localizedProfileList(
+    profile.custom_specialties_pl,
+    profile.custom_specialties_en,
+    profile.specialties
+  ).slice(0, 10);
   const serviceCapabilities = profile.service_capabilities?.filter(Boolean) ?? [];
+  const careerStage = careerStageLabel(profile.career_stage);
+  const contactAvailability = localizedProfileText(profile, "contact_availability");
   const webHref = websiteHref(profile.website);
   const hasVerifiedGoogleRating =
     typeof profile.google_rating === "number" && typeof profile.google_review_count === "number";
@@ -509,7 +543,7 @@ export default async function DesignerProfilePage({
         </div>
 
         <section className="mt-4 grid gap-6 lg:-mt-10 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="rounded-2xl border border-line bg-card p-5 shadow-sm sm:p-6">
+          <div className="self-start rounded-2xl border border-line bg-card p-5 shadow-sm sm:p-6">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex gap-4">
                 <div className="relative grid h-20 w-20 shrink-0 place-items-center overflow-visible rounded-2xl border-4 border-white bg-primary text-2xl font-bold text-white shadow">
@@ -530,6 +564,11 @@ export default async function DesignerProfilePage({
                     {projects.length ? (
                       <span className="rounded-full bg-[#eaf2ff] px-3 py-1 text-xs font-semibold text-[#2563eb]">
                         {copy.badges.portfolioAdded}
+                      </span>
+                    ) : null}
+                    {careerStage ? (
+                      <span className="rounded-full border border-primary/20 bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
+                        {careerStage}
                       </span>
                     ) : null}
                   </div>
@@ -652,6 +691,12 @@ export default async function DesignerProfilePage({
                 <span className="text-muted">{profileCopy.labels.availability}</span>
                 <span className="text-right font-semibold">{profile.availability_status ? availabilityLabel(profile.availability_status) : profileCopy.values.toBeAgreed}</span>
               </div>
+              {contactAvailability ? (
+                <div className="grid gap-1 border-b border-line pb-3">
+                  <span className="text-muted">{siteLocale === "pl" ? "Godziny pracy" : "Working hours"}</span>
+                  <span className="text-right font-semibold">{contactAvailability}</span>
+                </div>
+              ) : null}
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
                 <span className="text-muted">{profileCopy.labels.workMode}</span>
                 <span className="text-right font-semibold">{profile.work_modes?.map((mode) => workModeLabel(mode)).join(" · ") || profileCopy.values.toBeAgreed}</span>
