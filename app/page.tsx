@@ -3,7 +3,7 @@ import Link from "next/link";
 import { applyPolishArticleCopy } from "@/content/pl/copy";
 import { getSiteCopy } from "@/content/site-copy";
 import { localizeArticle, type ArticleLocalizationFields } from "@/lib/article-content";
-import { siteLocale } from "@/lib/site-locale";
+import { localeAssetPath, siteLocale } from "@/lib/site-locale";
 import { createPublicContentClient } from "@/lib/public-content-client";
 import { pageMetadata } from "@/lib/seo";
 
@@ -18,18 +18,18 @@ export const metadata: Metadata = pageMetadata({
 
 export const revalidate = 300;
 
-const heroImage = "/images/home/hero-warm-minimalist-20260811.png";
+const heroImage = localeAssetPath("/images/home/hero-warm-minimalist-20260811.png");
 const inspirationImages = [
   "/images/guides/popular-interior-styles.webp",
   "/images/guides/popular-interior-styles-moodboard.webp",
   "/images/guides/small-apartment-design-ideas.webp",
   "/images/guides/interior-design-brief-inspiration.webp",
-];
+].map(localeAssetPath);
 const projectFallbacks = [
   "/images/guides/popular-interior-styles.webp",
   "/images/guides/small-apartment-design-ideas.webp",
   "/images/guides/interior-design-brief-inspiration.webp",
-];
+].map(localeAssetPath);
 const paletteColors = ["#f7edda", "#ddbf8f", "#b57a49", "#54463a"];
 
 type FeaturedProject = {
