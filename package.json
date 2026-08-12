@@ -2,8 +2,12 @@
   "name": "archicompass-web",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.0.0 <23"
+  },
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/assert-node-version.mjs",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",

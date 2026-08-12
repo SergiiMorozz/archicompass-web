@@ -10,9 +10,16 @@ export type LocalizedProfileContent = {
   cooperation_terms?: string | null;
   cooperation_terms_pl?: string | null;
   cooperation_terms_en?: string | null;
+  contact_availability?: string | null;
+  contact_availability_pl?: string | null;
+  contact_availability_en?: string | null;
 };
 
-type LocalizedField = "profile_headline" | "bio" | "cooperation_terms";
+type LocalizedField =
+  | "profile_headline"
+  | "bio"
+  | "cooperation_terms"
+  | "contact_availability";
 
 function clean(value: string | null | undefined) {
   const normalized = value?.trim();
@@ -42,5 +49,6 @@ export function localizeProfileContent<T extends LocalizedProfileContent>(
     profile_headline: localizedProfileText(profile, "profile_headline", locale),
     bio: localizedProfileText(profile, "bio", locale),
     cooperation_terms: localizedProfileText(profile, "cooperation_terms", locale),
+    contact_availability: localizedProfileText(profile, "contact_availability", locale),
   };
 }

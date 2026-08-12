@@ -518,7 +518,7 @@ const pl: SiteCopy = {
   },
   home: {
     metadata: {
-      title: "Katalog projektantów wnętrz z dopasowaniem AI | ArchiCompass",
+      title: "Katalog Projektantów wnętrz z pomocą AI",
       description: "Zamień zdjęcia inspiracji w precyzyjny brief i znajdź projektantów wnętrz oraz architektów dopasowanych do Twojego projektu, budżetu i lokalizacji.",
     },
     hero: {
