@@ -62,6 +62,8 @@ type HomeCopy = {
       number: string;
       title: string;
       body: string;
+      matchCriteriaLabel: string;
+      matchCriteria: string[];
       designers: Array<{ name: string; tag: string; location: string; match: string; mark: string }>;
     };
   };
@@ -601,6 +603,8 @@ const pl: SiteCopy = {
         number: "03",
         title: "Poznaj projektantów dopasowanych do Twojego projektu",
         body: "Porównaj specjalistów dopasowanych do charakteru projektu, zakresu usług, budżetu i lokalizacji - i sprawdź ich portfolio przed pierwszą rozmową.",
+        matchCriteriaLabel: "Dopasowanie uwzględnia",
+        matchCriteria: ["Styl i inspiracje", "Zakres współpracy", "Budżet i lokalizację"],
         designers: [
           { name: "Studio Wątek", tag: "Ciepłe japandi", location: "Warszawa", match: "92%", mark: "SW" },
           { name: "Marta Wysocka", tag: "Soft minimalism", location: "Warszawa", match: "88%", mark: "MW" },
@@ -968,6 +972,8 @@ const en: SiteCopy = {
         number: "03",
         title: "Meet designers matched to your project",
         body: "Compare specialists matched to the character of your project, scope of services, budget, and location - and review their portfolio before the first conversation.",
+        matchCriteriaLabel: "The match considers",
+        matchCriteria: ["Style and inspiration", "Scope of work", "Budget and location"],
         designers: [
           { name: "Studio Wątek", tag: "Warm Japandi", location: "Warsaw", match: "92%", mark: "SW" },
           { name: "Marta Wysocka", tag: "Soft minimalism", location: "Warsaw", match: "88%", mark: "MW" },

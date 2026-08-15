@@ -205,32 +205,51 @@ function CompactResult() {
   const visual = homeCopy.hero.visual;
   const preview = homeCopy.howItWorks.stepTwo.preview;
   return (
-    <div className="rounded-[1.5rem] bg-white p-4 text-foreground shadow-[0_24px_72px_rgba(4,1,10,0.28)] sm:p-6">
-      <div className="flex items-start justify-between gap-4 border-b border-line pb-4">
+    <article className="rounded-[1.75rem] bg-white p-5 text-foreground shadow-[0_28px_80px_rgba(4,1,10,0.3)] sm:p-7">
+      <div className="flex items-start justify-between gap-5 border-b border-line pb-5">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">{visual.tag}</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary">{visual.tag}</p>
           <p className="mt-3 text-[10px] font-bold uppercase tracking-wide text-muted">{visual.directionLabel}</p>
-          <h3 className="text-2xl font-bold sm:text-3xl">{visual.styleValue}</h3>
+          <h3 className="mt-1 text-3xl font-bold leading-tight sm:text-4xl">{visual.styleValue}</h3>
         </div>
-        <span className="grid h-11 w-11 place-items-center rounded-xl bg-primary text-sm font-bold text-white">AI</span>
+        <div className="shrink-0 rounded-2xl bg-primary-soft px-4 py-3 text-right">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-primary">{visual.matchLabel}</p>
+          <p className="mt-1 text-3xl font-bold leading-none text-primary">{visual.matchValue}</p>
+        </div>
       </div>
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <div className="rounded-xl border border-line bg-background p-3.5"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{visual.paletteLabel}</p><div className="mt-3"><Palette compact /></div></div>
-        <div className="rounded-xl border border-line bg-background p-3.5"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{visual.materialsLabel}</p><p className="mt-2 text-sm font-bold">{visual.materialsValue}</p></div>
-        <div className="rounded-xl border border-line bg-background p-3.5"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{preview.moodLabel}</p><p className="mt-2 text-sm font-bold">{preview.moodValue}</p></div>
-        <div className="rounded-xl border border-line bg-background p-3.5"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{visual.briefLabel}</p><p className="mt-2 text-sm font-bold">{visual.briefValue}</p></div>
+
+      <div className="mt-5 grid gap-4 sm:grid-cols-[0.88fr_1.12fr]">
+        <div className="grid grid-cols-2 gap-2 rounded-2xl bg-primary-soft/55 p-2">
+          {inspirationImages.slice(0, 4).map((src, index) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img key={src} src={src} alt="" className={`w-full rounded-xl object-cover ${index === 0 ? "col-span-2 aspect-[2/1]" : "aspect-[1.12/1]"}`} />
+          ))}
+        </div>
+        <div className="space-y-3">
+          <div className="rounded-xl border border-line bg-background p-3.5">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-muted">{preview.summaryLabel}</p>
+            <p className="mt-1.5 text-sm font-semibold leading-6">{preview.summaryValue}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl border border-line bg-background p-3.5"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{visual.paletteLabel}</p><div className="mt-3"><Palette compact /></div></div>
+            <div className="rounded-xl border border-line bg-background p-3.5"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{visual.materialsLabel}</p><p className="mt-2 text-sm font-bold leading-5">{visual.materialsValue}</p></div>
+            <div className="rounded-xl border border-line bg-background p-3.5"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{preview.moodLabel}</p><p className="mt-2 text-sm font-bold leading-5">{preview.moodValue}</p></div>
+            <div className="rounded-xl border border-line bg-background p-3.5"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{visual.briefLabel}</p><p className="mt-2 text-sm font-bold leading-5">{visual.briefValue}</p></div>
+          </div>
+        </div>
       </div>
-      <div className="mt-4 rounded-xl border border-line bg-background p-3.5">
-        <p className="text-[10px] font-bold uppercase tracking-wide text-muted">{preview.summaryLabel}</p>
-        <p className="mt-1 text-sm font-semibold leading-6">{preview.summaryValue}</p>
-      </div>
-      <div className="mt-4 flex items-center gap-3 rounded-xl bg-primary-soft p-3.5">
+
+      <div className="mt-5 flex items-center gap-3 rounded-2xl border border-primary/15 bg-primary-soft p-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={inspirationImages[1]} alt="" className="h-9 w-9 rounded-lg object-cover" />
-        <div><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{visual.professionalLabel}</p><p className="font-bold">{visual.professionalValue}</p></div>
-        <span className="ml-auto text-lg font-bold text-primary">{visual.matchValue}</span>
+        <img src={matchedProfessionalFallbackImages[matchedProfessionalIds[0]]} alt="" className="h-12 w-12 rounded-xl object-cover" />
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-muted">{visual.professionalLabel}</p>
+          <p className="truncate font-bold">{visual.professionalValue}</p>
+          <p className="mt-0.5 text-xs text-muted">{visual.professionalSubtitle}</p>
+        </div>
+        <span className="ml-auto rounded-xl bg-white px-3 py-2 text-sm font-bold text-primary shadow-sm">{visual.matchValue}</span>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -273,7 +292,7 @@ export default async function Home() {
       </section>
 
       <section className="border-y border-line bg-card">
-        <div className="mx-auto grid max-w-7xl gap-2 px-4 py-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
+        <div className="mx-auto grid max-w-7xl gap-2 px-4 py-3 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
           {homeCopy.trust.items.map(({ body, icon, title }, index) => (
             <article key={title} className="flex min-h-[76px] items-center gap-3 rounded-xl px-3 py-2">
               <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl text-base ${index === 0 ? "bg-primary-soft text-primary" : index === 1 ? "bg-[#fff3dd] text-[#bc7c07]" : index === 2 ? "bg-accent-soft text-accent" : "bg-warm-soft text-warm"}`} aria-hidden="true">{icon}</span>
@@ -283,29 +302,32 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-11 sm:px-6 lg:py-14">
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-sm font-bold uppercase tracking-[0.14em] text-accent">{homeCopy.howItWorks.eyebrow}</p>
           <h2 className="mt-3 text-4xl font-bold leading-tight sm:text-5xl">{homeCopy.howItWorks.headline}</h2>
           <p className="mt-4 text-lg leading-8 text-muted">{homeCopy.howItWorks.body}</p>
         </div>
 
-        <div className="relative mt-7 grid gap-5 lg:grid-cols-3">
+        <div className="relative mt-6 grid gap-5 lg:grid-cols-3">
           <div className="pointer-events-none absolute left-[18%] right-[18%] top-10 hidden border-t-2 border-dashed border-primary/20 lg:block" aria-hidden="true" />
-          <article className="relative flex min-h-[470px] flex-col overflow-hidden rounded-2xl border border-line bg-card p-6 shadow-[0_16px_42px_rgba(54,31,73,0.07)] sm:p-7">
+          <article className="relative flex flex-col overflow-hidden rounded-2xl border border-line bg-card p-6 shadow-[0_16px_42px_rgba(54,31,73,0.07)] sm:p-7">
             <StepTop number={stepOne.number} icon="▧" />
-            <h3 className="mt-7 text-2xl font-bold leading-tight">{stepOne.title}</h3>
+            <h3 className="mt-6 text-2xl font-bold leading-tight">{stepOne.title}</h3>
             <p className="mt-3 text-sm leading-6 text-muted">{stepOne.body}</p>
-            <div className="mt-6 grid grid-cols-2 gap-2 rounded-2xl bg-primary-soft/70 p-2">
-              {inspirationImages.map((src) => (
+            <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl bg-primary-soft/70 p-2">
+              {[...inspirationImages, heroImage].map((src, index) => (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img key={src} src={src} alt="" className="aspect-[1.45/1] w-full rounded-xl object-cover" />
+                <img key={`${src}-${index}`} src={src} alt="" className={`w-full rounded-xl object-cover ${index === 0 ? "col-span-2 aspect-[2.1/1]" : "aspect-[1.32/1]"}`} />
               ))}
             </div>
-            <p className="mt-auto rounded-xl bg-primary-soft px-3 py-3 text-sm font-semibold text-primary">{stepOne.note}</p>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-primary">
+              {["4+", stepOne.title, homeCopy.hero.visual.materialsLabel].map((item) => <span key={item} className="rounded-full bg-primary-soft px-3 py-1.5">{item}</span>)}
+            </div>
+            <p className="mt-4 rounded-xl bg-primary-soft px-3 py-3 text-sm font-semibold text-primary">{stepOne.note}</p>
           </article>
 
-          <article className="relative flex min-h-[470px] flex-col overflow-hidden rounded-2xl border border-primary/20 bg-primary-soft/45 p-6 shadow-[0_16px_42px_rgba(54,31,73,0.07)] sm:p-7">
+          <article className="relative flex flex-col overflow-hidden rounded-2xl border border-primary/20 bg-primary-soft/45 p-6 shadow-[0_16px_42px_rgba(54,31,73,0.07)] sm:p-7">
             <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full border-[28px] border-primary/10" aria-hidden="true" />
             <div className="relative"><StepTop number={stepTwo.number} icon="✦" /></div>
             <p className="relative mt-5 text-[10px] font-bold uppercase tracking-[0.14em] text-primary">{stepTwo.badge}</p>
@@ -326,11 +348,11 @@ export default async function Home() {
             <p className="relative mt-4 text-sm font-bold leading-6">{stepTwo.emphasis}</p>
           </article>
 
-          <article className="relative flex min-h-[470px] flex-col overflow-hidden rounded-2xl border border-line bg-card p-6 shadow-[0_16px_42px_rgba(54,31,73,0.07)] sm:p-7">
+          <article className="relative flex flex-col overflow-hidden rounded-2xl border border-line bg-card p-6 shadow-[0_16px_42px_rgba(54,31,73,0.07)] sm:p-7">
             <StepTop number={stepThree.number} icon="♧" />
-            <h3 className="mt-7 text-2xl font-bold leading-tight">{stepThree.title}</h3>
+            <h3 className="mt-6 text-2xl font-bold leading-tight">{stepThree.title}</h3>
             <p className="mt-3 text-sm leading-6 text-muted">{stepThree.body}</p>
-            <div className="mt-auto pt-6">
+            <div className="mt-5">
               <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.13em] text-muted">{homeCopy.hero.visual.tag}</p>
               <div className="grid gap-3">
                 {matchedProfessionals.map((designer) => (
@@ -343,13 +365,26 @@ export default async function Home() {
                 ))}
               </div>
             </div>
+            <div className="mt-5">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.13em] text-muted">{stepThree.matchCriteriaLabel}</p>
+              <div className="grid grid-cols-3 gap-2">
+                {stepThree.matchCriteria.map((criterion) => (
+                  <span key={criterion} className="flex min-h-[58px] items-center rounded-xl border border-line bg-background px-2.5 text-center text-[11px] font-semibold leading-4 text-foreground">
+                    {criterion}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="mt-4 rounded-xl bg-accent-soft px-3 py-3 text-sm font-semibold text-accent">
+              {homeCopy.whyExists.matchSentence}
+            </div>
           </article>
         </div>
         <div className="mt-8 text-center"><Link href="/project-compass" className="group inline-flex min-h-[54px] items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-white shadow-[0_14px_32px_rgba(86,35,168,0.2)] transition hover:-translate-y-0.5 hover:bg-primary/90">{homeCopy.howItWorks.cta}<Arrow /></Link></div>
       </section>
 
-      <section className="bg-[#24132f] px-4 py-11 text-white sm:px-6 lg:py-14">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
+      <section className="bg-[#24132f] px-4 py-10 text-white sm:px-6 lg:py-12">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:items-center">
           <div className="max-w-xl">
             <p className="text-sm font-bold uppercase tracking-[0.14em] text-[#5de1d1]">{homeCopy.whyExists.eyebrow}</p>
             <h2 className="mt-4 whitespace-pre-line text-4xl font-bold leading-tight sm:text-5xl">{homeCopy.whyExists.headline}</h2>
@@ -364,7 +399,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-11 sm:px-6 lg:py-14">
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
         <div className="grid gap-6 lg:grid-cols-2">
           <article className="grid overflow-hidden rounded-[2rem] border border-primary/15 bg-primary-soft/55 shadow-[0_16px_44px_rgba(54,31,73,0.07)] md:grid-cols-[1.12fr_0.88fr]">
             <div className="flex min-h-[510px] flex-col p-7 sm:p-9">
@@ -406,7 +441,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="border-y border-line bg-card px-4 py-11 sm:px-6 lg:py-14">
+      <section className="border-y border-line bg-card px-4 py-8 sm:px-6 lg:py-10">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl"><p className="text-sm font-bold uppercase tracking-[0.12em] text-warm">{homeCopy.latestProjects.eyebrow}</p><h2 className="mt-3 text-4xl font-bold leading-tight">{homeCopy.latestProjects.headline}</h2><p className="mt-4 text-lg leading-8 text-muted">{homeCopy.latestProjects.body}</p></div>
