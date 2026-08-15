@@ -52,6 +52,8 @@ type HomeCopy = {
         materialsValue: string;
         moodLabel: string;
         moodValue: string;
+        summaryLabel: string;
+        summaryValue: string;
       };
       footer: string;
       emphasis: string;
@@ -60,6 +62,8 @@ type HomeCopy = {
       number: string;
       title: string;
       body: string;
+      signals: string[];
+      note: string;
       designers: Array<{ name: string; tag: string; location: string; match: string; mark: string }>;
     };
   };
@@ -68,6 +72,7 @@ type HomeCopy = {
     headline: string;
     body: string;
     body2: string;
+    matchSentence: string;
     flow: string[];
   };
   forClients: {
@@ -85,6 +90,8 @@ type HomeCopy = {
     checklist: string[];
     primaryCta: string;
     secondaryCta: string;
+    pricingNote: string;
+    pricingCta: string;
   };
   designerValue: {
     headline: string;
@@ -586,6 +593,8 @@ const pl: SiteCopy = {
           materialsValue: "Drewno, len, kamień",
           moodLabel: "Charakter",
           moodValue: "Spokojny, naturalny, ciepły",
+          summaryLabel: "Opis kierunku",
+          summaryValue: "Ciepły minimalizm, naturalne materiały i spokojna, domowa atmosfera.",
         },
         footer: "Uzupełnij metraż, budżet, termin i oczekiwany zakres współpracy.",
         emphasis: "W efekcie powstaje brief, który projektant może naprawdę wykorzystać.",
@@ -594,6 +603,8 @@ const pl: SiteCopy = {
         number: "03",
         title: "Poznaj projektantów dopasowanych do Twojego projektu",
         body: "Porównaj specjalistów dopasowanych do charakteru projektu, zakresu usług, budżetu i lokalizacji - i sprawdź ich portfolio przed pierwszą rozmową.",
+        signals: ["Styl i estetyka", "Zakres usług", "Budżet i lokalizacja"],
+        note: "Dopasowanie porządkuje wybór, a decyzję podejmujesz po zapoznaniu się z profilem i portfolio.",
         designers: [
           { name: "Studio Wątek", tag: "Ciepłe japandi", location: "Warszawa", match: "92%", mark: "SW" },
           { name: "Marta Wysocka", tag: "Soft minimalism", location: "Warszawa", match: "88%", mark: "MW" },
@@ -603,9 +614,10 @@ const pl: SiteCopy = {
     },
     whyExists: {
       eyebrow: "Od inspiracji do briefu",
-      headline: "Nie tylko moodboard. Punkt wyjścia do konkretnej rozmowy.",
-      body: "Twoje inspiracje, zakres inwestycji, budżet i termin zostają uporządkowane w jednym czytelnym kontekście.",
-      body2: "Dzięki temu porównujesz projektantów z całej Polski na podstawie tego, co naprawdę ma znaczenie dla Twojego projektu.",
+      headline: "Inspiracje stają się\nwskazówką dla\nprojektanta.",
+      body: "Pinterest, Instagram i narzędzia AI sprawiły, że łatwiej niż kiedykolwiek znaleźć wnętrza, które nam się podobają. Trudniej jest przełożyć te obrazy na realny projekt - z określonym budżetem, zakresem prac, terminem i możliwościami konkretnej przestrzeni.",
+      body2: "ArchiCompass pomaga uporządkować to, co masz w głowie, zanim rozpoczniesz rozmowę z projektantem.",
+      matchSentence: "Na tej podstawie ArchiCompass dobiera projektantów do Twoich potrzeb, stylu i planowanego zakresu prac.",
       flow: ["Zdjęcia inspiracji", "Czytelny brief", "Świadomy wybór projektanta"],
     },
     forClients: {
@@ -636,6 +648,8 @@ const pl: SiteCopy = {
       ],
       primaryCta: "Dołącz jako specjalista",
       secondaryCta: "Dowiedz się więcej",
+      pricingNote: "Pierwsze 3 miesiące bezpłatnie. Szczegóły cen znajdziesz w cenniku.",
+      pricingCta: "Ceny i usługi",
     },
     designerValue: {
       headline: "Więcej niż kolejny katalog projektantów.",
@@ -948,6 +962,8 @@ const en: SiteCopy = {
           materialsValue: "Wood, linen, stone",
           moodLabel: "Mood",
           moodValue: "Calm, natural, warm",
+          summaryLabel: "Style summary",
+          summaryValue: "Warm minimalism, natural materials, and a calm, lived-in atmosphere.",
         },
         footer: "Add area, budget, timing, and the scope of collaboration you expect.",
         emphasis: "The result is a brief a designer can actually work from.",
@@ -956,6 +972,8 @@ const en: SiteCopy = {
         number: "03",
         title: "Meet designers matched to your project",
         body: "Compare specialists matched to the character of your project, scope of services, budget, and location - and review their portfolio before the first conversation.",
+        signals: ["Style and aesthetic", "Service scope", "Budget and location"],
+        note: "Matching helps narrow the choice; the final decision comes after reviewing each profile and portfolio.",
         designers: [
           { name: "Studio Wątek", tag: "Warm Japandi", location: "Warsaw", match: "92%", mark: "SW" },
           { name: "Marta Wysocka", tag: "Soft minimalism", location: "Warsaw", match: "88%", mark: "MW" },
@@ -965,9 +983,10 @@ const en: SiteCopy = {
     },
     whyExists: {
       eyebrow: "From inspiration to a brief",
-      headline: "More than a moodboard. A starting point for a real conversation.",
-      body: "Your inspiration, project scope, budget, and timeline are organised into one clear context.",
-      body2: "That lets you compare designers from across Poland by what truly matters to your project.",
+      headline: "Inspiration becomes\na useful guide for\nyour designer.",
+      body: "Pinterest, Instagram, and AI tools have made it easier than ever to find interiors we like. What is harder is turning those images into a real project - with a defined budget, scope, timeline, and the constraints of a specific space.",
+      body2: "ArchiCompass helps organise what you have in mind before you start a conversation with a designer.",
+      matchSentence: "Based on that, ArchiCompass suggests designers that fit your needs, style, and planned scope of work.",
       flow: ["Inspiration photos", "Clear brief", "Confident designer choice"],
     },
     forClients: {
@@ -998,6 +1017,8 @@ const en: SiteCopy = {
       ],
       primaryCta: "Join as a professional",
       secondaryCta: "Learn more",
+      pricingNote: "The first 3 months are free. Find pricing details on the pricing page.",
+      pricingCta: "Pricing and services",
     },
     designerValue: {
       headline: "More than another designer directory.",

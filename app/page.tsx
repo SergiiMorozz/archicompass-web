@@ -187,6 +187,7 @@ function CompactResult() {
         <div className="rounded-xl border border-line bg-background p-3.5"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{preview.moodLabel}</p><p className="mt-2 text-sm font-bold">{preview.moodValue}</p></div>
         <div className="rounded-xl border border-line bg-background p-3.5"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{visual.briefLabel}</p><p className="mt-2 text-sm font-bold">{visual.briefValue}</p></div>
       </div>
+      <div className="mt-3 rounded-xl border border-line bg-background p-3.5"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{preview.summaryLabel}</p><p className="mt-1 text-sm font-semibold leading-6">{preview.summaryValue}</p></div>
       <div className="mt-4 flex items-center gap-3 rounded-xl bg-primary-soft p-3.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={inspirationImages[1]} alt="" className="h-9 w-9 rounded-lg object-cover" />
@@ -206,7 +207,7 @@ export default async function Home() {
       <section className="bg-[#fcfbff] px-4 py-10 sm:px-6 lg:py-16">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.88fr_1.12fr] lg:items-center">
           <div className="relative z-10 max-w-2xl">
-            <h1 className="text-[clamp(3.1rem,4.7vw,5rem)] font-bold leading-[0.99] text-foreground">
+            <h1 className="break-words text-[clamp(2.8rem,12vw,5rem)] font-bold leading-[0.99] text-foreground">
               {homeCopy.hero.headline}<br />
               <span className="text-primary">{homeCopy.hero.accentHeadline}</span>
             </h1>
@@ -237,16 +238,16 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
+      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:py-16">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-sm font-bold uppercase tracking-[0.14em] text-accent">{homeCopy.howItWorks.eyebrow}</p>
           <h2 className="mt-3 text-4xl font-bold leading-tight sm:text-5xl">{homeCopy.howItWorks.headline}</h2>
           <p className="mt-4 text-lg leading-8 text-muted">{homeCopy.howItWorks.body}</p>
         </div>
 
-        <div className="relative mt-10 grid gap-5 lg:grid-cols-3">
+        <div className="relative mt-8 grid gap-5 lg:grid-cols-3">
           <div className="pointer-events-none absolute left-[18%] right-[18%] top-10 hidden border-t-2 border-dashed border-primary/20 lg:block" aria-hidden="true" />
-          <article className="relative flex min-h-[500px] flex-col overflow-hidden rounded-2xl border border-line bg-card p-6 shadow-[0_16px_42px_rgba(54,31,73,0.07)] sm:p-7">
+          <article className="relative flex min-h-[470px] flex-col overflow-hidden rounded-2xl border border-line bg-card p-6 shadow-[0_16px_42px_rgba(54,31,73,0.07)] sm:p-7">
             <StepTop number={stepOne.number} icon="▧" />
             <h3 className="mt-7 text-2xl font-bold leading-tight">{stepOne.title}</h3>
             <p className="mt-3 text-sm leading-6 text-muted">{stepOne.body}</p>
@@ -256,10 +257,10 @@ export default async function Home() {
                 <img key={src} src={src} alt="" className="aspect-[1.45/1] w-full rounded-xl object-cover" />
               ))}
             </div>
-            <p className="mt-5 rounded-xl bg-primary-soft px-3 py-3 text-sm font-semibold text-primary">{stepOne.note}</p>
+            <p className="mt-auto rounded-xl bg-primary-soft px-3 py-3 text-sm font-semibold text-primary">{stepOne.note}</p>
           </article>
 
-          <article className="relative flex min-h-[500px] flex-col overflow-hidden rounded-2xl border border-primary/20 bg-primary-soft/45 p-6 shadow-[0_16px_42px_rgba(54,31,73,0.07)] sm:p-7">
+          <article className="relative flex min-h-[470px] flex-col overflow-hidden rounded-2xl border border-primary/20 bg-primary-soft/45 p-6 shadow-[0_16px_42px_rgba(54,31,73,0.07)] sm:p-7">
             <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full border-[28px] border-primary/10" aria-hidden="true" />
             <div className="relative"><StepTop number={stepTwo.number} icon="✦" /></div>
             <p className="relative mt-5 text-[10px] font-bold uppercase tracking-[0.14em] text-primary">{stepTwo.badge}</p>
@@ -275,16 +276,20 @@ export default async function Home() {
                 <div><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{stepTwo.preview.materialsLabel}</p><p className="mt-1 text-xs font-semibold leading-5">{stepTwo.preview.materialsValue}</p></div>
               </div>
               <div className="mt-4 rounded-xl bg-accent-soft px-3 py-3"><p className="text-[10px] font-bold uppercase tracking-wide text-accent">{stepTwo.preview.moodLabel}</p><p className="mt-1 text-xs font-semibold">{stepTwo.preview.moodValue}</p></div>
+              <div className="mt-3 rounded-xl border border-line bg-background px-3 py-3"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{stepTwo.preview.summaryLabel}</p><p className="mt-1 text-xs font-semibold leading-5">{stepTwo.preview.summaryValue}</p></div>
             </div>
             <p className="relative mt-5 text-sm leading-6 text-muted">{stepTwo.footer}</p>
             <p className="relative mt-4 text-sm font-bold leading-6">{stepTwo.emphasis}</p>
           </article>
 
-          <article className="relative flex min-h-[500px] flex-col overflow-hidden rounded-2xl border border-line bg-card p-6 shadow-[0_16px_42px_rgba(54,31,73,0.07)] sm:p-7">
+          <article className="relative flex min-h-[470px] flex-col overflow-hidden rounded-2xl border border-line bg-card p-6 shadow-[0_16px_42px_rgba(54,31,73,0.07)] sm:p-7">
             <StepTop number={stepThree.number} icon="♧" />
             <h3 className="mt-7 text-2xl font-bold leading-tight">{stepThree.title}</h3>
             <p className="mt-3 text-sm leading-6 text-muted">{stepThree.body}</p>
-            <div className="mt-auto pt-6">
+            <div className="mt-5 flex flex-wrap gap-2">
+              {stepThree.signals.map((signal) => <span key={signal} className="rounded-full border border-primary/15 bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary">{signal}</span>)}
+            </div>
+            <div className="mt-5">
               <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.13em] text-muted">{homeCopy.hero.visual.tag}</p>
               <div className="grid gap-3">
                 {stepThree.designers.map((designer, index) => (
@@ -297,18 +302,20 @@ export default async function Home() {
                 ))}
               </div>
             </div>
+            <p className="mt-auto pt-5 text-xs leading-5 text-muted">{stepThree.note}</p>
           </article>
         </div>
         <div className="mt-8 text-center"><Link href="/project-compass" className="group inline-flex min-h-[54px] items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-white shadow-[0_14px_32px_rgba(86,35,168,0.2)] transition hover:-translate-y-0.5 hover:bg-primary/90">{homeCopy.howItWorks.cta}<Arrow /></Link></div>
       </section>
 
-      <section className="bg-[#24132f] px-4 py-14 text-white sm:px-6 lg:py-20">
+      <section className="bg-[#24132f] px-4 py-12 text-white sm:px-6 lg:py-16">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
           <div className="max-w-xl">
             <p className="text-sm font-bold uppercase tracking-[0.14em] text-[#5de1d1]">{homeCopy.whyExists.eyebrow}</p>
-            <h2 className="mt-4 text-4xl font-bold leading-tight sm:text-5xl">{homeCopy.whyExists.headline}</h2>
+            <h2 className="mt-4 whitespace-pre-line text-4xl font-bold leading-tight sm:text-5xl">{homeCopy.whyExists.headline}</h2>
             <p className="mt-5 text-lg leading-8 text-white/72">{homeCopy.whyExists.body}</p>
             <p className="mt-6 text-lg font-semibold leading-8 text-white">{homeCopy.whyExists.body2}</p>
+            <p className="mt-5 text-base font-semibold leading-7 text-[#72f1e3]">{homeCopy.whyExists.matchSentence}</p>
             <ol className="mt-8 grid gap-2">
               {homeCopy.whyExists.flow.map((step, index) => <li key={step} className="flex items-center gap-3 rounded-xl border border-white/15 bg-white/[0.06] px-3 py-2.5 text-sm font-semibold"><b className="grid h-6 w-6 place-items-center rounded-full bg-[#5de1d1]/15 text-xs text-[#72f1e3]">{index + 1}</b>{step}</li>)}
             </ol>
@@ -317,7 +324,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
+      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:py-16">
         <div className="grid gap-6 lg:grid-cols-2">
           <article className="grid overflow-hidden rounded-[2rem] border border-primary/15 bg-primary-soft/55 shadow-[0_16px_44px_rgba(54,31,73,0.07)] md:grid-cols-[1.12fr_0.88fr]">
             <div className="flex min-h-[510px] flex-col p-7 sm:p-9">
@@ -339,6 +346,7 @@ export default async function Home() {
               <h2 className="mt-5 text-3xl font-bold leading-tight sm:text-4xl">{homeCopy.forDesigners.headline}</h2>
               <p className="mt-5 text-base leading-7 text-muted">{homeCopy.forDesigners.body}</p>
               <div className="mt-7"><Checklist items={homeCopy.forDesigners.checklist.slice(0, 4)} tone="accent" /></div>
+              <p className="mt-5 text-xs font-medium leading-5 text-muted">{homeCopy.forDesigners.pricingNote} <Link href="/services-and-pricing" className="font-bold text-[#207a68] hover:underline">{homeCopy.forDesigners.pricingCta}</Link></p>
               <div className="mt-auto pt-7"><Link href="/get-started" className="group inline-flex min-h-[54px] items-center gap-2 rounded-xl bg-[#1f604d] px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(31,96,77,0.2)] transition hover:-translate-y-0.5 hover:bg-[#19513f]">{homeCopy.forDesigners.primaryCta}<Arrow /></Link></div>
             </div>
             <div className="min-h-[250px] bg-accent-soft p-5 md:min-h-0 md:p-0">
@@ -358,7 +366,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="border-y border-line bg-card px-4 py-14 sm:px-6 lg:py-20">
+      <section className="border-y border-line bg-card px-4 py-12 sm:px-6 lg:py-16">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl"><p className="text-sm font-bold uppercase tracking-[0.12em] text-warm">{homeCopy.latestProjects.eyebrow}</p><h2 className="mt-3 text-4xl font-bold leading-tight">{homeCopy.latestProjects.headline}</h2><p className="mt-4 text-lg leading-8 text-muted">{homeCopy.latestProjects.body}</p></div>
@@ -368,7 +376,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="border-b border-line bg-primary-soft/35 px-4 py-14 sm:px-6 lg:py-20">
+      <section className="border-b border-line bg-primary-soft/35 px-4 py-12 sm:px-6 lg:py-16">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div className="max-w-3xl"><p className="text-sm font-bold uppercase tracking-[0.12em] text-accent">{homeCopy.inspirationHub.eyebrow}</p><h2 className="mt-3 text-4xl font-bold leading-tight">{homeCopy.inspirationHub.headline}</h2><p className="mt-4 text-lg leading-8 text-muted">{homeCopy.inspirationHub.body}</p></div><Link href="/inspiration" className="font-bold text-primary transition hover:underline">{homeCopy.inspirationHub.cta} &#8594;</Link></div>
           {featuredArticles.length ? <div className="mt-8 grid gap-5 md:grid-cols-3">{featuredArticles.map((article) => <article key={article.slug} className="group overflow-hidden rounded-xl border border-line bg-card shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"><Link href={`/inspiration/${article.slug}`} className="block">{article.image_url ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={article.image_url} alt={article.cover_alt} width="1000" height="700" loading="lazy" className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.03]" /> : <div className="aspect-[4/3] bg-primary-soft" aria-hidden="true" />}<div className="p-5"><div className="text-xs font-bold uppercase tracking-wide text-accent">{article.category}</div><h3 className="mt-2 text-xl font-bold transition group-hover:text-primary">{article.title}</h3><p className="mt-3 line-clamp-3 text-sm leading-6 text-muted">{article.excerpt}</p><div className="mt-5 text-sm font-bold text-primary">{homeCopy.inspirationHub.readCta} &#8594;</div></div></Link></article>)}</div> : <div className="mt-8 rounded-xl border border-dashed border-line bg-card p-7"><h3 className="text-xl font-bold">{homeCopy.inspirationHub.emptyTitle}</h3><Link href="/inspiration" className="mt-3 inline-flex font-bold text-primary hover:underline">{homeCopy.inspirationHub.emptyCta}</Link></div>}
