@@ -62,8 +62,6 @@ type HomeCopy = {
       number: string;
       title: string;
       body: string;
-      signals: string[];
-      note: string;
       designers: Array<{ name: string; tag: string; location: string; match: string; mark: string }>;
     };
   };
@@ -603,8 +601,6 @@ const pl: SiteCopy = {
         number: "03",
         title: "Poznaj projektantów dopasowanych do Twojego projektu",
         body: "Porównaj specjalistów dopasowanych do charakteru projektu, zakresu usług, budżetu i lokalizacji - i sprawdź ich portfolio przed pierwszą rozmową.",
-        signals: ["Styl i estetyka", "Zakres usług", "Budżet i lokalizacja"],
-        note: "Dopasowanie porządkuje wybór, a decyzję podejmujesz po zapoznaniu się z profilem i portfolio.",
         designers: [
           { name: "Studio Wątek", tag: "Ciepłe japandi", location: "Warszawa", match: "92%", mark: "SW" },
           { name: "Marta Wysocka", tag: "Soft minimalism", location: "Warszawa", match: "88%", mark: "MW" },
@@ -615,9 +611,9 @@ const pl: SiteCopy = {
     whyExists: {
       eyebrow: "Od inspiracji do briefu",
       headline: "Inspiracje stają się\nwskazówką dla\nprojektanta.",
-      body: "Pinterest, Instagram i narzędzia AI sprawiły, że łatwiej niż kiedykolwiek znaleźć wnętrza, które nam się podobają. Trudniej jest przełożyć te obrazy na realny projekt - z określonym budżetem, zakresem prac, terminem i możliwościami konkretnej przestrzeni.",
+      body: "Pinterest, Instagram i narzędzia AI sprawiły, że łatwiej niż kiedykolwiek znaleźć wnętrza, które nam się podobają. Trudniej jest przełożyć te obrazy na realny projekt — z określonym budżetem, zakresem prac, terminem i możliwościami konkretnej przestrzeni.",
       body2: "ArchiCompass pomaga uporządkować to, co masz w głowie, zanim rozpoczniesz rozmowę z projektantem.",
-      matchSentence: "Na tej podstawie ArchiCompass dobiera projektantów do Twoich potrzeb, stylu i planowanego zakresu prac.",
+      matchSentence: "Na tej podstawie ArchiCompass proponuje projektantów dopasowanych do Twojego stylu, potrzeb i planowanego zakresu prac.",
       flow: ["Zdjęcia inspiracji", "Czytelny brief", "Świadomy wybór projektanta"],
     },
     forClients: {
@@ -972,8 +968,6 @@ const en: SiteCopy = {
         number: "03",
         title: "Meet designers matched to your project",
         body: "Compare specialists matched to the character of your project, scope of services, budget, and location - and review their portfolio before the first conversation.",
-        signals: ["Style and aesthetic", "Service scope", "Budget and location"],
-        note: "Matching helps narrow the choice; the final decision comes after reviewing each profile and portfolio.",
         designers: [
           { name: "Studio Wątek", tag: "Warm Japandi", location: "Warsaw", match: "92%", mark: "SW" },
           { name: "Marta Wysocka", tag: "Soft minimalism", location: "Warsaw", match: "88%", mark: "MW" },
@@ -984,9 +978,9 @@ const en: SiteCopy = {
     whyExists: {
       eyebrow: "From inspiration to a brief",
       headline: "Inspiration becomes\na useful guide for\nyour designer.",
-      body: "Pinterest, Instagram, and AI tools have made it easier than ever to find interiors we like. What is harder is turning those images into a real project - with a defined budget, scope, timeline, and the constraints of a specific space.",
+      body: "Pinterest, Instagram, and AI tools have made it easier than ever to find interiors we like. What is harder is turning those images into a real project — with a defined budget, scope of work, timeline, and the constraints of a specific space.",
       body2: "ArchiCompass helps organise what you have in mind before you start a conversation with a designer.",
-      matchSentence: "Based on that, ArchiCompass suggests designers that fit your needs, style, and planned scope of work.",
+      matchSentence: "Based on this, ArchiCompass suggests designers matched to your style, needs, and planned scope of work.",
       flow: ["Inspiration photos", "Clear brief", "Confident designer choice"],
     },
     forClients: {
