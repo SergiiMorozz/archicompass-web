@@ -268,7 +268,7 @@ function LoginContent() {
                     onChange={(event) => setLegalConsents((current) => ({ ...current, terms: event.target.checked }))}
                     className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
                   />
-                  <span>{authCopy.form.termsConsentBefore} <Link href="/terms" className="font-semibold text-primary underline">{authCopy.form.terms}</Link> {authCopy.form.termsConsentAfter}</span>
+                  <span>{authCopy.form.termsConsentBefore}{" "}<Link href="/terms" className="font-semibold text-primary underline">{authCopy.form.terms}</Link>{" "}{authCopy.form.termsConsentAfter}</span>
                 </label>
                 <label className="flex cursor-pointer items-start gap-3 text-xs leading-5 text-muted">
                   <input
@@ -277,7 +277,7 @@ function LoginContent() {
                     onChange={(event) => setLegalConsents((current) => ({ ...current, privacy: event.target.checked }))}
                     className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
                   />
-                  <span>{authCopy.form.privacyConsentBefore} <Link href="/privacy" className="font-semibold text-primary underline">{authCopy.form.privacy}</Link>{authCopy.form.privacyConsentAfter}</span>
+                  <span>{authCopy.form.privacyConsentBefore}{" "}<Link href="/privacy" className="font-semibold text-primary underline">{authCopy.form.privacy}</Link>{authCopy.form.privacyConsentAfter}</span>
                 </label>
                 <label className="flex cursor-pointer items-start gap-3 text-xs leading-5 text-muted">
                   <input
@@ -286,7 +286,7 @@ function LoginContent() {
                     onChange={(event) => setLegalConsents((current) => ({ ...current, cookies: event.target.checked }))}
                     className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
                   />
-                  <span>{authCopy.form.cookiesConsentBefore} <Link href="/cookies" className="font-semibold text-primary underline">{authCopy.form.cookies}</Link>{authCopy.form.cookiesConsentAfter}</span>
+                  <span>{authCopy.form.cookiesConsentBefore}{" "}<Link href="/cookies" className="font-semibold text-primary underline">{authCopy.form.cookies}</Link>{authCopy.form.cookiesConsentAfter}</span>
                 </label>
                 <label className="flex cursor-pointer items-start gap-3 text-xs leading-5 text-muted">
                   <input
@@ -295,7 +295,7 @@ function LoginContent() {
                     onChange={(event) => setLegalConsents((current) => ({ ...current, aiTransparency: event.target.checked }))}
                     className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
                   />
-                  <span>{authCopy.form.aiTransparencyConsentBefore} <Link href="/ai-transparency" className="font-semibold text-primary underline">{authCopy.form.aiTransparency}</Link>{authCopy.form.aiTransparencyConsentAfter}</span>
+                  <span>{authCopy.form.aiTransparencyConsentBefore}{" "}<Link href="/ai-transparency" className="font-semibold text-primary underline">{authCopy.form.aiTransparency}</Link>{authCopy.form.aiTransparencyConsentAfter}</span>
                 </label>
               </fieldset>
             ) : null}
