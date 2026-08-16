@@ -1,0 +1,248 @@
+1. Why we are publishing this information
+
+ArchiCompass uses artificial intelligence solutions as tools to support the User in organising inspiration, preparing a Design Brief, and finding Designers who meet specific needs.
+
+This page explains:
+
+* where ArchiCompass uses AI;
+* what data may be analysed;
+* what AI does not do;
+* how we maintain human oversight;
+* what the limitations of the technology are;
+* how we protect data;
+* how to report issues regarding the operation of AI functions.
+
+ArchiCompass designs and uses AI functions in compliance with relevant legal requirements, including Regulation (EU) 2024/1689 – the AI Act, the GDPR, and consumer protection regulations.
+
+⸻
+
+2. Where we use AI
+
+AI Project Compass
+
+AI may support the analysis of:
+
+* inspiration photos;
+* stylistic preferences;
+* type of investment;
+* nature of the space;
+* declared User needs;
+* other information provided during the creation of the Brief.
+
+On this basis, AI may assist in preparing, among other things:
+
+* a description of the preferred style;
+* interior characteristics;
+* a colour palette;
+* material directions;
+* visual features;
+* tips for the Design Brief;
+* other information helpful during a conversation with a Designer.
+
+⸻
+
+3. Matching Designers
+
+ArchiCompass may use the data contained in the Brief and other project parameters to indicate Designers who may meet the Client's needs.
+
+Matching may take into account, in particular:
+
+* location;
+* scope of the project;
+* type of investment;
+* budget;
+* stylistic preferences;
+* information contained in Designers' Profiles and Portfolios;
+* area of operation;
+* other declared project parameters.
+
+AI may assist in interpreting certain information, e.g., stylistic features resulting from inspiration.
+
+The result of the Matching is of a recommendatory nature.
+
+ArchiCompass does not select a Designer for the Client.
+
+⸻
+
+4. Humans maintain control
+
+The User independently decides:
+
+* whether to launch the AI analysis;
+* which photos to upload;
+* whether to save the result;
+* what information will be included in the Brief;
+* whether to send an Enquiry;
+* which Designer to approach;
+* whether to commence cooperation.
+
+The Designer is independently responsible for their offer, advice, design, and the execution of services.
+
+AI does not enter into a Design Agreement on behalf of the User or the Designer.
+
+⸻
+
+5. How to recognise an AI function
+
+Functions and results directly generated or significantly supported by AI are marked in the interface with appropriate information, e.g.:
+
+"Analysis supported by AI"
+or
+"Result generated using AI".
+
+If the User is directly using an AI function, ArchiCompass informs them of this in a visible manner in the context of the given functionality.
+
+The AI Act requires informing a person of direct interaction with AI in appropriate cases.
+
+⸻
+
+6. Information before photo analysis
+
+Reference photos are not automatically sent to the AI model.
+
+The transfer takes place only after the User consciously launches the analysis function.
+
+Before starting the analysis, the User receives information that the selected materials will be transferred to an external AI technology provider.
+
+In a single request, AI Project Compass currently analyses a maximum of six photos.
+
+⸻
+
+7. What information may be transferred to AI
+
+Depending on the functionality used, this may include:
+
+* selected photos;
+* type of investment;
+* selected stylistic direction;
+* visual features;
+* information regarding the project;
+* other data necessary to prepare the result.
+
+ArchiCompass does not transfer login data or phone numbers as part of the standard AI Project Compass photo analysis.
+
+The User should not upload:
+
+* identity documents;
+* payment card data;
+* confidential documents;
+* special category data;
+* photos of people, if their use is not necessary or the User does not have a basis for their processing.
+
+⸻
+
+8. AI technology providers
+
+ArchiCompass may integrate AI models provided by external providers.
+
+The currently used provider or configuration may change as technology develops.
+
+Information regarding current providers, the processing of personal data, and any potential data transfers is described in the Privacy Policy.
+
+ArchiCompass does not use Users' private photos as a public content database.
+
+⸻
+
+9. AI limitations
+
+AI systems use statistical models and may:
+
+* misinterpret a photo;
+* fail to recognise an important element;
+* generate incomplete information;
+* propose a solution that is impossible to execute;
+* present a result that does not correspond to all of the User's preferences;
+* generate similar results for different Users.
+
+The AI result should be treated as a starting point for further work, and not as a guaranteed professional assessment.
+
+⸻
+
+10. AI does not replace a professional
+
+AI Project Compass does not constitute:
+
+* an architectural design;
+* an executive design;
+* technical documentation;
+* structural expertise;
+* a cost estimate;
+* legal advice;
+* tax advice;
+* financial advice;
+* an assessment of compliance with building regulations;
+* a guarantee of investment feasibility.
+
+Before implementing a project, important information should be verified with an appropriate specialist.
+
+⸻
+
+11. No automated decisions with significant effects
+
+ArchiCompass does not use AI Project Compass or the Matching mechanism to make decisions towards the User that produce legal effects or similarly significantly affect them solely through automated processing.
+
+Final decisions belong to the Users.
+
+⸻
+
+12. Prohibited and undesirable uses
+
+ArchiCompass does not design AI Project Compass for the purpose of:
+
+* recognising protected characteristics of a person based on appearance;
+* assessing the value or credibility of a human;
+* social scoring;
+* manipulating the User;
+* exploiting the vulnerabilities of children or particularly vulnerable persons;
+* biometric identification of persons;
+* drawing conclusions regarding health, sexual orientation, political views, or other special characteristics of a person.
+
+The analysis is intended to concern interiors, inspiration, and design needs.
+
+⸻
+
+13. Security and monitoring
+
+ArchiCompass may monitor:
+
+* reported errors;
+* unexpected results;
+* security issues;
+* changes in performance quality;
+* the impact of model or prompt updates.
+
+If necessary, we may:
+
+* change system instructions;
+* restrict a function;
+* change a model or provider;
+* add security measures;
+* temporarily disable a function.
+
+⸻
+
+14. Reporting issues
+
+If an AI result:
+
+* is evidently incorrect;
+* contains inappropriate content;
+* appears discriminatory;
+* violates privacy;
+* causes other objections,
+
+please contact us at:
+
+contact@archicompass.pl
+
+In the report, it is helpful to provide the name of the function, the approximate time of its use, and a description of the problem.
+
+⸻
+
+15. Related documents
+
+More information can be found in:
+
+* the ArchiCompass Terms and Conditions;
+* the Privacy Policy;
+* the Cookie Policy.

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import LegalDocumentPage from "@/components/LegalDocumentPage";
 import { getLegalCopy } from "@/content/legal-copy";
-import { getFullPolishLegalText } from "@/lib/legal-full-text";
+import { getFullLegalText } from "@/lib/legal-full-text";
 import { siteLocale } from "@/lib/site-locale";
 import { pageMetadata } from "@/lib/seo";
 
@@ -14,7 +14,7 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default function AiTransparencyPage() {
-  return <LegalDocumentPage document={copy.documents.aiTransparency} fullText={siteLocale === "pl" ? getFullPolishLegalText("aiTransparency") : undefined} relatedTitle={copy.relatedTitle} relatedLinks={[
+  return <LegalDocumentPage document={copy.documents.aiTransparency} fullText={getFullLegalText("aiTransparency", siteLocale)} relatedTitle={copy.relatedTitle} relatedLinks={[
     { href: "/responsible-ai", label: copy.links.responsibleAi },
     { href: "/privacy-and-ai", label: copy.links.privacyAndAi },
     { href: "/ai-disclaimer", label: copy.links.aiDisclaimer },
