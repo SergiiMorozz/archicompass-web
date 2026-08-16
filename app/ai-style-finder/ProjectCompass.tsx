@@ -1391,7 +1391,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                       <p className="mt-2 text-sm leading-6 text-muted">{module.body}</p>
                       <div className="mt-5 border-t border-line pt-4 text-sm font-semibold text-primary">{module.preview}</div>
                     </div>
-                    <span className="absolute bottom-5 right-5 text-xl text-primary transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">&rarr;</span>
+                    {!isLeadModule ? <span className="absolute bottom-5 right-5 text-xl text-primary transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">&rarr;</span> : null}
                     {isLeadModule ? (
                       <div className="mt-5 grid h-[190px] grid-cols-2 grid-rows-[1.15fr_1fr] gap-2 sm:absolute sm:inset-y-6 sm:right-6 sm:mt-0 sm:h-auto sm:w-[41%] sm:max-w-[360px]">
                         {workspacePhotos.slice(0, 3).map((src, index) => (
