@@ -1,0 +1,823 @@
+ARCHICOMPASS PRIVACY POLICY
+
+effective from 16 August 2026
+
+This Privacy Policy describes the principles for the processing of personal data in connection with the use of the ArchiCompass online platform, available in particular at the address archicompass.pl, including Client and Designer Accounts, Profiles and Portfolios, AI Project Compass, Project Briefs, Designer Matching, Enquiries, messages, and other functionalities of the Service.
+
+The Policy constitutes a supplement to the ArchiCompass Terms and Conditions. Capitalised terms that have not been defined in this Policy have the meaning assigned to them in the Terms and Conditions.
+
+⸻
+
+§ 1. Controller of personal data
+
+1. The controller of personal data processed in connection with the operation of ArchiCompass is:
+
+Sergii Moroz, conducting business under the name Sergii Moroz Advisory (SM Advisory)
+ul. Grzybowska 2, lok. 31
+00-131 Warsaw, Poland
+NIP (Tax Identification Number): 5252995634
+REGON (Statistical Identification Number): 528006413
+
+hereinafter referred to as the "Controller" or "ArchiCompass".
+
+2. In matters concerning personal data, privacy, and the exercise of rights resulting from the GDPR, you may contact the Controller at the address:
+
+contact@archicompass.pl
+
+3. Reports concerning the security of the Service may be directed to:
+
+admin@archicompass.pl
+
+4. The Controller has not appointed a Data Protection Officer. In matters concerning the protection of personal data, please use the contact details indicated above.
+
+⸻
+
+§ 2. Basic principles of data processing
+
+1. The Controller processes personal data in accordance with applicable laws, in particular:
+
+a) Regulation (EU) 2016/679 of the European Parliament and of the Council ("GDPR");
+
+b) the Act of 10 May 2018 on the protection of personal data;
+
+c) the Act of 12 July 2024 – Electronic Communications Law;
+
+d) other regulations applicable to a specific method of processing.
+
+2. The Controller applies, in particular, the principles of:
+
+a) lawfulness, fairness, and transparency;
+
+b) purpose limitation;
+
+c) data minimisation;
+
+d) accuracy;
+
+e) storage limitation;
+
+f) integrity and confidentiality;
+
+g) accountability.
+
+3. The Controller processes only the data necessary for the realisation of specific purposes.
+
+⸻
+
+§ 3. Which persons and which data are subject to processing
+
+Depending on the method of using ArchiCompass, the Controller may process data of the following categories of persons.
+
+1. Clients and persons using AI Project Compass
+
+The following may be processed in particular:
+
+a) name and surname, if provided;
+
+b) e-mail address;
+
+c) telephone number, if provided;
+
+d) Account data and authentication data;
+
+e) selected language and Account settings;
+
+f) information concerning the planned project, including location, type of investment, area, scope of the project, estimated budget, schedule, and preferences;
+
+g) answers provided during the creation of the Brief;
+
+h) information about stylistic preferences;
+
+i) photographs, graphics, and other reference materials uploaded to AI Project Compass;
+
+j) results of AI analysis;
+
+k) saved Project Briefs;
+
+l) saved or liked Designers and inspirations;
+
+m) content of the Enquiry and messages;
+
+n) information concerning the status of the Enquiry;
+
+o) data concerning the use of the Service and security.
+
+⸻
+
+2. Designers and persons acting on behalf of a Studio
+
+The following may be processed in particular:
+
+a) name and surname;
+
+b) name of the company or Studio;
+
+c) e-mail address;
+
+d) telephone number;
+
+e) website;
+
+f) company and billing data;
+
+g) NIP and other data identifying the business activity, if required;
+
+h) location and area of operation;
+
+i) description of activity and scope of services provided;
+
+j) specialisations and preferred types of projects;
+
+k) information about experience;
+
+l) price ranges or budget information;
+
+m) profile photo;
+
+n) photographs, visualisations, and descriptions included in the Portfolio;
+
+o) links to websites, social media, or other public profiles;
+
+p) data related to the Account and its settings;
+
+q) Enquiries received from Clients;
+
+r) messages conducted via the Service;
+
+s) statistics related to the Profile;
+
+t) data related to the Subscription and billing, if paid functionality is active.
+
+⸻
+
+3. Persons visiting the Service without an Account
+
+The Controller may process:
+
+a) IP address;
+
+b) date and time of connection;
+
+c) information about the browser;
+
+d) information about the device and operating system;
+
+e) URL address of the visited page;
+
+f) basic data concerning interaction with the Service;
+
+g) technical identifiers required to ensure the security and operation of the Service;
+
+h) information saved using cookies or similar technologies in accordance with § 13.
+
+⸻
+
+4. Persons contacting ArchiCompass
+
+The Controller may process:
+
+a) name and surname;
+
+b) e-mail address;
+
+c) telephone number, if provided;
+
+d) content of the correspondence;
+
+e) attachments;
+
+f) communication metadata;
+
+g) other information voluntarily provided in connection with the contact.
+
+⸻
+
+§ 4. Data concerning projects, photos, and special information
+
+1. ArchiCompass is intended for the processing of information related to interior design, and not special categories of data within the meaning of Article 9 of the GDPR.
+2. The User should not upload via the Service data revealing, among others:
+
+a) racial or ethnic origin;
+
+b) political opinions;
+
+c) religious or philosophical beliefs;
+
+d) trade union membership;
+
+e) genetic or biometric data used for unique identification;
+
+f) data concerning health;
+
+g) data concerning a person's sex life or sexual orientation,
+
+unless their processing is truly necessary and there is an appropriate legal basis.
+
+3. The User should not upload identity documents, full payment card details, or other information that ArchiCompass does not require.
+4. When uploading a photo containing the image of a third party or other personal data concerning them, the User should have an appropriate basis for sharing such material.
+5. The Controller may delete data that is obviously unnecessary for the provision of services or ask the User to delete it.
+
+⸻
+
+§ 5. Purposes and legal bases for processing
+
+The Controller processes data for the following purposes.
+
+1. Creation and maintenance of an Account
+
+Purpose: registration, logging in, maintenance of the Account, settings, Account support.
+
+Legal basis: Article 6(1)(b) of the GDPR – performance of a contract for the provision of services by electronic means or taking steps at the request of the person prior to entering into a contract.
+
+Data: primarily e-mail address, login data, Account role, settings, and data required for the realisation of Account functions.
+
+⸻
+
+2. Maintenance of a Designer or Studio Profile
+
+Purpose: creation, maintenance, and public presentation of the Profile and Portfolio.
+
+Legal basis: Article 6(1)(b) of the GDPR – performance of a contract with the Designer, and where appropriate, Article 6(1)(f) of the GDPR – the Controller's legitimate interest consisting in maintaining a directory of Designers and ensuring the currency and reliability of information in the Service.
+
+⸻
+
+3. AI Project Compass
+
+Purpose: analysis of reference materials and information concerning the project, determining the characteristics of the preferred interior, and assisting in the creation of a Project Brief.
+
+Legal basis: Article 6(1)(b) of the GDPR – performance of a service initiated by the User.
+
+If a specific optional functionality requires separate consent, the basis for processing will be Article 6(1)(a) of the GDPR.
+
+⸻
+
+4. Creation and storage of a Project Brief
+
+Purpose: saving information concerning the project, enabling its subsequent use by the Client and – at their request – transferring it to a Designer.
+
+Legal basis: Article 6(1)(b) of the GDPR.
+
+⸻
+
+5. Designer Matching
+
+Purpose: indicating Designers who may meet the Client's needs based on, among others, information about the project, location, scope of services, budget, and stylistic preferences.
+
+Legal basis: Article 6(1)(b) of the GDPR – realisation of functionality requested by the User.
+
+Regarding the analysis of the functioning of the Matching mechanism and its improvement, the basis may also be Article 6(1)(f) of the GDPR – the Controller's legitimate interest consisting in developing the quality of the Service.
+
+⸻
+
+6. Handling of Enquiries and Client–Designer communication
+
+Purpose: to enable the sending of an Inquiry, the transmission of a Brief, the conduct of communication, and the establishment of contact between the Client and the Designer.
+
+Legal basis: Article 6(1)(b) of the GDPR.
+
+Upon the Client providing their data to the Designer for the purpose of establishing direct cooperation, the Designer may become a separate data controller to the extent that they independently determine the further purposes and means of processing such data.
+
+⸻
+
+7. Service message handling
+
+Purpose: sending messages regarding the Account, security, new Inquiries, new messages, changes to the service, payments, or other events necessary for the use of the Service.
+
+Legal basis: Article 6(1)(b) of the GDPR.
+
+Such messages do not constitute marketing communication.
+
+⸻
+
+8. Handling of inquiries directed to the Controller
+
+Purpose: providing responses to messages, user support, and conducting correspondence.
+
+Legal basis: depending on the nature of the inquiry:
+
+a) Article 6(1)(b) of the GDPR – when the message concerns a contract or steps prior to its conclusion;
+
+b) Article 6(1)(f) of the GDPR – the Controller’s legitimate interest consisting of handling correspondence and providing responses.
+
+⸻
+
+9. Security and prevention of abuse
+
+Purpose: ensuring the security of Accounts and the Service, detecting unauthorised access, abuse, spam, errors, and attempts to breach security.
+
+Legal basis: Article 6(1)(f) of the GDPR.
+
+Legitimate interest: ensuring the security of the Service, Users, infrastructure, and data.
+
+⸻
+
+10. Establishing or defending against claims
+
+Purpose: establishing, exercising, or defending against potential claims.
+
+Legal basis: Article 6(1)(f) of the GDPR.
+
+Legitimate interest: protection of the Controller’s rights and documenting the performance of contracts and obligations.
+
+⸻
+
+11. Accounting, tax, and legal obligations
+
+If the User uses paid services, the Controller may process data for the purpose of issuing and storing accounting documentation, invoices, fulfilling tax obligations, and other obligations arising from the law.
+
+Legal basis: Article 6(1)(c) of the GDPR.
+
+⸻
+
+12. Development and statistics of the Service
+
+The Controller may analyse the operation of the Service, technical errors, aggregated statistics, and the use of individual features in order to improve ArchiCompass.
+
+Legal basis: Article 6(1)(f) of the GDPR – a legitimate interest consisting of maintaining, measuring, and developing the Service.
+
+If the analysis requires the use of cookies or similar technologies that are not necessary for the provision of the service, they are activated only after obtaining the required consent.
+
+⸻
+
+13. Marketing and newsletter
+
+If the User voluntarily subscribes to the newsletter or consents to receiving marketing communication, the Controller may process, in particular, the e-mail address and – if provided – the first name.
+
+Legal basis for the processing of personal data: Article 6(1)(a) of the GDPR – consent.
+
+The sending of marketing communication by electronic means is also carried out in accordance with the requirements of the Electronic Communications Law.
+
+Consent is voluntary and may be withdrawn at any time without affecting the lawfulness of processing based on consent before its withdrawal.
+
+⸻
+
+§ 6. Where the data comes from
+
+1. The Controller receives most personal data directly from the User.
+2. Data may also be generated during the use of the Service, in particular as:
+
+a) system logs;
+
+b) login data;
+
+c) technical identifiers;
+
+d) history of specific operations in the Account;
+
+e) Profile statistics;
+
+f) information regarding the Inquiry and messages.
+
+3. In the case of Designers and Studios, some information may come from publicly available sources, such as:
+
+a) official websites of the Designer or Studio;
+
+b) public company profiles;
+
+c) public registers of entrepreneurs;
+
+d) Google Business Profile or other public Google services;
+
+e) public industry directories;
+
+f) publicly available portfolios and professional profiles.
+
+4. From public sources, the following may primarily be obtained:
+
+a) first and last name or the name of the Studio;
+
+b) industry or specialisation;
+
+c) town/city and area of operation;
+
+d) public company contact details;
+
+e) website address;
+
+f) link to a public profile;
+
+g) public rating and number of reviews;
+
+h) other professional information made publicly available by the given Designer or Studio.
+
+5. If the Controller processes the data of persons which it has not obtained directly from them, it fulfils the information obligations resulting from Article 14 of the GDPR within the time limits and to the extent required by applicable regulations.
+
+⸻
+
+§ 7. Public profiles and data transferred to other Users
+
+1. Data placed on the public Profile of a Designer or Studio is available to persons visiting the Service and may be indexed by internet search engines.
+2. The following may be public in particular:
+
+a) first and last name or the name of the Studio;
+
+b) photo;
+
+c) description;
+
+d) location;
+
+e) scope of services;
+
+f) Portfolio;
+
+g) link to a website;
+
+h) public professional information;
+
+i) ratings and number of reviews, if presented on the Service.
+
+3. Client Account data, private Briefs, private reference photos, favourite items, and private messages are not made public.
+4. If the Client decides to send an Inquiry to a Designer, the Designer may receive data needed to handle this Inquiry, in particular:
+
+a) the content of the Brief;
+
+b) information about the project;
+
+c) the Client’s message;
+
+d) contact details provided by the Client;
+
+e) reference photos shared as part of the Brief.
+
+5. The transfer of data to the Designer takes place in connection with an action taken by the Client on the Service.
+6. After receiving the data and using it to conduct their own negotiations, prepare an offer, or conclude a Design Contract, the Designer may act as a separate controller of personal data.
+
+⸻
+
+§ 8. AI Project Compass and processing by AI systems
+
+1. AI Project Compass uses artificial intelligence technologies to analyse materials and information provided by the User.
+2. AI analysis takes place only after the User activates the appropriate feature.
+3. The following may be transferred to the AI system:
+
+a) selected reference images;
+
+b) information regarding the type of investment;
+
+c) indicated preferences;
+
+d) information about the style and features of the project;
+
+e) other information necessary to generate the result of the selected feature.
+
+4. Depending on the current technical configuration, ArchiCompass may use external AI model providers for this purpose, in particular OpenAI or Google Gemini.
+5. Data is transferred to the AI provider only to the extent necessary to perform the feature activated by the User, in accordance with the agreements and technical settings applied by the Controller.
+6. The Controller does not use the private materials of Users to independently train its own general artificial intelligence model.
+7. The results of AI analysis may be inaccurate, incomplete, or may not correspond to the actual implementation possibilities of the project.
+8. AI results are of an auxiliary nature.
+9. AI Project Compass does not make decisions towards the User that produce legal effects or similarly significantly affect the User solely by automated means within the meaning of Article 22 of the GDPR.
+
+⸻
+
+§ 9. Matching of Designers and profiling
+
+1. ArchiCompass may automatically analyse information regarding a project in order to indicate Designers who may meet the Client’s needs.
+2. The analysis may take into account, among other things:
+
+a) location;
+
+b) scope of the project;
+
+c) type of investment;
+
+d) declared budget;
+
+e) stylistic preferences;
+
+f) nature and scale of the project;
+
+g) information contained in the Designers’ Profiles;
+
+h) other parameters related to the project.
+
+3. As a result of the analysis, the Service may create a list or ranking of Designers whose characteristics most closely correspond to the specified parameters.
+4. This mechanism may constitute profiling within the meaning of the GDPR to the extent that it uses personal data to evaluate specific preferences or interests of the User.
+5. The purpose of profiling is to present more relevant search results and to reduce the number of inadequate proposals.
+6. The result of the Matching is of a recommendatory nature.
+7. The Client independently decides whether to contact any of the proposed Designers.
+8. The Matching does not produce legal effects or similarly significant effects for the Client or the Designer based solely on automated processing within the meaning of Article 22 of the GDPR.
+
+⸻
+
+§ 10. Service providers and data recipients
+
+1. The Controller uses the services of external providers necessary for the operation of ArchiCompass.
+2. Depending on the current configuration of the Service, these may include, in particular:
+
+Supabase
+
+Used, among other things, for:
+
+* authentication;
+* data storage;
+* database;
+* storage of files and photos;
+* backend functions.
+
+Vercel
+
+Used, among other things, for:
+
+* application hosting;
+* delivery of the Service;
+* technical infrastructure.
+
+home.pl
+
+Used for:
+
+* handling mail related to the ArchiCompass domain;
+* e-mail communication.
+
+OpenAI and/or Google Gemini
+
+Depending on the current configuration, they may be used for:
+
+* implementation of optional artificial intelligence functions;
+* analysis of text information;
+* analysis of images;
+* generation of auxiliary AI results.
+
+Google
+
+In specific functions, it may be used for:
+
+* presenting or synchronizing public information from Google Business Profile;
+* providing other Google functions launched in the Service.
+
+3. Data may also be transferred to:
+
+a) IT service providers;
+
+b) mail and communication providers;
+
+c) payment service providers – if payments are activated;
+
+d) accounting service providers;
+
+e) law firms or advisors, if necessary;
+
+f) entities ensuring infrastructure security;
+
+g) public authorities – if the obligation to transfer data arises from the law;
+
+h) Designers – to the extent resulting from the Inquiry sent by the Client.
+
+4. Entities processing data on behalf of the Controller are entitled to process it only to the extent resulting from an appropriate agreement or other legal basis.
+5. Some recipients, in particular Designers, payment operators, or specific third-party service providers, may act as separate data controllers in relation to certain operations.
+
+⸻
+
+§ 11. Transfer of data outside the European Economic Area
+
+1. Due to the use of international technology providers, some data may be processed outside the European Economic Area.
+2. If data is transferred to a country for which the European Commission has issued an adequacy decision, the transfer may take place on the basis of that decision.
+3. In other cases, the Controller applies an appropriate mechanism provided for in the GDPR, in particular standard contractual clauses approved by the European Commission, together with additional safeguards, if required.
+4. If a recipient in the United States participates in the EU-U.S. Data Privacy Framework and the transfer can lawfully rely on this mechanism, the Controller may use the appropriate adequacy decision.
+5. The data subject may request the Controller for additional information regarding the mechanism applied in relation to a specific data transfer.
+
+⸻
+
+§ 12. Photos and file storage
+
+1. Reference photos used by the Client within Project Compass are not published as a public Portfolio.
+2. Before saving a Brief or launching the appropriate AI function, some data may be stored locally in the User's browser.
+3. After saving photos in the Service, they are stored in a private file space used by ArchiCompass.
+4. Access to private photos may be implemented using time-limited, signed URLs.
+5. If the Client provides a Brief to a Designer, the Designer may receive temporary access to the photos associated with that Brief.
+6. Portfolio photos uploaded by the Designer are intended for public presentation in accordance with the Terms and Conditions and Account settings.
+
+⸻
+
+§ 13. Cookies, local storage and similar technologies
+
+1. ArchiCompass uses cookies and similar technologies, including local or session browser storage.
+2. Necessary technologies may be used, among other things, for the purpose of:
+
+a) maintaining a session;
+
+b) logging in;
+
+c) securing the Account;
+
+d) saving the selected language;
+
+e) interface operation;
+
+f) maintaining form state;
+
+g) saving privacy settings;
+
+h) preventing abuse.
+
+3. The use of technologies necessary to provide the service requested by the User does not require consent to the extent permitted by applicable law.
+4. Analytical, advertising, or marketing cookies and similar technologies that are not necessary for the provision of the service are used only after obtaining the required consent of the User.
+5. As of the effective date of this Policy, ArchiCompass does not use advertising cookies.
+6. The User may at any time change or withdraw consent for optional cookies via the mechanism available in the Service, if such cookies are used.
+7. Detailed information regarding the technologies used can be found in the ArchiCompass Cookie Policy.
+
+⸻
+
+§ 14. Profile view statistics
+
+1. ArchiCompass may record limited information regarding Profile views in order to present statistics to Designers and to improve the Service.
+2. In order to limit multiple counting of the same view, a random technical session or browser tab identifier may be used.
+3. The Controller limits the scope of this data to information needed to achieve the statistical purpose.
+4. Statistical data may be aggregated or anonymized.
+
+⸻
+
+§ 15. Data retention period
+
+The Controller does not store data longer than is necessary to achieve the purpose of its processing.
+
+In particular:
+
+Data category	Retention period
+Active Account data	for the period of holding the Account
+Designer Profile data	for the period of maintaining the Profile, and subsequently for the period necessary to fulfill obligations or defend claims
+Portfolio	until its removal by the Designer, removal of the Profile, or termination of the provision of the relevant service
+Client Briefs and projects	until their removal or removal of the Account, unless further storage is necessary on another legal basis
+Private reference photos	for the period of association with an active project or Brief, and subsequently until their removal in accordance with the Service mechanism
+Inquiries and messages	for the period needed to handle communication and subsequently for the period necessary to establish, pursue, or defend claims
+Data processed on the basis of marketing consent	until withdrawal of consent or cessation of the given activity
+Billing data and accounting documents	for the period required by tax and accounting regulations
+Data regarding claims	until the expiry of the relevant limitation period, and if proceedings are pending – until their final conclusion
+Technical data and security logs	for a period justified by the security and diagnostics of the Service, and subsequently they are deleted or anonymized
+Data obtained from public sources regarding Designers	until they become outdated, an effective objection is raised, the Profile is removed, or the purpose of processing ceases
+
+2. In some cases, data may be anonymized earlier. Anonymous data, which no longer allows for the identification of a natural person, is not treated as personal data by the GDPR.
+3. After deleting data from active systems, limited copies may remain for a certain period in backups, if this is necessary for infrastructure security.
+4. Content previously publicly available may be visible for some time in the cache of internet search engines independently of the Controller.
+
+⸻
+
+§ 16. Is providing data mandatory
+
+1. Providing data is, in principle, voluntary.
+2. However, some data is necessary to use specific functionalities.
+3. For example:
+
+a) without an e-mail address, it may not be possible to create an Account;
+
+b) without information about a project, it may not be possible to prepare a Brief or a Match;
+
+c) without appropriate contact details, it may not be possible to forward an Inquiry to a Designer;
+
+d) without data required by tax regulations, it may not be possible to correctly settle a paid service.
+
+4. Data marked in the Service as optional is voluntary, and failure to provide it does not prevent the use of other functions for which it is not required.
+
+⸻
+
+§ 17. Rights of the data subject
+
+The data subject has the following rights – in cases provided for by the GDPR:
+
+1. the right of access to data, including receiving information about its processing;
+2. the right to rectification of data if it is incorrect or incomplete;
+3. the right to erasure of data;
+4. the right to restriction of processing;
+5. the right to data portability, if the conditions specified in the GDPR are met;
+6. the right to object to processing based on Article 6(1)(f) of the GDPR;
+7. the right to withdraw consent at any time, if the basis for processing is consent;
+8. the right to lodge a complaint with a supervisory authority.
+
+Withdrawal of consent does not affect the lawfulness of processing carried out before its withdrawal.
+
+⸻
+
+§ 18. Right to object
+
+1. If data is processed on the basis of the Controller’s legitimate interest, the data subject may object at any time for reasons relating to their particular situation.
+2. In such a case, the Controller shall cease processing the data, unless it demonstrates the existence of compelling legitimate grounds which override the interests, rights, and freedoms of the person, or grounds for the establishment, exercise, or defence of claims.
+3. If data is processed for direct marketing purposes, an objection to such processing is effective without the need to demonstrate a particular situation.
+
+⸻
+
+§ 19. How to exercise rights
+
+1. In order to exercise rights, one may contact the Controller at the address:
+
+contact@archicompass.pl
+
+2. The request should enable the Controller to determine which person and which data it concerns.
+3. If the Controller has reasonable doubts as to the identity of the person making the request, it may ask for additional information necessary to confirm it.
+4. The Controller will not request a greater scope of data than is necessary to verify identity.
+5. The Controller shall provide information on actions taken in connection with the request without undue delay and within the time limits provided for by the GDPR.
+6. The exercise of rights is, in principle, free of charge. In cases specified in Article 12(5) of the GDPR, the Controller may charge a reasonable fee or refuse to act on a request that is manifestly unfounded or excessive.
+
+⸻
+
+§ 20. Complaint to the President of the Personal Data Protection Office (UODO)
+
+1. If a person believes that their personal data is being processed in violation of the GDPR, they have the right to lodge a complaint with a supervisory authority.
+2. In Poland, the supervisory authority is:
+
+President of the Personal Data Protection Office (Prezes Urzędu Ochrony Danych Osobowych)
+ul. Stawki 2
+00-193 Warsaw
+
+3. Exercising the right to lodge a complaint does not limit other legal remedies available under applicable law.
+
+⸻
+
+§ 21. Data security
+
+1. The Controller applies technical and organisational measures appropriate to the nature, scope, context, and purposes of the processing and the risk associated with it.
+2. These measures may include, in particular:
+
+a) encryption of transmission;
+
+b) access control;
+
+c) authentication mechanisms;
+
+d) restricting access to data in accordance with the scope of authorisations;
+
+e) private file storage spaces;
+
+f) signed and time-limited access addresses to private files;
+
+g) logging of security-related events;
+
+h) creating backups;
+
+i) updating software and infrastructure;
+
+j) incident response procedures.
+
+3. No IT system ensures the complete elimination of risk; therefore, Users should also apply appropriate security measures, in particular, protecting access to their Account and e-mail.
+4. In the event of a personal data breach, the Controller shall act in accordance with Articles 33 and 34 of the GDPR.
+
+⸻
+
+§ 22. Minors
+
+1. ArchiCompass Accounts are intended for persons who have reached the age of 18.
+2. The Service is not directed at children as recipients of services.
+3. The Controller does not intend to knowingly collect children's data for the purpose of maintaining Accounts.
+4. If the Controller learns that an Account has been created by a person who does not meet the age requirements, it may take appropriate action, including restricting the Account and deleting data, unless its further processing results from a legal obligation.
+
+⸻
+
+§ 23. Third-party data provided by the User
+
+1. If a User provides the Controller with the data of another person, they should have a legal basis for providing it.
+2. The User should avoid providing third-party data if it is not needed for the implementation of a specific function.
+3. In cases where the Controller becomes the controller of data obtained indirectly, it fulfils the information obligation resulting from Article 14 of the GDPR to the extent provided for by the regulations.
+
+⸻
+
+§ 24. Changes to the Privacy Policy
+
+1. The Policy may be updated in particular in the event of:
+
+a) changes in the law;
+
+b) changes in the way ArchiCompass operates;
+
+c) implementation of new functionalities;
+
+d) changes in the way data is processed;
+
+e) changes in technology providers;
+
+f) changes in the AI mechanisms used;
+
+g) changes in the way cookies or similar technologies are used.
+
+2. The current version of the Policy is always published on the Service along with its effective date.
+3. If a change significantly affects the way data is processed for Users who have an Account, the Controller may additionally inform them of the change via e-mail or a message on the Service.
+4. If a change requires obtaining new consent, the Controller will obtain it before starting the given method of processing.
+
+⸻
+
+§ 25. Contact
+
+In matters concerning the protection of personal data:
+
+Sergii Moroz Advisory (SM Advisory)
+Sergii Moroz
+ul. Grzybowska 2, lok. 31
+00-131 Warsaw
+NIP (Tax ID): 5252995634
+REGON (Statistical ID): 528006413
+
+e-mail regarding privacy:
+contact@archicompass.pl
+
+e-mail regarding security:
+admin@archicompass.pl
+
+⸻
+
+§ 26. Final provisions
+
+1. This Policy is effective from 16 August 2026.
+2. In matters not regulated by the Policy, the relevant provisions of law shall apply, in particular the GDPR.
+3. The rules for the provision of services via ArchiCompass are defined by the ArchiCompass Terms and Conditions.
+4. Detailed information regarding technologies saved on the User's device is contained in the Cookie Policy.
+
+Version: 1.0

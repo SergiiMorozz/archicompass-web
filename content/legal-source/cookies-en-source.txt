@@ -1,0 +1,196 @@
+1. General information
+
+This Cookie Policy explains how the ArchiCompass platform, available at archicompass.pl, uses cookies, browser storage, and other similar technologies.
+
+The operator of ArchiCompass is:
+
+Sergii Moroz, conducting business under the name Sergii Moroz Advisory (SM Advisory)
+ul. Grzybowska 2, lok. 31
+00-131 Warsaw
+NIP (Tax Identification Number): 5252995634
+REGON (Statistical Identification Number): 528006413
+e-mail: contact@archicompass.pl
+
+Detailed information regarding the processing of personal data can be found in the ArchiCompass Privacy Policy.
+
+⸻
+
+2. What are cookies and similar technologies
+
+Cookies are small pieces of information saved on the User's device when using a website.
+
+ArchiCompass may also use other browser storage mechanisms, in particular:
+
+* localStorage;
+* sessionStorage;
+* technical session identifiers;
+* authentication tokens;
+* similar technologies necessary for the operation of the web application.
+
+In the remainder of this document, the term "cookies" also includes these similar technologies, unless the context indicates otherwise.
+
+⸻
+
+3. Categories of technologies used
+
+3.1. Necessary technologies
+
+Necessary technologies are used to ensure the proper and secure operation of ArchiCompass.
+
+They may be used in particular for:
+
+* logging in and maintaining the User's session;
+* authentication;
+* Account protection;
+* fraud prevention;
+* permission control;
+* handling file uploads;
+* saving settings required for the operation of the Service;
+* maintaining form state;
+* ensuring the continuity of the Service's functionality.
+
+Such technologies may be used without the User's separate consent to the extent that their use is necessary to provide the service requested by the User or to transmit an electronic communication.
+
+Blocking them in the browser may cause the Service to malfunction.
+
+⸻
+
+3.2. Preferences and interface storage
+
+ArchiCompass may locally save information regarding:
+
+* the selected language;
+* interface preferences;
+* the state of certain forms;
+* the current stage of the AI Project Compass;
+* temporary file previews;
+* privacy and cookie settings.
+
+These data are used primarily to ensure the continuity and convenience of using the Service.
+
+If a given technology is necessary to perform a function selected by the User, it may be used as a necessary technology.
+
+⸻
+
+3.3. Limited technical statistics
+
+ArchiCompass may use a random technical browser or browser tab identifier to limit the multiple counting of the same Designer Profile view.
+
+This mechanism is not intended to identify the User based on their first name, surname, or email address.
+
+Statistical data may be aggregated or anonymised.
+
+⸻
+
+3.4. Analytical cookies
+
+As of the effective date of this Policy, ArchiCompass does not use optional third-party analytical cookies, unless the User is informed about their implementation and – if required – provides appropriate consent.
+
+If ArchiCompass implements, for example, Google Analytics, Microsoft Clarity, PostHog, or a similar tool requiring consent in the future, it will only be activated after the User has made the appropriate choice.
+
+⸻
+
+3.5. Marketing and advertising cookies
+
+As of the effective date of this Policy, ArchiCompass does not use advertising or remarketing cookies and does not use cookies to create advertising profiles of Users.
+
+If such technologies are implemented in the future, this Policy and the consent management mechanism will be updated accordingly before their activation.
+
+⸻
+
+4. Technologies currently used
+
+Depending on the device, login status, and functionality used, the following mechanisms may be used in particular:
+
+Technology	Purpose	Category
+Supabase authentication mechanisms	logging in, maintaining sessions, and Account security	necessary
+localStorage / sessionStorage	language, interface settings, state of forms and selected functions	necessary / functional
+temporary AI Project Compass data	maintaining current form state and analysis	necessary for the selected function
+Profile view technical identifier	limiting multiple counting of page views	technical statistics
+saving cookie preferences	storing the User's choice	necessary
+
+The exact names of technical keys may change in connection with the development of the application, without changing the purpose of their use.
+
+⸻
+
+5. External entities
+
+Some necessary ArchiCompass functions are performed using the infrastructure of external providers, in particular:
+
+* Supabase;
+* Vercel.
+
+The mere use of an external infrastructure provider does not automatically mean that their cookies are used for marketing purposes.
+
+Information regarding data recipients and data transfers can be found in the Privacy Policy.
+
+⸻
+
+6. Basis for the use of optional cookies
+
+Cookies and similar technologies that are not necessary for the operation of the service requested by the User are used only after obtaining the required consent.
+
+Consent:
+
+* is voluntary;
+* is granted through the User's active action;
+* may be withdrawn at any time;
+* may be granted separately for individual categories.
+
+The lack of consent for optional cookies should not prevent the use of the basic functions of ArchiCompass.
+
+⸻
+
+7. Consent management
+
+If ArchiCompass uses optional cookies, the User can manage consents using the option:
+
+"Cookie settings"
+
+available on the Service.
+
+The User can in particular:
+
+* accept all optional technologies;
+* reject all optional technologies;
+* select individual categories;
+* change their decision later;
+* withdraw previously granted consent.
+
+Withdrawal of consent does not affect the lawfulness of actions performed before its withdrawal.
+
+⸻
+
+8. Browser settings
+
+The User can also delete or block cookies through browser settings.
+
+However, please note that blocking necessary technologies may result in particular in:
+
+* being logged out;
+* inability to log in;
+* incorrect operation of forms;
+* problems with file uploads;
+* lack of access to certain Account functions.
+
+⸻
+
+9. Policy changes
+
+The Policy may be updated in connection with:
+
+* changes in regulations;
+* implementation of new tools;
+* change of providers;
+* change in the way the Service operates;
+* implementation of new analytical or marketing functions.
+
+The current version of the Policy and its effective date will be published on ArchiCompass.
+
+⸻
+
+10. Contact
+
+Questions regarding cookies and privacy can be directed to:
+
+contact@archicompass.pl

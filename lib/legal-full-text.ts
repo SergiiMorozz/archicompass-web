@@ -2,6 +2,7 @@ import "server-only";
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import type { SiteLocale } from "@/lib/site-locale";
 
 type FullLegalDocumentKey = "terms" | "privacy" | "cookies" | "aiTransparency";
 
@@ -21,20 +22,36 @@ function fromMarker(source: string, marker: string) {
   return source.slice(markerIndex).trim();
 }
 
-const termsSource = readSource("terms-pl-source.txt");
-const privacySource = readSource("privacy-pl-source.txt");
-const cookiesSource = readSource("cookies-pl-source.txt");
-const aiTransparencySource = readSource("ai-transparency-pl-source.txt");
+const legalSources: Record<SiteLocale, Record<FullLegalDocumentKey, string>> = {
+  pl: {
+    terms: readSource("terms-pl-source.txt"),
+    privacy: readSource("privacy-pl-source.txt"),
+    cookies: readSource("cookies-pl-source.txt"),
+    aiTransparency: readSource("ai-transparency-pl-source.txt"),
+  },
+  en: {
+    terms: readSource("terms-en-source.txt"),
+    privacy: readSource("privacy-en-source.txt"),
+    cookies: readSource("cookies-en-source.txt"),
+    aiTransparency: readSource("ai-transparency-en-source.txt"),
+  },
+};
 
-export function getFullPolishLegalText(key: FullLegalDocumentKey) {
-  switch (key) {
-    case "terms":
-      return fromMarker(termsSource, "§ 1. Postanowienia ogólne");
-    case "privacy":
-      return fromMarker(privacySource, "Niniejsza Polityka Prywatności");
-    case "cookies":
-      return fromMarker(cookiesSource, "1. Informacje ogólne");
-    case "aiTransparency":
-      return fromMarker(aiTransparencySource, "1. Dlaczego publikujemy tę informację");
-  }
+const documentStartMarkers: Record<SiteLocale, Record<FullLegalDocumentKey, string>> = {
+  pl: {
+    terms: "§ 1. Postanowienia ogólne",
+    privacy: "Niniejsza Polityka Prywatności",
+    cookies: "1. Informacje ogólne",
+    aiTransparency: "1. Dlaczego publikujemy tę informację",
+  },
+  en: {
+    terms: "§ 1. General provisions",
+    privacy: "This Privacy Policy describes",
+    cookies: "1. General information",
+    aiTransparency: "1. Why we are publishing this information",
+  },
+};
+
+export function getFullLegalText(key: FullLegalDocumentKey, locale: SiteLocale) {
+  return fromMarker(legalSources[locale][key], documentStartMarkers[locale][key]);
 }

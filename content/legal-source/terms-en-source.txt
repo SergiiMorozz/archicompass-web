@@ -1,0 +1,620 @@
+ARCHICOMPASS SERVICE TERMS AND CONDITIONS
+
+effective from 16 August 2026
+
+§ 1. General provisions
+
+1. These Terms and Conditions define the rules for using the ArchiCompass website available at archicompass.pl, including the rules for the provision of electronic services, creating and maintaining Accounts, publishing Profiles and Portfolios, using the AI Project Compass functionality, creating Project Briefs, searching for and matching Designers, and communication between Users.
+2. The Service Operator and service provider within the meaning of the regulations on the provision of electronic services is:
+
+Sergii Moroz, conducting business under the name Sergii Moroz Advisory (SM Advisory)
+ul. Grzybowska 2, lok. 31
+00-131 Warsaw, Poland
+NIP (Tax Identification Number): 5252995634
+REGON (Statistical Identification Number): 528006413
+e-mail: contact@archicompass.pl
+
+hereinafter referred to as the "Operator".
+
+3. The Terms and Conditions are made available free of charge on the Service in a manner that allows for their acquisition, reproduction, recording, and storage.
+4. Commencing the use of services that require acceptance of the Terms and Conditions constitutes the conclusion of an agreement for the provision of electronic services between the User and the Operator on the terms set out in the Terms and Conditions.
+5. ArchiCompass is a technological platform supporting the preparation of interior design projects, the organisation of project information, and the searching for and contacting of Clients with independent Designers.
+6. The Operator does not provide architectural, design, construction, execution, or investor supervision services and – unless expressly stated otherwise – does not represent Designers or Clients in the conclusion of agreements between them.
+
+⸻
+
+§ 2. Definitions
+
+Terms used in the Terms and Conditions shall mean:
+
+1. Service or ArchiCompass – the internet platform available in particular at archicompass.pl, together with its subpages, functionalities, and services.
+2. Operator – the entity indicated in § 1(2) of the Terms and Conditions.
+3. User – any person using the Service, in particular a Client, a Designer, or a person acting on behalf of a Studio.
+4. Client – a User using the Service for the purpose of preparing a project, analysing inspiration, creating a Project Brief, finding a Designer, or establishing contact with one.
+5. Designer – a natural person, an entrepreneur, or a person acting on behalf of an entrepreneur, who presents in the Service their services related in particular to architecture, interior design, designing, decorating, or other services related to space design.
+6. Studio – an entrepreneur or other organisational unit conducting business in the field of design, architecture, or related services, which may have a Studio Profile and associated team member profiles in the Service.
+7. Account – an individual set of resources and permissions assigned to a User after registration.
+8. Profile – a public or partially public presentation of a Designer or Studio in the Service.
+9. Portfolio – materials presenting the activities of a Designer or Studio, in particular photographs, visualisations, graphics, project descriptions, and other materials.
+10. User Content – any information and materials provided, uploaded, saved, or published by a User in the Service, in particular texts, photographs, visualisations, graphics, files, inspiration, project information, Portfolios, and messages.
+11. AI Project Compass – a functionality of the Service using IT solutions, including artificial intelligence models, to analyse materials and information provided by the User and to support the creation of a Project Brief and Matching.
+12. Project Brief or Brief – an organised description of a project, needs, inspiration, preferences, budget, scope of work, or other information related to a planned investment, created by the User independently or with the support of AI Project Compass.
+13. Matching – the result of the operation of the Service's functionality consisting of indicating Designers who, according to the criteria used by the Service, may meet the needs specified by the Client.
+14. Inquiry – information sent via the Service by a Client to a Designer or Studio, or provided to a Designer by the Service in connection with a Client's interest in their services.
+15. Design Agreement – an agreement concerning the Designer's services concluded directly between the Client and the Designer or Studio outside the legal relationship connecting the User with the Operator.
+16. Subscription – paid access to specific functionalities of the Service for a specified billing period.
+17. Privacy Policy – the current ArchiCompass privacy policy made available on the Service.
+
+⸻
+
+§ 3. Types and scope of services
+
+1. The Operator may provide, via the Service, in particular the following services:
+
+a) maintaining User Accounts;
+
+b) creating and publishing Designer and Studio Profiles;
+
+c) publishing Portfolios;
+
+d) searching for and browsing Profiles;
+
+e) analysing inspiration and project information using AI Project Compass;
+
+f) creating and storing Project Briefs;
+
+g) Matching Designers to the Client's information and preferences;
+
+h) sending an Inquiry or enabling contact between a Client and a Designer;
+
+i) saving inspiration and other information related to a project;
+
+j) presenting ratings, opinions, or other information regarding Designers;
+
+k) providing informational and educational content, including the Inspiration Hub;
+
+l) other functionalities made available in the Service.
+
+2. The scope of functionalities may depend on the type of Account, the User's role, the selected plan, the stage of development of the Service, or other conditions indicated in the Service.
+3. The Operator may provide test, experimental, or "beta" marked features. Such features may be changed or withdrawn.
+
+⸻
+
+§ 4. Technical requirements
+
+1. To use the Service, the following are necessary:
+
+a) a device enabling the use of the Internet;
+
+b) an up-to-date web browser supporting the technologies used by the Service;
+
+c) an active Internet connection;
+
+d) in the case of registration – an active e-mail address;
+
+e) enabling JavaScript and – to the extent required for specific functions – cookies or similar technologies.
+
+2. Using outdated software may cause some functions to malfunction.
+3. The User is obliged to properly secure their device and the data enabling access to the Account.
+4. The Operator may temporarily limit the availability of the Service in connection with maintenance, updates, security, failure, or the development of functionalities.
+
+⸻
+
+§ 5. Registration and Account
+
+1. Use of parts of the Service may take place without registration.
+2. Access to functions requiring User identification requires the creation of an Account.
+3. During registration, the User is obliged to provide data that is true, current, and not misleading.
+4. The User may not create an Account using another person's data without appropriate authorisation.
+5. The User is responsible for maintaining the confidentiality of the access data to the Account.
+6. The User should immediately inform the Operator of any suspicion of unauthorised access to the Account.
+7. One person should not use multiple Accounts for the purpose of circumventing Service restrictions, manipulating results, opinions, rankings, or other functionalities.
+8. The User may at any time cease using the Service and – subject to obligations resulting from the law or an ongoing Subscription – request the deletion of the Account.
+
+⸻
+
+§ 6. Clients
+
+1. A Client may use the functions intended for the preparation and organisation of information regarding a planned investment and for searching for Designers.
+2. The Client is obliged to provide truthful information to the extent that it may affect Matching or communication with a Designer.
+3. Creating a Brief, receiving a Match, viewing a Profile, or sending an Inquiry does not oblige the Client to conclude a Design Agreement.
+4. Use of a basic Client Account is free of charge, unless the User is expressly informed of the chargeability of a specific additional service before using it.
+
+⸻
+
+§ 7. Designers and Studios
+
+1. A Designer publishing a Profile declares that:
+
+a) they have the right to offer the described services;
+
+b) the provided information is true and current;
+
+c) they possess the qualifications or authorisations required by law, if they are necessary for the provision of specific services;
+
+d) the use of published materials does not infringe the rights of third parties.
+
+2. The Designer is responsible for information concerning, among other things, the scope of services, experience, location, availability, prices, deadlines, and the Portfolio.
+3. The Operator may demand the completion or verification of information concerning the Designer or the Studio if this is justified by the safety of Users, the credibility of the Service, or a legal obligation.
+4. The Operator does not guarantee the Designer a specific number of Profile views, Matches, Inquiries, Clients, or concluded Design Agreements.
+
+⸻
+
+§ 8. Profiles and Portfolio
+
+1. The Designer may publish information and materials in the Profile in accordance with the functionalities made available by the Service.
+2. The Profile does not constitute an offer within the meaning of the provisions of the Civil Code, unless its content clearly indicates otherwise.
+3. Information concerning prices, budgets, or scopes of services published in the Profile is for informational purposes, unless the Designer explicitly defines it as a binding offer.
+4. The Designer is solely responsible for the currency and accuracy of the information published in the Profile.
+5. The Operator may change the manner of presenting the Profile or Portfolio if this does not lead to an unauthorized change in the meaning of the User Content.
+
+⸻
+
+§ 9. User Content and intellectual property
+
+1. The User retains the rights to User Content to the extent that these rights are vested in them.
+2. By submitting User Content to the Service, the User declares that they possess the rights, licenses, consents, or other legal basis allowing them to use it in a manner resulting from the functionalities of the Service.
+3. The User may not publish content that infringes, in particular:
+
+a) copyrights;
+
+b) trademark rights;
+
+c) personal rights;
+
+d) the right to one's image;
+
+e) privacy;
+
+f) trade secrets;
+
+g) applicable legal provisions.
+
+4. The User grants the Operator a non-exclusive, royalty-free license, limited to the storage period of the given Content and technically necessary, to use the User Content solely to the extent necessary for:
+
+a) storing it in the Service;
+
+b) displaying it in accordance with the User's settings;
+
+c) technical processing;
+
+d) creating technical and security copies;
+
+e) providing functions selected by the User, including AI analysis and Matching;
+
+f) moderating and securing the Service.
+
+5. The license does not mean the transfer of copyrights to the Operator.
+6. The Operator does not acquire, on the basis of the Terms and Conditions, the right to use the User's private materials for advertising purposes unrelated to the provision of the service, unless the User grants separate consent for this.
+7. In the case of a public Portfolio, the license covers the public display of materials within the Service for the period during which the Designer makes them publicly available.
+
+⸻
+
+§ 10. AI Project Compass
+
+1. AI Project Compass is a tool supporting the User in analyzing inspiration, organizing information concerning a project, and preparing a Brief.
+2. AI Project Compass may analyze, among other things:
+
+a) uploaded photographs and graphics;
+
+b) information about the User's preferences;
+
+c) information concerning the project;
+
+d) answers provided by the User;
+
+e) other data provided within the scope of a given functionality.
+
+3. The results of AI Project Compass may include, among other things, a description of stylistic preferences, interior features, materials, color schemes, space functions, or other elements relevant to the preparation of a Brief.
+4. The result generated using AI:
+
+a) is of an auxiliary nature;
+
+b) may contain errors or inaccuracies;
+
+c) does not constitute professional architectural, technical, legal, construction, or cost-estimation advice;
+
+d) does not constitute a guarantee of the feasibility of the project;
+
+e) does not replace consultation with an appropriate specialist.
+
+5. The User should verify the result before using it to make significant decisions.
+6. The User should not submit for analysis materials whose use for this purpose infringes the rights of third parties.
+7. The Operator may use the services of external AI technology providers. Information concerning the processing of personal data in connection with such services is specified in the Privacy Policy.
+8. The Operator does not guarantee that the generated result will be unique. Similar input information may lead to similar results.
+9. The Operator may change the models, providers, and technologies used to implement AI functions, provided that this remains in accordance with the Terms and Conditions and applicable law.
+
+⸻
+
+§ 11. Design Brief
+
+1. A Design Brief may be created on the basis of information provided directly by the Client and the results of AI Project Compass.
+2. The Brief is intended to help organize the Client's expectations and streamline communication with the Designer.
+3. The Brief is not technical documentation or an architectural design.
+4. Information concerning, among other things, budget, deadlines, area, technical possibilities, materials, and scope of work should be verified directly with the Designer before concluding a Design Agreement.
+5. The Client decides on the final content of the Brief and its use.
+
+⸻
+
+§ 12. Matching Designers
+
+1. The Service may use information contained in the Brief and other information provided by the Client to indicate Designers potentially meeting the Client's needs.
+2. In Matching, the following may be taken into account in particular:
+
+a) project location;
+
+b) scope of services;
+
+c) type and scale of the project;
+
+d) declared budget;
+
+e) stylistic preferences;
+
+f) information contained in the Profile and Portfolio;
+
+g) the Designer's area of operation;
+
+h) other criteria related to the Client's needs and the nature of the project.
+
+3. The weight of individual parameters may vary depending on the nature of the Inquiry and the available information.
+4. Matching is a technological recommendation and does not constitute:
+
+a) a guarantee of the quality of the Designer's services;
+
+b) certification of the Designer by the Operator;
+
+c) a guarantee of the Designer's availability;
+
+d) a guarantee of concluding a Design Agreement;
+
+e) a guarantee of the offer's compliance with the Client's budget.
+
+5. The Client makes the choice of the Designer independently.
+6. The Operator may change the Matching mechanism in order to improve the quality of results, safety, or the operation of the Service.
+7. If, in the future, paid promotion of a Profile affects its position or visibility, such a circumstance will be appropriately marked, and the rules for the impact of promotion on the presentation of results will be presented to the User.
+
+⸻
+
+§ 13. Inquiries and communication
+
+1. The Client may contact the Designer using the functionalities made available in the Service.
+2. Sending an Inquiry signifies interest in the possibility of using the Designer's services, but does not constitute the conclusion of a Design Agreement.
+3. The Designer decides independently whether to respond to an Inquiry.
+4. The Operator does not guarantee a response from the Designer.
+5. Data received in connection with an Inquiry may be used solely for the purpose related to the given communication or on another lawful basis.
+6. It is forbidden to use data obtained via the Service for spam, harassment, mass marketing, or other purposes contrary to the law or the Terms and Conditions.
+
+⸻
+
+§ 14. Agreement between the Client and the Designer
+
+1. ArchiCompass is not a party to the Design Agreement concluded between the Client and the Designer.
+2. The Design Agreement is concluded directly between the Client and the Designer on terms established by these parties.
+3. The Operator does not establish on behalf of the parties, in particular:
+
+a) the final scope of the project;
+
+b) the Designer's remuneration;
+
+c) the schedule;
+
+d) payment terms;
+
+e) the liability of the parties;
+
+f) conditions for project acceptance;
+
+g) copyrights to the project;
+
+h) rules for supervision or investment implementation.
+
+4. The parties to the Design Agreement should establish the above issues independently before commencing cooperation.
+5. Complaints concerning the performance of the Design Agreement should be directed directly to the party to that agreement.
+6. The Operator may, but is not obliged to, enable the parties to communicate or attempt an amicable settlement of a dispute.
+
+⸻
+
+§ 15. External information, ratings, and opinions
+
+1. The Service may present information originating from Users or from external sources, in particular company data, links, ratings, or information regarding the number of reviews.
+2. If information originates from an external source, its availability and currency may depend on the provider of that source.
+3. The Operator does not guarantee the currency of information originating from independent third parties.
+4. If the Service enables the publication of reviews, it is prohibited to publish reviews that are:
+
+a) fictitious;
+
+b) purchased or obtained in exchange for an undisclosed benefit;
+
+c) concerning an experience that did not take place;
+
+d) published for the purpose of manipulating a rating;
+
+e) in violation of the law or the rights of third parties.
+
+5. The Operator may apply mechanisms for verifying the reliability of reviews and indicate the method of their verification.
+
+⸻
+
+§ 16. Prohibited use of the Service
+
+1. The User may not:
+
+a) provide unlawful content;
+
+b) infringe intellectual property rights;
+
+c) impersonate another person or entity;
+
+d) knowingly publish false information;
+
+e) distribute malicious software;
+
+f) attempt unauthorized access to the Service;
+
+g) circumvent technical security measures;
+
+h) disrupt the operation of the Service;
+
+i) use the Service for spam or fraud;
+
+j) automatically download, copy, or index significant parts of the Service's data without the Operator's consent, except for actions permitted by law or standard internet search engines;
+
+k) resell or create unauthorized databases based on data downloaded from the Service;
+
+l) manipulate Matching, rankings, ratings, or reviews;
+
+m) use other Users' data in a manner inconsistent with the purpose of their disclosure;
+
+n) use the Service in a manner contrary to the law, the Terms and Conditions, or the rights of other persons.
+
+⸻
+
+§ 17. Content moderation and reporting violations
+
+1. The Operator may take action against User Content that violates the law or the Terms and Conditions.
+2. Actions may include, in particular:
+
+a) limiting the visibility of content;
+
+b) removing content;
+
+c) limiting specific Account functionalities;
+
+d) temporary suspension of the Account;
+
+e) removal of the Account – in cases justified by the nature or recurrence of the violation.
+
+3. When taking moderation actions, the Operator shall take into account, in particular, the nature of the violation, its consequences, frequency, and the possibility of removing the violation in a less intrusive manner.
+4. The User may report content that they believe is illegal or violates the Terms and Conditions to the address:
+
+admin@archicompass.pl
+
+5. The report should, as far as possible, contain:
+
+a) an indication of the content;
+
+b) its location in the Service;
+
+c) an explanation of the reason for the report;
+
+d) contact details of the reporter, if required by law or necessary to process the report.
+
+6. In cases required by applicable regulations, the Operator shall provide the User with a statement of reasons for the decision regarding the restriction of Content or an Account, as well as information on available appeal options.
+7. The Operator may use automated means to detect certain violations; however, significant decisions regarding Accounts may be subject to human verification to the extent required by law or justified by the circumstances of the case.
+
+⸻
+
+§ 18. Subscriptions and fees
+
+1. The Client Account is free of charge, unless the User explicitly selects an additional paid service.
+2. The Operator may offer Designers or Studios a free period of access to functionalities, in accordance with the terms presented upon activation.
+3. As of the date of entry into force of these Terms and Conditions, the Operator may offer the first Designers a 3-month period of free access to functionalities including the Profile, Portfolio, and the ability to receive an Inquiry, in accordance with the information presented in the Service.
+4. After the end of the free period, further use of functionalities requiring a Subscription may require selecting a paid plan.
+5. Before making a purchase, the User receives information at least regarding:
+
+a) the price;
+
+b) taxes, if applicable;
+
+c) the billing period;
+
+d) the main features of the plan;
+
+e) the rules for Subscription renewal;
+
+f) the rules for its termination.
+
+6. Payment is made using the payment methods available in the Service.
+7. If the Subscription renews automatically, information about this will be presented before the purchase is made.
+8. The User may opt out of further Subscription renewal in accordance with the mechanism made available in the Account. Opting out does not result in the loss of paid access before the end of the current billing period, unless applicable regulations require a different solution.
+9. Lack of effective payment may result in the limitation of paid functionalities, in particular the visibility of the Profile, Portfolio, or the ability to receive new Inquiries.
+10. Detailed prices and the scope of individual plans are defined by the current offer presented in the Service.
+
+⸻
+
+§ 19. Consumer right of withdrawal
+
+1. If a User who is a consumer enters into a paid distance contract with the Operator, they are entitled to rights resulting from mandatory consumer law provisions.
+2. Information required before entering into a specific paid contract, including information regarding the right of withdrawal, is provided to the User before placing an order.
+3. If the provision of the service is to begin before the expiry of the statutory withdrawal period, the Operator shall obtain the User's request or consent required by law, if necessary.
+4. The provisions of the Terms and Conditions do not limit the consumer's rights resulting from mandatory provisions of law.
+5. The rights provided by regulations for a natural person entering into a contract directly related to their business activity, when the contract does not have a professional character for them, shall apply to the extent resulting from applicable regulations.
+
+⸻
+
+§ 20. Liability
+
+1. The Operator is liable for the proper provision of ArchiCompass services in accordance with applicable law.
+2. The Operator is not a party to the Design Agreement and is not liable for its performance by the Client or the Designer.
+3. The Operator does not guarantee:
+
+a) finding a Designer;
+
+b) receiving an Inquiry;
+
+c) a response from a Designer;
+
+d) the conclusion of a Design Agreement;
+
+e) a specific project result;
+
+f) the compliance of the project with the Client's expectations;
+
+g) the availability of a specific Designer;
+
+h) the compliance of the final price of services with the budget stated in the Service.
+
+4. Designers are independent entities and are liable for their own actions, information, offers, and services provided.
+5. The Operator is not liable for the truthfulness of information provided by the User, unless such liability results from mandatory provisions.
+6. The Operator is not liable for the operation of external websites or services to which the Service contains links.
+7. The Operator does not guarantee uninterrupted or completely error-free operation of the Service.
+8. The Operator is not liable for interruptions resulting from causes beyond its reasonable control, in particular failures of external infrastructure, force majeure, or unlawful actions of third parties, subject to applicable regulations.
+9. No provision of the Terms and Conditions excludes or limits the Operator's liability towards a consumer to the extent that such exclusion or limitation would be inadmissible under applicable law.
+
+⸻
+
+§ 21. Limitation, suspension, and removal of an Account
+
+1. The Operator may limit access to specific functionalities, suspend an Account, or – in justified cases – remove it if the User:
+
+a) seriously or repeatedly violates the Terms and Conditions;
+
+b) uses the Service in a manner inconsistent with the law;
+
+c) poses a threat to the security of the Service or other Users;
+
+d) impersonates other persons;
+
+e) uses the Account for fraud, spam, or manipulation;
+
+f) does not remove a violation despite an appropriate request, if the nature of the violation allows for its removal.
+
+2. If the nature of the violation allows it, the Operator may, before applying a permanent restriction, request the User to remove the violation.
+3. The Operator may act without prior request if required by law, the safety of Users, or the nature of the violation.
+4. In cases required by law, the User shall receive a statement of reasons for the applied restriction and information about available appeal measures.
+
+⸻
+
+§ 22. Complaints
+
+1. The User may lodge a complaint regarding the operation of the Website or services provided by the Operator.
+2. A complaint may be sent electronically to:
+
+contact@archicompass.pl
+
+3. A complaint should, as far as possible, contain:
+
+a) data enabling the identification of the User;
+
+b) a description of the problem;
+
+c) an indication of the functionality to which it relates;
+
+d) the expected method of resolving the matter.
+
+4. The Operator may request additional information if it is necessary to process the complaint.
+5. The Operator shall process the complaint without undue delay, no later than within 14 days of its receipt, unless mandatory provisions of law provide for a shorter time limit.
+6. The response shall be sent to the User's e-mail address or by another agreed method.
+7. This paragraph applies to the Operator's services. Complaints regarding the Design Agreement should be directed directly to the Designer.
+
+⸻
+
+§ 23. Personal data and privacy
+
+1. The principles of personal data processing by the Operator are defined by the Privacy Policy available on the Website.
+2. The Privacy Policy specifies in particular:
+
+a) categories of processed data;
+
+b) purposes and legal bases for processing;
+
+c) storage periods;
+
+d) categories of recipients;
+
+e) rules for the use of technology and AI service providers;
+
+f) rights of data subjects;
+
+g) rules for data transfers outside the European Economic Area, if applicable.
+
+3. The rules for the use of cookies and similar technologies are defined by the Cookies Policy.
+
+⸻
+
+§ 24. Changes to the Website
+
+1. The Operator develops the Website and may introduce new features, modify existing ones, or withdraw functionalities.
+2. A change in functionality may not infringe upon the User's rights resulting from an already paid service, unless it is necessary for legal, security, or other important reasons and is carried out in accordance with applicable law.
+3. The Operator may change the Terms and Conditions for important reasons, in particular:
+
+a) changes in legal regulations;
+
+b) changes in the method of service provision;
+
+c) introduction of new functionalities;
+
+d) changes in technology;
+
+e) the need to increase security;
+
+f) the need to prevent abuse;
+
+g) changes in the payment model or the scope of paid services.
+
+4. Changes concerning ongoing agreements will be communicated to Users in a timely manner and in the manner required by applicable law.
+5. If a change requires the User's acceptance, the continued provision of a given service may be conditional upon such acceptance.
+6. Changes will not be applied retroactively, unless this results from applicable law or is beneficial to the User.
+
+⸻
+
+§ 25. Termination of the agreement
+
+1. The User may at any time cease using the free ArchiCompass services.
+2. Deletion of the Account constitutes termination of the agreement regarding the maintenance of the Account, subject to data and obligations that, in accordance with the law, should be retained after its termination.
+3. In the case of an active paid Subscription, its termination occurs in accordance with the terms presented at the time of purchase and the provisions of § 18.
+4. Termination of the agreement does not affect Design Agreements concluded independently between the Client and the Designer.
+
+⸻
+
+§ 26. Governing law and disputes
+
+1. Polish law applies to the Terms and Conditions and agreements concluded between the Operator and the User.
+2. The choice of Polish law does not deprive the consumer of the protection granted to them under provisions that cannot be excluded by agreement and which would apply in the absence of a choice of law.
+3. The parties should first seek an amicable resolution to the dispute.
+4. A consumer may use the out-of-court complaint handling and redress mechanisms available under applicable law.
+5. In the case of disputes with Users who are not consumers, the court having jurisdiction shall be the court locally competent for the registered office or place of business of the Operator, unless mandatory provisions of law provide otherwise.
+
+⸻
+
+§ 27. Contact
+
+1. In matters concerning the Website, the Terms and Conditions, and complaints, you may contact the Operator at the address:
+
+contact@archicompass.pl
+
+2. Reports concerning security, abuse, and potentially illegal content may be directed to:
+
+admin@archicompass.pl
+
+3. Operator's details:
+
+Sergii Moroz Advisory (SM Advisory)
+Sergii Moroz
+ul. Grzybowska 2, lok. 31
+00-131 Warsaw, Poland
+NIP (Tax Identification Number): 5252995634
+REGON (Statistical Identification Number): 528006413
+
+⸻
+
+§ 28. Final provisions
+
+1. The Terms and Conditions are effective from 16 August 2026.
+2. The current version of the Terms and Conditions is available on the Website.
+3. In matters not regulated by the Terms and Conditions, the relevant provisions of Polish law and directly applicable provisions of European Union law shall apply.
+4. If any provision of the Terms and Conditions proves to be invalid or ineffective, this does not affect the validity of the remaining provisions, unless applicable law provides otherwise.
+5. The Terms and Conditions shall be interpreted with respect for the mandatory rights of consumers and other Users.
+
+Version: 1.0
