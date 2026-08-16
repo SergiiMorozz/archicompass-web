@@ -1,0 +1,248 @@
+1. Dlaczego publikujemy tę informację
+
+ArchiCompass wykorzystuje rozwiązania sztucznej inteligencji jako narzędzia wspierające Użytkownika w porządkowaniu inspiracji, przygotowaniu Briefu Projektowego oraz znajdowaniu Projektantów odpowiadających określonym potrzebom.
+
+Niniejsza strona wyjaśnia:
+
+* gdzie ArchiCompass wykorzystuje AI;
+* jakie dane mogą być analizowane;
+* czego AI nie robi;
+* w jaki sposób zachowujemy kontrolę człowieka;
+* jakie są ograniczenia technologii;
+* jak chronimy dane;
+* jak zgłaszać problemy dotyczące działania funkcji AI.
+
+ArchiCompass projektuje i wykorzystuje funkcje AI z uwzględnieniem właściwych wymogów prawa, w tym Rozporządzenia (UE) 2024/1689 – AI Act, RODO oraz przepisów dotyczących ochrony konsumentów.
+
+⸻
+
+2. Gdzie wykorzystujemy AI
+
+AI Project Compass
+
+AI może wspierać analizę:
+
+* zdjęć inspiracji;
+* preferencji stylistycznych;
+* rodzaju inwestycji;
+* charakteru przestrzeni;
+* deklarowanych potrzeb Użytkownika;
+* innych informacji podanych podczas tworzenia Briefu.
+
+Na tej podstawie AI może pomagać w przygotowaniu między innymi:
+
+* opisu preferowanego stylu;
+* charakterystyki wnętrza;
+* palety kolorystycznej;
+* kierunków materiałowych;
+* cech wizualnych;
+* wskazówek do Briefu Projektowego;
+* innych informacji pomocnych podczas rozmowy z Projektantem.
+
+⸻
+
+3. Dopasowanie Projektantów
+
+ArchiCompass może wykorzystywać dane zawarte w Briefie oraz inne parametry projektu do wskazania Projektantów mogących odpowiadać potrzebom Klienta.
+
+Dopasowanie może uwzględniać w szczególności:
+
+* lokalizację;
+* zakres projektu;
+* rodzaj inwestycji;
+* budżet;
+* preferencje stylistyczne;
+* informacje zawarte w Profilach i Portfolio Projektantów;
+* obszar działania;
+* inne deklarowane parametry projektu.
+
+AI może pomagać w interpretacji niektórych informacji, np. cech stylistycznych wynikających z inspiracji.
+
+Wynik Dopasowania ma charakter rekomendacyjny.
+
+ArchiCompass nie wybiera Projektanta za Klienta.
+
+⸻
+
+4. Człowiek zachowuje kontrolę
+
+Użytkownik samodzielnie decyduje:
+
+* czy uruchomi analizę AI;
+* jakie zdjęcia prześle;
+* czy zapisze wynik;
+* jakie informacje znajdą się w Briefie;
+* czy wyśle Zapytanie;
+* do którego Projektanta się zwróci;
+* czy rozpocznie współpracę.
+
+Projektant samodzielnie odpowiada za swoją ofertę, poradę, projekt i realizację usług.
+
+AI nie zawiera Umowy Projektowej w imieniu Użytkownika ani Projektanta.
+
+⸻
+
+5. Jak rozpoznać funkcję AI
+
+Funkcje i wyniki bezpośrednio generowane lub istotnie wspierane przez AI są oznaczane w interfejsie odpowiednią informacją, np.:
+
+„Analiza wspierana przez AI”
+lub
+„Wynik wygenerowany z wykorzystaniem AI”.
+
+Jeżeli Użytkownik bezpośrednio korzysta z funkcji AI, ArchiCompass informuje o tym w sposób widoczny w kontekście danej funkcjonalności.
+
+AI Act wymaga informowania osoby o bezpośredniej interakcji z AI w odpowiednich przypadkach.
+
+⸻
+
+6. Informacja przed analizą zdjęć
+
+Zdjęcia referencyjne nie są automatycznie wysyłane do modelu AI.
+
+Przekazanie następuje dopiero po świadomym uruchomieniu przez Użytkownika funkcji analizy.
+
+Przed rozpoczęciem analizy Użytkownik otrzymuje informację, że wybrane materiały zostaną przekazane zewnętrznemu dostawcy technologii AI.
+
+W jednym żądaniu AI Project Compass analizuje obecnie maksymalnie sześć zdjęć.
+
+⸻
+
+7. Jakie informacje mogą zostać przekazane do AI
+
+W zależności od używanej funkcjonalności mogą to być:
+
+* wybrane zdjęcia;
+* typ inwestycji;
+* wybrany kierunek stylistyczny;
+* cechy wizualne;
+* informacje dotyczące projektu;
+* inne dane niezbędne do przygotowania wyniku.
+
+ArchiCompass nie przekazuje danych logowania ani numeru telefonu jako elementu standardowej analizy zdjęć AI Project Compass.
+
+Użytkownik nie powinien przesyłać:
+
+* dokumentów tożsamości;
+* danych kart płatniczych;
+* poufnych dokumentów;
+* danych szczególnych kategorii;
+* zdjęć osób, jeżeli ich wykorzystanie nie jest konieczne lub Użytkownik nie posiada podstawy do ich przetwarzania.
+
+⸻
+
+8. Dostawcy technologii AI
+
+ArchiCompass może integrować modele AI dostarczane przez zewnętrznych dostawców.
+
+Aktualnie stosowany dostawca lub konfiguracja może ulegać zmianie wraz z rozwojem technologii.
+
+Informacje dotyczące aktualnych dostawców, przetwarzania danych osobowych oraz ewentualnych transferów danych opisuje Polityka Prywatności.
+
+ArchiCompass nie wykorzystuje prywatnych zdjęć Użytkowników jako publicznej bazy treści.
+
+⸻
+
+9. Ograniczenia AI
+
+Systemy AI wykorzystują modele statystyczne i mogą:
+
+* błędnie interpretować zdjęcie;
+* nie rozpoznać istotnego elementu;
+* wygenerować niepełną informację;
+* zaproponować rozwiązanie niemożliwe do wykonania;
+* przedstawić wynik, który nie odpowiada wszystkim preferencjom Użytkownika;
+* generować podobne wyniki dla różnych Użytkowników.
+
+Wynik AI należy traktować jako punkt wyjścia do dalszej pracy, a nie jako gwarantowaną ocenę profesjonalną.
+
+⸻
+
+10. AI nie zastępuje profesjonalisty
+
+AI Project Compass nie stanowi:
+
+* projektu architektonicznego;
+* projektu wykonawczego;
+* dokumentacji technicznej;
+* ekspertyzy konstrukcyjnej;
+* kosztorysu;
+* porady prawnej;
+* porady podatkowej;
+* porady finansowej;
+* oceny zgodności z prawem budowlanym;
+* gwarancji wykonalności inwestycji.
+
+Przed realizacją projektu istotne informacje powinny zostać zweryfikowane z odpowiednim specjalistą.
+
+⸻
+
+11. Brak automatycznych decyzji o istotnych skutkach
+
+ArchiCompass nie wykorzystuje AI Project Compass ani mechanizmu Dopasowania do podejmowania wobec Użytkownika decyzji, które wywołują skutki prawne lub w podobnie istotny sposób wpływają na niego wyłącznie poprzez zautomatyzowane przetwarzanie.
+
+Ostateczne decyzje należą do Użytkowników.
+
+⸻
+
+12. Zakazane i niepożądane zastosowania
+
+ArchiCompass nie projektuje AI Project Compass w celu:
+
+* rozpoznawania chronionych cech osoby na podstawie wyglądu;
+* oceny wartości lub wiarygodności człowieka;
+* social scoring;
+* manipulowania Użytkownikiem;
+* wykorzystywania podatności dzieci lub osób szczególnie narażonych;
+* identyfikacji biometrycznej osób;
+* wyciągania wniosków dotyczących zdrowia, orientacji seksualnej, poglądów politycznych lub innych szczególnych cech osoby.
+
+Analiza ma dotyczyć wnętrz, inspiracji i potrzeb projektowych.
+
+⸻
+
+13. Bezpieczeństwo i monitoring
+
+ArchiCompass może monitorować:
+
+* zgłoszone błędy;
+* nieoczekiwane wyniki;
+* problemy z bezpieczeństwem;
+* zmiany jakości działania;
+* wpływ aktualizacji modelu lub promptów.
+
+W razie potrzeby możemy:
+
+* zmienić instrukcje systemowe;
+* ograniczyć funkcję;
+* zmienić model lub dostawcę;
+* dodać zabezpieczenia;
+* czasowo wyłączyć funkcję.
+
+⸻
+
+14. Zgłaszanie problemów
+
+Jeżeli wynik AI:
+
+* jest ewidentnie błędny;
+* zawiera nieodpowiednią treść;
+* wydaje się dyskryminujący;
+* narusza prywatność;
+* powoduje inne zastrzeżenia,
+
+prosimy o kontakt:
+
+contact@archicompass.pl
+
+W zgłoszeniu warto podać nazwę funkcji, przybliżony czas jej użycia oraz opis problemu.
+
+⸻
+
+15. Powiązane dokumenty
+
+Więcej informacji znajduje się w:
+
+* Regulaminie ArchiCompass;
+* Polityce Prywatności;
+* Polityce plików cookies.

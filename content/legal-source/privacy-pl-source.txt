@@ -1,0 +1,823 @@
+POLITYKA PRYWATNOŚCI ARCHICOMPASS
+
+obowiązuje od dnia 16 sierpnia 2026 r.
+
+Niniejsza Polityka Prywatności opisuje zasady przetwarzania danych osobowych w związku z korzystaniem z platformy internetowej ArchiCompass, dostępnej w szczególności pod adresem archicompass.pl, w tym z Kont Klientów i Projektantów, Profili i Portfolio, AI Project Compass, Briefów Projektowych, Dopasowania Projektantów, Zapytania, wiadomości oraz pozostałych funkcjonalności Serwisu.
+
+Polityka stanowi uzupełnienie Regulaminu ArchiCompass. Pojęcia pisane wielką literą, które nie zostały zdefiniowane w niniejszej Polityce, mają znaczenie nadane im w Regulaminie.
+
+⸻
+
+§ 1. Administrator danych osobowych
+
+1. Administratorem danych osobowych przetwarzanych w związku z działaniem ArchiCompass jest:
+
+Sergii Moroz, prowadzący działalność gospodarczą pod firmą Sergii Moroz Advisory (SM Advisory)
+ul. Grzybowska 2, lok. 31
+00-131 Warszawa, Polska
+NIP: 5252995634
+REGON: 528006413
+
+dalej jako „Administrator” lub „ArchiCompass”.
+
+2. W sprawach dotyczących danych osobowych, prywatności oraz wykonywania praw wynikających z RODO można kontaktować się z Administratorem pod adresem:
+
+contact@archicompass.pl
+
+3. Zgłoszenia dotyczące bezpieczeństwa Serwisu można kierować na:
+
+admin@archicompass.pl
+
+4. Administrator nie wyznaczył Inspektora Ochrony Danych. W sprawach dotyczących ochrony danych osobowych należy korzystać z danych kontaktowych wskazanych powyżej.
+
+⸻
+
+§ 2. Podstawowe zasady przetwarzania danych
+
+1. Administrator przetwarza dane osobowe zgodnie z obowiązującymi przepisami, w szczególności:
+
+a) Rozporządzeniem Parlamentu Europejskiego i Rady (UE) 2016/679 („RODO”);
+
+b) ustawą z dnia 10 maja 2018 r. o ochronie danych osobowych;
+
+c) ustawą z dnia 12 lipca 2024 r. – Prawo komunikacji elektronicznej;
+
+d) innymi przepisami mającymi zastosowanie do określonego sposobu przetwarzania.
+
+2. Administrator stosuje w szczególności zasady:
+
+a) zgodności z prawem, rzetelności i przejrzystości;
+
+b) ograniczenia celu;
+
+c) minimalizacji danych;
+
+d) prawidłowości;
+
+e) ograniczenia przechowywania;
+
+f) integralności i poufności;
+
+g) rozliczalności.
+
+3. Administrator przetwarza wyłącznie dane potrzebne do realizacji określonych celów.
+
+⸻
+
+§ 3. Jakie osoby i jakie dane dotyczą przetwarzania
+
+W zależności od sposobu korzystania z ArchiCompass Administrator może przetwarzać dane następujących kategorii osób.
+
+1. Klienci i osoby korzystające z AI Project Compass
+
+Mogą być przetwarzane w szczególności:
+
+a) imię i nazwisko, jeżeli zostało podane;
+
+b) adres e-mail;
+
+c) numer telefonu, jeżeli został podany;
+
+d) dane Konta i dane uwierzytelniające;
+
+e) wybrany język i ustawienia Konta;
+
+f) informacje dotyczące planowanego projektu, w tym lokalizacja, rodzaj inwestycji, powierzchnia, zakres projektu, przewidywany budżet, harmonogram i preferencje;
+
+g) odpowiedzi udzielane podczas tworzenia Briefu;
+
+h) informacje o preferencjach stylistycznych;
+
+i) fotografie, grafiki i inne materiały referencyjne przesyłane do AI Project Compass;
+
+j) wyniki analizy AI;
+
+k) zapisane Briefy Projektowe;
+
+l) zapisani lub polubieni Projektanci i inspiracje;
+
+m) treść Zapytania i wiadomości;
+
+n) informacje dotyczące statusu Zapytania;
+
+o) dane dotyczące korzystania z Serwisu i bezpieczeństwa.
+
+⸻
+
+2. Projektanci i osoby działające w imieniu Pracowni
+
+Mogą być przetwarzane w szczególności:
+
+a) imię i nazwisko;
+
+b) nazwa firmy lub Pracowni;
+
+c) adres e-mail;
+
+d) numer telefonu;
+
+e) strona internetowa;
+
+f) dane firmowe i rozliczeniowe;
+
+g) NIP oraz inne dane identyfikujące działalność gospodarczą, jeżeli są potrzebne;
+
+h) lokalizacja i obszar działania;
+
+i) opis działalności i zakres świadczonych usług;
+
+j) specjalizacje i preferowane typy projektów;
+
+k) informacje o doświadczeniu;
+
+l) przedziały cenowe lub informacje budżetowe;
+
+m) zdjęcie profilowe;
+
+n) fotografie, wizualizacje i opisy zawarte w Portfolio;
+
+o) linki do stron internetowych, mediów społecznościowych lub innych publicznych profili;
+
+p) dane związane z Kontem i jego ustawieniami;
+
+q) Zapytania otrzymywane od Klientów;
+
+r) wiadomości prowadzone za pośrednictwem Serwisu;
+
+s) statystyki związane z Profilem;
+
+t) dane związane z Subskrypcją i rozliczeniami, jeżeli funkcjonalność płatna jest aktywna.
+
+⸻
+
+3. Osoby odwiedzające Serwis bez Konta
+
+Administrator może przetwarzać:
+
+a) adres IP;
+
+b) datę i godzinę połączenia;
+
+c) informacje o przeglądarce;
+
+d) informacje o urządzeniu i systemie operacyjnym;
+
+e) adres URL odwiedzanej strony;
+
+f) podstawowe dane dotyczące interakcji z Serwisem;
+
+g) identyfikatory techniczne wymagane do zapewnienia bezpieczeństwa i działania Serwisu;
+
+h) informacje zapisywane za pomocą plików cookies lub podobnych technologii zgodnie z § 13.
+
+⸻
+
+4. Osoby kontaktujące się z ArchiCompass
+
+Administrator może przetwarzać:
+
+a) imię i nazwisko;
+
+b) adres e-mail;
+
+c) numer telefonu, jeżeli został podany;
+
+d) treść korespondencji;
+
+e) załączniki;
+
+f) metadane komunikacji;
+
+g) inne informacje dobrowolnie przekazane w związku z kontaktem.
+
+⸻
+
+§ 4. Dane dotyczące projektów, zdjęcia i informacje szczególne
+
+1. ArchiCompass jest przeznaczony do przetwarzania informacji związanych z projektowaniem wnętrz, a nie danych szczególnych kategorii w rozumieniu art. 9 RODO.
+2. Użytkownik nie powinien przesyłać za pośrednictwem Serwisu danych ujawniających między innymi:
+
+a) pochodzenie rasowe lub etniczne;
+
+b) poglądy polityczne;
+
+c) przekonania religijne lub światopoglądowe;
+
+d) przynależność do związków zawodowych;
+
+e) danych genetycznych lub biometrycznych służących jednoznacznej identyfikacji;
+
+f) danych dotyczących zdrowia;
+
+g) danych dotyczących życia seksualnego lub orientacji seksualnej,
+
+chyba że ich przetwarzanie jest rzeczywiście konieczne i istnieje właściwa podstawa prawna.
+
+3. Użytkownik nie powinien przesyłać dokumentów tożsamości, pełnych danych kart płatniczych ani innych informacji, których ArchiCompass nie wymaga.
+4. Przesyłając zdjęcie zawierające wizerunek osoby trzeciej lub inne dotyczące jej dane osobowe, Użytkownik powinien mieć odpowiednią podstawę do udostępnienia takiego materiału.
+5. Administrator może usuwać dane oczywiście zbędne do świadczenia usług lub poprosić Użytkownika o ich usunięcie.
+
+⸻
+
+§ 5. Cele i podstawy prawne przetwarzania
+
+Administrator przetwarza dane w następujących celach.
+
+1. Utworzenie i prowadzenie Konta
+
+Cel: rejestracja, logowanie, prowadzenie Konta, ustawienia, obsługa Konta.
+
+Podstawa prawna: art. 6 ust. 1 lit. b RODO – wykonanie umowy o świadczenie usług drogą elektroniczną lub podjęcie działań na żądanie osoby przed zawarciem umowy.
+
+Dane: przede wszystkim adres e-mail, dane logowania, rola Konta, ustawienia oraz dane wymagane do realizacji funkcji Konta.
+
+⸻
+
+2. Prowadzenie Profilu Projektanta lub Pracowni
+
+Cel: utworzenie, prowadzenie i publiczne prezentowanie Profilu oraz Portfolio.
+
+Podstawa prawna: art. 6 ust. 1 lit. b RODO – wykonanie umowy z Projektantem, a w odpowiednich przypadkach art. 6 ust. 1 lit. f RODO – prawnie uzasadniony interes Administratora polegający na prowadzeniu katalogu Projektantów oraz zapewnieniu aktualności i wiarygodności informacji w Serwisie.
+
+⸻
+
+3. AI Project Compass
+
+Cel: analiza materiałów referencyjnych i informacji dotyczących projektu, określanie cech preferowanego wnętrza oraz wspomaganie tworzenia Briefu Projektowego.
+
+Podstawa prawna: art. 6 ust. 1 lit. b RODO – wykonanie usługi uruchomionej przez Użytkownika.
+
+Jeżeli określona opcjonalna funkcjonalność wymaga odrębnej zgody, podstawą przetwarzania będzie art. 6 ust. 1 lit. a RODO.
+
+⸻
+
+4. Tworzenie i przechowywanie Briefu Projektowego
+
+Cel: zapisanie informacji dotyczących projektu, umożliwienie ich późniejszego wykorzystania przez Klienta oraz – na jego żądanie – przekazania ich Projektantowi.
+
+Podstawa prawna: art. 6 ust. 1 lit. b RODO.
+
+⸻
+
+5. Dopasowanie Projektantów
+
+Cel: wskazywanie Projektantów mogących odpowiadać potrzebom Klienta na podstawie między innymi informacji o projekcie, lokalizacji, zakresie usług, budżecie i preferencjach stylistycznych.
+
+Podstawa prawna: art. 6 ust. 1 lit. b RODO – realizacja funkcjonalności żądanej przez Użytkownika.
+
+W zakresie analizy funkcjonowania mechanizmu Dopasowania i jego ulepszania podstawą może być również art. 6 ust. 1 lit. f RODO – prawnie uzasadniony interes Administratora polegający na rozwijaniu jakości Serwisu.
+
+⸻
+
+6. Obsługa Zapytania i komunikacji Klient–Projektant
+
+Cel: umożliwienie wysłania Zapytania, przekazania Briefu, prowadzenia komunikacji i nawiązania kontaktu pomiędzy Klientem a Projektantem.
+
+Podstawa prawna: art. 6 ust. 1 lit. b RODO.
+
+Po przekazaniu przez Klienta swoich danych Projektantowi w celu nawiązania bezpośredniej współpracy Projektant może stać się odrębnym administratorem danych w zakresie, w jakim samodzielnie określa dalsze cele i sposoby ich przetwarzania.
+
+⸻
+
+7. Obsługa wiadomości usługowych
+
+Cel: wysyłanie wiadomości dotyczących Konta, bezpieczeństwa, nowych Zapytania, nowych wiadomości, zmian w usłudze, płatności lub innych zdarzeń niezbędnych do korzystania z Serwisu.
+
+Podstawa prawna: art. 6 ust. 1 lit. b RODO.
+
+Wiadomości takie nie stanowią komunikacji marketingowej.
+
+⸻
+
+8. Obsługa zapytań kierowanych do Administratora
+
+Cel: udzielanie odpowiedzi na wiadomości, wsparcie użytkownika i prowadzenie korespondencji.
+
+Podstawa prawna: w zależności od charakteru zapytania:
+
+a) art. 6 ust. 1 lit. b RODO – gdy wiadomość dotyczy umowy lub działań przed jej zawarciem;
+
+b) art. 6 ust. 1 lit. f RODO – prawnie uzasadniony interes Administratora polegający na obsłudze korespondencji i udzielaniu odpowiedzi.
+
+⸻
+
+9. Bezpieczeństwo i przeciwdziałanie nadużyciom
+
+Cel: zapewnienie bezpieczeństwa Kont i Serwisu, wykrywanie nieautoryzowanego dostępu, nadużyć, spamu, błędów i prób naruszenia bezpieczeństwa.
+
+Podstawa prawna: art. 6 ust. 1 lit. f RODO.
+
+Prawnie uzasadniony interes: zapewnienie bezpieczeństwa Serwisu, Użytkowników, infrastruktury i danych.
+
+⸻
+
+10. Dochodzenie lub obrona przed roszczeniami
+
+Cel: ustalenie, dochodzenie lub obrona przed ewentualnymi roszczeniami.
+
+Podstawa prawna: art. 6 ust. 1 lit. f RODO.
+
+Prawnie uzasadniony interes: ochrona praw Administratora oraz dokumentowanie wykonywania umów i obowiązków.
+
+⸻
+
+11. Obowiązki księgowe, podatkowe i prawne
+
+Jeżeli Użytkownik korzysta z odpłatnych usług, Administrator może przetwarzać dane w celu wystawiania i przechowywania dokumentacji księgowej, faktur, realizowania obowiązków podatkowych i innych obowiązków wynikających z prawa.
+
+Podstawa prawna: art. 6 ust. 1 lit. c RODO.
+
+⸻
+
+12. Rozwój i statystyki Serwisu
+
+Administrator może analizować sposób działania Serwisu, błędy techniczne, zagregowane statystyki oraz korzystanie z poszczególnych funkcji w celu poprawy ArchiCompass.
+
+Podstawa prawna: art. 6 ust. 1 lit. f RODO – prawnie uzasadniony interes polegający na utrzymywaniu, mierzeniu i rozwijaniu Serwisu.
+
+Jeżeli analiza wymaga zastosowania cookies lub podobnych technologii, które nie są niezbędne do świadczenia usługi, są one uruchamiane wyłącznie po uzyskaniu wymaganej zgody.
+
+⸻
+
+13. Marketing i newsletter
+
+Jeżeli Użytkownik dobrowolnie zapisze się do newslettera lub wyrazi zgodę na otrzymywanie komunikacji marketingowej, Administrator może przetwarzać w szczególności adres e-mail i – jeżeli został podany – imię.
+
+Podstawa przetwarzania danych osobowych: art. 6 ust. 1 lit. a RODO – zgoda.
+
+Wysyłanie komunikacji marketingowej drogą elektroniczną odbywa się również zgodnie z wymaganiami Prawa komunikacji elektronicznej.
+
+Zgoda jest dobrowolna i może zostać wycofana w dowolnym momencie bez wpływu na zgodność z prawem przetwarzania dokonanego przed jej cofnięciem.
+
+⸻
+
+§ 6. Skąd pochodzą dane
+
+1. Większość danych osobowych Administrator otrzymuje bezpośrednio od Użytkownika.
+2. Dane mogą być także generowane podczas korzystania z Serwisu, w szczególności jako:
+
+a) logi systemowe;
+
+b) dane dotyczące logowania;
+
+c) identyfikatory techniczne;
+
+d) historia określonych operacji w Koncie;
+
+e) statystyki Profilu;
+
+f) informacje dotyczące Zapytania i wiadomości.
+
+3. W przypadku Projektantów i Pracowni część informacji może pochodzić z publicznie dostępnych źródeł, takich jak:
+
+a) oficjalne strony internetowe Projektanta lub Pracowni;
+
+b) publiczne profile firmowe;
+
+c) publiczne rejestry przedsiębiorców;
+
+d) Google Business Profile lub inne publiczne usługi Google;
+
+e) publiczne katalogi branżowe;
+
+f) publicznie dostępne portfolio i profile zawodowe.
+
+4. Z publicznych źródeł mogą być pozyskiwane przede wszystkim:
+
+a) imię i nazwisko lub nazwa Pracowni;
+
+b) branża lub specjalizacja;
+
+c) miejscowość i obszar działania;
+
+d) publiczne firmowe dane kontaktowe;
+
+e) adres strony internetowej;
+
+f) link do publicznego profilu;
+
+g) publiczna ocena i liczba opinii;
+
+h) inne informacje zawodowe publicznie udostępnione przez danego Projektanta lub Pracownię.
+
+5. Jeżeli Administrator przetwarza dane osoby, których nie pozyskał bezpośrednio od niej, realizuje obowiązki informacyjne wynikające z art. 14 RODO w terminach i zakresie wymaganym przez obowiązujące przepisy.
+
+⸻
+
+§ 7. Profile publiczne i dane przekazywane innym Użytkownikom
+
+1. Dane umieszczone w publicznym Profilu Projektanta lub Pracowni są dostępne dla osób odwiedzających Serwis i mogą być indeksowane przez wyszukiwarki internetowe.
+2. Publiczne mogą być w szczególności:
+
+a) imię i nazwisko lub nazwa Pracowni;
+
+b) zdjęcie;
+
+c) opis;
+
+d) lokalizacja;
+
+e) zakres usług;
+
+f) Portfolio;
+
+g) link do strony internetowej;
+
+h) publiczne informacje zawodowe;
+
+i) oceny i liczba opinii, jeżeli są prezentowane w Serwisie.
+
+3. Dane Konta Klienta, prywatne Briefy, prywatne zdjęcia referencyjne, ulubione elementy i prywatne wiadomości nie są publicznie udostępniane.
+4. Jeżeli Klient zdecyduje się wysłać Zapytanie do Projektanta, Projektant może otrzymać dane potrzebne do obsługi tego Zapytania, w szczególności:
+
+a) treść Briefu;
+
+b) informacje o projekcie;
+
+c) wiadomość Klienta;
+
+d) dane kontaktowe przekazane przez Klienta;
+
+e) zdjęcia referencyjne udostępnione w ramach Briefu.
+
+5. Przekazanie danych Projektantowi następuje w związku z działaniem podjętym przez Klienta w Serwisie.
+6. Po otrzymaniu danych i wykorzystaniu ich do prowadzenia własnych negocjacji, przygotowania oferty lub zawarcia Umowy Projektowej Projektant może działać jako odrębny administrator danych osobowych.
+
+⸻
+
+§ 8. AI Project Compass i przetwarzanie przez systemy AI
+
+1. AI Project Compass wykorzystuje technologie sztucznej inteligencji do analizy materiałów i informacji przekazywanych przez Użytkownika.
+2. Analiza AI odbywa się wyłącznie po uruchomieniu odpowiedniej funkcji przez Użytkownika.
+3. Do systemu AI mogą zostać przekazane:
+
+a) wybrane obrazy referencyjne;
+
+b) informacje dotyczące rodzaju inwestycji;
+
+c) wskazane preferencje;
+
+d) informacje o stylu i cechach projektu;
+
+e) inne informacje konieczne do wygenerowania wyniku wybranej funkcji.
+
+4. W zależności od aktualnej konfiguracji technicznej ArchiCompass może korzystać w tym celu z zewnętrznych dostawców modeli AI, w szczególności OpenAI lub Google Gemini.
+5. Dane są przekazywane dostawcy AI wyłącznie w zakresie potrzebnym do realizacji uruchomionej przez Użytkownika funkcji, zgodnie z umowami i ustawieniami technicznymi stosowanymi przez Administratora.
+6. Administrator nie wykorzystuje prywatnych materiałów Użytkowników do samodzielnego trenowania własnego ogólnego modelu sztucznej inteligencji.
+7. Wyniki analizy AI mogą być niedokładne, niekompletne lub nie odpowiadać rzeczywistym możliwościom realizacyjnym projektu.
+8. Wyniki AI mają charakter pomocniczy.
+9. AI Project Compass nie podejmuje wobec Użytkownika decyzji wywołującej skutki prawne lub w podobny sposób istotnie wpływającej na Użytkownika wyłącznie w sposób zautomatyzowany w rozumieniu art. 22 RODO.
+
+⸻
+
+§ 9. Dopasowanie Projektantów i profilowanie
+
+1. ArchiCompass może automatycznie analizować informacje dotyczące projektu w celu wskazania Projektantów mogących odpowiadać potrzebom Klienta.
+2. Analiza może uwzględniać między innymi:
+
+a) lokalizację;
+
+b) zakres projektu;
+
+c) rodzaj inwestycji;
+
+d) deklarowany budżet;
+
+e) preferencje stylistyczne;
+
+f) charakter i skalę projektu;
+
+g) informacje zawarte w Profilach Projektantów;
+
+h) inne parametry związane z projektem.
+
+3. W wyniku analizy Serwis może utworzyć listę lub ranking Projektantów, których charakterystyka w największym stopniu odpowiada określonym parametrom.
+4. Mechanizm ten może stanowić profilowanie w rozumieniu RODO w zakresie, w jakim wykorzystuje dane osobowe do oceny określonych preferencji lub zainteresowań Użytkownika.
+5. Celem profilowania jest przedstawienie bardziej odpowiednich wyników wyszukiwania i ograniczenie liczby nieadekwatnych propozycji.
+6. Wynik Dopasowania ma charakter rekomendacyjny.
+7. Klient samodzielnie decyduje, czy skontaktuje się z którymkolwiek z zaproponowanych Projektantów.
+8. Dopasowanie nie powoduje wobec Klienta ani Projektanta skutków prawnych ani skutków w podobny sposób istotnych wyłącznie na podstawie zautomatyzowanego przetwarzania w rozumieniu art. 22 RODO.
+
+⸻
+
+§ 10. Dostawcy usług i odbiorcy danych
+
+1. Administrator korzysta z usług zewnętrznych dostawców niezbędnych do prowadzenia ArchiCompass.
+2. W zależności od aktualnej konfiguracji Serwisu mogą do nich należeć w szczególności:
+
+Supabase
+
+Wykorzystywany między innymi do:
+
+* uwierzytelniania;
+* przechowywania danych;
+* bazy danych;
+* przechowywania plików i zdjęć;
+* funkcji backendowych.
+
+Vercel
+
+Wykorzystywany między innymi do:
+
+* hostingu aplikacji;
+* dostarczania Serwisu;
+* infrastruktury technicznej.
+
+home.pl
+
+Wykorzystywany do:
+
+* obsługi poczty związanej z domeną ArchiCompass;
+* komunikacji e-mail.
+
+OpenAI i/lub Google Gemini
+
+W zależności od aktualnej konfiguracji mogą być wykorzystywane do:
+
+* realizacji opcjonalnych funkcji sztucznej inteligencji;
+* analizy informacji tekstowych;
+* analizy obrazów;
+* generowania pomocniczych wyników AI.
+
+Google
+
+W określonych funkcjach może być wykorzystywany do:
+
+* prezentowania lub synchronizowania publicznych informacji z Google Business Profile;
+* dostarczania innych funkcji Google uruchomionych w Serwisie.
+
+3. Dane mogą być również przekazywane:
+
+a) dostawcom usług IT;
+
+b) dostawcom poczty i komunikacji;
+
+c) dostawcom usług płatniczych – jeżeli aktywowane zostaną płatności;
+
+d) dostawcom usług księgowych;
+
+e) kancelariom prawnym lub doradcom, jeżeli będzie to konieczne;
+
+f) podmiotom zapewniającym bezpieczeństwo infrastruktury;
+
+g) organom publicznym – jeżeli obowiązek przekazania danych wynika z prawa;
+
+h) Projektantom – w zakresie wynikającym z Zapytania przesłanego przez Klienta.
+
+4. Podmioty przetwarzające dane na zlecenie Administratora są uprawnione do przetwarzania ich wyłącznie w zakresie wynikającym z odpowiedniej umowy lub innej podstawy prawnej.
+5. Niektórzy odbiorcy, w szczególności Projektanci, operatorzy płatności lub określeni dostawcy zewnętrznych usług, mogą w odniesieniu do niektórych operacji działać jako odrębni administratorzy danych.
+
+⸻
+
+§ 11. Przekazywanie danych poza Europejski Obszar Gospodarczy
+
+1. Ze względu na korzystanie z międzynarodowych dostawców technologii niektóre dane mogą być przetwarzane poza Europejskim Obszarem Gospodarczym.
+2. Jeżeli dane są przekazywane do państwa, dla którego Komisja Europejska wydała decyzję stwierdzającą odpowiedni stopień ochrony, transfer może odbywać się na podstawie tej decyzji.
+3. W pozostałych przypadkach Administrator stosuje odpowiedni mechanizm przewidziany w RODO, w szczególności standardowe klauzule umowne zatwierdzone przez Komisję Europejską, wraz z dodatkowymi zabezpieczeniami, jeżeli są wymagane.
+4. Jeżeli odbiorca w Stanach Zjednoczonych uczestniczy w EU-U.S. Data Privacy Framework i transfer może zgodnie z prawem opierać się na tym mechanizmie, Administrator może korzystać z odpowiedniej decyzji stwierdzającej adekwatność.
+5. Osoba, której dane dotyczą, może zwrócić się do Administratora o dodatkowe informacje dotyczące mechanizmu zastosowanego w odniesieniu do konkretnego transferu danych.
+
+⸻
+
+§ 12. Zdjęcia i przechowywanie plików
+
+1. Zdjęcia referencyjne używane przez Klienta w ramach Project Compass nie są publikowane jako publiczne Portfolio.
+2. Przed zapisaniem Briefu lub uruchomieniem odpowiedniej funkcji AI część danych może być przechowywana lokalnie w przeglądarce Użytkownika.
+3. Po zapisaniu zdjęć w Serwisie są one przechowywane w prywatnej przestrzeni plików wykorzystywanej przez ArchiCompass.
+4. Dostęp do prywatnych zdjęć może być realizowany za pomocą ograniczonych czasowo, podpisanych adresów URL.
+5. Jeżeli Klient przekazuje Brief Projektantowi, Projektant może otrzymać czasowy dostęp do zdjęć powiązanych z tym Briefem.
+6. Zdjęcia Portfolio przesyłane przez Projektanta są przeznaczone do publicznej prezentacji zgodnie z Regulaminem i ustawieniami Konta.
+
+⸻
+
+§ 13. Cookies, local storage i podobne technologie
+
+1. ArchiCompass wykorzystuje pliki cookies oraz podobne technologie, w tym pamięć lokalną lub sesyjną przeglądarki.
+2. Technologie niezbędne mogą być stosowane między innymi w celu:
+
+a) utrzymania sesji;
+
+b) logowania;
+
+c) zabezpieczenia Konta;
+
+d) zapisywania wybranego języka;
+
+e) działania interfejsu;
+
+f) zachowania stanu formularza;
+
+g) zapisywania ustawień dotyczących prywatności;
+
+h) przeciwdziałania nadużyciom.
+
+3. Korzystanie z technologii niezbędnych do dostarczenia usługi żądanej przez Użytkownika nie wymaga zgody w zakresie dozwolonym przez obowiązujące przepisy.
+4. Analityczne, reklamowe lub marketingowe cookies i podobne technologie, które nie są konieczne do świadczenia usługi, są wykorzystywane wyłącznie po uzyskaniu wymaganej zgody Użytkownika.
+5. Na dzień wejścia w życie niniejszej Polityki ArchiCompass nie wykorzystuje reklamowych plików cookies.
+6. Użytkownik może w dowolnym momencie zmienić lub cofnąć zgodę na opcjonalne cookies za pośrednictwem mechanizmu dostępnego w Serwisie, jeżeli takie cookies są wykorzystywane.
+7. Szczegółowe informacje dotyczące wykorzystywanych technologii znajdują się w Polityce plików cookies ArchiCompass.
+
+⸻
+
+§ 14. Statystyki wyświetleń Profili
+
+1. ArchiCompass może rejestrować ograniczone informacje dotyczące wyświetlania Profili w celu przedstawiania Projektantom statystyk oraz poprawy Serwisu.
+2. W celu ograniczania wielokrotnego zliczania tego samego wyświetlenia może zostać wykorzystany losowy identyfikator techniczny sesji lub karty przeglądarki.
+3. Administrator ogranicza zakres tych danych do informacji potrzebnych do realizacji celu statystycznego.
+4. Dane statystyczne mogą być agregowane lub anonimizowane.
+
+⸻
+
+§ 15. Okres przechowywania danych
+
+Administrator nie przechowuje danych dłużej, niż jest to konieczne do realizacji celu ich przetwarzania.
+
+W szczególności:
+
+Kategoria danych	Okres przechowywania
+Dane aktywnego Konta	przez okres posiadania Konta
+Dane Profilu Projektanta	przez okres prowadzenia Profilu, a następnie przez okres niezbędny do realizacji obowiązków lub obrony roszczeń
+Portfolio	do czasu jego usunięcia przez Projektanta, usunięcia Profilu lub zakończenia świadczenia odpowiedniej usługi
+Briefy i projekty Klienta	do czasu ich usunięcia lub usunięcia Konta, chyba że dalsze przechowywanie jest konieczne z innej podstawy prawnej
+Prywatne zdjęcia referencyjne	przez okres powiązania z aktywnym projektem lub Briefem, a następnie do czasu ich usunięcia zgodnie z mechanizmem Serwisu
+Zapytania i wiadomości	przez okres potrzebny do obsługi komunikacji oraz następnie przez okres niezbędny do ustalenia, dochodzenia lub obrony roszczeń
+Dane przetwarzane na podstawie zgody marketingowej	do czasu cofnięcia zgody lub zaprzestania prowadzenia danego działania
+Dane rozliczeniowe i dokumenty księgowe	przez okres wymagany przez przepisy podatkowe i rachunkowe
+Dane dotyczące roszczeń	do upływu właściwego okresu przedawnienia, a gdy toczy się postępowanie – do jego prawomocnego zakończenia
+Dane techniczne i logi bezpieczeństwa	przez okres uzasadniony bezpieczeństwem i diagnostyką Serwisu, a następnie są usuwane lub anonimizowane
+Dane uzyskane z publicznych źródeł dotyczące Projektantów	do czasu utraty aktualności, skutecznego sprzeciwu, usunięcia Profilu lub ustania celu przetwarzania
+
+2. W niektórych przypadkach dane mogą zostać wcześniej zanonimizowane. Danych anonimowych, które nie pozwalają już na identyfikację osoby fizycznej, RODO nie traktuje jako danych osobowych.
+3. Po usunięciu danych z aktywnych systemów ich ograniczone kopie mogą pozostawać przez określony czas w kopiach zapasowych, jeżeli jest to niezbędne dla bezpieczeństwa infrastruktury.
+4. Treści wcześniej publicznie dostępne mogą być przez pewien czas widoczne w pamięci podręcznej wyszukiwarek internetowych niezależnie od Administratora.
+
+⸻
+
+§ 16. Czy podanie danych jest obowiązkowe
+
+1. Podanie danych jest co do zasady dobrowolne.
+2. Niektóre dane są jednak konieczne do skorzystania z określonych funkcjonalności.
+3. Przykładowo:
+
+a) bez adresu e-mail może nie być możliwe utworzenie Konta;
+
+b) bez informacji o projekcie może nie być możliwe przygotowanie Briefu lub Dopasowania;
+
+c) bez odpowiednich danych kontaktowych może nie być możliwe przekazanie Zapytania Projektantowi;
+
+d) bez danych wymaganych przepisami podatkowymi może nie być możliwe prawidłowe rozliczenie płatnej usługi.
+
+4. Dane oznaczone w Serwisie jako opcjonalne są dobrowolne i ich niepodanie nie uniemożliwia korzystania z innych funkcji, dla których nie są potrzebne.
+
+⸻
+
+§ 17. Prawa osoby, której dane dotyczą
+
+Osobie, której dane dotyczą, przysługują – w przypadkach przewidzianych przez RODO – następujące prawa:
+
+1. prawo dostępu do danych, w tym otrzymania informacji o ich przetwarzaniu;
+2. prawo do sprostowania danych, jeżeli są nieprawidłowe lub niekompletne;
+3. prawo do usunięcia danych;
+4. prawo do ograniczenia przetwarzania;
+5. prawo do przenoszenia danych, jeżeli spełnione są przesłanki określone w RODO;
+6. prawo do sprzeciwu wobec przetwarzania opartego na art. 6 ust. 1 lit. f RODO;
+7. prawo do wycofania zgody w dowolnym momencie, jeżeli podstawą przetwarzania jest zgoda;
+8. prawo do wniesienia skargi do organu nadzorczego.
+
+Wycofanie zgody nie wpływa na zgodność z prawem przetwarzania dokonanego przed jej cofnięciem.
+
+⸻
+
+§ 18. Prawo do sprzeciwu
+
+1. Jeżeli dane są przetwarzane na podstawie prawnie uzasadnionego interesu Administratora, osoba, której dane dotyczą, może w dowolnym momencie wnieść sprzeciw z przyczyn związanych z jej szczególną sytuacją.
+2. W takim przypadku Administrator zaprzestanie przetwarzania danych, chyba że wykaże istnienie ważnych prawnie uzasadnionych podstaw nadrzędnych wobec interesów, praw i wolności osoby lub podstaw do ustalenia, dochodzenia albo obrony roszczeń.
+3. Jeżeli dane są przetwarzane na potrzeby marketingu bezpośredniego, sprzeciw wobec takiego przetwarzania jest skuteczny bez konieczności wykazywania szczególnej sytuacji.
+
+⸻
+
+§ 19. Jak wykonywać prawa
+
+1. W celu wykonania praw można skontaktować się z Administratorem pod adresem:
+
+contact@archicompass.pl
+
+2. Żądanie powinno umożliwić Administratorowi ustalenie, jakiej osoby i jakich danych dotyczy.
+3. Jeżeli Administrator ma uzasadnione wątpliwości co do tożsamości osoby składającej żądanie, może poprosić o dodatkowe informacje konieczne do jej potwierdzenia.
+4. Administrator nie będzie żądał większego zakresu danych niż konieczny do weryfikacji tożsamości.
+5. Administrator udzieli informacji o działaniach podjętych w związku z żądaniem bez zbędnej zwłoki i w terminach przewidzianych przez RODO.
+6. Realizacja praw jest co do zasady bezpłatna. W przypadkach określonych w art. 12 ust. 5 RODO Administrator może pobrać rozsądną opłatę lub odmówić podjęcia działania w odniesieniu do żądania oczywiście nieuzasadnionego lub nadmiernego.
+
+⸻
+
+§ 20. Skarga do Prezesa UODO
+
+1. Jeżeli osoba uważa, że jej dane osobowe są przetwarzane z naruszeniem RODO, ma prawo wnieść skargę do organu nadzorczego.
+2. W Polsce organem nadzorczym jest:
+
+Prezes Urzędu Ochrony Danych Osobowych
+ul. Stawki 2
+00-193 Warszawa
+
+3. Skorzystanie z prawa do wniesienia skargi nie ogranicza innych środków ochrony prawnej przysługujących na podstawie obowiązujących przepisów.
+
+⸻
+
+§ 21. Bezpieczeństwo danych
+
+1. Administrator stosuje środki techniczne i organizacyjne odpowiednie do charakteru, zakresu, kontekstu i celów przetwarzania oraz związanego z nim ryzyka.
+2. Środki te mogą obejmować w szczególności:
+
+a) szyfrowanie transmisji;
+
+b) kontrolę dostępu;
+
+c) mechanizmy uwierzytelniania;
+
+d) ograniczanie dostępu do danych zgodnie z zakresem uprawnień;
+
+e) prywatne przestrzenie przechowywania plików;
+
+f) podpisane i ograniczone czasowo adresy dostępu do prywatnych plików;
+
+g) rejestrowanie zdarzeń związanych z bezpieczeństwem;
+
+h) tworzenie kopii zapasowych;
+
+i) aktualizowanie oprogramowania i infrastruktury;
+
+j) procedury reagowania na incydenty.
+
+3. Żaden system informatyczny nie zapewnia całkowitego wyeliminowania ryzyka, dlatego Użytkownicy również powinni stosować odpowiednie środki bezpieczeństwa, w szczególności chronić dostęp do Konta i poczty elektronicznej.
+4. W przypadku naruszenia ochrony danych osobowych Administrator postępuje zgodnie z art. 33 i 34 RODO.
+
+⸻
+
+§ 22. Osoby małoletnie
+
+1. Konta ArchiCompass są przeznaczone dla osób, które ukończyły 18 lat.
+2. Serwis nie jest kierowany do dzieci jako odbiorców usług.
+3. Administrator nie zamierza świadomie pozyskiwać danych dzieci do celów prowadzenia Kont.
+4. Jeżeli Administrator dowie się, że Konto zostało utworzone przez osobę, która nie spełnia wymagań wiekowych, może podjąć odpowiednie działania, w tym ograniczyć Konto i usunąć dane, chyba że ich dalsze przetwarzanie wynika z obowiązku prawnego.
+
+⸻
+
+§ 23. Dane osób trzecich przekazywane przez Użytkownika
+
+1. Jeżeli Użytkownik przekazuje Administratorowi dane innej osoby, powinien mieć podstawę prawną do ich przekazania.
+2. Użytkownik powinien unikać podawania danych osób trzecich, jeżeli nie są potrzebne do realizacji określonej funkcji.
+3. W przypadkach, w których Administrator staje się administratorem danych pozyskanych pośrednio, realizuje obowiązek informacyjny wynikający z art. 14 RODO w zakresie przewidzianym przez przepisy.
+
+⸻
+
+§ 24. Zmiany Polityki Prywatności
+
+1. Polityka może być aktualizowana w szczególności w przypadku:
+
+a) zmiany prawa;
+
+b) zmiany sposobu działania ArchiCompass;
+
+c) wdrożenia nowych funkcjonalności;
+
+d) zmiany sposobu przetwarzania danych;
+
+e) zmiany dostawców technologicznych;
+
+f) zmiany wykorzystywanych mechanizmów AI;
+
+g) zmiany sposobu wykorzystywania cookies lub podobnych technologii.
+
+2. Aktualna wersja Polityki jest zawsze publikowana w Serwisie wraz z datą jej obowiązywania.
+3. Jeżeli zmiana istotnie wpływa na sposób przetwarzania danych Użytkowników posiadających Konto, Administrator może dodatkowo poinformować ich o zmianie za pomocą wiadomości e-mail lub komunikatu w Serwisie.
+4. Jeżeli zmiana wymaga uzyskania nowej zgody, Administrator uzyska ją przed rozpoczęciem danego sposobu przetwarzania.
+
+⸻
+
+§ 25. Kontakt
+
+W sprawach dotyczących ochrony danych osobowych:
+
+Sergii Moroz Advisory (SM Advisory)
+Sergii Moroz
+ul. Grzybowska 2, lok. 31
+00-131 Warszawa
+NIP: 5252995634
+REGON: 528006413
+
+e-mail dotyczący prywatności:
+contact@archicompass.pl
+
+e-mail dotyczący bezpieczeństwa:
+admin@archicompass.pl
+
+⸻
+
+§ 26. Postanowienia końcowe
+
+1. Niniejsza Polityka obowiązuje od dnia 16 sierpnia 2026 r..
+2. W sprawach nieuregulowanych Polityką zastosowanie mają odpowiednie przepisy prawa, w szczególności RODO.
+3. Zasady świadczenia usług za pośrednictwem ArchiCompass określa Regulamin ArchiCompass.
+4. Szczegółowe informacje dotyczące technologii zapisywanych w urządzeniu Użytkownika zawiera Polityka plików cookies.
+
+Wersja: 1.0

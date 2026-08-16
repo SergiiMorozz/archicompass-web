@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import LegalDocumentPage from "@/components/LegalDocumentPage";
 import { getLegalCopy } from "@/content/legal-copy";
+import { getFullPolishLegalText } from "@/lib/legal-full-text";
+import { siteLocale } from "@/lib/site-locale";
 import { pageMetadata } from "@/lib/seo";
 
 const copy = getLegalCopy();
@@ -12,7 +14,7 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default function CookiePolicyPage() {
-  return <LegalDocumentPage document={copy.documents.cookies} relatedTitle={copy.relatedTitle} relatedLinks={[
+  return <LegalDocumentPage document={copy.documents.cookies} fullText={siteLocale === "pl" ? getFullPolishLegalText("cookies") : undefined} relatedTitle={copy.relatedTitle} relatedLinks={[
     { href: "/privacy", label: copy.links.privacy },
     { href: "/terms", label: copy.links.terms },
     { href: "/privacy-and-ai", label: copy.links.privacyAndAi },
