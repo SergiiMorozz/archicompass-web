@@ -15,7 +15,7 @@ export type LegalDocument = {
   title: string;
   effectiveDate: string;
   intro: string;
-  sections: Array<{ title: string; paragraphs: string[] }>;
+  sections: Array<{ title: string; paragraphs: string[]; bullets?: string[] }>;
 };
 
 type LegalCopy = {
@@ -23,6 +23,13 @@ type LegalCopy = {
   relatedTitle: string;
   contactLabel: string;
   companyLine: string;
+  cookieNotice: {
+    ariaLabel: string;
+    title: string;
+    body: string;
+    dismiss: string;
+    learnMore: string;
+  };
   documents: Record<LegalPageKey, LegalDocument>;
 };
 
@@ -42,6 +49,13 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
     relatedTitle: "Powiązane informacje",
     contactLabel: "Kontakt z ArchiCompass",
     companyLine,
+    cookieNotice: {
+      ariaLabel: "Informacja o plikach cookies",
+      title: "Prywatność i pliki cookies",
+      body: "ArchiCompass wykorzystuje niezbędne pliki cookies i pamięć przeglądarki do logowania, bezpieczeństwa oraz prawidłowego działania platformy. Nie używamy reklamowych plików cookies.",
+      dismiss: "Rozumiem",
+      learnMore: "Polityka cookies",
+    },
     documents: {
       privacy: {
         metadata: {
@@ -50,7 +64,7 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
         },
         eyebrow: "Informacje prawne",
         title: "Polityka prywatności",
-        effectiveDate: "Obowiązuje od: 4 sierpnia 2026 r.",
+        effectiveDate: "Obowiązuje od: 16 sierpnia 2026 r.",
         intro: "Ta polityka wyjaśnia, jak ArchiCompass przetwarza dane osobowe w kontach klientów, profilach profesjonalistów, AI Project Compass, zapytaniach, wiadomościach i pozostałych usługach platformy.",
         sections: [
           { title: "1. Administrator danych i kontakt", paragraphs: [
@@ -80,14 +94,14 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
             "Dostawcy przetwarzają dane na podstawie własnych warunków umownych i zabezpieczeń. Jeżeli dane są przekazywane poza Europejski Obszar Gospodarczy, stosujemy odpowiednią decyzję stwierdzającą adekwatność, standardowe klauzule umowne lub inny zgodny z prawem mechanizm transferu.",
           ] },
           { title: "7. Statystyki i komunikacja", paragraphs: [
-            "ArchiCompass zapisuje ograniczone statystyki wyświetleń profilu z użyciem losowego identyfikatora karty przeglądarki, aby ograniczyć podwójne zliczanie. Rekord wyświetlenia nie zawiera imienia ani adresu e-mail odwiedzającego.",
+            "ArchiCompass zapisuje ograniczone statystyki wyświetleń profilu z użyciem losowego identyfikatora karty przeglądarki, aby ograniczyć podwójne zliczanie. Rekord wyświetlenia nie zawiera imienia ani adresu e-mail odwiedzającego. Korzystamy też z ograniczonych, zagregowanych metryk technicznych Vercel Analytics i Speed Insights, aby sprawdzać wydajność, niezawodność i bezpieczeństwo serwisu; nie służą one do tworzenia reklamowych profili użytkowników.",
             "Wysyłamy wiadomości usługowe dotyczące aktywności konta, nowych briefów, wiadomości, przypomnień o nieprzeczytanych wiadomościach, bezpieczeństwa i istotnych zmian usługi. Są one niezbędne do świadczenia platformy i nie stanowią komunikacji marketingowej.",
           ] },
           { title: "8. Pliki cookies i pamięć przeglądarki", paragraphs: [
             "Platforma wykorzystuje pliki cookies i pamięć przeglądarki niezbędne do logowania, bezpieczeństwa, ustawień języka i interfejsu oraz zapisywania stanu formularzy. Obecnie nie używamy reklamowych plików cookies. Szczegóły opisuje Polityka cookies.",
           ] },
           { title: "9. Okres przechowywania i usuwanie", paragraphs: [
-            "Dane konta, profilu, projektów, briefów, ulubionych elementów i zapytań przechowujemy przez okres aktywności konta lub tak długo, jak jest to potrzebne do realizacji wybranej funkcji. Konto i obsługiwane treści można usuwać za pomocą dostępnych opcji albo kontaktując się z nami.",
+            "Dane konta przechowujemy do usunięcia konta. Dane profilu i portfolio przechowujemy do usunięcia ich przez użytkownika lub konta; briefy, zdjęcia referencyjne, ulubione elementy, zapytania i rozmowy — do ich usunięcia, usunięcia konta albo przez czas potrzebny do obsługi relacji i ewentualnych roszczeń. Dane rozliczeniowe i faktury przechowujemy przez okres wymagany przez przepisy podatkowe i rachunkowe.",
             "Możemy zachować ograniczone dane dla celów bezpieczeństwa, przeciwdziałania nadużyciom, obsługi sporów, wykonania obowiązków prawnych i odtwarzania kopii zapasowych. Kopie w wyszukiwarkach mogą być widoczne jeszcze przez pewien czas po usunięciu treści z ArchiCompass.",
           ] },
           { title: "10. Prawa użytkownika", paragraphs: [
@@ -103,7 +117,7 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
         metadata: { title: "Regulamin", description: "Zasady korzystania z ArchiCompass przez klientów, projektantów, pracownie i odwiedzających." },
         eyebrow: "Informacje prawne",
         title: "Regulamin",
-        effectiveDate: "Obowiązuje od: 4 sierpnia 2026 r.",
+        effectiveDate: "Obowiązuje od: 16 sierpnia 2026 r.",
         intro: "Regulamin określa zasady korzystania z ArchiCompass przez klientów, niezależnych profesjonalistów, członków pracowni i odwiedzających.",
         sections: [
           { title: "1. Zakres platformy", paragraphs: ["ArchiCompass pomaga użytkownikom przygotować brief projektu wnętrza, przeglądać profile i portfolio oraz prowadzić uporządkowaną komunikację projektową. Nie jest stroną umowy o projekt, nadzór, wykonanie, zakup materiałów ani usługi zawartej bezpośrednio między klientem a profesjonalistą."] },
@@ -113,30 +127,32 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
           { title: "5. Komunikacja i prywatność", paragraphs: ["Zapytania i wiadomości służą uzasadnionej komunikacji projektowej. Nie wolno wykorzystywać danych kontaktowych uzyskanych przez platformę do spamu, nękania ani nieuprawnionego marketingu. Zasady przetwarzania danych i zdjęć opisuje Polityka prywatności."] },
           { title: "6. Oceny i informacje zewnętrzne", paragraphs: ["Publiczne oceny, liczby opinii, dane firmowe i linki zewnętrzne mogą pochodzić od użytkowników lub usług podmiotów trzecich, takich jak Google. Ich dostępność i dokładność mogą się zmieniać. Zabronione jest manipulowanie ocenami, publikowanie fałszywych informacji oraz podszywanie się pod inną osobę lub firmę."] },
           { title: "7. Dozwolone korzystanie", paragraphs: ["Nie wolno podejmować prób nieuprawnionego dostępu, przesyłać złośliwego oprogramowania lub treści niezgodnych z prawem, naruszać praw własności intelektualnej lub prywatności, automatycznie pobierać lub odsprzedawać danych platformy, omijać zabezpieczeń, wysyłać spamu ani korzystać z ArchiCompass niezgodnie z prawem."] },
-          { title: "8. Opłaty", paragraphs: ["Konta klientów pozostają bezpłatne. Pierwszym profesjonalistom oferujemy 3-miesięczny okres bezpłatnego dostępu do profilu, portfolio i zapytań. Po jego zakończeniu utrzymanie aktywnego profilu profesjonalisty wymaga wybrania płatnej subskrypcji przedstawionej przed zakupem. Aktywna płatna subskrypcja pracowni obejmuje bez dodatkowej opłaty osobiste profile jej aktywnych członków zespołu.", "Cena, okres rozliczeniowy, podatki oraz ewentualne warunki promocyjne są widoczne przed płatnością. W przypadku braku płatności możemy ograniczyć widoczność profilu, portfolio i możliwość otrzymywania nowych zapytań, zachowując dostęp do danych konta zgodnie z Regulaminem."] },
-          { title: "9. Dostępność, ograniczenie i usuwanie", paragraphs: ["Dążymy do zapewnienia dostępności i bezpieczeństwa ArchiCompass, ale nie gwarantujemy nieprzerwanego dostępu, działania bez błędów, trwałego przechowywania, konkretnego dopasowania, odpowiedzi profesjonalisty ani powodzenia projektu. Funkcje mogą być aktualizowane, zastępowane lub wycofywane z powodów operacyjnych, bezpieczeństwa, prawnych lub produktowych."] },
-          { title: "10. Odpowiedzialność, prawo i kontakt", paragraphs: ["W maksymalnym zakresie dozwolonym przez prawo ArchiCompass nie odpowiada za treści użytkowników, usługi profesjonalistów, działania podmiotów trzecich, strony zewnętrzne ani pośrednie szkody wynikające z projektów realizowanych między użytkownikami. Regulamin podlega prawu polskiemu, bez pozbawiania konsumentów bezwzględnie obowiązującej ochrony wynikającej z prawa ich miejsca zwykłego pobytu.", "Pytania dotyczące Regulaminu można wysyłać na contact@archicompass.pl, a zgłoszenia dotyczące bezpieczeństwa i nadużyć na admin@archicompass.pl."] },
+          { title: "8. Subskrypcje, płatności i faktury", paragraphs: ["Konta klientów pozostają bezpłatne, chyba że przed zakupem wyraźnie wskazano płatną usługę dodatkową. Pierwszym profesjonalistom oferujemy 3-miesięczny okres bezpłatnego dostępu do profilu, portfolio i zapytań. Po jego zakończeniu utrzymanie aktywnego profilu profesjonalisty wymaga wybrania płatnej subskrypcji przedstawionej przed zakupem. Aktywna płatna subskrypcja pracowni obejmuje bez dodatkowej opłaty osobiste profile jej aktywnych członków zespołu.", "Cena, okres rozliczeniowy, podatki, ewentualne automatyczne odnowienie oraz warunki promocyjne są widoczne przed płatnością. Jeżeli użytkownik kupuje jako przedsiębiorca i poda dane wymagane do rozliczenia, może otrzymać fakturę zgodnie z dostępnym procesem rozliczeniowym. W przypadku braku płatności możemy ograniczyć widoczność profilu, portfolio i możliwość otrzymywania nowych zapytań, zachowując dostęp do danych konta zgodnie z Regulaminem."] },
+          { title: "9. Konsumenci i usługi cyfrowe", paragraphs: ["Przed zakupem płatnej usługi przedstawimy informacje wymagane dla konsumenta, w tym cenę, okres rozliczeniowy i zasady świadczenia usługi. Jeżeli użytkownik zażąda rozpoczęcia usługi cyfrowej przed upływem ustawowego terminu na odstąpienie, może zostać poproszony o wyraźne żądanie i potwierdzenie wynikające z obowiązujących przepisów. Niniejszy Regulamin nie ogranicza bezwzględnie obowiązujących praw konsumenta."] },
+          { title: "10. Dostępność, ograniczenie i usuwanie", paragraphs: ["Dążymy do zapewnienia dostępności i bezpieczeństwa ArchiCompass, ale nie gwarantujemy nieprzerwanego dostępu, działania bez błędów, trwałego przechowywania, konkretnego dopasowania, odpowiedzi profesjonalisty ani powodzenia projektu. Funkcje mogą być aktualizowane, zastępowane lub wycofywane z powodów operacyjnych, bezpieczeństwa, prawnych lub produktowych."] },
+          { title: "11. Reklamacje, odpowiedzialność, prawo i kontakt", paragraphs: ["Reklamacje dotyczące działania platformy można przesłać na contact@archicompass.pl wraz z opisem sprawy i danymi pozwalającymi ją zidentyfikować. Odpowiemy bez zbędnej zwłoki, co do zasady w ciągu 14 dni. Zgłoszenia dotyczące bezpieczeństwa i nadużyć należy kierować na admin@archicompass.pl.", "W maksymalnym zakresie dozwolonym przez prawo ArchiCompass nie odpowiada za treści użytkowników, usługi profesjonalistów, działania podmiotów trzecich, strony zewnętrzne ani pośrednie szkody wynikające z projektów realizowanych między użytkownikami. Regulamin podlega prawu polskiemu, bez pozbawiania konsumentów bezwzględnie obowiązującej ochrony wynikającej z prawa ich miejsca zwykłego pobytu."] },
         ],
       },
       cookies: {
         metadata: { title: "Polityka cookies", description: "Jak ArchiCompass wykorzystuje niezbędne pliki cookies i pamięć przeglądarki." },
         eyebrow: "Informacje prawne",
         title: "Polityka cookies",
-        effectiveDate: "Obowiązuje od: 4 sierpnia 2026 r.",
+        effectiveDate: "Obowiązuje od: 16 sierpnia 2026 r.",
         intro: "Ta polityka wyjaśnia, jakich plików cookies i mechanizmów pamięci przeglądarki używa ArchiCompass.",
         sections: [
           { title: "Niezbędne uwierzytelnianie i bezpieczeństwo", paragraphs: ["ArchiCompass i Supabase używają plików cookies i podobnych mechanizmów, aby utrzymywać zalogowanie, chronić sesje, przeprowadzać uwierzytelnianie, zapobiegać nadużyciom i stosować uprawnienia konta. Technologie te są konieczne do działania funkcji konta."] },
           { title: "Preferencje i zapisywanie stanu pracy", paragraphs: ["Przeglądarka może zapisywać język, ustawienia interfejsu, stan AI Project Compass, podgląd przesyłanych plików i formularzy, aby nawigacja działała spójnie. Część danych tymczasowych jest usuwana po zamknięciu karty lub zakończeniu sesji."] },
-          { title: "Ograniczone statystyki", paragraphs: ["Losowy identyfikator karty przeglądarki może służyć do ograniczania podwójnego zliczania wyświetleń profili. Nie jest przeznaczony do identyfikowania odwiedzającego według imienia ani adresu e-mail. ArchiCompass obecnie nie używa reklamowych plików cookies podmiotów trzecich ani nie sprzedaje danych o przeglądaniu."] },
+          { title: "Ograniczone statystyki techniczne", paragraphs: ["Losowy identyfikator karty przeglądarki może służyć do ograniczania podwójnego zliczania wyświetleń profili. Nie jest przeznaczony do identyfikowania odwiedzającego według imienia ani adresu e-mail. Wykorzystujemy też ograniczone, zagregowane metryki Vercel Analytics i Speed Insights do monitorowania wydajności oraz niezawodności. Nie wykorzystujemy tych danych do reklamy behawioralnej ani nie sprzedajemy danych o przeglądaniu."], bullets: ["Nie używamy reklamowych, remarketingowych ani afiliacyjnych plików cookies.", "Nie uruchamiamy opcjonalnych narzędzi reklamowych przed uzyskaniem właściwej zgody, jeżeli kiedyś zostaną wdrożone."] },
+          { title: "Przyszłe opcjonalne cookies", paragraphs: ["Jeśli w przyszłości wprowadzimy nieobowiązkowe cookies analityczne lub marketingowe, zaktualizujemy tę politykę i udostępnimy odpowiedni mechanizm wyboru z możliwością zaakceptowania, odrzucenia lub ustawienia kategorii. Domyślne ustawienie takich kategorii będzie wyłączone, dopóki nie będzie wymaganej zgody."] },
           { title: "Zarządzanie pamięcią", paragraphs: ["Możesz usunąć lub zablokować pliki cookies i dane witryny w ustawieniach przeglądarki. Zablokowanie niezbędnej pamięci może spowodować wylogowanie lub uniemożliwić prawidłowe działanie konta, przesyłania plików, wiadomości, ulubionych i zabezpieczeń."] },
-          { title: "Aktualizacje i kontakt", paragraphs: ["Zaktualizujemy tę politykę, jeżeli wprowadzimy analityczne, reklamowe lub inne nieobowiązkowe zastosowania plików cookies. Pytania można wysyłać na contact@archicompass.pl."] },
+          { title: "Aktualizacje i kontakt", paragraphs: ["Zaktualizujemy tę politykę, jeżeli zmienią się stosowane technologie lub ich cele. Pytania można wysyłać na contact@archicompass.pl."] },
         ],
       },
       aiTransparency: {
         metadata: { title: "AI i przejrzystość", description: "Jak ArchiCompass oznacza i wyjaśnia wyniki wspierane przez sztuczną inteligencję." },
         eyebrow: "AI Project Compass",
         title: "AI i przejrzystość",
-        effectiveDate: "Aktualizacja: 4 sierpnia 2026 r.",
+        effectiveDate: "Aktualizacja: 16 sierpnia 2026 r.",
         intro: "Ta strona wyjaśnia, kiedy ArchiCompass korzysta z AI i jak rozpoznać wyniki wspierane przez AI. Nie jest poradą prawną ani klasyfikacją systemu w rozumieniu przepisów o sztucznej inteligencji.",
         sections: [
           { title: "Co robi AI", paragraphs: ["AI Project Compass może analizować przesłane zdjęcia inspiracji oraz przekazany kontekst, np. typ inwestycji, wybrany kierunek stylu i cechy wizualne. Pomaga zaproponować kierunek stylistyczny, paletę, materiały, wskazówki do briefu oraz sygnały pomocne przy szukaniu projektanta."] },
@@ -144,13 +160,14 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
           { title: "Czego AI nie robi", paragraphs: ["AI nie wybiera projektanta za użytkownika, nie ustala ceny, nie ocenia technicznej lub prawnej wykonalności projektu i nie podejmuje decyzji wywołujących skutki prawne lub podobnie istotne. Wyniki dopasowania łączą zadeklarowane dane oraz pomocnicze sygnały — nie zastępują rozmowy i oceny portfolio."] },
           { title: "Ograniczenia", paragraphs: ["Zdjęcia mogą nie pokazywać pełnego kontekstu przestrzeni, a wynik może być niepełny, niedokładny lub nie odpowiadać wszystkim preferencjom. Weryfikuj rekomendacje i omów zakres, budżet oraz wymagania z wybranym projektantem."] },
           { title: "Twoja kontrola", paragraphs: ["To użytkownik decyduje, czy uruchomić analizę, zapisać brief, wysłać zapytanie oraz którego profesjonalistę wybrać. Możesz korzystać z ArchiCompass bez uruchamiania analizy zdjęć."] },
+          { title: "Zgłoszenia i przegląd", paragraphs: ["Jeśli wynik wydaje się błędny, niejasny lub nieodpowiedni, nie korzystaj z niego jako z jedynej podstawy decyzji i zgłoś sprawę na contact@archicompass.pl. Przeglądamy zgłoszenia oraz zmiany funkcji, modelu lub dostawcy, aby aktualizować informacje i zabezpieczenia."] },
         ],
       },
       responsibleAi: {
         metadata: { title: "Odpowiedzialne AI", description: "Zasady odpowiedzialnego korzystania ze sztucznej inteligencji w ArchiCompass." },
         eyebrow: "AI Project Compass",
         title: "Odpowiedzialne AI",
-        effectiveDate: "Aktualizacja: 4 sierpnia 2026 r.",
+        effectiveDate: "Aktualizacja: 16 sierpnia 2026 r.",
         intro: "W ArchiCompass traktujemy AI jako narzędzie wspierające przygotowanie projektu, a nie zastępstwo dla decyzji użytkownika lub wiedzy projektanta.",
         sections: [
           { title: "Cel i proporcjonalność", paragraphs: ["Korzystamy z AI, aby łatwiej przejść od rozproszonych inspiracji do uporządkowanego briefu. Zakres analizy ograniczamy do informacji potrzebnych do tej funkcji."] },
@@ -164,7 +181,7 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
         metadata: { title: "Prywatność i AI", description: "Jak ArchiCompass przetwarza zdjęcia i kontekst projektu podczas analizy AI." },
         eyebrow: "AI Project Compass",
         title: "Prywatność i AI",
-        effectiveDate: "Aktualizacja: 4 sierpnia 2026 r.",
+        effectiveDate: "Aktualizacja: 16 sierpnia 2026 r.",
         intro: "Poniżej opisujemy, co dzieje się z materiałami wysłanymi do analizy AI w AI Project Compass.",
         sections: [
           { title: "Kiedy dane są wysyłane", paragraphs: ["Zdjęcia referencyjne nie są wysyłane do analizy automatycznie. Zostają przekazane dopiero po kliknięciu przycisku uruchamiającego analizę. W pojedynczym żądaniu analizujemy maksymalnie sześć zdjęć."] },
@@ -178,7 +195,7 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
         metadata: { title: "Zastrzeżenie dotyczące AI", description: "Ważne ograniczenia rekomendacji generowanych przez AI Project Compass." },
         eyebrow: "AI Project Compass",
         title: "Zastrzeżenie dotyczące AI",
-        effectiveDate: "Aktualizacja: 4 sierpnia 2026 r.",
+        effectiveDate: "Aktualizacja: 16 sierpnia 2026 r.",
         intro: "Wyniki AI Project Compass są pomocą w porządkowaniu inspiracji i przygotowaniu rozmowy z projektantem. Nie stanowią porady zawodowej ani gwarancji rezultatu.",
         sections: [
           { title: "Charakter pomocniczy", paragraphs: ["Sugestie stylu, materiałów, palety, zakresu i dopasowania projektantów mają charakter informacyjny. Mogą być niepełne, niedokładne lub nieodpowiednie dla konkretnej nieruchomości."] },
@@ -203,12 +220,19 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
     relatedTitle: "Related information",
     contactLabel: "Contact ArchiCompass",
     companyLine,
+    cookieNotice: {
+      ariaLabel: "Cookie information",
+      title: "Privacy and cookies",
+      body: "ArchiCompass uses essential cookies and browser storage for sign-in, security and the correct operation of the platform. We do not use advertising cookies.",
+      dismiss: "I understand",
+      learnMore: "Cookie Policy",
+    },
     documents: {
       privacy: {
         metadata: { title: "Privacy Policy", description: "How ArchiCompass processes account, profile, project, message, image and AI feature data." },
         eyebrow: "Legal information",
         title: "Privacy Policy",
-        effectiveDate: "Effective from: 4 August 2026",
+        effectiveDate: "Effective from: 16 August 2026",
         intro: "This policy explains how ArchiCompass processes personal data in client accounts, professional profiles, AI Project Compass, enquiries, messages and other platform services.",
         sections: [
           { title: "1. Data controller and contact", paragraphs: ["ArchiCompass is an online platform operated by SM Advisory, Sergii Moroz, ul. Grzybowska 2, lok. 31, 00-131 Warszawa, NIP 5252995634, REGON 528006413 (" + '"ArchiCompass", "we"' + "). SM Advisory is the controller of personal data processed to operate the platform unless a different controller is identified for a specific service.", "Send privacy requests and rights requests to contact@archicompass.pl. Send security reports to admin@archicompass.pl."] },
@@ -217,9 +241,9 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
           { title: "4. Public profiles and private areas", paragraphs: ["Designer profile data, studio information, portfolio projects, public ratings and public project links are intended for publication online and may be indexed by search engines.", "Saved briefs, private reference images, saved items, account data and conversations remain private until you decide to send or share them. A designer who receives a brief can view its contents, message, shared contact data and time-limited links to reference images."] },
           { title: "5. Images and AI features", paragraphs: ["Reference-image previews remain in your browser until you save a brief or run an analysis. When you choose AI analysis, the selected images and related project context, such as project type, style direction and visual cues, are sent to the configured AI provider to prepare style guidance.", "An analysis includes no more than six images in one request. Saved reference images are held privately in Supabase Storage. You and designers who receive the related brief can open them through time-limited signed links. Portfolio images uploaded by professionals are public.", "AI output may be incomplete or inaccurate. It is supportive only and does not replace professional design, construction, technical, legal or financial advice."] },
           { title: "6. Service providers and transfers", paragraphs: ["We use Supabase for authentication, database and file storage; Vercel for hosting and delivery; home.pl for domain email; and configured AI providers such as Google Gemini or OpenAI for optional image analysis. Google services may be used to display or synchronise public business ratings.", "Providers process data under their own contractual terms and safeguards. Where data is transferred outside the European Economic Area, we use an adequacy decision, standard contractual clauses or another lawful transfer mechanism as appropriate."] },
-          { title: "7. Analytics and communications", paragraphs: ["ArchiCompass records limited profile-view statistics using a random browser-tab identifier to reduce duplicate counts. A view record does not contain the visitor's name or email address.", "We send service messages about account activity, new briefs, messages, unread-message reminders, security and material service changes. These messages are necessary to operate the platform and are not marketing communications."] },
+          { title: "7. Analytics and communications", paragraphs: ["ArchiCompass records limited profile-view statistics using a random browser-tab identifier to reduce duplicate counts. A view record does not contain the visitor's name or email address. We also use limited aggregated technical metrics from Vercel Analytics and Speed Insights to assess service performance, reliability and security; they are not used to build advertising profiles.", "We send service messages about account activity, new briefs, messages, unread-message reminders, security and material service changes. These messages are necessary to operate the platform and are not marketing communications."] },
           { title: "8. Cookies and browser storage", paragraphs: ["The platform uses cookies and browser storage needed for sign-in, security, language and interface preferences and saving form state. We currently do not use advertising cookies. The Cookie Policy provides more detail."] },
-          { title: "9. Retention and deletion", paragraphs: ["We retain account, profile, project, brief, saved-item and enquiry data for as long as the account is active or the data is needed for the selected feature. You can delete your account and supported content using available controls or by contacting us.", "We may retain limited data for security, abuse prevention, dispute handling, legal obligations and backups. Search-engine copies can remain visible for a period after content has been removed from ArchiCompass."] },
+          { title: "9. Retention and deletion", paragraphs: ["We retain account data until the account is deleted. Profile and portfolio data are retained until you delete them or close the account; briefs, reference images, saved items, enquiries and conversations are retained until deletion, account deletion, or for the period needed to manage the relationship and potential claims. Billing data and invoices are retained for the period required by tax and accounting law.", "We may retain limited data for security, abuse prevention, dispute handling, legal obligations and backups. Search-engine copies can remain visible for a period after content has been removed from ArchiCompass."] },
           { title: "10. Your rights", paragraphs: ["Subject to applicable law, you may request access, correction, deletion, restriction, portability or information about your data; object to processing based on legitimate interests; and withdraw consent where consent is the basis.", "You may lodge a complaint with the Polish Data Protection Authority (UODO) or another competent supervisory authority. ArchiCompass does not make decisions producing legal or similarly significant effects solely by automated means."] },
           { title: "11. Minors and policy changes", paragraphs: ["ArchiCompass accounts are intended for people aged 18 or older. We may update this policy as the service, providers or legal requirements change. The current version and effective date will remain available on this page."] },
         ],
@@ -228,7 +252,7 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
         metadata: { title: "Terms of Service", description: "Rules for using ArchiCompass as a client, designer, studio member or visitor." },
         eyebrow: "Legal information",
         title: "Terms of Service",
-        effectiveDate: "Effective from: 4 August 2026",
+        effectiveDate: "Effective from: 16 August 2026",
         intro: "These Terms set out the rules for using ArchiCompass as a client, independent professional, studio member or visitor.",
         sections: [
           { title: "1. Platform scope", paragraphs: ["ArchiCompass helps users prepare an interior-project brief, explore profiles and portfolios, and hold structured project conversations. It is not a party to a design, supervision, construction, material-purchase or other service agreement made directly between a client and a professional."] },
@@ -238,30 +262,32 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
           { title: "5. Communication and privacy", paragraphs: ["Enquiries and messages are for legitimate project communication. You must not use contact data obtained through the platform for spam, harassment or unauthorised marketing. The Privacy Policy explains how we handle data and images."] },
           { title: "6. Ratings and external information", paragraphs: ["Public ratings, review counts, business information and external links may come from users or third-party services such as Google. Their availability and accuracy can change. Manipulating ratings, publishing false information or impersonating another person or business is prohibited."] },
           { title: "7. Acceptable use", paragraphs: ["You must not attempt unauthorised access, upload malware or unlawful content, infringe intellectual-property or privacy rights, scrape or resell platform data, bypass safeguards, send spam or use ArchiCompass unlawfully."] },
-          { title: "8. Fees", paragraphs: ["Client accounts remain free. Early professionals receive a three-month free period for their profile, portfolio and enquiries. After that, keeping an active professional profile requires selecting a paid subscription shown before purchase. An active paid studio subscription covers the personal profiles of its active team members at no extra charge.", "Price, billing period, taxes and any promotional terms are shown before payment. Where payment is not received, we may limit profile visibility, portfolio visibility and new-enquiry access while preserving account-data access in line with these Terms."] },
-          { title: "9. Availability, restriction and deletion", paragraphs: ["We aim to keep ArchiCompass available and secure, but do not guarantee uninterrupted access, error-free operation, permanent storage, a particular match, a professional response or project success. Features may be updated, replaced or withdrawn for operational, security, legal or product reasons."] },
-          { title: "10. Liability, law and contact", paragraphs: ["To the maximum extent allowed by law, ArchiCompass is not liable for user content, professional services, third-party actions, external websites or indirect loss arising from projects carried out between users. These Terms are governed by Polish law without removing mandatory consumer protection available under the law of your habitual residence.", "For questions about these Terms, write to contact@archicompass.pl. For security and abuse reports, write to admin@archicompass.pl."] },
+          { title: "8. Subscriptions, payments and invoices", paragraphs: ["Client accounts remain free unless a paid additional service is expressly shown before purchase. Early professionals receive a three-month free period for their profile, portfolio and enquiries. After that, keeping an active professional profile requires selecting a paid subscription shown before purchase. An active paid studio subscription covers the personal profiles of its active team members at no extra charge.", "Price, billing period, taxes, any automatic renewal and promotional terms are shown before payment. A business customer that supplies the billing information required by the available billing process may receive an invoice. Where payment is not received, we may limit profile visibility, portfolio visibility and new-enquiry access while preserving account-data access in line with these Terms."] },
+          { title: "9. Consumers and digital services", paragraphs: ["Before a paid service is purchased, we provide the consumer information required by law, including price, billing period and how the service is supplied. If you ask for a digital service to begin before the statutory withdrawal period has ended, we may ask for the explicit request and acknowledgement required by applicable law. These Terms do not limit mandatory consumer rights."] },
+          { title: "10. Availability, restriction and deletion", paragraphs: ["We aim to keep ArchiCompass available and secure, but do not guarantee uninterrupted access, error-free operation, permanent storage, a particular match, a professional response or project success. Features may be updated, replaced or withdrawn for operational, security, legal or product reasons."] },
+          { title: "11. Complaints, liability, law and contact", paragraphs: ["You can submit a complaint about the platform to contact@archicompass.pl with a description of the matter and details that allow us to identify it. We will respond without undue delay and normally within 14 days. For security and abuse reports, write to admin@archicompass.pl.", "To the maximum extent allowed by law, ArchiCompass is not liable for user content, professional services, third-party actions, external websites or indirect loss arising from projects carried out between users. These Terms are governed by Polish law without removing mandatory consumer protection available under the law of your habitual residence."] },
         ],
       },
       cookies: {
         metadata: { title: "Cookie Policy", description: "How ArchiCompass uses essential cookies and browser storage." },
         eyebrow: "Legal information",
         title: "Cookie Policy",
-        effectiveDate: "Effective from: 4 August 2026",
+        effectiveDate: "Effective from: 16 August 2026",
         intro: "This policy explains the cookies and browser-storage mechanisms used by ArchiCompass.",
         sections: [
           { title: "Essential authentication and security", paragraphs: ["ArchiCompass and Supabase use cookies and similar mechanisms to keep you signed in, protect sessions, perform authentication, prevent abuse and apply account permissions. These technologies are necessary for account features to work."] },
           { title: "Preferences and work state", paragraphs: ["Your browser may store language and interface preferences, AI Project Compass state, file previews and form state to keep navigation consistent. Some temporary data is removed when you close a tab or end a session."] },
-          { title: "Limited statistics", paragraphs: ["A random browser-tab identifier may be used to reduce duplicate profile-view counts. It is not intended to identify a visitor by name or email address. ArchiCompass currently does not use third-party advertising cookies or sell browsing data."] },
+          { title: "Limited technical measurement", paragraphs: ["A random browser-tab identifier may be used to reduce duplicate profile-view counts. It is not intended to identify a visitor by name or email address. We also use limited aggregated Vercel Analytics and Speed Insights metrics to monitor performance and reliability. We do not use these metrics for behavioural advertising or sell browsing data."], bullets: ["We do not use advertising, remarketing or affiliate cookies.", "We will not run optional advertising tools before obtaining the consent required for them, if they are introduced in the future."] },
+          { title: "Future optional cookies", paragraphs: ["If we introduce non-essential analytics or marketing cookies in the future, we will update this policy and provide an appropriate choice mechanism to accept, reject or configure categories. Such categories will be off by default until the necessary consent has been obtained."] },
           { title: "Managing storage", paragraphs: ["You can delete or block cookies and site data in your browser settings. Blocking essential storage can sign you out or prevent account features, file uploads, messages, saved items and safeguards from working correctly."] },
-          { title: "Updates and contact", paragraphs: ["We will update this policy if we introduce analytics, advertising or other non-essential cookie uses. Questions can be sent to contact@archicompass.pl."] },
+          { title: "Updates and contact", paragraphs: ["We will update this policy if the technologies we use or their purposes change. Questions can be sent to contact@archicompass.pl."] },
         ],
       },
       aiTransparency: {
         metadata: { title: "AI and transparency", description: "How ArchiCompass identifies and explains results supported by artificial intelligence." },
         eyebrow: "AI Project Compass",
         title: "AI and transparency",
-        effectiveDate: "Updated: 4 August 2026",
+        effectiveDate: "Updated: 16 August 2026",
         intro: "This page explains when ArchiCompass uses AI and how you can recognise AI-supported results. It is not legal advice or a legal classification of the system under AI regulation.",
         sections: [
           { title: "What AI does", paragraphs: ["AI Project Compass can analyse the inspiration images and context you submit, such as project type, selected style direction and visual cues. It can suggest a style direction, palette, materials, brief prompts and signals that may help when looking for a designer."] },
@@ -269,13 +295,14 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
           { title: "What AI does not do", paragraphs: ["AI does not choose a designer for you, set a price, assess technical or legal feasibility, or make decisions producing legal or similarly significant effects. Match results combine declared information and supportive signals; they do not replace a conversation or portfolio review."] },
           { title: "Limitations", paragraphs: ["Images may not show the full context of a space, and an output can be incomplete, inaccurate or unsuitable for all preferences. Verify recommendations and discuss scope, budget and requirements with your selected designer."] },
           { title: "Your control", paragraphs: ["You decide whether to run an analysis, save a brief, send an enquiry and choose a professional. You can use ArchiCompass without running image analysis."] },
+          { title: "Reports and review", paragraphs: ["If a result seems inaccurate, unclear or inappropriate, do not use it as the sole basis for a decision and report it to contact@archicompass.pl. We review reports and changes to the feature, model or provider to keep our information and safeguards current."] },
         ],
       },
       responsibleAi: {
         metadata: { title: "Responsible AI", description: "Principles for the responsible use of artificial intelligence in ArchiCompass." },
         eyebrow: "AI Project Compass",
         title: "Responsible AI",
-        effectiveDate: "Updated: 4 August 2026",
+        effectiveDate: "Updated: 16 August 2026",
         intro: "At ArchiCompass, we treat AI as a tool that supports project preparation, not a substitute for user decisions or design expertise.",
         sections: [
           { title: "Purpose and proportionality", paragraphs: ["We use AI to make it easier to move from scattered inspiration to a structured brief. We limit analysis to information needed for that feature."] },
@@ -289,7 +316,7 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
         metadata: { title: "Privacy and AI", description: "How ArchiCompass processes images and project context during AI analysis." },
         eyebrow: "AI Project Compass",
         title: "Privacy and AI",
-        effectiveDate: "Updated: 4 August 2026",
+        effectiveDate: "Updated: 16 August 2026",
         intro: "This page explains what happens to the material you send for AI analysis in AI Project Compass.",
         sections: [
           { title: "When data is sent", paragraphs: ["Reference images are not sent for analysis automatically. They are transferred only after you click the button that starts analysis. One request analyses no more than six images."] },
@@ -303,7 +330,7 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
         metadata: { title: "AI disclaimer", description: "Important limitations of recommendations generated by AI Project Compass." },
         eyebrow: "AI Project Compass",
         title: "AI disclaimer",
-        effectiveDate: "Updated: 4 August 2026",
+        effectiveDate: "Updated: 16 August 2026",
         intro: "AI Project Compass results help organise inspiration and prepare a conversation with a designer. They are not professional advice or a guarantee of an outcome.",
         sections: [
           { title: "Supportive nature", paragraphs: ["Style, material, palette, scope and designer-matching suggestions are for information only. They can be incomplete, inaccurate or unsuitable for a particular property."] },
@@ -320,4 +347,3 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
 export function getLegalCopy(locale: SiteLocale = siteLocale) {
   return legalCopy[locale];
 }
-

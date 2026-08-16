@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import CookieNotice from "@/components/CookieNotice";
 import JsonLd from "@/components/JsonLd";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -137,6 +138,7 @@ export default function RootLayout({
           {children}
           <Footer />
         </div>
+        <CookieNotice />
         <Analytics />
         <SpeedInsights />
       </body>
