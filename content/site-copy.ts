@@ -54,6 +54,8 @@ type HomeCopy = {
         moodValue: string;
         summaryLabel: string;
         summaryValue: string;
+        briefScopeLabel: string;
+        briefScopeValue: string;
       };
       footer: string;
       emphasis: string;
@@ -619,6 +621,8 @@ const pl: SiteCopy = {
           moodValue: "Spokojny, naturalny, ciepły",
           summaryLabel: "Opis kierunku",
           summaryValue: "Ciepły minimalizm, naturalne materiały i spokojna, domowa atmosfera.",
+          briefScopeLabel: "Co warto doprecyzować",
+          briefScopeValue: "Metraż, budżet, termin i oczekiwany zakres współpracy.",
         },
         footer: "Uzupełnij metraż, budżet, termin i oczekiwany zakres współpracy.",
         emphasis: "W efekcie powstaje brief, który projektant może naprawdę wykorzystać.",
@@ -1000,6 +1004,8 @@ const en: SiteCopy = {
           moodValue: "Calm, natural, warm",
           summaryLabel: "Style summary",
           summaryValue: "Warm minimalism, natural materials, and a calm, lived-in atmosphere.",
+          briefScopeLabel: "What to refine next",
+          briefScopeValue: "Area, budget, timeline, and the scope of collaboration you expect.",
         },
         footer: "Add area, budget, timing, and the scope of collaboration you expect.",
         emphasis: "The result is a brief a designer can actually work from.",
