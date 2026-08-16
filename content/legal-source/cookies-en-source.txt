@@ -143,11 +143,7 @@ The lack of consent for optional cookies should not prevent the use of the basic
 
 7. Consent management
 
-If ArchiCompass uses optional cookies, the User can manage consents using the option:
-
-"Cookie settings"
-
-available on the Service.
+If ArchiCompass begins to use optional cookies, a "Cookie settings" mechanism will be made available in the Service with their implementation, allowing the User to manage consents.
 
 The User can in particular:
 

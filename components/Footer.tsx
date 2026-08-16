@@ -69,15 +69,6 @@ export default function Footer() {
             <Link href={appHref("/ai-transparency")} className="hover:text-white">
               {legalCopy.links.aiTransparency}
             </Link>
-            <Link href={appHref("/responsible-ai")} className="hover:text-white">
-              {legalCopy.links.responsibleAi}
-            </Link>
-            <Link href={appHref("/privacy-and-ai")} className="hover:text-white">
-              {legalCopy.links.privacyAndAi}
-            </Link>
-            <Link href={appHref("/ai-disclaimer")} className="hover:text-white">
-              {legalCopy.links.aiDisclaimer}
-            </Link>
             <a href="mailto:contact@archicompass.pl" className="hover:text-white">
               {copy.contact}
             </a>

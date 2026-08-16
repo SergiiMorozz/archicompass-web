@@ -29,9 +29,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ["/terms", "yearly", 0.2],
     ["/cookies", "yearly", 0.2],
     ["/ai-transparency", "monthly", 0.4],
-    ["/responsible-ai", "monthly", 0.4],
-    ["/privacy-and-ai", "monthly", 0.4],
-    ["/ai-disclaimer", "monthly", 0.4],
   ].map(([path, changeFrequency, priority]) => ({
     url: absoluteUrl(path as string),
     lastModified: now,

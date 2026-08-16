@@ -15,8 +15,8 @@ export const metadata: Metadata = pageMetadata({
 
 export default function AiTransparencyPage() {
   return <LegalDocumentPage document={copy.documents.aiTransparency} fullText={getFullLegalText("aiTransparency", siteLocale)} relatedTitle={copy.relatedTitle} relatedLinks={[
-    { href: "/responsible-ai", label: copy.links.responsibleAi },
-    { href: "/privacy-and-ai", label: copy.links.privacyAndAi },
-    { href: "/ai-disclaimer", label: copy.links.aiDisclaimer },
+    { href: "/terms", label: copy.links.terms },
+    { href: "/privacy", label: copy.links.privacy },
+    { href: "/cookies", label: copy.links.cookies },
   ]} contactLabel={copy.contactLabel} companyLine={copy.companyLine} />;
 }

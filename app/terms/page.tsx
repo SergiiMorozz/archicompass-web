@@ -16,7 +16,7 @@ export const metadata: Metadata = pageMetadata({
 export default function TermsPage() {
   return <LegalDocumentPage document={copy.documents.terms} fullText={getFullLegalText("terms", siteLocale)} relatedTitle={copy.relatedTitle} relatedLinks={[
     { href: "/privacy", label: copy.links.privacy },
-    { href: "/ai-disclaimer", label: copy.links.aiDisclaimer },
+    { href: "/ai-transparency", label: copy.links.aiTransparency },
     { href: "/cookies", label: copy.links.cookies },
   ]} contactLabel={copy.contactLabel} companyLine={copy.companyLine} />;
 }

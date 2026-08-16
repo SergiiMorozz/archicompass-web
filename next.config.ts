@@ -35,8 +35,27 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
+    const legacyAiDocumentRedirects = [
+      {
+        source: "/responsible-ai",
+        destination: "/ai-transparency",
+        permanent: true,
+      },
+      {
+        source: "/privacy-and-ai",
+        destination: "/ai-transparency",
+        permanent: true,
+      },
+      {
+        source: "/ai-disclaimer",
+        destination: "/ai-transparency",
+        permanent: true,
+      },
+    ];
+
     if (!isEnglishZone) {
       return [
+        ...legacyAiDocumentRedirects,
         {
           source: "/en/en",
           destination: "/en",
@@ -51,6 +70,7 @@ const nextConfig: NextConfig = {
     }
 
     return [
+      ...legacyAiDocumentRedirects,
       {
         source: "/",
         destination: "/en",

@@ -136,7 +136,7 @@ d) wykorzystanie publikowanych materiałów nie narusza praw osób trzecich.
 
 2. Projektant odpowiada za informacje dotyczące między innymi zakresu usług, doświadczenia, lokalizacji, dostępności, cen, terminów i Portfolio.
 3. Operator może żądać uzupełnienia lub weryfikacji informacji dotyczących Projektanta lub Pracowni, jeżeli jest to uzasadnione bezpieczeństwem Użytkowników, wiarygodnością Serwisu albo obowiązkiem prawnym.
-4. Operator nie gwarantuje Projektantowi określonej liczby wyświetleń Profilu, Dopasowań, Zapytania, Klientów ani zawartych Umów Projektowych.
+4. Operator nie gwarantuje Projektantowi określonej liczby wyświetleń Profilu, Dopasowań, Zapytań, Klientów ani zawartych Umów Projektowych.
 
 ⸻
 
@@ -409,7 +409,7 @@ d) dane kontaktowe zgłaszającego, jeżeli są wymagane przez prawo lub koniecz
 
 1. Konto Klienta jest bezpłatne, chyba że Użytkownik wyraźnie wybierze dodatkową odpłatną usługę.
 2. Operator może oferować Projektantom lub Pracowniom bezpłatny okres dostępu do funkcjonalności, zgodnie z warunkami przedstawionymi przy aktywacji.
-3. Na dzień wejścia w życie niniejszego Regulaminu Operator może oferować pierwszym Projektantom 3-miesięczny okres bezpłatnego dostępu do funkcjonalności obejmujących Profil, Portfolio i możliwość otrzymywania Zapytania, zgodnie z informacjami prezentowanymi w Serwisie.
+3. Na dzień wejścia w życie niniejszego Regulaminu Operator może oferować pierwszym Projektantom 3-miesięczny okres bezpłatnego dostępu do funkcjonalności obejmujących Profil, Portfolio i możliwość otrzymywania Zapytań, zgodnie z informacjami prezentowanymi w Serwisie.
 4. Po zakończeniu okresu bezpłatnego dalsze korzystanie z funkcjonalności wymagających Subskrypcji może wymagać wybrania płatnego planu.
 5. Przed dokonaniem zakupu Użytkownik otrzymuje informację co najmniej o:
 
@@ -428,7 +428,7 @@ f) zasadach jej zakończenia.
 6. Płatność następuje przy wykorzystaniu metod płatności dostępnych w Serwisie.
 7. Jeżeli Subskrypcja odnawia się automatycznie, informacja o tym zostanie przedstawiona przed dokonaniem zakupu.
 8. Użytkownik może zrezygnować z dalszego odnawiania Subskrypcji zgodnie z mechanizmem udostępnionym w Koncie. Rezygnacja nie powoduje utraty opłaconego dostępu przed końcem bieżącego okresu rozliczeniowego, chyba że obowiązujące przepisy wymagają innego rozwiązania.
-9. Brak skutecznej płatności może skutkować ograniczeniem funkcjonalności płatnych, w szczególności widoczności Profilu, Portfolio lub możliwości otrzymywania nowych Zapytania.
+9. Brak skutecznej płatności może skutkować ograniczeniem funkcjonalności płatnych, w szczególności widoczności Profilu, Portfolio lub możliwości otrzymywania nowych Zapytań.
 10. Szczegółowe ceny i zakres poszczególnych planów określa aktualna oferta prezentowana w Serwisie.
 
 ⸻
@@ -611,7 +611,7 @@ REGON: 528006413
 
 § 28. Postanowienia końcowe
 
-1. Regulamin obowiązuje od dnia 16 sierpnia 2026 r..
+1. Regulamin obowiązuje od dnia 16 sierpnia 2026 r.
 2. Aktualna wersja Regulaminu jest dostępna w Serwisie.
 3. W sprawach nieuregulowanych Regulaminem zastosowanie mają właściwe przepisy prawa polskiego oraz bezpośrednio stosowane przepisy prawa Unii Europejskiej.
 4. Jeżeli którekolwiek postanowienie Regulaminu okaże się nieważne lub nieskuteczne, nie wpływa to na ważność pozostałych postanowień, o ile obowiązujące przepisy nie stanowią inaczej.
