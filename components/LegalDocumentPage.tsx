@@ -30,6 +30,11 @@ export default function LegalDocumentPage({
             <h2 className="text-2xl font-bold">{section.title}</h2>
             <div className="mt-3 grid gap-3 text-base leading-8 text-muted">
               {section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+              {section.bullets?.length ? (
+                <ul className="ml-5 grid list-disc gap-2">
+                  {section.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}
+                </ul>
+              ) : null}
             </div>
           </section>
         ))}
