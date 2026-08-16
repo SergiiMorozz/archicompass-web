@@ -24,6 +24,7 @@ const inspirationImages = [
   "/images/guides/popular-interior-styles-moodboard.webp",
   "/images/guides/small-apartment-design-ideas.webp",
   "/images/guides/interior-design-brief-inspiration.webp",
+  "/images/guides/interior-project-planning.webp",
 ].map(localeAssetPath);
 const projectFallbacks = [
   "/images/guides/popular-interior-styles.webp",
@@ -220,7 +221,7 @@ function CompactResult() {
 
       <div className="mt-5 grid gap-4 sm:grid-cols-[0.88fr_1.12fr]">
         <div className="grid grid-cols-2 gap-2 rounded-2xl bg-primary-soft/55 p-2">
-          {inspirationImages.slice(0, 4).map((src, index) => (
+          {inspirationImages.slice(0, 5).map((src, index) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img key={src} src={src} alt="" className={`w-full rounded-xl object-cover ${index === 0 ? "col-span-2 aspect-[2/1]" : "aspect-[1.12/1]"}`} />
           ))}
@@ -235,6 +236,10 @@ function CompactResult() {
             <div className="rounded-xl border border-line bg-background p-3.5"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{visual.materialsLabel}</p><p className="mt-2 text-sm font-bold leading-5">{visual.materialsValue}</p></div>
             <div className="rounded-xl border border-line bg-background p-3.5"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{preview.moodLabel}</p><p className="mt-2 text-sm font-bold leading-5">{preview.moodValue}</p></div>
             <div className="rounded-xl border border-line bg-background p-3.5"><p className="text-[10px] font-bold uppercase tracking-wide text-muted">{visual.briefLabel}</p><p className="mt-2 text-sm font-bold leading-5">{visual.briefValue}</p></div>
+          </div>
+          <div className="rounded-xl border border-line bg-background p-3.5">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-muted">{preview.briefScopeLabel}</p>
+            <p className="mt-1.5 text-sm font-semibold leading-6">{preview.briefScopeValue}</p>
           </div>
         </div>
       </div>
@@ -316,15 +321,11 @@ export default async function Home() {
             <h3 className="mt-6 text-2xl font-bold leading-tight">{stepOne.title}</h3>
             <p className="mt-3 text-sm leading-6 text-muted">{stepOne.body}</p>
             <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl bg-primary-soft/70 p-2">
-              {[...inspirationImages, heroImage].map((src, index) => (
+              {inspirationImages.map((src, index) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img key={`${src}-${index}`} src={src} alt="" className={`w-full rounded-xl object-cover ${index === 0 ? "col-span-2 aspect-[2.1/1]" : "aspect-[1.32/1]"}`} />
               ))}
             </div>
-            <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-primary">
-              {["4+", stepOne.title, homeCopy.hero.visual.materialsLabel].map((item) => <span key={item} className="rounded-full bg-primary-soft px-3 py-1.5">{item}</span>)}
-            </div>
-            <p className="mt-4 rounded-xl bg-primary-soft px-3 py-3 text-sm font-semibold text-primary">{stepOne.note}</p>
           </article>
 
           <article className="relative flex flex-col overflow-hidden rounded-2xl border border-primary/20 bg-primary-soft/45 p-6 shadow-[0_16px_42px_rgba(54,31,73,0.07)] sm:p-7">
@@ -352,7 +353,7 @@ export default async function Home() {
             <StepTop number={stepThree.number} icon="♧" />
             <h3 className="mt-6 text-2xl font-bold leading-tight">{stepThree.title}</h3>
             <p className="mt-3 text-sm leading-6 text-muted">{stepThree.body}</p>
-            <div className="mt-5">
+            <div className="mt-auto pt-6">
               <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.13em] text-muted">{homeCopy.hero.visual.tag}</p>
               <div className="grid gap-3">
                 {matchedProfessionals.map((designer) => (
@@ -375,9 +376,6 @@ export default async function Home() {
                 ))}
               </div>
             </div>
-            <div className="mt-4 rounded-xl bg-accent-soft px-3 py-3 text-sm font-semibold text-accent">
-              {homeCopy.whyExists.matchSentence}
-            </div>
           </article>
         </div>
         <div className="mt-8 text-center"><Link href="/project-compass" className="group inline-flex min-h-[54px] items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-white shadow-[0_14px_32px_rgba(86,35,168,0.2)] transition hover:-translate-y-0.5 hover:bg-primary/90">{homeCopy.howItWorks.cta}<Arrow /></Link></div>
@@ -399,15 +397,15 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
-        <div className="grid gap-6 lg:grid-cols-2">
-          <article className="grid overflow-hidden rounded-[2rem] border border-primary/15 bg-primary-soft/55 shadow-[0_16px_44px_rgba(54,31,73,0.07)] md:grid-cols-[1.12fr_0.88fr]">
-            <div className="flex min-h-[510px] flex-col p-7 sm:p-9">
+      <section className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:py-8">
+        <div className="grid gap-5 lg:grid-cols-2">
+          <article className="grid overflow-hidden rounded-[2rem] border border-primary/15 bg-primary-soft/55 shadow-[0_16px_44px_rgba(54,31,73,0.07)] md:grid-cols-[1.1fr_0.9fr]">
+            <div className="flex min-h-[470px] flex-col p-6 sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.14em] text-primary">— {homeCopy.forClients.eyebrow}</p>
-              <h2 className="mt-5 text-3xl font-bold leading-tight sm:text-4xl">{homeCopy.forClients.headline}</h2>
-              <p className="mt-5 text-base leading-7 text-muted">{homeCopy.forClients.body}</p>
-              <div className="mt-7"><Checklist items={homeCopy.forClients.checklist.slice(0, 4)} /></div>
-              <div className="mt-auto pt-7"><Link href="/project-compass" className="group inline-flex min-h-[54px] items-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(86,35,168,0.22)] transition hover:-translate-y-0.5 hover:bg-primary/90">{homeCopy.forClients.primaryCta}<Arrow /></Link></div>
+              <h2 className="mt-4 text-3xl font-bold leading-tight sm:text-[2.1rem]">{homeCopy.forClients.headline}</h2>
+              <p className="mt-4 text-[0.95rem] leading-7 text-muted">{homeCopy.forClients.body}</p>
+              <div className="mt-6"><Checklist items={homeCopy.forClients.checklist.slice(0, 4)} /></div>
+              <div className="mt-auto pt-6"><Link href="/project-compass" className="group inline-flex min-h-[52px] items-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(86,35,168,0.22)] transition hover:-translate-y-0.5 hover:bg-primary/90">{homeCopy.forClients.primaryCta}<Arrow /></Link></div>
             </div>
             <div className="min-h-[250px] bg-primary-soft p-5 md:min-h-0 md:p-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -415,14 +413,14 @@ export default async function Home() {
             </div>
           </article>
 
-          <article className="grid overflow-hidden rounded-[2rem] border border-accent/20 bg-accent-soft/55 shadow-[0_16px_44px_rgba(54,31,73,0.07)] md:grid-cols-[1.12fr_0.88fr]">
-            <div className="flex min-h-[510px] flex-col p-7 sm:p-9">
+          <article className="grid overflow-hidden rounded-[2rem] border border-accent/20 bg-accent-soft/55 shadow-[0_16px_44px_rgba(54,31,73,0.07)] md:grid-cols-[1.1fr_0.9fr]">
+            <div className="flex min-h-[470px] flex-col p-6 sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.14em] text-[#207a68]">— {homeCopy.forDesigners.eyebrow}</p>
-              <h2 className="mt-5 text-3xl font-bold leading-tight sm:text-4xl">{homeCopy.forDesigners.headline}</h2>
-              <p className="mt-5 text-base leading-7 text-muted">{homeCopy.forDesigners.body}</p>
-              <div className="mt-7"><Checklist items={homeCopy.forDesigners.checklist.slice(0, 4)} tone="accent" /></div>
-              <p className="mt-5 text-xs font-medium leading-5 text-muted">{homeCopy.forDesigners.pricingNote} <Link href="/services-and-pricing" className="font-bold text-[#207a68] hover:underline">{homeCopy.forDesigners.pricingCta}</Link></p>
-              <div className="mt-auto pt-7"><Link href="/get-started" className="group inline-flex min-h-[54px] items-center gap-2 rounded-xl bg-[#1f604d] px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(31,96,77,0.2)] transition hover:-translate-y-0.5 hover:bg-[#19513f]">{homeCopy.forDesigners.primaryCta}<Arrow /></Link></div>
+              <h2 className="mt-4 text-3xl font-bold leading-tight sm:text-[2.1rem]">{homeCopy.forDesigners.headline}</h2>
+              <p className="mt-4 text-[0.95rem] leading-7 text-muted">{homeCopy.forDesigners.body}</p>
+              <div className="mt-6"><Checklist items={homeCopy.forDesigners.checklist.slice(0, 4)} tone="accent" /></div>
+              <p className="mt-4 text-xs font-medium leading-5 text-muted">{homeCopy.forDesigners.pricingNote} <Link href="/services-and-pricing" className="font-bold text-[#207a68] hover:underline">{homeCopy.forDesigners.pricingCta}</Link></p>
+              <div className="mt-auto pt-6"><Link href="/get-started" className="group inline-flex min-h-[52px] items-center gap-2 rounded-xl bg-[#1f604d] px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(31,96,77,0.2)] transition hover:-translate-y-0.5 hover:bg-[#19513f]">{homeCopy.forDesigners.primaryCta}<Arrow /></Link></div>
             </div>
             <div className="min-h-[250px] bg-accent-soft p-5 md:min-h-0 md:p-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
