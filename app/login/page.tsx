@@ -268,7 +268,7 @@ function LoginContent() {
                     onChange={(event) => setLegalConsents((current) => ({ ...current, terms: event.target.checked }))}
                     className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
                   />
-                  <span>{authCopy.form.termsConsentBefore}{" "}<Link href="/terms" className="font-semibold text-primary underline">{authCopy.form.terms}</Link>{" "}{authCopy.form.termsConsentAfter}</span>
+                  <span>{authCopy.form.termsConsentBefore}{" "}<Link href="/terms" className="font-semibold text-primary underline">{authCopy.form.terms}</Link>{authCopy.form.termsConsentAfter}</span>
                 </label>
                 <label className="flex cursor-pointer items-start gap-3 text-xs leading-5 text-muted">
                   <input

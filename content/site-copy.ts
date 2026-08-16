@@ -425,7 +425,7 @@ const pl: SiteCopy = {
       aiTransparency: "informacją „AI i przejrzystość”",
       legalConsentTitle: "Wymagane potwierdzenia",
       termsConsentBefore: "Zapoznałem/am się z",
-      termsConsentAfter: "i akceptuję jego postanowienia.",
+      termsConsentAfter: " i akceptuję jego postanowienia.",
       privacyConsentBefore: "Potwierdzam, że zapoznałem/am się z",
       privacyConsentAfter: ".",
       cookiesConsentBefore: "Potwierdzam, że zapoznałem/am się z",
