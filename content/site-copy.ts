@@ -283,6 +283,10 @@ export type SiteCopy = {
       passwordsMismatch: string;
       updated: string;
       openAccount: string;
+      checking: string;
+      invalidTitle: string;
+      invalidBody: string;
+      newRequestCta: string;
     };
     onboarding: {
       welcome: string;
@@ -464,6 +468,10 @@ const pl: SiteCopy = {
       passwordsMismatch: "Hasła nie są takie same.",
       updated: "Hasło zostało zmienione. Możesz przejść do swojego konta.",
       openAccount: "Otwórz konto",
+      checking: "Sprawdzanie linku...",
+      invalidTitle: "Link do zmiany hasła nie jest już aktywny",
+      invalidBody: "Otwórz najnowszą wiadomość z linkiem albo poproś o nowy link do zmiany hasła.",
+      newRequestCta: "Wyślij nowy link",
     },
     onboarding: {
       welcome: "Witamy w ArchiCompass",
@@ -847,6 +855,10 @@ const en: SiteCopy = {
       passwordsMismatch: "Passwords do not match.",
       updated: "Password updated. You can now continue to your account.",
       openAccount: "Open account",
+      checking: "Checking your link...",
+      invalidTitle: "This password reset link is no longer active",
+      invalidBody: "Open the newest reset email or request a new password reset link.",
+      newRequestCta: "Send a new link",
     },
     onboarding: {
       welcome: "Welcome to ArchiCompass",

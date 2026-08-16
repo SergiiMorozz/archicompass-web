@@ -194,3 +194,23 @@ export function getDemoProjectPresentation(profileId: string, seed: string) {
   const index = seed.split("").reduce((sum, character) => sum + character.charCodeAt(0), 0);
   return options[index % options.length];
 }
+
+type ProjectPresentationTarget = {
+  id: string;
+  profile_id: string;
+  title: string | null;
+  category: string | null;
+  description: string | null;
+};
+
+export function applyDemoProjectPresentation<T extends ProjectPresentationTarget>(project: T): T {
+  const demo = getDemoProjectPresentation(project.profile_id, project.id);
+  if (!demo) return project;
+
+  return {
+    ...project,
+    title: project.title?.trim() || demo.title,
+    category: project.category?.trim() || demo.category,
+    description: project.description?.trim() || demo.description,
+  } as T;
+}

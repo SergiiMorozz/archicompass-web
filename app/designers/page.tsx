@@ -6,7 +6,7 @@ import GoogleRating from "@/components/GoogleRating";
 import JsonLd from "@/components/JsonLd";
 import { getDirectoryCopy } from "@/content/directory-copy";
 import { briefLabel, briefStyleLabel } from "@/lib/brief-labels";
-import { siteLocale } from "@/lib/site-locale";
+import { localeAppPath, localePublicPath, siteLocale } from "@/lib/site-locale";
 import {
   type MatchBrief,
   type ProfessionalMatch,
@@ -191,6 +191,12 @@ function many(v: string | string[] | undefined) {
         .filter(Boolean)
     )
   );
+}
+
+function safeNumber(value: string) {
+  if (!value) return Number.NaN;
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? number : Number.NaN;
 }
 
 function normalizeSearchText(value: string) {
@@ -743,6 +749,7 @@ export default async function DesignersPage({
   const projectType = first(sp.projectType).trim();
   const goal = first(sp.goal).trim();
   const style = first(sp.style).trim();
+  if (style && !selectedStyles.includes(style)) selectedStyles.push(style);
   const support = first(sp.support).trim();
   const budget = first(sp.budget).trim();
   const timeline = first(sp.timeline).trim();
@@ -784,13 +791,13 @@ export default async function DesignersPage({
 
   const minRateRaw = first(sp.minRate).trim();
   const maxRateRaw = first(sp.maxRate).trim();
-  const minRate = minRateRaw ? Number(minRateRaw) : NaN;
-  const maxRate = maxRateRaw ? Number(maxRateRaw) : NaN;
+  const minRate = safeNumber(minRateRaw);
+  const maxRate = safeNumber(maxRateRaw);
   const pricingModel = first(sp.pricingModel).trim();
   const minExperienceRaw = first(sp.minExperience).trim();
-  const minExperience = minExperienceRaw ? Number(minExperienceRaw) : NaN;
+  const minExperience = safeNumber(minExperienceRaw);
   const maxProjectBudgetRaw = first(sp.maxProjectBudget).trim();
-  const maxProjectBudget = maxProjectBudgetRaw ? Number(maxProjectBudgetRaw) : NaN;
+  const maxProjectBudget = safeNumber(maxProjectBudgetRaw);
 
   const supabase = await createSupabaseServerClient();
   const publicSupabase = createPublicContentClient();
@@ -907,7 +914,7 @@ export default async function DesignersPage({
     : 250;
 
   const locationMatches = (candidate: string | null) => {
-    if (matchingMode || !normalizedLocation) return true;
+    if (!normalizedLocation) return true;
     if (normalizeSearchText(candidate ?? "").includes(normalizedLocation)) return true;
     if (!nearbyFallback || !candidate) return false;
     const distance = distanceForLocation(candidate);
@@ -941,7 +948,7 @@ export default async function DesignersPage({
       const categoryText = normalizeSearchText((profile.service_categories ?? []).join(" "));
       const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
       const matchesLocation = locationMatches(profile.location);
-      const matchesSpecialty = matchingMode || selectedStyles.length === 0 || selectedStyles.some((item) =>
+      const matchesSpecialty = selectedStyles.length === 0 || selectedStyles.some((item) =>
         specialtyText.includes(normalizeSearchText(item).replace(/(istic|ist|ism)$/, ""))
       );
       const matchesServices = selectedServices.length === 0 || selectedServices.every((item) =>
@@ -958,7 +965,8 @@ export default async function DesignersPage({
       const matchesWorkMode = !workMode || (profile.work_modes ?? []).includes(workMode);
       const matchesExperience = Number.isNaN(minExperience) || (profile.years_experience ?? 0) >= minExperience;
       const matchesProjectBudget = Number.isNaN(maxProjectBudget) ||
-        (profile.minimum_project_budget !== null && profile.minimum_project_budget <= maxProjectBudget);
+        profile.minimum_project_budget === null ||
+        profile.minimum_project_budget <= maxProjectBudget;
       const matchesPrice = priceFilterMatches(profile);
 
       return (
@@ -987,7 +995,7 @@ export default async function DesignersPage({
     const specialtyText = normalizeSearchText(specialties.join(" "));
     const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
     const matchesLocation = locationMatches(studio.location);
-    const matchesSpecialty = matchingMode || selectedStyles.length === 0 || selectedStyles.some((item) =>
+    const matchesSpecialty = selectedStyles.length === 0 || selectedStyles.some((item) =>
       specialtyText.includes(normalizeSearchText(item).replace(/(istic|ist|ism)$/, ""))
     );
     const matchesServices = selectedServices.length === 0 || selectedServices.every((item) =>
@@ -1004,7 +1012,8 @@ export default async function DesignersPage({
     const matchesWorkMode = !workMode || (studio.work_modes ?? []).includes(workMode);
     const matchesExperience = Number.isNaN(minExperience) || (studio.years_experience ?? 0) >= minExperience;
     const matchesProjectBudget = Number.isNaN(maxProjectBudget) ||
-      (studio.minimum_project_budget !== null && studio.minimum_project_budget <= maxProjectBudget);
+      studio.minimum_project_budget === null ||
+      studio.minimum_project_budget <= maxProjectBudget;
     const matchesPrice = priceFilterMatches(studio);
     return matchesQuery && matchesLocation && matchesSpecialty && matchesServices && matchesCategories && matchesFocus && matchesAvailability && matchesCareerStage && matchesWorkMode && matchesExperience && matchesProjectBudget && matchesPrice;
   });
@@ -1152,8 +1161,10 @@ export default async function DesignersPage({
     sort,
   };
 
-  const gridHref = "/designers" + qs({ ...base, view: "grid" });
-  const listHref = "/designers" + qs({ ...base, view: "list" });
+  const directoryPath = localeAppPath("/designers");
+  const directoryPublicPath = localePublicPath(siteLocale, "/designers");
+  const gridHref = directoryPath + qs({ ...base, view: "grid" });
+  const listHref = directoryPath + qs({ ...base, view: "list" });
   const hasFilters = Boolean(q || location || selectedStyles.length || selectedServices.length || selectedProjectCategories.length || selectedFocus.length || availability || careerStage || workMode || minExperienceRaw || maxProjectBudgetRaw || profileType !== "all" || minRateRaw || maxRateRaw || pricingModel);
   const activeFilterCount = [
     Boolean(q),
@@ -1241,14 +1252,14 @@ export default async function DesignersPage({
               {copy.hero.body}
             </p>
             <Link
-              href="/project-compass"
+              href={localeAppPath("/project-compass")}
               className="mt-6 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white shadow-[0_12px_28px_rgba(104,40,200,0.25)] transition hover:bg-primary/90"
             >
               {copy.hero.cta}
             </Link>
           </div>
 
-          <form action="/designers" className="mt-9 max-w-4xl">
+          <form action={directoryPublicPath} className="mt-9 max-w-4xl">
             <input type="hidden" name="view" value={view} />
             <input type="hidden" name="sort" value={sort} />
             {briefContext && location ? <input type="hidden" name="location" value={location} /> : null}
@@ -1276,7 +1287,7 @@ export default async function DesignersPage({
             {trendChips.map((chip) => (
               <Link
                 key={chip.label}
-                href={"/designers" + qs({ ...base, ...chip.params })}
+                href={directoryPath + qs({ ...base, ...chip.params })}
                 className="rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"
               >
                 {chip.label}
@@ -1319,7 +1330,7 @@ export default async function DesignersPage({
                   {copy.brief.body}
                 </p>
               </div>
-              <Link href="/project-compass" className="rounded-xl border border-primary bg-card px-4 py-3 text-center text-sm font-semibold text-primary">
+              <Link href={localeAppPath("/project-compass")} className="rounded-xl border border-primary bg-card px-4 py-3 text-center text-sm font-semibold text-primary">
                 {copy.brief.edit}
               </Link>
             </div>
@@ -1362,13 +1373,13 @@ export default async function DesignersPage({
               <p className="mt-1 text-sm text-muted">{copy.counts.results(profiles.length + studios.length)}</p>
             </div>
             {hasFilters ? (
-              <Link href="/designers" className="text-sm font-semibold text-primary hover:underline">
+              <Link href={directoryPath} className="text-sm font-semibold text-primary hover:underline">
                 {copy.filters.clear}
               </Link>
             ) : null}
           </div>
 
-          <form action="/designers" className="mt-6 grid gap-6">
+          <form action={directoryPublicPath} className="mt-6 grid gap-6">
             <input type="hidden" name="view" value={view} />
             <input type="hidden" name="sort" value={sort} />
             <input type="hidden" name="q" value={q} />
@@ -1663,7 +1674,7 @@ export default async function DesignersPage({
 
             <div className="flex flex-wrap items-center gap-2">
               <Link
-                href={"/designers" + qs({ ...base, view, sort: "recommended" })}
+                href={directoryPath + qs({ ...base, view, sort: "recommended" })}
                 className={[
                   "rounded-xl border border-line px-4 py-2 text-sm font-semibold",
                   sort === "recommended" ? "bg-primary text-white" : "bg-card text-muted",
@@ -1672,7 +1683,7 @@ export default async function DesignersPage({
                 {copy.results.sortRecommended}
               </Link>
               <Link
-                href={"/designers" + qs({ ...base, view, sort: "newest" })}
+                href={directoryPath + qs({ ...base, view, sort: "newest" })}
                 className={[
                   "rounded-xl border border-line px-4 py-2 text-sm font-semibold",
                   sort === "newest" ? "bg-primary text-white" : "bg-card text-muted",
@@ -1681,7 +1692,7 @@ export default async function DesignersPage({
                 {copy.results.sortNewest}
               </Link>
               <Link
-                href={"/designers" + qs({ ...base, view, sort: "experience" })}
+                href={directoryPath + qs({ ...base, view, sort: "experience" })}
                 className={[
                   "rounded-xl border border-line px-4 py-2 text-sm font-semibold",
                   sort === "experience" ? "bg-primary text-white" : "bg-card text-muted",
@@ -1724,7 +1735,7 @@ export default async function DesignersPage({
                   : copy.results.emptySearch}
               </p>
               <Link
-                href="/designers"
+                href={directoryPath}
                 className="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"
               >
                 {copy.results.showAll}
@@ -1784,7 +1795,7 @@ export default async function DesignersPage({
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             {seoLocations.filter((item) => item.countryCode === "PL").map((item) => (
-              <Link key={`${item.countrySlug}-${item.citySlug}`} href={locationPath(item, siteLocale)} className="rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold hover:border-primary hover:text-primary">
+              <Link key={`${item.countrySlug}-${item.citySlug}`} href={localeAppPath(locationPath(item, siteLocale))} className="rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold hover:border-primary hover:text-primary">
                 {item.city}, {item.country}
               </Link>
             ))}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getSiteCopy } from "@/content/site-copy";
 import { localePublicPath, siteLocale } from "@/lib/site-locale";
+import { safeInternalPath, stripLocalePrefix } from "@/lib/safe-next-path";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const authCopy = getSiteCopy().auth;
@@ -36,17 +37,13 @@ function authErrorMessage(message: string) {
 }
 
 function localizedDestination(path: string) {
-  const rawPath = path.replace(/^\/en(?=\/|$)/, "") || "/";
-  return localePublicPath(siteLocale, rawPath);
+  return localePublicPath(siteLocale, stripLocalePrefix(safeInternalPath(path)));
 }
 
 function LoginContent() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const searchParams = useSearchParams();
-  const requestedValue = searchParams.get("next") || "/account";
-  const requestedNext = requestedValue.startsWith("/") && !requestedValue.startsWith("//")
-    ? requestedValue
-    : "/account";
+  const requestedNext = stripLocalePrefix(safeInternalPath(searchParams.get("next")));
   const initialMode: Mode = searchParams.get("mode") === "signup" ? "signup" : "signin";
   const [mode, setMode] = useState<Mode>(initialMode);
   const [intent, setIntent] = useState<Intent>(() => intentFromNext(requestedNext));
