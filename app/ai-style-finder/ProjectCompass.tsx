@@ -1361,43 +1361,50 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
             </div>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {workspaceModules.map((module) => (
-                <button
-                  key={module.id}
-                  type="button"
-                  aria-expanded={activeModule === module.id}
-                  onClick={() => openModule(module.id)}
-                  className={[
-                    "group relative min-h-[220px] overflow-hidden rounded-3xl border bg-white p-5 text-left shadow-[0_12px_28px_rgba(57,31,92,0.05)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(57,31,92,0.10)]",
-                    activeModule === module.id ? "border-primary ring-2 ring-primary/10" : "border-[#e8e1f1] hover:border-primary/50",
-                  ].join(" ")}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-2xl bg-primary text-xs font-bold text-white">{workspaceModuleMarks[module.id]}</span>
-                    <span className={module.complete ? "rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800" : "rounded-full bg-background px-3 py-1 text-xs font-bold text-muted"}>
-                      {module.complete
-                        ? copy.ui.workspace.complete
-                        : module.touched
-                        ? copy.ui.workspace.inProgress
-                        : copy.ui.workspace.statusEmpty}
-                    </span>
-                  </div>
-                  <h3 className="mt-7 text-xl font-bold">{module.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-muted">{module.body}</p>
-                  <div className="mt-5 border-t border-line pt-4 text-sm font-semibold text-primary">{module.preview}</div>
-                  <span className="absolute bottom-5 right-5 text-xl text-primary transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">&rarr;</span>
-                  {module.id === "inspirations" ? (
-                    <div className="absolute right-4 top-[76px] grid w-24 grid-cols-2 gap-1 opacity-90">
-                      {workspacePhotos.slice(0, 4).map((src) => (
-                        <span key={src} className="aspect-square overflow-hidden rounded-lg bg-primary-soft">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={src} alt="" className="h-full w-full object-cover" />
+              {workspaceModules.map((module) => {
+                const isLeadModule = module.id === "inspirations";
+
+                return (
+                  <button
+                    key={module.id}
+                    type="button"
+                    aria-expanded={activeModule === module.id}
+                    onClick={() => openModule(module.id)}
+                    className={[
+                      "group relative min-h-[220px] overflow-hidden rounded-3xl border bg-white p-5 text-left shadow-[0_12px_28px_rgba(57,31,92,0.05)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(57,31,92,0.10)]",
+                      isLeadModule ? "sm:col-span-2 sm:min-h-[290px] sm:p-6" : "",
+                      activeModule === module.id ? "border-primary ring-2 ring-primary/10" : "border-[#e8e1f1] hover:border-primary/50",
+                    ].join(" ")}
+                  >
+                    <div className={isLeadModule ? "sm:max-w-[52%]" : ""}>
+                      <div className="flex items-start justify-between gap-3">
+                        <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-2xl bg-primary text-xs font-bold text-white">{workspaceModuleMarks[module.id]}</span>
+                        <span className={module.complete ? "rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800" : "rounded-full bg-background px-3 py-1 text-xs font-bold text-muted"}>
+                          {module.complete
+                            ? copy.ui.workspace.complete
+                            : module.touched
+                            ? copy.ui.workspace.inProgress
+                            : copy.ui.workspace.statusEmpty}
                         </span>
-                      ))}
+                      </div>
+                      <h3 className="mt-7 text-xl font-bold">{module.title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-muted">{module.body}</p>
+                      <div className="mt-5 border-t border-line pt-4 text-sm font-semibold text-primary">{module.preview}</div>
                     </div>
-                  ) : null}
-                </button>
-              ))}
+                    <span className="absolute bottom-5 right-5 text-xl text-primary transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">&rarr;</span>
+                    {isLeadModule ? (
+                      <div className="mt-5 grid grid-cols-4 gap-2 sm:absolute sm:inset-y-6 sm:right-6 sm:mt-0 sm:w-[41%] sm:max-w-[360px] sm:grid-cols-2">
+                        {workspacePhotos.slice(0, 4).map((src, index) => (
+                          <span key={src} className={index === 0 ? "col-span-2 aspect-[2.35/1] overflow-hidden rounded-xl bg-primary-soft sm:aspect-auto" : "aspect-square overflow-hidden rounded-xl bg-primary-soft"}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={src} alt="" className="h-full w-full object-cover" />
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </button>
+                );
+              })}
             </div>
 
             {activeModule ? (
