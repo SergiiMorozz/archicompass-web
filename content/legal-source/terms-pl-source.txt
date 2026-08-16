@@ -1,0 +1,620 @@
+REGULAMIN SERWISU ARCHICOMPASS
+
+obowiązuje od dnia 16 sierpnia 2026 r.
+
+§ 1. Postanowienia ogólne
+
+1. Niniejszy Regulamin określa zasady korzystania z serwisu internetowego ArchiCompass dostępnego pod adresem archicompass.pl, w tym zasady świadczenia usług drogą elektroniczną, zakładania i prowadzenia Kont, publikowania Profili i Portfolio, korzystania z funkcji AI Project Compass, tworzenia Briefów Projektowych, wyszukiwania i dopasowywania Projektantów oraz komunikacji pomiędzy Użytkownikami.
+2. Operatorem Serwisu i usługodawcą w rozumieniu przepisów o świadczeniu usług drogą elektroniczną jest:
+
+Sergii Moroz, prowadzący działalność gospodarczą pod firmą Sergii Moroz Advisory (SM Advisory)
+ul. Grzybowska 2, lok. 31
+00-131 Warszawa, Polska
+NIP: 5252995634
+REGON: 528006413
+e-mail: contact@archicompass.pl
+
+zwany dalej „Operatorem”.
+
+3. Regulamin jest udostępniany nieodpłatnie w Serwisie w sposób umożliwiający jego pozyskanie, odtworzenie, utrwalenie i przechowywanie.
+4. Rozpoczęcie korzystania z usług wymagających akceptacji Regulaminu oznacza zawarcie pomiędzy Użytkownikiem a Operatorem umowy o świadczenie usług drogą elektroniczną na zasadach określonych w Regulaminie.
+5. ArchiCompass jest platformą technologiczną wspierającą przygotowanie projektu wnętrza, organizację informacji projektowych oraz wyszukiwanie i kontaktowanie Klientów z niezależnymi Projektantami.
+6. Operator nie świadczy usług architektonicznych, projektowych, budowlanych, wykonawczych ani usług nadzoru inwestorskiego i – o ile wyraźnie nie wskazano inaczej – nie reprezentuje Projektantów ani Klientów przy zawieraniu pomiędzy nimi umów.
+
+⸻
+
+§ 2. Definicje
+
+Użyte w Regulaminie określenia oznaczają:
+
+1. Serwis lub ArchiCompass – platformę internetową dostępną w szczególności pod adresem archicompass.pl wraz z jej podstronami, funkcjonalnościami i usługami.
+2. Operator – podmiot wskazany w § 1 ust. 2 Regulaminu.
+3. Użytkownik – każdą osobę korzystającą z Serwisu, w szczególności Klienta, Projektanta lub osobę działającą w imieniu Pracowni.
+4. Klient – Użytkownika korzystającego z Serwisu w celu przygotowania projektu, analizy inspiracji, stworzenia Briefu Projektowego, znalezienia Projektanta lub nawiązania z nim kontaktu.
+5. Projektant – osobę fizyczną, przedsiębiorcę lub osobę działającą w imieniu przedsiębiorcy, która prezentuje w Serwisie swoje usługi związane w szczególności z architekturą, architekturą wnętrz, projektowaniem, dekorowaniem lub innymi usługami związanymi z projektowaniem przestrzeni.
+6. Pracownia – przedsiębiorcę lub inną jednostkę organizacyjną prowadzącą działalność w zakresie projektowania, architektury lub usług pokrewnych, która może posiadać w Serwisie Profil Pracowni i powiązane profile członków zespołu.
+7. Konto – indywidualny zbiór zasobów i uprawnień przypisanych Użytkownikowi po dokonaniu rejestracji.
+8. Profil – publiczną lub częściowo publiczną prezentację Projektanta lub Pracowni w Serwisie.
+9. Portfolio – materiały prezentujące działalność Projektanta lub Pracowni, w szczególności fotografie, wizualizacje, grafiki, opisy projektów i inne materiały.
+10. Treści Użytkownika – wszelkie informacje i materiały przekazywane, przesyłane, zapisywane lub publikowane przez Użytkownika w Serwisie, w szczególności teksty, fotografie, wizualizacje, grafiki, pliki, inspiracje, informacje projektowe, Portfolio i wiadomości.
+11. AI Project Compass – funkcjonalność Serwisu wykorzystującą rozwiązania informatyczne, w tym modele sztucznej inteligencji, do analizy materiałów i informacji przekazanych przez Użytkownika oraz wspomagania tworzenia Briefu Projektowego i Dopasowania.
+12. Brief Projektowy lub Brief – uporządkowany opis projektu, potrzeb, inspiracji, preferencji, budżetu, zakresu prac lub innych informacji związanych z planowaną inwestycją, tworzony przez Użytkownika samodzielnie lub przy wsparciu AI Project Compass.
+13. Dopasowanie – wynik działania funkcjonalności Serwisu polegającej na wskazaniu Projektantów, którzy według kryteriów stosowanych przez Serwis mogą odpowiadać potrzebom określonym przez Klienta.
+14. Zapytanie – informację wysłaną za pośrednictwem Serwisu przez Klienta do Projektanta lub Pracowni albo przekazaną Projektantowi przez Serwis w związku z zainteresowaniem Klienta jego usługami.
+15. Umowa Projektowa – umowę dotyczącą usług Projektanta zawieraną bezpośrednio pomiędzy Klientem a Projektantem lub Pracownią poza stosunkiem prawnym łączącym Użytkownika z Operatorem.
+16. Subskrypcja – odpłatny dostęp do określonych funkcjonalności Serwisu przez wskazany okres rozliczeniowy.
+17. Polityka Prywatności – aktualną politykę prywatności ArchiCompass udostępnioną w Serwisie.
+
+⸻
+
+§ 3. Rodzaje i zakres usług
+
+1. Operator może świadczyć za pośrednictwem Serwisu w szczególności następujące usługi:
+
+a) prowadzenie Kont Użytkowników;
+
+b) tworzenie i publikowanie Profili Projektantów i Pracowni;
+
+c) publikowanie Portfolio;
+
+d) wyszukiwanie i przeglądanie Profili;
+
+e) analizowanie inspiracji i informacji projektowych za pomocą AI Project Compass;
+
+f) tworzenie i przechowywanie Briefów Projektowych;
+
+g) Dopasowanie Projektantów do informacji i preferencji Klienta;
+
+h) przesyłanie Zapytania lub umożliwienie kontaktu pomiędzy Klientem a Projektantem;
+
+i) zapisywanie inspiracji i innych informacji związanych z projektem;
+
+j) prezentowanie ocen, opinii lub innych informacji dotyczących Projektantów;
+
+k) udostępnianie treści informacyjnych i edukacyjnych, w tym Inspiration Hub;
+
+l) inne funkcjonalności udostępniane w Serwisie.
+
+2. Zakres funkcjonalności może zależeć od rodzaju Konta, roli Użytkownika, wybranego planu, etapu rozwoju Serwisu lub innych warunków wskazanych w Serwisie.
+3. Operator może udostępniać funkcje testowe, eksperymentalne lub oznaczone jako „beta”. Funkcje takie mogą być zmieniane lub wycofywane.
+
+⸻
+
+§ 4. Wymagania techniczne
+
+1. Do korzystania z Serwisu niezbędne są:
+
+a) urządzenie umożliwiające korzystanie z Internetu;
+
+b) aktualna przeglądarka internetowa obsługująca technologie stosowane przez Serwis;
+
+c) aktywne połączenie z Internetem;
+
+d) w przypadku rejestracji – aktywny adres e-mail;
+
+e) włączenie obsługi JavaScript i – w zakresie wymaganym dla określonych funkcji – plików cookies lub podobnych technologii.
+
+2. Korzystanie z nieaktualnego oprogramowania może powodować nieprawidłowe działanie niektórych funkcji.
+3. Użytkownik jest zobowiązany odpowiednio zabezpieczać urządzenie oraz dane umożliwiające dostęp do Konta.
+4. Operator może czasowo ograniczyć dostępność Serwisu w związku z konserwacją, aktualizacją, bezpieczeństwem, awarią albo rozwojem funkcjonalności.
+
+⸻
+
+§ 5. Rejestracja i Konto
+
+1. Korzystanie z części Serwisu może odbywać się bez rejestracji.
+2. Dostęp do funkcji wymagających identyfikacji Użytkownika wymaga utworzenia Konta.
+3. Użytkownik podczas rejestracji jest zobowiązany podać dane prawdziwe, aktualne i niewprowadzające w błąd.
+4. Użytkownik nie może tworzyć Konta przy użyciu danych innej osoby bez odpowiedniego upoważnienia.
+5. Użytkownik odpowiada za zachowanie poufności danych dostępowych do Konta.
+6. Użytkownik powinien niezwłocznie poinformować Operatora o podejrzeniu nieuprawnionego dostępu do Konta.
+7. Jedna osoba nie powinna wykorzystywać wielu Kont w celu obejścia ograniczeń Serwisu, manipulowania wynikami, opiniami, rankingiem lub innymi funkcjonalnościami.
+8. Użytkownik może w każdym czasie zaprzestać korzystania z Serwisu i – z zastrzeżeniem obowiązków wynikających z prawa lub trwającej Subskrypcji – zażądać usunięcia Konta.
+
+⸻
+
+§ 6. Klienci
+
+1. Klient może korzystać z funkcji przeznaczonych do przygotowania i organizacji informacji dotyczących planowanej inwestycji oraz wyszukiwania Projektantów.
+2. Klient zobowiązany jest przekazywać informacje zgodne z prawdą w zakresie, w jakim mogą one wpływać na Dopasowanie lub komunikację z Projektantem.
+3. Utworzenie Briefu, otrzymanie Dopasowania, wyświetlenie Profilu lub wysłanie Zapytania nie zobowiązuje Klienta do zawarcia Umowy Projektowej.
+4. Korzystanie z podstawowego Konta Klienta jest nieodpłatne, chyba że przed skorzystaniem z określonej dodatkowej usługi Użytkownik zostanie wyraźnie poinformowany o jej odpłatności.
+
+⸻
+
+§ 7. Projektanci i Pracownie
+
+1. Projektant publikujący Profil oświadcza, że:
+
+a) posiada prawo do oferowania opisanych usług;
+
+b) podane informacje są prawdziwe i aktualne;
+
+c) posiada wymagane prawem kwalifikacje lub uprawnienia, jeżeli są konieczne do świadczenia określonych usług;
+
+d) wykorzystanie publikowanych materiałów nie narusza praw osób trzecich.
+
+2. Projektant odpowiada za informacje dotyczące między innymi zakresu usług, doświadczenia, lokalizacji, dostępności, cen, terminów i Portfolio.
+3. Operator może żądać uzupełnienia lub weryfikacji informacji dotyczących Projektanta lub Pracowni, jeżeli jest to uzasadnione bezpieczeństwem Użytkowników, wiarygodnością Serwisu albo obowiązkiem prawnym.
+4. Operator nie gwarantuje Projektantowi określonej liczby wyświetleń Profilu, Dopasowań, Zapytania, Klientów ani zawartych Umów Projektowych.
+
+⸻
+
+§ 8. Profile i Portfolio
+
+1. Projektant może publikować w Profilu informacje oraz materiały zgodnie z funkcjonalnościami udostępnionymi przez Serwis.
+2. Profil nie stanowi oferty w rozumieniu przepisów Kodeksu cywilnego, chyba że z jego treści wyraźnie wynika inaczej.
+3. Informacje dotyczące cen, budżetów lub zakresów usług publikowane w Profilu mają charakter informacyjny, chyba że Projektant wyraźnie określi je jako wiążącą ofertę.
+4. Projektant samodzielnie odpowiada za aktualność i prawdziwość informacji publikowanych w Profilu.
+5. Operator może zmienić sposób prezentowania Profilu lub Portfolio, jeżeli nie prowadzi to do nieuprawnionej zmiany znaczenia Treści Użytkownika.
+
+⸻
+
+§ 9. Treści Użytkownika i własność intelektualna
+
+1. Użytkownik zachowuje prawa do Treści Użytkownika w zakresie, w jakim prawa te mu przysługują.
+2. Przesyłając Treści Użytkownika do Serwisu, Użytkownik oświadcza, że posiada prawa, licencje, zgody lub inną podstawę prawną pozwalającą mu na ich wykorzystanie w sposób wynikający z funkcjonalności Serwisu.
+3. Użytkownik nie może publikować treści naruszających w szczególności:
+
+a) prawa autorskie;
+
+b) prawa do znaków towarowych;
+
+c) dobra osobiste;
+
+d) prawo do wizerunku;
+
+e) prywatność;
+
+f) tajemnicę przedsiębiorstwa;
+
+g) obowiązujące przepisy prawa.
+
+4. Użytkownik udziela Operatorowi niewyłącznej, nieodpłatnej, ograniczonej do okresu przechowywania danej Treści i niezbędnej technicznie licencji na korzystanie z Treści Użytkownika wyłącznie w zakresie koniecznym do:
+
+a) przechowywania jej w Serwisie;
+
+b) wyświetlania zgodnie z ustawieniami Użytkownika;
+
+c) technicznego przetwarzania;
+
+d) tworzenia kopii technicznych i bezpieczeństwa;
+
+e) świadczenia funkcji wybranych przez Użytkownika, w tym analizy AI i Dopasowania;
+
+f) moderowania i zabezpieczania Serwisu.
+
+5. Licencja nie oznacza przeniesienia praw autorskich na Operatora.
+6. Operator nie nabywa na podstawie Regulaminu prawa do wykorzystywania prywatnych materiałów Użytkownika w celach reklamowych niezwiązanych z realizacją usługi, chyba że Użytkownik udzieli na to odrębnej zgody.
+7. W przypadku publicznego Portfolio licencja obejmuje publiczne wyświetlanie materiałów w ramach Serwisu przez okres, w którym Projektant udostępnia je publicznie.
+
+⸻
+
+§ 10. AI Project Compass
+
+1. AI Project Compass jest narzędziem wspomagającym Użytkownika w analizie inspiracji, organizacji informacji dotyczących projektu i przygotowaniu Briefu.
+2. AI Project Compass może analizować między innymi:
+
+a) przesłane fotografie i grafiki;
+
+b) informacje o preferencjach Użytkownika;
+
+c) informacje dotyczące projektu;
+
+d) odpowiedzi udzielone przez Użytkownika;
+
+e) inne dane przekazane w ramach danej funkcjonalności.
+
+3. Wyniki AI Project Compass mogą obejmować między innymi opis preferencji stylistycznych, cech wnętrza, materiałów, kolorystyki, funkcji przestrzeni lub innych elementów istotnych dla przygotowania Briefu.
+4. Wynik generowany przy wykorzystaniu AI:
+
+a) ma charakter pomocniczy;
+
+b) może zawierać błędy lub nieścisłości;
+
+c) nie stanowi profesjonalnej porady architektonicznej, technicznej, prawnej, budowlanej ani kosztorysowej;
+
+d) nie stanowi gwarancji możliwości wykonania projektu;
+
+e) nie zastępuje konsultacji z odpowiednim specjalistą.
+
+5. Użytkownik powinien zweryfikować wynik przed wykorzystaniem go do podejmowania istotnych decyzji.
+6. Użytkownik nie powinien przesyłać do analizy materiałów, których wykorzystanie w tym celu narusza prawa osób trzecich.
+7. Operator może korzystać z usług zewnętrznych dostawców technologii AI. Informacje dotyczące przetwarzania danych osobowych w związku z takimi usługami określa Polityka Prywatności.
+8. Operator nie gwarantuje, że wygenerowany wynik będzie unikalny. Podobne informacje wejściowe mogą prowadzić do podobnych wyników.
+9. Operator może zmieniać modele, dostawców i technologie wykorzystywane do realizacji funkcji AI, o ile pozostaje to zgodne z Regulaminem i obowiązującym prawem.
+
+⸻
+
+§ 11. Brief Projektowy
+
+1. Brief Projektowy może być tworzony na podstawie informacji przekazanych bezpośrednio przez Klienta oraz wyników AI Project Compass.
+2. Brief ma pomóc uporządkować oczekiwania Klienta i usprawnić komunikację z Projektantem.
+3. Brief nie jest dokumentacją techniczną ani projektem architektonicznym.
+4. Informacje dotyczące między innymi budżetu, terminów, powierzchni, możliwości technicznych, materiałów i zakresu prac powinny zostać zweryfikowane bezpośrednio z Projektantem przed zawarciem Umowy Projektowej.
+5. Klient decyduje o ostatecznej treści Briefu oraz o jego wykorzystaniu.
+
+⸻
+
+§ 12. Dopasowanie Projektantów
+
+1. Serwis może wykorzystywać informacje zawarte w Briefie oraz inne informacje przekazane przez Klienta do wskazania Projektantów potencjalnie odpowiadających potrzebom Klienta.
+2. Przy Dopasowaniu mogą być uwzględniane w szczególności:
+
+a) lokalizacja projektu;
+
+b) zakres usług;
+
+c) rodzaj i skala projektu;
+
+d) deklarowany budżet;
+
+e) preferencje stylistyczne;
+
+f) informacje zawarte w Profilu i Portfolio;
+
+g) obszar działania Projektanta;
+
+h) inne kryteria związane z potrzebami Klienta i charakterem projektu.
+
+3. Waga poszczególnych parametrów może się różnić w zależności od charakteru Zapytania i dostępnych informacji.
+4. Dopasowanie jest rekomendacją technologiczną i nie stanowi:
+
+a) gwarancji jakości usług Projektanta;
+
+b) certyfikacji Projektanta przez Operatora;
+
+c) gwarancji dostępności Projektanta;
+
+d) gwarancji zawarcia Umowy Projektowej;
+
+e) gwarancji zgodności oferty z budżetem Klienta.
+
+5. Klient samodzielnie dokonuje wyboru Projektanta.
+6. Operator może zmieniać mechanizm Dopasowania w celu poprawy jakości wyników, bezpieczeństwa lub działania Serwisu.
+7. Jeżeli w przyszłości odpłatna promocja Profilu będzie wpływać na jego pozycję lub widoczność, taka okoliczność będzie odpowiednio oznaczona, a zasady wpływu promocji na prezentację wyników zostaną przedstawione Użytkownikowi.
+
+⸻
+
+§ 13. Zapytania i komunikacja
+
+1. Klient może skontaktować się z Projektantem za pomocą funkcjonalności udostępnionych w Serwisie.
+2. Wysłanie Zapytania oznacza zainteresowanie możliwością skorzystania z usług Projektanta, ale nie stanowi zawarcia Umowy Projektowej.
+3. Projektant samodzielnie decyduje, czy odpowie na Zapytanie.
+4. Operator nie gwarantuje odpowiedzi Projektanta.
+5. Dane otrzymane w związku z Zapytaniem mogą być wykorzystywane wyłącznie w celu związanym z daną komunikacją lub na innej zgodnej z prawem podstawie.
+6. Zabronione jest wykorzystywanie danych uzyskanych za pośrednictwem Serwisu do spamu, nękania, masowego marketingu lub innych celów sprzecznych z prawem lub Regulaminem.
+
+⸻
+
+§ 14. Umowa pomiędzy Klientem a Projektantem
+
+1. ArchiCompass nie jest stroną Umowy Projektowej zawieranej pomiędzy Klientem a Projektantem.
+2. Umowa Projektowa jest zawierana bezpośrednio pomiędzy Klientem a Projektantem na warunkach ustalonych przez te strony.
+3. Operator nie ustala w imieniu stron w szczególności:
+
+a) ostatecznego zakresu projektu;
+
+b) wynagrodzenia Projektanta;
+
+c) harmonogramu;
+
+d) zasad płatności;
+
+e) odpowiedzialności stron;
+
+f) warunków odbioru projektu;
+
+g) praw autorskich do projektu;
+
+h) zasad nadzoru lub realizacji inwestycji.
+
+4. Strony Umowy Projektowej powinny samodzielnie ustalić powyższe kwestie przed rozpoczęciem współpracy.
+5. Reklamacje dotyczące wykonania Umowy Projektowej powinny być kierowane bezpośrednio do strony tej umowy.
+6. Operator może, ale nie ma obowiązku, umożliwić stronom komunikację lub podjęcie próby polubownego wyjaśnienia sporu.
+
+⸻
+
+§ 15. Informacje zewnętrzne, oceny i opinie
+
+1. Serwis może prezentować informacje pochodzące od Użytkowników lub z zewnętrznych źródeł, w szczególności dane firmowe, linki, oceny lub informacje o liczbie opinii.
+2. Jeżeli informacja pochodzi z zewnętrznego źródła, jej dostępność i aktualność może zależeć od dostawcy tego źródła.
+3. Operator nie gwarantuje aktualności informacji pochodzących od niezależnych podmiotów trzecich.
+4. Jeżeli Serwis umożliwia publikowanie opinii, zabronione jest publikowanie opinii:
+
+a) fikcyjnych;
+
+b) kupionych lub uzyskanych w zamian za nieujawnioną korzyść;
+
+c) dotyczących doświadczenia, które nie miało miejsca;
+
+d) publikowanych w celu manipulowania oceną;
+
+e) naruszających prawo lub prawa osób trzecich.
+
+5. Operator może stosować mechanizmy służące weryfikowaniu wiarygodności opinii i oznaczać sposób ich weryfikacji.
+
+⸻
+
+§ 16. Niedozwolone korzystanie z Serwisu
+
+1. Użytkownik nie może:
+
+a) dostarczać treści bezprawnych;
+
+b) naruszać praw własności intelektualnej;
+
+c) podszywać się pod inną osobę lub podmiot;
+
+d) publikować świadomie fałszywych informacji;
+
+e) rozpowszechniać złośliwego oprogramowania;
+
+f) podejmować prób nieuprawnionego dostępu do Serwisu;
+
+g) omijać zabezpieczeń technicznych;
+
+h) zakłócać działania Serwisu;
+
+i) wykorzystywać Serwisu do spamu lub oszustwa;
+
+j) automatycznie pobierać, kopiować lub indeksować istotnych części danych Serwisu bez zgody Operatora, z wyjątkiem działań dozwolonych przez prawo lub standardowe wyszukiwarki internetowe;
+
+k) odsprzedawać lub tworzyć nieautoryzowanych baz danych na podstawie danych pobranych z Serwisu;
+
+l) manipulować Dopasowaniem, rankingami, ocenami lub opiniami;
+
+m) wykorzystywać danych innych Użytkowników niezgodnie z celem ich udostępnienia;
+
+n) wykorzystywać Serwisu w sposób sprzeczny z prawem, Regulaminem lub prawami innych osób.
+
+⸻
+
+§ 17. Moderacja treści i zgłaszanie naruszeń
+
+1. Operator może podejmować działania wobec Treści Użytkownika naruszających prawo lub Regulamin.
+2. Działania mogą obejmować w szczególności:
+
+a) ograniczenie widoczności treści;
+
+b) usunięcie treści;
+
+c) ograniczenie określonych funkcjonalności Konta;
+
+d) czasowe zawieszenie Konta;
+
+e) usunięcie Konta – w przypadkach uzasadnionych charakterem lub powtarzalnością naruszenia.
+
+3. Podejmując działania moderacyjne, Operator uwzględnia w szczególności charakter naruszenia, jego skutki, częstotliwość oraz możliwość usunięcia naruszenia w mniej ingerujący sposób.
+4. Użytkownik może zgłosić treść, która jego zdaniem jest nielegalna lub narusza Regulamin, na adres:
+
+admin@archicompass.pl
+
+5. Zgłoszenie powinno w miarę możliwości zawierać:
+
+a) wskazanie treści;
+
+b) jej lokalizację w Serwisie;
+
+c) wyjaśnienie przyczyny zgłoszenia;
+
+d) dane kontaktowe zgłaszającego, jeżeli są wymagane przez prawo lub konieczne do rozpatrzenia zgłoszenia.
+
+6. W przypadkach wymaganych przez obowiązujące przepisy Operator przekazuje Użytkownikowi uzasadnienie decyzji dotyczącej ograniczenia Treści lub Konta oraz informację o dostępnych możliwościach odwołania.
+7. Operator może wykorzystywać środki automatyczne do wykrywania niektórych naruszeń, jednak istotne decyzje dotyczące Kont mogą podlegać weryfikacji przez człowieka w zakresie wymaganym prawem lub uzasadnionym okolicznościami sprawy.
+
+⸻
+
+§ 18. Subskrypcje i opłaty
+
+1. Konto Klienta jest bezpłatne, chyba że Użytkownik wyraźnie wybierze dodatkową odpłatną usługę.
+2. Operator może oferować Projektantom lub Pracowniom bezpłatny okres dostępu do funkcjonalności, zgodnie z warunkami przedstawionymi przy aktywacji.
+3. Na dzień wejścia w życie niniejszego Regulaminu Operator może oferować pierwszym Projektantom 3-miesięczny okres bezpłatnego dostępu do funkcjonalności obejmujących Profil, Portfolio i możliwość otrzymywania Zapytania, zgodnie z informacjami prezentowanymi w Serwisie.
+4. Po zakończeniu okresu bezpłatnego dalsze korzystanie z funkcjonalności wymagających Subskrypcji może wymagać wybrania płatnego planu.
+5. Przed dokonaniem zakupu Użytkownik otrzymuje informację co najmniej o:
+
+a) cenie;
+
+b) podatkach, jeżeli mają zastosowanie;
+
+c) okresie rozliczeniowym;
+
+d) głównych funkcjach planu;
+
+e) zasadach odnawiania Subskrypcji;
+
+f) zasadach jej zakończenia.
+
+6. Płatność następuje przy wykorzystaniu metod płatności dostępnych w Serwisie.
+7. Jeżeli Subskrypcja odnawia się automatycznie, informacja o tym zostanie przedstawiona przed dokonaniem zakupu.
+8. Użytkownik może zrezygnować z dalszego odnawiania Subskrypcji zgodnie z mechanizmem udostępnionym w Koncie. Rezygnacja nie powoduje utraty opłaconego dostępu przed końcem bieżącego okresu rozliczeniowego, chyba że obowiązujące przepisy wymagają innego rozwiązania.
+9. Brak skutecznej płatności może skutkować ograniczeniem funkcjonalności płatnych, w szczególności widoczności Profilu, Portfolio lub możliwości otrzymywania nowych Zapytania.
+10. Szczegółowe ceny i zakres poszczególnych planów określa aktualna oferta prezentowana w Serwisie.
+
+⸻
+
+§ 19. Prawo odstąpienia przez konsumenta
+
+1. Jeżeli Użytkownik będący konsumentem zawiera z Operatorem odpłatną umowę na odległość, przysługują mu prawa wynikające z bezwzględnie obowiązujących przepisów prawa konsumenckiego.
+2. Informacje wymagane przed zawarciem konkretnej odpłatnej umowy, w tym informacje dotyczące prawa odstąpienia, są przekazywane Użytkownikowi przed złożeniem zamówienia.
+3. Jeżeli świadczenie usługi ma rozpocząć się przed upływem ustawowego terminu na odstąpienie, Operator uzyska wymagane prawem żądanie lub zgodę Użytkownika, jeżeli jest ona konieczna.
+4. Postanowienia Regulaminu nie ograniczają praw konsumenta wynikających z bezwzględnie obowiązujących przepisów prawa.
+5. Uprawnienia przewidziane przez przepisy dla osoby fizycznej zawierającej umowę bezpośrednio związaną z jej działalnością gospodarczą, gdy umowa nie ma dla niej charakteru zawodowego, stosuje się w zakresie wynikającym z obowiązujących przepisów.
+
+⸻
+
+§ 20. Odpowiedzialność
+
+1. Operator odpowiada za prawidłowe świadczenie usług ArchiCompass zgodnie z obowiązującym prawem.
+2. Operator nie jest stroną Umowy Projektowej i nie odpowiada za jej wykonanie przez Klienta lub Projektanta.
+3. Operator nie gwarantuje:
+
+a) znalezienia Projektanta;
+
+b) otrzymania Zapytania;
+
+c) odpowiedzi Projektanta;
+
+d) zawarcia Umowy Projektowej;
+
+e) określonego rezultatu projektu;
+
+f) zgodności projektu z oczekiwaniami Klienta;
+
+g) dostępności określonego Projektanta;
+
+h) zgodności ostatecznej ceny usług z budżetem podanym w Serwisie.
+
+4. Projektanci są niezależnymi podmiotami i odpowiadają za własne działania, informacje, oferty i świadczone usługi.
+5. Operator nie odpowiada za prawdziwość informacji przekazywanych przez Użytkownika, chyba że odpowiedzialność taka wynika z bezwzględnie obowiązujących przepisów.
+6. Operator nie odpowiada za działanie zewnętrznych stron internetowych ani usług, do których Serwis zawiera odnośniki.
+7. Operator nie gwarantuje nieprzerwanego ani całkowicie bezbłędnego działania Serwisu.
+8. Operator nie ponosi odpowiedzialności za przerwy wynikające z przyczyn pozostających poza jego uzasadnioną kontrolą, w szczególności awarii infrastruktury zewnętrznej, działania siły wyższej lub bezprawnych działań osób trzecich, z zastrzeżeniem obowiązujących przepisów.
+9. Żadne postanowienie Regulaminu nie wyłącza ani nie ogranicza odpowiedzialności Operatora wobec konsumenta w zakresie, w którym takie wyłączenie lub ograniczenie byłoby niedopuszczalne na podstawie obowiązującego prawa.
+
+⸻
+
+§ 21. Ograniczenie, zawieszenie i usunięcie Konta
+
+1. Operator może ograniczyć dostęp do określonych funkcjonalności, zawiesić Konto lub – w uzasadnionych przypadkach – je usunąć, jeżeli Użytkownik:
+
+a) poważnie lub powtarzalnie narusza Regulamin;
+
+b) korzysta z Serwisu niezgodnie z prawem;
+
+c) stwarza zagrożenie dla bezpieczeństwa Serwisu lub innych Użytkowników;
+
+d) podszywa się pod inne osoby;
+
+e) wykorzystuje Konto do oszustwa, spamu lub manipulacji;
+
+f) nie usuwa naruszenia pomimo odpowiedniego wezwania, jeżeli charakter naruszenia pozwala na jego usunięcie.
+
+2. Jeżeli charakter naruszenia na to pozwala, Operator może przed zastosowaniem trwałego ograniczenia wezwać Użytkownika do usunięcia naruszenia.
+3. Operator może działać bez wcześniejszego wezwania, jeżeli wymaga tego prawo, bezpieczeństwo Użytkowników lub charakter naruszenia.
+4. W przypadkach wymaganych prawem Użytkownik otrzyma uzasadnienie zastosowanego ograniczenia oraz informację o dostępnych środkach odwoławczych.
+
+⸻
+
+§ 22. Reklamacje
+
+1. Użytkownik może złożyć reklamację dotyczącą działania Serwisu lub usług świadczonych przez Operatora.
+2. Reklamację można przesłać elektronicznie na:
+
+contact@archicompass.pl
+
+3. Reklamacja powinna w miarę możliwości zawierać:
+
+a) dane umożliwiające identyfikację Użytkownika;
+
+b) opis problemu;
+
+c) wskazanie funkcjonalności, której dotyczy;
+
+d) oczekiwany sposób rozwiązania sprawy.
+
+4. Operator może poprosić o dodatkowe informacje, jeżeli są konieczne do rozpatrzenia reklamacji.
+5. Operator rozpatrzy reklamację bez zbędnej zwłoki, nie później niż w terminie 14 dni od jej otrzymania, chyba że bezwzględnie obowiązujące przepisy przewidują krótszy termin.
+6. Odpowiedź zostanie przesłana na adres e-mail Użytkownika lub w inny uzgodniony sposób.
+7. Niniejszy paragraf dotyczy usług Operatora. Reklamacje dotyczące Umowy Projektowej należy kierować bezpośrednio do Projektanta.
+
+⸻
+
+§ 23. Dane osobowe i prywatność
+
+1. Zasady przetwarzania danych osobowych przez Operatora określa Polityka Prywatności dostępna w Serwisie.
+2. Polityka Prywatności określa w szczególności:
+
+a) kategorie przetwarzanych danych;
+
+b) cele i podstawy prawne przetwarzania;
+
+c) okresy przechowywania;
+
+d) kategorie odbiorców;
+
+e) zasady korzystania z dostawców usług technologicznych i AI;
+
+f) prawa osób, których dane dotyczą;
+
+g) zasady transferów danych poza Europejski Obszar Gospodarczy, jeżeli występują.
+
+3. Zasady wykorzystywania plików cookies i podobnych technologii określa Polityka Cookies.
+
+⸻
+
+§ 24. Zmiany Serwisu
+
+1. Operator rozwija Serwis i może wprowadzać nowe funkcje, modyfikować istniejące lub wycofywać funkcjonalności.
+2. Zmiana funkcjonalności nie może naruszać praw Użytkownika wynikających z już opłaconej usługi, chyba że jest konieczna z przyczyn prawnych, bezpieczeństwa albo innych ważnych przyczyn i odbywa się zgodnie z obowiązującym prawem.
+3. Operator może zmienić Regulamin z ważnych przyczyn, w szczególności:
+
+a) zmiany przepisów prawa;
+
+b) zmiany sposobu świadczenia usług;
+
+c) wprowadzenia nowych funkcjonalności;
+
+d) zmiany technologii;
+
+e) konieczności zwiększenia bezpieczeństwa;
+
+f) konieczności przeciwdziałania nadużyciom;
+
+g) zmiany modelu płatności lub zakresu odpłatnych usług.
+
+4. Zmiany dotyczące trwających umów zostaną zakomunikowane Użytkownikom w odpowiednim terminie i w sposób wymagany przez obowiązujące przepisy.
+5. Jeżeli zmiana wymaga akceptacji Użytkownika, dalsze świadczenie danej usługi może być uzależnione od jej zaakceptowania.
+6. Zmiany nie będą stosowane wstecz, chyba że wynika to z obowiązującego prawa lub jest korzystne dla Użytkownika.
+
+⸻
+
+§ 25. Rozwiązanie umowy
+
+1. Użytkownik może w każdym czasie zaprzestać korzystania z bezpłatnych usług ArchiCompass.
+2. Usunięcie Konta oznacza rozwiązanie umowy dotyczącej prowadzenia Konta, z zastrzeżeniem danych i zobowiązań, które zgodnie z prawem powinny zostać zachowane po jej rozwiązaniu.
+3. W przypadku aktywnej odpłatnej Subskrypcji jej zakończenie następuje zgodnie z warunkami przedstawionymi przy zakupie i postanowieniami § 18.
+4. Rozwiązanie umowy nie wpływa na Umowy Projektowe zawarte niezależnie pomiędzy Klientem a Projektantem.
+
+⸻
+
+§ 26. Prawo właściwe i spory
+
+1. Do Regulaminu i umów zawieranych pomiędzy Operatorem a Użytkownikiem stosuje się prawo polskie.
+2. Wybór prawa polskiego nie pozbawia konsumenta ochrony przyznanej mu na podstawie przepisów, których nie można wyłączyć w drodze umowy i które miałyby zastosowanie w braku wyboru prawa.
+3. Strony powinny w pierwszej kolejności dążyć do polubownego rozwiązania sporu.
+4. Konsument może korzystać z dostępnych na podstawie obowiązujących przepisów pozasądowych sposobów rozpatrywania reklamacji i dochodzenia roszczeń.
+5. W przypadku sporów z Użytkownikami niebędącymi konsumentami sądem właściwym jest sąd właściwy miejscowo dla siedziby lub miejsca prowadzenia działalności Operatora, o ile bezwzględnie obowiązujące przepisy nie stanowią inaczej.
+
+⸻
+
+§ 27. Kontakt
+
+1. W sprawach dotyczących Serwisu, Regulaminu i reklamacji można kontaktować się z Operatorem pod adresem:
+
+contact@archicompass.pl
+
+2. Zgłoszenia dotyczące bezpieczeństwa, nadużyć oraz treści potencjalnie nielegalnych można kierować na:
+
+admin@archicompass.pl
+
+3. Dane Operatora:
+
+Sergii Moroz Advisory (SM Advisory)
+Sergii Moroz
+ul. Grzybowska 2, lok. 31
+00-131 Warszawa, Polska
+NIP: 5252995634
+REGON: 528006413
+
+⸻
+
+§ 28. Postanowienia końcowe
+
+1. Regulamin obowiązuje od dnia 16 sierpnia 2026 r..
+2. Aktualna wersja Regulaminu jest dostępna w Serwisie.
+3. W sprawach nieuregulowanych Regulaminem zastosowanie mają właściwe przepisy prawa polskiego oraz bezpośrednio stosowane przepisy prawa Unii Europejskiej.
+4. Jeżeli którekolwiek postanowienie Regulaminu okaże się nieważne lub nieskuteczne, nie wpływa to na ważność pozostałych postanowień, o ile obowiązujące przepisy nie stanowią inaczej.
+5. Regulamin należy interpretować z poszanowaniem bezwzględnie obowiązujących praw konsumentów i innych Użytkowników.
+
+Wersja: 1.0

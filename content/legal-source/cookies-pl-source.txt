@@ -1,0 +1,196 @@
+1. Informacje ogólne
+
+Niniejsza Polityka plików cookies wyjaśnia, w jaki sposób platforma ArchiCompass, dostępna pod adresem archicompass.pl, wykorzystuje pliki cookies, pamięć przeglądarki oraz inne podobne technologie.
+
+Operatorem ArchiCompass jest:
+
+Sergii Moroz, prowadzący działalność gospodarczą pod firmą Sergii Moroz Advisory (SM Advisory)
+ul. Grzybowska 2, lok. 31
+00-131 Warszawa
+NIP: 5252995634
+REGON: 528006413
+e-mail: contact@archicompass.pl
+
+Szczegółowe informacje dotyczące przetwarzania danych osobowych znajdują się w Polityce Prywatności ArchiCompass.
+
+⸻
+
+2. Czym są cookies i podobne technologie
+
+Pliki cookies są niewielkimi informacjami zapisywanymi w urządzeniu Użytkownika podczas korzystania ze strony internetowej.
+
+ArchiCompass może również wykorzystywać inne mechanizmy pamięci przeglądarki, w szczególności:
+
+* localStorage;
+* sessionStorage;
+* identyfikatory techniczne sesji;
+* tokeny uwierzytelniające;
+* podobne technologie niezbędne do działania aplikacji internetowej.
+
+W dalszej części dokumentu określenie „cookies” obejmuje również te podobne technologie, o ile z kontekstu nie wynika inaczej.
+
+⸻
+
+3. Kategorie wykorzystywanych technologii
+
+3.1. Technologie niezbędne
+
+Technologie niezbędne są wykorzystywane w celu zapewnienia prawidłowego i bezpiecznego działania ArchiCompass.
+
+Mogą służyć w szczególności do:
+
+* logowania i utrzymywania sesji Użytkownika;
+* uwierzytelniania;
+* ochrony Konta;
+* zapobiegania nadużyciom;
+* kontroli uprawnień;
+* obsługi przesyłania plików;
+* zapisywania ustawień wymaganych do działania Serwisu;
+* zachowania stanu formularza;
+* zapewnienia ciągłości działania funkcjonalności Serwisu.
+
+Technologie takie mogą być stosowane bez odrębnej zgody Użytkownika w zakresie, w jakim ich wykorzystanie jest niezbędne do świadczenia usługi żądanej przez Użytkownika lub transmisji komunikatu elektronicznego.
+
+Zablokowanie ich w przeglądarce może spowodować nieprawidłowe działanie Serwisu.
+
+⸻
+
+3.2. Preferencje i pamięć interfejsu
+
+ArchiCompass może lokalnie zapisywać informacje dotyczące:
+
+* wybranego języka;
+* preferencji interfejsu;
+* stanu niektórych formularzy;
+* bieżącego etapu AI Project Compass;
+* tymczasowego podglądu plików;
+* ustawień prywatności i cookies.
+
+Dane te są wykorzystywane przede wszystkim do zapewnienia ciągłości i wygody korzystania z Serwisu.
+
+Jeżeli dana technologia jest konieczna do realizacji funkcji wybranej przez Użytkownika, może być stosowana jako technologia niezbędna.
+
+⸻
+
+3.3. Ograniczone statystyki techniczne
+
+ArchiCompass może wykorzystywać losowy identyfikator techniczny przeglądarki lub karty przeglądarki w celu ograniczenia wielokrotnego zliczania tego samego wyświetlenia Profilu Projektanta.
+
+Mechanizm ten nie jest przeznaczony do identyfikowania Użytkownika na podstawie imienia, nazwiska ani adresu e-mail.
+
+Dane statystyczne mogą być agregowane lub anonimizowane.
+
+⸻
+
+3.4. Cookies analityczne
+
+Na dzień wejścia w życie niniejszej Polityki ArchiCompass nie wykorzystuje opcjonalnych cookies analitycznych podmiotów trzecich, chyba że Użytkownik zostanie o ich wdrożeniu poinformowany i – jeżeli jest to wymagane – wyrazi odpowiednią zgodę.
+
+Jeżeli w przyszłości ArchiCompass wdroży np. Google Analytics, Microsoft Clarity, PostHog lub podobne narzędzie wymagające zgody, zostanie ono uruchomione dopiero po dokonaniu odpowiedniego wyboru przez Użytkownika.
+
+⸻
+
+3.5. Cookies marketingowe i reklamowe
+
+Na dzień wejścia w życie niniejszej Polityki ArchiCompass nie wykorzystuje reklamowych ani remarketingowych plików cookies i nie wykorzystuje cookies do tworzenia reklamowych profili Użytkowników.
+
+Jeżeli takie technologie zostaną wdrożone w przyszłości, niniejsza Polityka oraz mechanizm zarządzania zgodą zostaną odpowiednio zaktualizowane przed ich aktywacją.
+
+⸻
+
+4. Technologie wykorzystywane obecnie
+
+W zależności od urządzenia, stanu zalogowania i używanej funkcjonalności mogą być wykorzystywane w szczególności następujące mechanizmy:
+
+Technologia	Cel	Kategoria
+mechanizmy uwierzytelniania Supabase	logowanie, utrzymywanie sesji i bezpieczeństwo Konta	niezbędna
+localStorage / sessionStorage	język, ustawienia interfejsu, stan formularzy i wybranych funkcji	niezbędna / funkcjonalna
+tymczasowe dane AI Project Compass	zachowanie bieżącego stanu formularza i analizy	niezbędna dla wybranej funkcji
+identyfikator techniczny wyświetlenia Profilu	ograniczenie wielokrotnego zliczania odsłon	statystyka techniczna
+zapis preferencji cookies	przechowywanie wyboru Użytkownika	niezbędna
+
+Dokładne nazwy technicznych kluczy mogą się zmieniać w związku z rozwojem aplikacji, bez zmiany celu ich wykorzystywania.
+
+⸻
+
+5. Podmioty zewnętrzne
+
+Niektóre niezbędne funkcje ArchiCompass są realizowane przy wykorzystaniu infrastruktury zewnętrznych dostawców, w szczególności:
+
+* Supabase;
+* Vercel.
+
+Samo korzystanie z zewnętrznego dostawcy infrastruktury nie oznacza automatycznie wykorzystywania jego cookies do celów marketingowych.
+
+Informacje dotyczące odbiorców danych i transferów danych znajdują się w Polityce Prywatności.
+
+⸻
+
+6. Podstawa stosowania opcjonalnych cookies
+
+Cookies oraz podobne technologie, które nie są niezbędne do działania usługi żądanej przez Użytkownika, są wykorzystywane wyłącznie po uzyskaniu wymaganej zgody.
+
+Zgoda:
+
+* jest dobrowolna;
+* jest udzielana poprzez aktywne działanie Użytkownika;
+* może zostać wycofana w dowolnym momencie;
+* może być udzielona osobno dla poszczególnych kategorii.
+
+Brak zgody na opcjonalne cookies nie powinien uniemożliwiać korzystania z podstawowych funkcji ArchiCompass.
+
+⸻
+
+7. Zarządzanie zgodami
+
+Jeżeli ArchiCompass wykorzystuje opcjonalne cookies, Użytkownik może zarządzać zgodami za pomocą opcji:
+
+„Ustawienia cookies”
+
+dostępnej w Serwisie.
+
+Użytkownik może w szczególności:
+
+* zaakceptować wszystkie opcjonalne technologie;
+* odrzucić wszystkie opcjonalne technologie;
+* wybrać poszczególne kategorie;
+* później zmienić swoją decyzję;
+* wycofać wcześniej udzieloną zgodę.
+
+Wycofanie zgody nie wpływa na zgodność z prawem działań wykonanych przed jej wycofaniem.
+
+⸻
+
+8. Ustawienia przeglądarki
+
+Użytkownik może również usuwać lub blokować cookies poprzez ustawienia przeglądarki.
+
+Należy jednak pamiętać, że blokowanie technologii niezbędnych może spowodować w szczególności:
+
+* wylogowanie;
+* brak możliwości zalogowania;
+* nieprawidłowe działanie formularzy;
+* problemy z przesyłaniem plików;
+* brak dostępu do niektórych funkcji Konta.
+
+⸻
+
+9. Zmiany Polityki
+
+Polityka może być aktualizowana w związku z:
+
+* zmianami przepisów;
+* wdrożeniem nowych narzędzi;
+* zmianą dostawców;
+* zmianą sposobu działania Serwisu;
+* wdrożeniem nowych funkcji analitycznych lub marketingowych.
+
+Aktualna wersja Polityki oraz data jej obowiązywania będą publikowane w ArchiCompass.
+
+⸻
+
+10. Kontakt
+
+Pytania dotyczące cookies i prywatności można kierować na:
+
+contact@archicompass.pl

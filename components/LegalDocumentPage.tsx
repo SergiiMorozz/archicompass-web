@@ -10,22 +10,46 @@ export default function LegalDocumentPage({
   relatedLinks,
   contactLabel,
   companyLine,
+  fullText,
 }: {
   document: LegalDocument;
   relatedTitle: string;
   relatedLinks: RelatedLink[];
   contactLabel: string;
   companyLine: string;
+  fullText?: string;
 }) {
+  const fullTextLines = fullText?.split("\n").map((line) => line.trim()).filter(Boolean) ?? [];
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
       <p className="text-sm font-semibold uppercase tracking-[0.12em] text-primary">{document.eyebrow}</p>
       <h1 className="mt-3 text-4xl font-bold sm:text-5xl">{document.title}</h1>
       <p className="mt-3 text-sm text-muted">{document.effectiveDate}</p>
-      <p className="mt-6 max-w-3xl text-lg leading-8 text-muted">{document.intro}</p>
+      {!fullText ? <p className="mt-6 max-w-3xl text-lg leading-8 text-muted">{document.intro}</p> : null}
 
-      <div className="mt-10 grid gap-9">
-        {document.sections.map((section) => (
+      {fullText ? (
+        <div className="mt-10 grid gap-4 text-base leading-8 text-muted">
+          {fullTextLines.map((line, index) => {
+            if (line === "⸻") return null;
+
+            const isParagraphHeading = /^§\s+\d+\./.test(line)
+              || (/^\d+\.\s+/.test(line) && line.length <= 100 && !/[.;:,]$/.test(line));
+
+            if (isParagraphHeading) {
+              return <h2 key={`${index}-${line}`} className="mt-7 text-2xl font-bold text-foreground">{line}</h2>;
+            }
+
+            if (/^[a-z]\)|^\*\s|^\d+\./.test(line)) {
+              return <p key={`${index}-${line}`} className="ml-5">{line}</p>;
+            }
+
+            return <p key={`${index}-${line}`}>{line}</p>;
+          })}
+        </div>
+      ) : (
+        <div className="mt-10 grid gap-9">
+          {document.sections.map((section) => (
           <section key={section.title}>
             <h2 className="text-2xl font-bold">{section.title}</h2>
             <div className="mt-3 grid gap-3 text-base leading-8 text-muted">
@@ -37,8 +61,9 @@ export default function LegalDocumentPage({
               ) : null}
             </div>
           </section>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <section className="mt-12 rounded-2xl border border-line bg-card p-6 sm:p-7">
         <h2 className="text-xl font-bold">{relatedTitle}</h2>
