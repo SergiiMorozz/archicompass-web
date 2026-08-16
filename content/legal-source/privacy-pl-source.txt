@@ -281,7 +281,7 @@ Po przekazaniu przez Klienta swoich danych Projektantowi w celu nawiązania bezp
 
 7. Obsługa wiadomości usługowych
 
-Cel: wysyłanie wiadomości dotyczących Konta, bezpieczeństwa, nowych Zapytania, nowych wiadomości, zmian w usłudze, płatności lub innych zdarzeń niezbędnych do korzystania z Serwisu.
+Cel: wysyłanie wiadomości dotyczących Konta, bezpieczeństwa, nowych Zapytań, nowych wiadomości, zmian w usłudze, płatności lub innych zdarzeń niezbędnych do korzystania z Serwisu.
 
 Podstawa prawna: art. 6 ust. 1 lit. b RODO.
 
@@ -461,7 +461,7 @@ d) informacje o stylu i cechach projektu;
 
 e) inne informacje konieczne do wygenerowania wyniku wybranej funkcji.
 
-4. W zależności od aktualnej konfiguracji technicznej ArchiCompass może korzystać w tym celu z zewnętrznych dostawców modeli AI, w szczególności OpenAI lub Google Gemini.
+4. Aktualnie produkcyjna wersja AI Project Compass wykorzystuje modele Google Gemini. Administrator może w przyszłości zmienić dostawcę, jeżeli będzie to uzasadnione technicznie lub organizacyjnie; w takim przypadku odpowiednio zaktualizuje niniejszą Politykę.
 5. Dane są przekazywane dostawcy AI wyłącznie w zakresie potrzebnym do realizacji uruchomionej przez Użytkownika funkcji, zgodnie z umowami i ustawieniami technicznymi stosowanymi przez Administratora.
 6. Administrator nie wykorzystuje prywatnych materiałów Użytkowników do samodzielnego trenowania własnego ogólnego modelu sztucznej inteligencji.
 7. Wyniki analizy AI mogą być niedokładne, niekompletne lub nie odpowiadać rzeczywistym możliwościom realizacyjnym projektu.
@@ -530,9 +530,9 @@ Wykorzystywany do:
 * obsługi poczty związanej z domeną ArchiCompass;
 * komunikacji e-mail.
 
-OpenAI i/lub Google Gemini
+Google Gemini
 
-W zależności od aktualnej konfiguracji mogą być wykorzystywane do:
+Aktualnie wykorzystywany do:
 
 * realizacji opcjonalnych funkcji sztucznej inteligencji;
 * analizy informacji tekstowych;
@@ -815,7 +815,7 @@ admin@archicompass.pl
 
 § 26. Postanowienia końcowe
 
-1. Niniejsza Polityka obowiązuje od dnia 16 sierpnia 2026 r..
+1. Niniejsza Polityka obowiązuje od dnia 16 sierpnia 2026 r.
 2. W sprawach nieuregulowanych Polityką zastosowanie mają odpowiednie przepisy prawa, w szczególności RODO.
 3. Zasady świadczenia usług za pośrednictwem ArchiCompass określa Regulamin ArchiCompass.
 4. Szczegółowe informacje dotyczące technologii zapisywanych w urządzeniu Użytkownika zawiera Polityka plików cookies.

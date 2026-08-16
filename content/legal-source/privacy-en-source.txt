@@ -271,7 +271,7 @@ Regarding the analysis of the functioning of the Matching mechanism and its impr
 
 6. Handling of Enquiries and Client–Designer communication
 
-Purpose: to enable the sending of an Inquiry, the transmission of a Brief, the conduct of communication, and the establishment of contact between the Client and the Designer.
+Purpose: to enable the sending of an Enquiry, the transmission of a Brief, the conduct of communication, and the establishment of contact between the Client and the Designer.
 
 Legal basis: Article 6(1)(b) of the GDPR.
 
@@ -281,7 +281,7 @@ Upon the Client providing their data to the Designer for the purpose of establis
 
 7. Service message handling
 
-Purpose: sending messages regarding the Account, security, new Inquiries, new messages, changes to the service, payments, or other events necessary for the use of the Service.
+Purpose: sending messages regarding the Account, security, new Enquiries, new messages, changes to the service, payments, or other events necessary for the use of the Service.
 
 Legal basis: Article 6(1)(b) of the GDPR.
 
@@ -366,7 +366,7 @@ d) history of specific operations in the Account;
 
 e) Profile statistics;
 
-f) information regarding the Inquiry and messages.
+f) information regarding the Enquiry and messages.
 
 3. In the case of Designers and Studios, some information may come from publicly available sources, such as:
 
@@ -428,7 +428,7 @@ h) public professional information;
 i) ratings and number of reviews, if presented on the Service.
 
 3. Client Account data, private Briefs, private reference photos, favourite items, and private messages are not made public.
-4. If the Client decides to send an Inquiry to a Designer, the Designer may receive data needed to handle this Inquiry, in particular:
+4. If the Client decides to send an Enquiry to a Designer, the Designer may receive data needed to handle this Enquiry, in particular:
 
 a) the content of the Brief;
 
@@ -461,7 +461,7 @@ d) information about the style and features of the project;
 
 e) other information necessary to generate the result of the selected feature.
 
-4. Depending on the current technical configuration, ArchiCompass may use external AI model providers for this purpose, in particular OpenAI or Google Gemini.
+4. The production version of AI Project Compass currently uses Google Gemini models. The Controller may change the provider in the future where technically or organisationally justified; in that case, this Policy will be updated accordingly.
 5. Data is transferred to the AI provider only to the extent necessary to perform the feature activated by the User, in accordance with the agreements and technical settings applied by the Controller.
 6. The Controller does not use the private materials of Users to independently train its own general artificial intelligence model.
 7. The results of AI analysis may be inaccurate, incomplete, or may not correspond to the actual implementation possibilities of the project.
@@ -530,9 +530,9 @@ Used for:
 * handling mail related to the ArchiCompass domain;
 * e-mail communication.
 
-OpenAI and/or Google Gemini
+Google Gemini
 
-Depending on the current configuration, they may be used for:
+Currently used for:
 
 * implementation of optional artificial intelligence functions;
 * analysis of text information;
@@ -562,7 +562,7 @@ f) entities ensuring infrastructure security;
 
 g) public authorities – if the obligation to transfer data arises from the law;
 
-h) Designers – to the extent resulting from the Inquiry sent by the Client.
+h) Designers – to the extent resulting from the Enquiry sent by the Client.
 
 4. Entities processing data on behalf of the Controller are entitled to process it only to the extent resulting from an appropriate agreement or other legal basis.
 5. Some recipients, in particular Designers, payment operators, or specific third-party service providers, may act as separate data controllers in relation to certain operations.
@@ -640,7 +640,7 @@ Designer Profile data	for the period of maintaining the Profile, and subsequentl
 Portfolio	until its removal by the Designer, removal of the Profile, or termination of the provision of the relevant service
 Client Briefs and projects	until their removal or removal of the Account, unless further storage is necessary on another legal basis
 Private reference photos	for the period of association with an active project or Brief, and subsequently until their removal in accordance with the Service mechanism
-Inquiries and messages	for the period needed to handle communication and subsequently for the period necessary to establish, pursue, or defend claims
+Enquiries and messages	for the period needed to handle communication and subsequently for the period necessary to establish, pursue, or defend claims
 Data processed on the basis of marketing consent	until withdrawal of consent or cessation of the given activity
 Billing data and accounting documents	for the period required by tax and accounting regulations
 Data regarding claims	until the expiry of the relevant limitation period, and if proceedings are pending – until their final conclusion
@@ -663,7 +663,7 @@ a) without an e-mail address, it may not be possible to create an Account;
 
 b) without information about a project, it may not be possible to prepare a Brief or a Match;
 
-c) without appropriate contact details, it may not be possible to forward an Inquiry to a Designer;
+c) without appropriate contact details, it may not be possible to forward an Enquiry to a Designer;
 
 d) without data required by tax regulations, it may not be possible to correctly settle a paid service.
 

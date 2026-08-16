@@ -133,9 +133,9 @@ The User should not upload:
 
 8. AI technology providers
 
-ArchiCompass may integrate AI models provided by external providers.
+The production version of AI Project Compass currently uses Google Gemini models provided by Google.
 
-The currently used provider or configuration may change as technology develops.
+The provider or configuration may change as technology develops. In that case, ArchiCompass will update the information for Users before, or at the latest together with, the implementation of the change.
 
 Information regarding current providers, the processing of personal data, and any potential data transfers is described in the Privacy Policy.
 

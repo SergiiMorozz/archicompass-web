@@ -133,9 +133,9 @@ Użytkownik nie powinien przesyłać:
 
 8. Dostawcy technologii AI
 
-ArchiCompass może integrować modele AI dostarczane przez zewnętrznych dostawców.
+Aktualnie produkcyjna wersja AI Project Compass wykorzystuje modele Google Gemini dostarczane przez Google.
 
-Aktualnie stosowany dostawca lub konfiguracja może ulegać zmianie wraz z rozwojem technologii.
+Dostawca lub konfiguracja może ulec zmianie wraz z rozwojem technologii. W takim przypadku ArchiCompass zaktualizuje informacje dla Użytkowników przed lub najpóźniej wraz z wdrożeniem zmiany.
 
 Informacje dotyczące aktualnych dostawców, przetwarzania danych osobowych oraz ewentualnych transferów danych opisuje Polityka Prywatności.
 

@@ -40,7 +40,7 @@ Terms used in the Terms and Conditions shall mean:
 11. AI Project Compass – a functionality of the Service using IT solutions, including artificial intelligence models, to analyse materials and information provided by the User and to support the creation of a Project Brief and Matching.
 12. Project Brief or Brief – an organised description of a project, needs, inspiration, preferences, budget, scope of work, or other information related to a planned investment, created by the User independently or with the support of AI Project Compass.
 13. Matching – the result of the operation of the Service's functionality consisting of indicating Designers who, according to the criteria used by the Service, may meet the needs specified by the Client.
-14. Inquiry – information sent via the Service by a Client to a Designer or Studio, or provided to a Designer by the Service in connection with a Client's interest in their services.
+14. Enquiry – information sent via the Service by a Client to a Designer or Studio, or provided to a Designer by the Service in connection with a Client's interest in their services.
 15. Design Agreement – an agreement concerning the Designer's services concluded directly between the Client and the Designer or Studio outside the legal relationship connecting the User with the Operator.
 16. Subscription – paid access to specific functionalities of the Service for a specified billing period.
 17. Privacy Policy – the current ArchiCompass privacy policy made available on the Service.
@@ -65,7 +65,7 @@ f) creating and storing Project Briefs;
 
 g) Matching Designers to the Client's information and preferences;
 
-h) sending an Inquiry or enabling contact between a Client and a Designer;
+h) sending an Enquiry or enabling contact between a Client and a Designer;
 
 i) saving inspiration and other information related to a project;
 
@@ -117,7 +117,7 @@ e) enabling JavaScript and – to the extent required for specific functions –
 
 1. A Client may use the functions intended for the preparation and organisation of information regarding a planned investment and for searching for Designers.
 2. The Client is obliged to provide truthful information to the extent that it may affect Matching or communication with a Designer.
-3. Creating a Brief, receiving a Match, viewing a Profile, or sending an Inquiry does not oblige the Client to conclude a Design Agreement.
+3. Creating a Brief, receiving a Match, viewing a Profile, or sending an Enquiry does not oblige the Client to conclude a Design Agreement.
 4. Use of a basic Client Account is free of charge, unless the User is expressly informed of the chargeability of a specific additional service before using it.
 
 ⸻
@@ -136,7 +136,7 @@ d) the use of published materials does not infringe the rights of third parties.
 
 2. The Designer is responsible for information concerning, among other things, the scope of services, experience, location, availability, prices, deadlines, and the Portfolio.
 3. The Operator may demand the completion or verification of information concerning the Designer or the Studio if this is justified by the safety of Users, the credibility of the Service, or a legal obligation.
-4. The Operator does not guarantee the Designer a specific number of Profile views, Matches, Inquiries, Clients, or concluded Design Agreements.
+4. The Operator does not guarantee the Designer a specific number of Profile views, Matches, Enquiries, Clients, or concluded Design Agreements.
 
 ⸻
 
@@ -257,7 +257,7 @@ g) the Designer's area of operation;
 
 h) other criteria related to the Client's needs and the nature of the project.
 
-3. The weight of individual parameters may vary depending on the nature of the Inquiry and the available information.
+3. The weight of individual parameters may vary depending on the nature of the Enquiry and the available information.
 4. Matching is a technological recommendation and does not constitute:
 
 a) a guarantee of the quality of the Designer's services;
@@ -276,13 +276,13 @@ e) a guarantee of the offer's compliance with the Client's budget.
 
 ⸻
 
-§ 13. Inquiries and communication
+§ 13. Enquiries and communication
 
 1. The Client may contact the Designer using the functionalities made available in the Service.
-2. Sending an Inquiry signifies interest in the possibility of using the Designer's services, but does not constitute the conclusion of a Design Agreement.
-3. The Designer decides independently whether to respond to an Inquiry.
+2. Sending an Enquiry signifies interest in the possibility of using the Designer's services, but does not constitute the conclusion of a Design Agreement.
+3. The Designer decides independently whether to respond to an Enquiry.
 4. The Operator does not guarantee a response from the Designer.
-5. Data received in connection with an Inquiry may be used solely for the purpose related to the given communication or on another lawful basis.
+5. Data received in connection with an Enquiry may be used solely for the purpose related to the given communication or on another lawful basis.
 6. It is forbidden to use data obtained via the Service for spam, harassment, mass marketing, or other purposes contrary to the law or the Terms and Conditions.
 
 ⸻
@@ -409,7 +409,7 @@ d) contact details of the reporter, if required by law or necessary to process t
 
 1. The Client Account is free of charge, unless the User explicitly selects an additional paid service.
 2. The Operator may offer Designers or Studios a free period of access to functionalities, in accordance with the terms presented upon activation.
-3. As of the date of entry into force of these Terms and Conditions, the Operator may offer the first Designers a 3-month period of free access to functionalities including the Profile, Portfolio, and the ability to receive an Inquiry, in accordance with the information presented in the Service.
+3. As of the date of entry into force of these Terms and Conditions, the Operator may offer the first Designers a 3-month period of free access to functionalities including the Profile, Portfolio, and the ability to receive Enquiries, in accordance with the information presented in the Service.
 4. After the end of the free period, further use of functionalities requiring a Subscription may require selecting a paid plan.
 5. Before making a purchase, the User receives information at least regarding:
 
@@ -428,7 +428,7 @@ f) the rules for its termination.
 6. Payment is made using the payment methods available in the Service.
 7. If the Subscription renews automatically, information about this will be presented before the purchase is made.
 8. The User may opt out of further Subscription renewal in accordance with the mechanism made available in the Account. Opting out does not result in the loss of paid access before the end of the current billing period, unless applicable regulations require a different solution.
-9. Lack of effective payment may result in the limitation of paid functionalities, in particular the visibility of the Profile, Portfolio, or the ability to receive new Inquiries.
+9. Lack of effective payment may result in the limitation of paid functionalities, in particular the visibility of the Profile, Portfolio, or the ability to receive new Enquiries.
 10. Detailed prices and the scope of individual plans are defined by the current offer presented in the Service.
 
 ⸻
@@ -451,7 +451,7 @@ f) the rules for its termination.
 
 a) finding a Designer;
 
-b) receiving an Inquiry;
+b) receiving an Enquiry;
 
 c) a response from a Designer;
 

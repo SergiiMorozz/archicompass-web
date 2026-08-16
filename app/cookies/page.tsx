@@ -17,6 +17,6 @@ export default function CookiePolicyPage() {
   return <LegalDocumentPage document={copy.documents.cookies} fullText={getFullLegalText("cookies", siteLocale)} relatedTitle={copy.relatedTitle} relatedLinks={[
     { href: "/privacy", label: copy.links.privacy },
     { href: "/terms", label: copy.links.terms },
-    { href: "/privacy-and-ai", label: copy.links.privacyAndAi },
+    { href: "/ai-transparency", label: copy.links.aiTransparency },
   ]} contactLabel={copy.contactLabel} companyLine={copy.companyLine} />;
 }

@@ -143,11 +143,7 @@ Brak zgody na opcjonalne cookies nie powinien uniemożliwiać korzystania z pods
 
 7. Zarządzanie zgodami
 
-Jeżeli ArchiCompass wykorzystuje opcjonalne cookies, Użytkownik może zarządzać zgodami za pomocą opcji:
-
-„Ustawienia cookies”
-
-dostępnej w Serwisie.
+Jeżeli ArchiCompass zacznie wykorzystywać opcjonalne cookies, wraz z ich wdrożeniem udostępni w Serwisie mechanizm „Ustawienia cookies”, który pozwoli Użytkownikowi zarządzać zgodami.
 
 Użytkownik może w szczególności:
 

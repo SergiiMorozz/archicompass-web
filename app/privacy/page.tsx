@@ -15,7 +15,6 @@ export const metadata: Metadata = pageMetadata({
 
 export default function PrivacyPage() {
   return <LegalDocumentPage document={copy.documents.privacy} fullText={getFullLegalText("privacy", siteLocale)} relatedTitle={copy.relatedTitle} relatedLinks={[
-    { href: "/privacy-and-ai", label: copy.links.privacyAndAi },
     { href: "/ai-transparency", label: copy.links.aiTransparency },
     { href: "/terms", label: copy.links.terms },
     { href: "/cookies", label: copy.links.cookies },
