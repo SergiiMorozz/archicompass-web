@@ -38,10 +38,11 @@ type StyleAnalysis = {
 
 type WorkspaceModule =
   | "inspirations"
-  | "preferences"
+  | "analysis"
   | "details"
   | "scope"
-  | "budget";
+  | "budget"
+  | "preferences";
 
 const maxReferencePhotos = 10;
 const maxAnalysisPhotos = 6;
@@ -51,49 +52,20 @@ const preparedPhotoQualities = [0.82, 0.72, 0.62, 0.52];
 const projectCompassDraftKey = "archicompass-project-compass-draft";
 
 const workspaceFallbackPhotos = [
-  "/images/home/hero-warm-minimalist-20260811.png",
-  "/images/guides/popular-interior-styles-moodboard.webp",
-  "/images/guides/interior-design-brief-inspiration.webp",
-  "/images/guides/define-interior-style.webp",
+  "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=85",
+  "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=900&q=85",
+  "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=900&q=85",
+  "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=900&q=85",
 ];
 
 const workspaceModuleMarks: Record<WorkspaceModule, string> = {
   inspirations: "01",
-  preferences: "02",
-  details: "03",
-  scope: "04",
-  budget: "05",
+  analysis: "AI",
+  details: "02",
+  scope: "03",
+  budget: "04",
+  preferences: "05",
 };
-
-const paletteFallbacks = ["#f2e7d3", "#dfc393", "#b77c48", "#6f5747", "#40584d", "#9e9ab6"];
-
-function paletteColor(value: string, index: number) {
-  const normalized = value.toLowerCase();
-
-  if (normalized.includes("white") || normalized.includes("cream") || normalized.includes("ivory")) return "#f4eddf";
-  if (normalized.includes("beige") || normalized.includes("sand") || normalized.includes("linen")) return "#dcc29b";
-  if (normalized.includes("oak") || normalized.includes("wood") || normalized.includes("caramel")) return "#b67d4a";
-  if (normalized.includes("brown") || normalized.includes("walnut")) return "#654d3e";
-  if (normalized.includes("green") || normalized.includes("olive")) return "#637761";
-  if (normalized.includes("grey") || normalized.includes("gray") || normalized.includes("stone")) return "#aaa49b";
-
-  return paletteFallbacks[index % paletteFallbacks.length];
-}
-
-function PaletteLegend({ colors, compact = false }: { colors: string[]; compact?: boolean }) {
-  if (!colors.length) return null;
-
-  return (
-    <div className={compact ? "flex flex-wrap gap-1.5" : "flex flex-wrap gap-2"}>
-      {colors.slice(0, compact ? 4 : 6).map((color, index) => (
-        <span key={`${color}-${index}`} className={compact ? "inline-flex h-5 w-5 items-center justify-center rounded-full border border-black/10 shadow-sm" : "inline-flex items-center gap-2 rounded-full border border-line bg-background px-2.5 py-1.5 text-xs font-semibold"} title={color}>
-          <span className="h-4 w-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: paletteColor(color, index) }} />
-          {!compact ? <span>{color}</span> : null}
-        </span>
-      ))}
-    </div>
-  );
-}
 
 function canvasBlob(canvas: HTMLCanvasElement, quality: number) {
   return new Promise<Blob | null>((resolve) => {
@@ -751,11 +723,12 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   const hasBudget = Boolean(touchedModules.budget);
   const hasPreferences = Boolean(styleAnalysis || selectedVisualCues.length || notes.trim() || touchedModules.preferences);
   const readinessParts = [
-    { module: "inspirations" as const, weight: 30, complete: Boolean(referencePhotos.length && styleAnalysis) },
-    { module: "preferences" as const, weight: 15, complete: hasPreferences },
+    { module: "inspirations" as const, weight: 20, complete: referencePhotos.length > 0 },
+    { module: "analysis" as const, weight: 15, complete: Boolean(styleAnalysis) },
     { module: "details" as const, weight: 20, complete: hasProjectDetails },
     { module: "scope" as const, weight: 15, complete: hasScope },
-    { module: "budget" as const, weight: 20, complete: hasBudget },
+    { module: "budget" as const, weight: 25, complete: hasBudget },
+    { module: "preferences" as const, weight: 5, complete: hasPreferences },
   ];
   const briefReadiness = readinessParts.reduce(
     (total, item) => total + (item.complete ? item.weight : 0),
@@ -767,7 +740,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       : briefReadiness > 0
       ? copy.ui.workspace.statusInProgress
       : copy.ui.workspace.statusEmpty;
-  const recommendedModule = readinessParts.find((item) => !item.complete)?.module ?? "budget";
+  const recommendedModule = readinessParts.find((item) => !item.complete)?.module ?? "preferences";
   const isReadyForMatching = briefReadiness >= 65 && hasProjectDetails && hasScope && hasBudget;
   const workspaceProjectSummary = hasProjectDetails
     ? `${optionLabel(projectTypes, projectType)}${areaM2 ? ` · ${areaM2} m²` : ""}${location.trim() ? ` · ${location.trim()}` : ""}`
@@ -784,22 +757,20 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       title: copy.ui.workspace.inspirations.title,
       body: copy.ui.workspace.inspirations.body,
       preview: referencePhotos.length
-        ? styleAnalysis
-          ? styleAnalysis.primaryStyle
-          : copy.ui.workspace.inspirations.previewReady(referencePhotos.length)
+        ? copy.ui.workspace.inspirations.previewReady(referencePhotos.length)
         : copy.ui.workspace.inspirations.previewEmpty,
-      complete: Boolean(referencePhotos.length && styleAnalysis),
-      touched: Boolean(touchedModules.inspirations || styleAnalysis),
+      complete: referencePhotos.length > 0,
+      touched: Boolean(touchedModules.inspirations),
     },
     {
-      id: "preferences" as const,
-      title: copy.ui.workspace.preferences.title,
-      body: copy.ui.workspace.preferences.body,
-      preview: hasPreferences
-        ? styleAnalysis?.primaryStyle || styleLabels(style)
-        : copy.ui.workspace.preferences.previewEmpty,
-      complete: hasPreferences,
-      touched: Boolean(touchedModules.preferences || styleAnalysis),
+      id: "analysis" as const,
+      title: copy.ui.workspace.analysis.title,
+      body: copy.ui.workspace.analysis.body,
+      preview: styleAnalysis
+        ? styleAnalysis.primaryStyle
+        : copy.ui.workspace.analysis.previewEmpty,
+      complete: Boolean(styleAnalysis),
+      touched: Boolean(touchedModules.analysis),
     },
     {
       id: "details" as const,
@@ -828,6 +799,16 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
         : copy.ui.workspace.budget.previewEmpty,
       complete: hasBudget,
       touched: Boolean(touchedModules.budget),
+    },
+    {
+      id: "preferences" as const,
+      title: copy.ui.workspace.preferences.title,
+      body: copy.ui.workspace.preferences.body,
+      preview: hasPreferences
+        ? styleAnalysis?.primaryStyle || styleLabels(style)
+        : copy.ui.workspace.preferences.previewEmpty,
+      complete: hasPreferences,
+      touched: Boolean(touchedModules.preferences),
     },
   ];
 
@@ -1059,7 +1040,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       }
 
       setStyleAnalysis(payload.analysis);
-      markModule("inspirations");
+      markModule("analysis");
       markModule("preferences");
       if (styles.some((option) => option.value === payload.analysis?.styleDirection)) {
         setStyle((current) => mergeStyleValue(current, payload.analysis!.styleDirection));
@@ -1254,14 +1235,14 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
     return (
       <main className="bg-[#fbfaff] pb-12 text-foreground">
         <section className="border-b border-[#ece6f7] bg-[radial-gradient(circle_at_78%_20%,rgba(125,68,232,0.13),transparent_28%),linear-gradient(180deg,#ffffff_0%,#fbfaff_100%)] px-4 py-9 sm:px-6 sm:py-14">
-          <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.92fr)_minmax(460px,1.08fr)] lg:items-center">
+          <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(380px,0.9fr)] lg:items-center">
             <div>
               <Link href={localeAppPath("/")} className="inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-primary">
                 <span aria-hidden="true">&larr;</span>
                 {copy.ui.workspace.back}
               </Link>
               <div className="mt-8 text-xs font-bold tracking-[0.16em] text-primary">{copy.ui.workspace.eyebrow}</div>
-              <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-[1.05] tracking-tight sm:text-[3.1rem] lg:text-[4.25rem]">
+              <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
                 {copy.ui.workspace.titleBefore}{" "}
                 <span className="text-primary">{copy.ui.workspace.titleHighlight}</span>{" "}
                 {copy.ui.workspace.titleAfter}
@@ -1279,7 +1260,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
               </ul>
             </div>
 
-            <div className="relative mx-auto h-[390px] w-full max-w-[620px] sm:h-[470px]">
+            <div className="relative mx-auto h-[350px] w-full max-w-[540px] sm:h-[420px]">
               <div className="absolute inset-x-6 top-3 h-[calc(100%-22px)] overflow-hidden rounded-[32px] border border-white bg-[#eee8df] shadow-[0_28px_65px_rgba(57,31,92,0.16)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={workspacePhotos[0]} alt="" className="h-full w-full object-cover" />
@@ -1300,12 +1281,16 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                 </div>
               ))}
               <div className="absolute left-6 top-7 rounded-2xl border border-primary/20 bg-white/95 p-4 shadow-[0_16px_32px_rgba(57,31,92,0.13)] backdrop-blur sm:left-0 sm:top-14 sm:p-5">
-                <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">{copy.ui.steps.aiTitle}</div>
+                <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">{copy.ui.workspace.analysis.title}</div>
                 <div className="mt-1 text-sm font-bold">
                   {styleAnalysis ? styleAnalysis.primaryStyle : copy.ui.workspace.progressTitle}
                 </div>
                 {styleAnalysis?.colorPalette.length ? (
-                  <div className="mt-3" aria-label={styleAnalysis.colorPalette.join(", ")}><PaletteLegend colors={styleAnalysis.colorPalette} compact /></div>
+                  <div className="mt-3 flex gap-1.5" aria-label={styleAnalysis.colorPalette.join(", ")}>
+                    {styleAnalysis.colorPalette.slice(0, 4).map((color) => (
+                      <span key={color} title={color} className="h-4 w-4 rounded-full border border-black/10 bg-[#d9c29c] odd:bg-[#f3e7d5]" />
+                    ))}
+                  </div>
                 ) : (
                   <div className="mt-3 h-1.5 w-24 overflow-hidden rounded-full bg-primary-soft"><span className="block h-full w-2/3 rounded-full bg-primary" /></div>
                 )}
@@ -1413,7 +1398,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                 </div>
 
                 {activeModule === "inspirations" ? (
-                  <div className="mt-6 grid gap-6">
+                  <div className="mt-6">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                       <div>
                         <p className="text-sm leading-6 text-muted">{copy.ui.steps.photosBody}</p>
@@ -1438,23 +1423,26 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                         ))}
                       </div>
                     ) : <p className="mt-5 rounded-2xl border border-line bg-background p-4 text-sm leading-6 text-muted">{copy.ui.steps.noPhotos}</p>}
+                    <p className="mt-5 text-xs leading-5 text-muted">{copy.ui.steps.aiPrivacyBefore} {maxAnalysisPhotos} {copy.ui.steps.aiPrivacyAfter} <Link href={localeAppPath("/privacy")} className="font-semibold underline">{copy.ui.steps.privacy}</Link>.</p>
+                  </div>
+                ) : null}
+
+                {activeModule === "analysis" ? (
+                  <div className="mt-6">
                     <div className="rounded-2xl border border-primary/25 bg-primary-soft/55 p-5">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div><div className="flex items-center gap-2"><span className="rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-white">AI</span><h3 className="font-bold text-primary">{copy.ui.steps.aiTitle}</h3></div><p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{copy.ui.steps.aiBody}</p></div>
-                        <button type="button" onClick={analyzeReferencePhotos} disabled={!referencePhotos.length || isAnalyzing || isPreparingPhotos} className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60">{isAnalyzing ? copy.ui.steps.analyzing : copy.ui.steps.analyze}</button>
+                        <button type="button" onClick={analyzeReferencePhotos} disabled={!referencePhotos.length || isAnalyzing || isPreparingPhotos} className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60">{isAnalyzing ? copy.ui.steps.analyzing : copy.ui.workspace.analysis.start}</button>
                       </div>
                       <p className="mt-4 rounded-xl border border-primary/15 bg-white/70 px-3 py-2 text-xs leading-5 text-muted">{copy.ui.steps.aiTransparencyNotice} <Link href={localeAppPath("/ai-transparency")} className="font-semibold text-primary underline">{copy.ui.steps.aiTransparencyLink}</Link>.</p>
                     </div>
                     {referencePhotos.length > maxAnalysisPhotos ? <p className="mt-3 text-xs leading-5 text-muted">{copy.ui.steps.manyPhotos(maxAnalysisPhotos)}</p> : null}
                     {styleAnalysis ? (
-                      <div className="grid gap-4 rounded-2xl border border-primary/20 bg-[#fbfaff] p-5">
+                      <div className="mt-5 grid gap-4 rounded-2xl border border-primary/20 bg-[#fbfaff] p-5">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"><div><div className="text-xs font-bold uppercase tracking-[0.12em] text-primary">{copy.ui.steps.suggestedStyle}</div><div className="mt-1 text-2xl font-bold">{styleAnalysis.primaryStyle}</div></div><span className="w-fit rounded-full bg-white px-3 py-1 text-xs font-bold text-primary">{copy.ui.steps.confidencePrefix} {confidenceLabel(styleAnalysis.confidence)}</span></div>
                         <p className="text-sm leading-6 text-muted">{styleAnalysis.summary}</p>
-                        <div className="grid gap-3 md:grid-cols-2">
-                          <div className="rounded-xl border border-line bg-white p-4 text-sm"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{copy.ui.steps.closestDirection}</div><div className="mt-2 font-semibold">{optionLabel(styles, styleAnalysis.styleDirection)}</div></div>
-                          <div className="rounded-xl border border-line bg-white p-4 text-sm"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{copy.ui.steps.colors}</div><div className="mt-3"><PaletteLegend colors={styleAnalysis.colorPalette} /></div></div>
-                          <div className="rounded-xl border border-line bg-white p-4 text-sm"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{copy.ui.steps.materials}</div><div className="mt-3 flex flex-wrap gap-2">{styleAnalysis.materials.length ? styleAnalysis.materials.map((material) => <span key={material} className="rounded-full bg-[#f5efe7] px-2.5 py-1 text-xs font-semibold">{material}</span>) : <span className="font-semibold text-muted">{copy.ui.steps.tooLittleData}</span>}</div></div>
-                          <div className="rounded-xl border border-line bg-white p-4 text-sm"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{copy.ui.steps.styleClues}</div><div className="mt-3 flex flex-wrap gap-2">{styleAnalysis.styleClues.length ? styleAnalysis.styleClues.map((clue) => <span key={clue} className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary">{clue}</span>) : <span className="font-semibold text-muted">{copy.ui.steps.tooLittleData}</span>}</div></div>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {[[copy.ui.steps.closestDirection, optionLabel(styles, styleAnalysis.styleDirection)], [copy.ui.steps.colors, styleAnalysis.colorPalette.join(", ") || copy.ui.steps.tooLittleData], [copy.ui.steps.materials, styleAnalysis.materials.join(", ") || copy.ui.steps.tooLittleData], [copy.ui.steps.styleClues, styleAnalysis.styleClues.join(", ") || copy.ui.steps.tooLittleData]].map(([label, value]) => <div key={label} className="rounded-xl border border-line bg-white p-4 text-sm"><div className="text-muted">{label}</div><div className="mt-1 font-semibold">{value}</div></div>)}
                         </div>
                         <div className="rounded-xl border border-line bg-white p-4 text-sm leading-6"><div className="font-semibold">{copy.ui.steps.describeNeeds}</div><p className="mt-1 text-muted">{styleAnalysis.designerPrompt}</p></div>
                         {styleAnalysis.watchOuts.length ? <div><div className="text-sm font-semibold">{copy.ui.steps.watchOuts}</div><ul className="mt-2 grid gap-1 text-sm leading-6 text-muted">{styleAnalysis.watchOuts.map((item) => <li key={item}>- {item}</li>)}</ul></div> : null}
@@ -1462,7 +1450,6 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                       </div>
                     ) : null}
                     {analysisError ? <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700"><div className="font-semibold">{copy.ui.steps.analysisUnavailable}</div><p className="mt-1">{analysisError}</p></div> : null}
-                    <p className="text-xs leading-5 text-muted">{copy.ui.steps.aiPrivacyBefore} {maxAnalysisPhotos} {copy.ui.steps.aiPrivacyAfter} <Link href={localeAppPath("/privacy")} className="font-semibold underline">{copy.ui.steps.privacy}</Link>.</p>
                   </div>
                 ) : null}
 
@@ -1484,12 +1471,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                 ) : null}
 
                 {activeModule === "preferences" ? (
-                  <div className="mt-6 grid gap-7">
-                    {styleAnalysis ? <div className="rounded-2xl border border-primary/20 bg-primary-soft/55 p-4 text-sm leading-6 text-muted"><span className="font-bold text-primary">AI</span> {styleAnalysis.primaryStyle}. {copy.ui.workspace.preferences.body}</div> : null}
-                    <MultiOptionGrid label={copy.ui.steps.style} onChange={(values) => { setStyle(values.length ? values.join(" | ") : "Not sure yet"); markModule("preferences"); }} options={styles} values={selectedStyles} />
-                    <section><h3 className="text-base font-bold">{copy.ui.steps.visualCues}</h3><div className="mt-3 grid gap-3 sm:grid-cols-2">{visualCues.map((cue) => { const selected = selectedVisualCues.includes(cue.value); return <button key={cue.value} type="button" aria-pressed={selected} onClick={() => { toggleVisualCue(cue.value); markModule("preferences"); }} className={selected ? "rounded-2xl border border-primary bg-primary-soft p-4 text-left" : "rounded-2xl border border-line bg-background p-4 text-left hover:border-primary"}><span className="block text-sm font-bold">{cue.label}</span><span className="mt-1 block text-sm leading-6 text-muted">{cue.description}</span></button>; })}</div></section>
-                    <label className="block text-sm font-semibold">{copy.ui.notes}<textarea value={notes} onChange={(event) => { setNotes(event.target.value); markModule("preferences"); }} placeholder={copy.ui.notesPlaceholder} rows={4} className="mt-2 w-full resize-y rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label>
-                  </div>
+                  <div className="mt-6 grid gap-7"><MultiOptionGrid label={copy.ui.steps.style} onChange={(values) => { setStyle(values.length ? values.join(" | ") : "Not sure yet"); markModule("preferences"); }} options={styles} values={selectedStyles} /><section><h3 className="text-base font-bold">{copy.ui.steps.visualCues}</h3><div className="mt-3 grid gap-3 sm:grid-cols-2">{visualCues.map((cue) => { const selected = selectedVisualCues.includes(cue.value); return <button key={cue.value} type="button" aria-pressed={selected} onClick={() => { toggleVisualCue(cue.value); markModule("preferences"); }} className={selected ? "rounded-2xl border border-primary bg-primary-soft p-4 text-left" : "rounded-2xl border border-line bg-background p-4 text-left hover:border-primary"}><span className="block text-sm font-bold">{cue.label}</span><span className="mt-1 block text-sm leading-6 text-muted">{cue.description}</span></button>; })}</div></section><label className="block text-sm font-semibold">{copy.ui.notes}<textarea value={notes} onChange={(event) => { setNotes(event.target.value); markModule("preferences"); }} placeholder={copy.ui.notesPlaceholder} rows={4} className="mt-2 w-full resize-y rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label></div>
                 ) : null}
               </section>
             ) : null}
@@ -1500,13 +1482,9 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
           <aside className="h-fit rounded-3xl border border-primary/20 bg-white p-5 shadow-[0_18px_44px_rgba(57,31,92,0.10)] lg:sticky lg:top-24">
             <div className="flex items-start justify-between gap-4"><div><div className="text-sm font-bold text-primary">{copy.ui.workspace.summaryTitle}</div><h2 className="mt-1 text-xl font-bold">{styleAnalysis?.primaryStyle || (hasPreferences ? styleLabels(style) : copy.ui.notProvided)}</h2></div><span className="rounded-full bg-primary px-2.5 py-1 text-xs font-bold text-white">AI</span></div>
             <p className="mt-3 text-sm leading-6 text-muted">{styleAnalysis?.summary || copy.ui.workspace.summaryBody}</p>
-            {styleAnalysis?.colorPalette.length ? <div className="mt-4 rounded-2xl border border-line bg-background p-4"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{copy.ui.steps.colors}</div><div className="mt-3"><PaletteLegend colors={styleAnalysis.colorPalette} /></div></div> : null}
+            {styleAnalysis?.colorPalette.length ? <div className="mt-4"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{copy.ui.steps.colors}</div><div className="mt-2 flex flex-wrap gap-2">{styleAnalysis.colorPalette.map((color) => <span key={color} className="rounded-full border border-line bg-background px-2.5 py-1 text-xs font-semibold">{color}</span>)}</div></div> : null}
             <div className="mt-5 grid gap-3 border-y border-line py-5 text-sm">
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                <div className="rounded-xl border border-line bg-background p-3"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{copy.ui.steps.materials}</div><div className="mt-2 flex flex-wrap gap-1.5">{styleAnalysis?.materials.length ? styleAnalysis.materials.slice(0, 5).map((material) => <span key={material} className="rounded-full bg-[#f5efe7] px-2 py-1 text-xs font-semibold">{material}</span>) : <span className="font-semibold text-muted">{copy.ui.notProvided}</span>}</div></div>
-                <div className="rounded-xl border border-line bg-background p-3"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{copy.ui.workspace.moodLabel}</div><div className="mt-2 flex flex-wrap gap-1.5">{styleAnalysis?.styleClues.length ? styleAnalysis.styleClues.slice(0, 4).map((clue) => <span key={clue} className="rounded-full bg-primary-soft px-2 py-1 text-xs font-semibold text-primary">{clue}</span>) : selectedVisualCues.length ? selectedVisualCues.slice(0, 3).map((item) => <span key={item} className="rounded-full bg-primary-soft px-2 py-1 text-xs font-semibold text-primary">{optionLabel(visualCues, item)}</span>) : <span className="font-semibold text-muted">{copy.ui.notProvided}</span>}</div></div>
-              </div>
-              {[[copy.ui.workspace.projectLabel, workspaceProjectSummary], [copy.ui.brief.support, workspaceScopeSummary], [copy.ui.brief.budget, workspaceBudgetSummary], [copy.ui.brief.timeline, workspaceTimelineSummary]].map(([label, value]) => <div key={label} className="flex items-start justify-between gap-4"><span className="text-muted">{label}</span><span className="max-w-[55%] text-right font-semibold">{value}</span></div>)}
+              {[[copy.ui.workspace.projectLabel, workspaceProjectSummary], [copy.ui.steps.materials, styleAnalysis?.materials.join(", ") || copy.ui.notProvided], [copy.ui.workspace.moodLabel, styleAnalysis?.styleClues.slice(0, 2).join(", ") || (selectedVisualCues.length ? selectedVisualCues.slice(0, 2).map((item) => optionLabel(visualCues, item)).join(", ") : copy.ui.notProvided)], [copy.ui.brief.support, workspaceScopeSummary], [copy.ui.brief.budget, workspaceBudgetSummary], [copy.ui.brief.timeline, workspaceTimelineSummary]].map(([label, value]) => <div key={label} className="flex items-start justify-between gap-4"><span className="text-muted">{label}</span><span className="max-w-[55%] text-right font-semibold">{value}</span></div>)}
             </div>
             <div className="mt-5 rounded-2xl bg-primary-soft p-4"><div className="flex items-center justify-between gap-3 text-sm font-bold"><span>{copy.ui.workspace.readinessTitle}</span><span className="text-primary">{briefReadiness}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${briefReadiness}%` }} /></div><p className="mt-3 text-xs leading-5 text-muted">{copy.ui.workspace.readinessBody}</p></div>
             <div className="mt-5 grid gap-3">
