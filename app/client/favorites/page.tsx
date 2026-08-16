@@ -6,7 +6,7 @@ import { getSiteCopy } from "@/content/site-copy";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
 import {
   applyDemoProfilePresentation,
-  getDemoProjectPresentation,
+  applyDemoProjectPresentation,
 } from "@/lib/public-demo-profiles";
 import { localizeProfileContent } from "@/lib/localized-profile-content";
 import { profileLocationLabel, profileTypeLabel } from "@/lib/profile-system-labels";
@@ -111,10 +111,7 @@ export default async function ClientFavoritesPage() {
     .map(applyDemoProfilePresentation)
     .map((profile) => localizeProfileContent(profile));
   const studios = ((studioData ?? []) as Studio[]).map((studio) => localizeProfileContent(studio));
-  const projects = ((projectData ?? []) as Project[]).map((project) => {
-    const presentation = getDemoProjectPresentation(project.profile_id, project.id);
-    return presentation ? { ...project, ...presentation } : project;
-  });
+  const projects = ((projectData ?? []) as Project[]).map(applyDemoProjectPresentation);
   const articles = ((articleData ?? []) as Article[]).map((article) => {
     const legacy = siteLocale === "pl" ? applyPolishArticleCopy(article) : article;
     return localizeArticle(legacy, siteLocale);

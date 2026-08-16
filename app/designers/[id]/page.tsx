@@ -17,9 +17,9 @@ import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { createPublicContentClient } from "@/lib/public-content-client";
 import { absoluteUrl, breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import {
+  applyDemoProjectPresentation,
   applyDemoProfilePresentation,
   getDemoProfilePresentation,
-  getDemoProjectPresentation,
 } from "@/lib/public-demo-profiles";
 import { localizeProfileContent, localizedProfileText } from "@/lib/localized-profile-content";
 import {
@@ -396,10 +396,7 @@ export default async function DesignerProfilePage({
         project.image_urls?.[0] ||
         null,
     };
-    const demoCopy = getDemoProjectPresentation(profile.id, project.id);
-    return demoCopy
-      ? { ...publicProject, ...demoCopy, project_url: null }
-      : publicProject;
+    return applyDemoProjectPresentation(publicProject);
   });
   const { data: studioMembershipData } = await supabase
     .from("studio_members")

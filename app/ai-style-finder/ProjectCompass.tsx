@@ -560,7 +560,7 @@ function selectedOption(options: Option[], value: string) {
 }
 
 function optionLabel(options: Option[], value: string) {
-  return options.find((option) => option.value === value)?.label || value;
+  return options.find((option) => option.value === value)?.label || value || copy.ui.notProvided;
 }
 
 function styleLabels(value: string) {
@@ -577,7 +577,7 @@ function confidenceLabel(confidence: StyleAnalysis["confidence"]) {
 
 function styleValues(value: string) {
   const values = value.split(" | ").filter(Boolean);
-  return values.length ? values : ["Not sure yet"];
+  return values;
 }
 
 function primaryStyleValue(value: string) {
@@ -685,19 +685,19 @@ function MultiOptionGrid({
 }
 
 export default function ProjectCompass({ isDesigner = false }: { isDesigner?: boolean }) {
-  const [projectType, setProjectType] = useState(projectTypes[0].value);
-  const [goal, setGoal] = useState(goals[1].value);
-  const [style, setStyle] = useState(styles[0].value);
-  const [scope, setScope] = useState(scopes[1].value);
-  const [budget, setBudget] = useState(budgets[1].value);
-  const [timeline, setTimeline] = useState(timelines[1].value);
+  const [projectType, setProjectType] = useState("");
+  const [goal, setGoal] = useState("");
+  const [style, setStyle] = useState("");
+  const [scope, setScope] = useState("");
+  const [budget, setBudget] = useState("");
+  const [timeline, setTimeline] = useState("");
   const [areaM2, setAreaM2] = useState("");
   const [roomCount, setRoomCount] = useState("");
   const [selectedRoomTypes, setSelectedRoomTypes] = useState<string[]>([]);
-  const [propertyStatus, setPropertyStatus] = useState(propertyStatuses[0].value);
-  const [visualizationNeed, setVisualizationNeed] = useState(visualizationNeeds[3].value);
-  const [supervisionNeed, setSupervisionNeed] = useState(supervisionNeeds[0].value);
-  const [location, setLocation] = useState(copy.ui.defaultLocation);
+  const [propertyStatus, setPropertyStatus] = useState("");
+  const [visualizationNeed, setVisualizationNeed] = useState("");
+  const [supervisionNeed, setSupervisionNeed] = useState("");
+  const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
   const [referencePhotos, setReferencePhotos] = useState<ReferencePhoto[]>([]);
   const [selectedVisualCues, setSelectedVisualCues] = useState<string[]>([]);
@@ -731,7 +731,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   }
 
   const selectedStyles = styleValues(style);
-  const selectedStyle = selectedOption(styles, selectedStyles[0]);
+  const selectedStyle = selectedStyles[0] ? selectedOption(styles, selectedStyles[0]) : null;
   const selectedScope = selectedOption(scopes, scope);
   const selectedCueOptions = useMemo(
     () => visualCues.filter((cue) => selectedVisualCues.includes(cue.value)),
@@ -741,10 +741,10 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
     styleAnalysis?.searchSpecialty ||
     selectedCueOptions.find((cue) => cue.specialty)?.specialty ||
     styles.find((option) => selectedStyles.includes(option.value) && option.specialty)?.specialty ||
-    selectedStyle.specialty;
+    selectedStyle?.specialty;
   const visualCueLabel = selectedVisualCues.length
     ? selectedVisualCues.slice(0, 3).map((item) => optionLabel(visualCues, item)).join(", ")
-    : selectedStyle.label;
+    : selectedStyle?.label || copy.ui.notSelected;
 
   const hasProjectDetails = Boolean(areaM2 || roomCount || selectedRoomTypes.length || touchedModules.details);
   const hasScope = Boolean(touchedModules.scope);
@@ -831,10 +831,9 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
     },
   ];
 
-  const designerParams = new URLSearchParams({
-    match: "brief",
-    sort: "recommended",
-    view: "list",
+  const designerParams = new URLSearchParams({ sort: "recommended", view: "list" });
+  if (isReadyForMatching) designerParams.set("match", "brief");
+  const matchingSignals = {
     projectType,
     goal,
     style: styleAnalysis?.styleDirection || style,
@@ -844,6 +843,9 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
     propertyStatus,
     visualization: visualizationNeed,
     supervision: supervisionNeed,
+  };
+  Object.entries(matchingSignals).forEach(([key, value]) => {
+    if (value) designerParams.set(key, value);
   });
 
   if (areaM2) designerParams.set("area", areaM2);
@@ -1078,6 +1080,12 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   }
 
   async function saveBrief(openMatches = false) {
+    if (openMatches && !isReadyForMatching) {
+      setSaveError(copy.ui.workspace.continueBody);
+      openModule(recommendedModule);
+      return;
+    }
+
     if (openMatches && savedBriefId && savedBriefSignature === briefText) {
       const matchesUrl = new URL(designerPublicHref, window.location.origin);
       matchesUrl.searchParams.set("brief", savedBriefId);
@@ -1493,7 +1501,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
                 {activeModule === "preferences" ? (
                   <div className="mt-6 grid gap-7">
                     {styleAnalysis ? <div className="rounded-2xl border border-primary/20 bg-primary-soft/55 p-4 text-sm leading-6 text-muted"><span className="font-bold text-primary">AI</span> {styleAnalysis.primaryStyle}. {copy.ui.workspace.preferences.body}</div> : null}
-                    <MultiOptionGrid label={copy.ui.steps.style} onChange={(values) => { setStyle(values.length ? values.join(" | ") : "Not sure yet"); markModule("preferences"); }} options={styles} values={selectedStyles} />
+                    <MultiOptionGrid label={copy.ui.steps.style} onChange={(values) => { setStyle(values.join(" | ")); markModule("preferences"); }} options={styles} values={selectedStyles} />
                     <section><h3 className="text-base font-bold">{copy.ui.steps.visualCues}</h3><div className="mt-3 grid gap-3 sm:grid-cols-2">{visualCues.map((cue) => { const selected = selectedVisualCues.includes(cue.value); return <button key={cue.value} type="button" aria-pressed={selected} onClick={() => { toggleVisualCue(cue.value); markModule("preferences"); }} className={selected ? "rounded-2xl border border-primary bg-primary-soft p-4 text-left" : "rounded-2xl border border-line bg-background p-4 text-left hover:border-primary"}><span className="block text-sm font-bold">{cue.label}</span><span className="mt-1 block text-sm leading-6 text-muted">{cue.description}</span></button>; })}</div></section>
                     <label className="block text-sm font-semibold">{copy.ui.notes}<textarea value={notes} onChange={(event) => { setNotes(event.target.value); markModule("preferences"); }} placeholder={copy.ui.notesPlaceholder} rows={4} className="mt-2 w-full resize-y rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label>
                   </div>
@@ -1520,7 +1528,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
               {isDesigner ? <div className="rounded-xl border border-primary/25 bg-primary-soft p-3 text-sm leading-6 text-muted">{copy.ui.designerOnly}</div> : null}
               {isReadyForMatching ? <><div><div className="text-sm font-bold">{copy.ui.workspace.matchingReadyTitle}</div><p className="mt-1 text-sm leading-6 text-muted">{copy.ui.workspace.matchingReadyBody}</p></div>{!isDesigner ? <button type="button" onClick={() => saveBrief(true)} disabled={isSaving} className="rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white hover:opacity-90 disabled:opacity-60">{isSaving ? copy.ui.saving : copy.ui.saveAndFind}</button> : null}</> : <><div><div className="text-sm font-bold">{copy.ui.workspace.continueTitle}</div><p className="mt-1 text-sm leading-6 text-muted">{copy.ui.workspace.continueBody}</p></div><button type="button" onClick={() => openModule(recommendedModule)} className="rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white hover:opacity-90">{copy.ui.workspace.continue}</button></>}
               {!isDesigner ? <button type="button" onClick={() => saveBrief(false)} disabled={isSaving} className="rounded-xl border border-primary bg-white px-4 py-3 text-sm font-bold text-primary hover:bg-primary hover:text-white disabled:opacity-60">{isSaving ? copy.ui.saving : copy.ui.workspace.saveAndReturn}</button> : null}
-              <Link href={designerHref} className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-bold hover:border-primary hover:text-primary">{copy.ui.viewMatches}</Link>
+              {isReadyForMatching ? <Link href={designerHref} className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-bold hover:border-primary hover:text-primary">{copy.ui.viewMatches}</Link> : <button type="button" onClick={() => openModule(recommendedModule)} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-bold hover:border-primary hover:text-primary">{copy.ui.workspace.continue}</button>}
               <button type="button" onClick={() => setShowFullBrief((current) => !current)} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-bold hover:border-primary hover:text-primary">{showFullBrief ? copy.ui.workspace.hideFullBrief : copy.ui.workspace.showFullBrief}</button>
               <button type="button" onClick={copyBrief} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-bold hover:border-primary hover:text-primary">{copied ? copy.ui.briefCopied : copy.ui.copyBrief}</button>
             </div>
@@ -1962,7 +1970,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
 
         <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
           <div className="text-sm font-semibold text-primary">{copy.ui.brief.title}</div>
-          <h2 className="mt-2 text-2xl font-bold">{optionLabel(projectTypes, projectType)} · {location || copy.ui.defaultLocation}</h2>
+          <h2 className="mt-2 text-2xl font-bold">{optionLabel(projectTypes, projectType)} · {location || copy.ui.notProvided}</h2>
 
           <div className="mt-5 grid gap-3 text-sm">
             {[
@@ -2059,7 +2067,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
               <p className="mt-1">
                 {copy.ui.brief.savedBody(savedReferenceCount ?? 0)}
               </p>
-              <Link href="/client/briefs" className="mt-3 inline-flex font-semibold underline">
+              <Link href={localeAppPath("/client/briefs")} className="mt-3 inline-flex font-semibold underline">
                 {copy.ui.brief.openSavedBriefs}
               </Link>
             </div>

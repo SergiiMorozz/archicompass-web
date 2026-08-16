@@ -7,9 +7,9 @@ import ProjectGallery from "@/components/ProjectGallery";
 import JsonLd from "@/components/JsonLd";
 import { getAccountRole } from "@/lib/studios";
 import {
+  applyDemoProjectPresentation,
   applyDemoProfilePresentation,
   getDemoProfilePresentation,
-  getDemoProjectPresentation,
 } from "@/lib/public-demo-profiles";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { createPublicContentClient } from "@/lib/public-content-client";
@@ -198,10 +198,7 @@ export default async function ProjectDetailPage({
     ? applyDemoProfilePresentation(profileData as Profile)
     : null;
   const demo = getDemoProfilePresentation(project.profile_id);
-  const demoProject = getDemoProjectPresentation(project.profile_id, project.id);
-  if (demoProject) {
-    project = { ...project, ...demoProject, project_url: null };
-  }
+  project = applyDemoProjectPresentation(project);
   const isOwner = userData.user?.id === project.profile_id;
   const { data: favoriteData } = userData.user
     ? await supabase

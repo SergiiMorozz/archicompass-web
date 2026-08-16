@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getExplicitAccountRole } from "@/lib/studios";
 import { localePublicPath, siteLocale } from "@/lib/site-locale";
+import { safeInternalPath, stripLocalePrefix } from "@/lib/safe-next-path";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function localizedUrl(origin: string, path: string) {
@@ -10,10 +11,7 @@ function localizedUrl(origin: string, path: string) {
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const requestedNext = searchParams.get("next") || "/account";
-  const next = requestedNext.startsWith("/") && !requestedNext.startsWith("//")
-    ? requestedNext
-    : "/account";
+  const next = stripLocalePrefix(safeInternalPath(searchParams.get("next")));
 
   if (code) {
     const supabase = await createSupabaseServerClient();
