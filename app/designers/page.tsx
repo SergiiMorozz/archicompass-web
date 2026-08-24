@@ -798,6 +798,23 @@ export default async function DesignersPage({
   const minExperience = safeNumber(minExperienceRaw);
   const maxProjectBudgetRaw = first(sp.maxProjectBudget).trim();
   const maxProjectBudget = safeNumber(maxProjectBudgetRaw);
+  const hasRequestedFilters = Boolean(
+    q ||
+      location ||
+      selectedStyles.length ||
+      selectedServices.length ||
+      selectedProjectCategories.length ||
+      selectedFocus.length ||
+      availability ||
+      careerStage ||
+      workMode ||
+      minExperienceRaw ||
+      maxProjectBudgetRaw ||
+      profileType !== "all" ||
+      minRateRaw ||
+      maxRateRaw ||
+      pricingModel
+  );
 
   const supabase = await createSupabaseServerClient();
   const publicSupabase = createPublicContentClient();
@@ -900,6 +917,9 @@ export default async function DesignersPage({
   const locationDistances = normalizedLocation
     ? await distanceMapFromLocation(location, allProfileLocations)
     : new Map<string, number>();
+  const locationResolutionUnavailable = Boolean(
+    normalizedLocation && nearbyFallback && locationDistances.size === 0
+  );
   const distanceForLocation = (candidate: string | null) =>
     candidate
       ? locationDistances.get(normalizeSearchText(candidate)) ?? distanceBetweenLocations(location, candidate)
@@ -917,6 +937,7 @@ export default async function DesignersPage({
     if (!normalizedLocation) return true;
     if (normalizeSearchText(candidate ?? "").includes(normalizedLocation)) return true;
     if (!nearbyFallback || !candidate) return false;
+    if (locationResolutionUnavailable) return true;
     const distance = distanceForLocation(candidate);
     return distance !== null && distance <= nearbyRadius;
   };
@@ -1019,6 +1040,77 @@ export default async function DesignersPage({
   });
   if (profileType === "designer") studios = [];
   if (profileType === "studio") profiles = [];
+
+  const searchableCandidateText = (candidate: Profile | Studio) => {
+    const name = "full_name" in candidate ? candidate.full_name : candidate.name;
+    return normalizeSearchText(
+      [name, candidate.bio, ...profileSpecialties(candidate), ...(candidate.service_capabilities ?? [])]
+        .filter(Boolean)
+        .join(" ")
+    );
+  };
+  const fallbackMatchScore = (candidate: Profile | Studio) => {
+    const specialties = profileSpecialties(candidate);
+    const specialtyText = normalizeSearchText(specialties.join(" "));
+    const searchable = searchableCandidateText(candidate);
+    const categories = "service_categories" in candidate ? candidate.service_categories ?? [] : [];
+    const categoryText = normalizeSearchText(categories.join(" "));
+    let score = 0;
+
+    if (normalizedLocation) {
+      if (normalizeSearchText(candidate.location ?? "").includes(normalizedLocation)) {
+        score += 12;
+      } else if (!locationResolutionUnavailable) {
+        const distance = distanceForLocation(candidate.location);
+        if (distance !== null && distance <= nearbyRadius) {
+          score += Math.max(2, 10 - Math.floor(distance / 40));
+        } else if ((candidate.work_modes ?? []).some((mode) => mode === "Remote" || mode === "Hybrid")) {
+          score += 2;
+        }
+      }
+    }
+    if (selectedStyles.length) {
+      score += selectedStyles.filter((item) =>
+        specialtyText.includes(normalizeSearchText(item).replace(/(istic|ist|ism)$/, ""))
+      ).length * 5;
+    }
+    if (selectedServices.length) {
+      score += selectedServices.filter((item) => candidate.service_capabilities?.includes(item)).length * 4;
+    }
+    if (selectedProjectCategories.length) {
+      score += selectedProjectCategories.filter((item) =>
+        `${searchable} ${categoryText}`.includes(normalizeSearchText(item))
+      ).length * 3;
+    }
+    if (selectedFocus.length) {
+      score += selectedFocus.filter((item) => specialtyText.includes(normalizeSearchText(item))).length * 3;
+    }
+    if (availability && candidate.availability_status === availability) score += 2;
+    if (careerStage && candidate.career_stage === careerStage) score += 1;
+    if (workMode && candidate.work_modes?.includes(workMode)) score += 1;
+    if (!Number.isNaN(minExperience) && (candidate.years_experience ?? 0) >= minExperience) score += 1;
+    if (
+      !Number.isNaN(maxProjectBudget) &&
+      (candidate.minimum_project_budget === null || candidate.minimum_project_budget <= maxProjectBudget)
+    ) {
+      score += 1;
+    }
+    if (priceFilterMatches(candidate)) score += 1;
+    return score;
+  };
+
+  let relaxedMatching = false;
+  if (!profiles.length && !studios.length && hasRequestedFilters) {
+    profiles = allProfiles
+      .filter((profile) => !normalizedQuery || searchableCandidateText(profile).includes(normalizedQuery))
+      .sort((left, right) => fallbackMatchScore(right) - fallbackMatchScore(left));
+    studios = allStudios
+      .filter((studio) => !normalizedQuery || searchableCandidateText(studio).includes(normalizedQuery))
+      .sort((left, right) => fallbackMatchScore(right) - fallbackMatchScore(left));
+    if (profileType === "designer") studios = [];
+    if (profileType === "studio") profiles = [];
+    relaxedMatching = Boolean(profiles.length || studios.length);
+  }
   const studioIds = studios.map((studio) => studio.id);
   const { data: studioMemberData } = studioIds.length
     ? await supabase
@@ -1119,7 +1211,7 @@ export default async function DesignersPage({
   } else if (sort === "experience") {
     profiles = profiles.sort((a, b) => (b.years_experience ?? 0) - (a.years_experience ?? 0));
     studios = studios.sort((a, b) => (b.years_experience ?? 0) - (a.years_experience ?? 0));
-  } else if (nearbyFallback && location) {
+  } else if (nearbyFallback && location && !locationResolutionUnavailable && !relaxedMatching) {
     const distance = (candidate: string | null) =>
       distanceForLocation(candidate) ?? Number.MAX_SAFE_INTEGER;
     profiles = profiles.sort((a, b) => distance(a.location) - distance(b.location));
@@ -1165,7 +1257,7 @@ export default async function DesignersPage({
   const directoryPublicPath = localePublicPath(siteLocale, "/designers");
   const gridHref = directoryPath + qs({ ...base, view: "grid" });
   const listHref = directoryPath + qs({ ...base, view: "list" });
-  const hasFilters = Boolean(q || location || selectedStyles.length || selectedServices.length || selectedProjectCategories.length || selectedFocus.length || availability || careerStage || workMode || minExperienceRaw || maxProjectBudgetRaw || profileType !== "all" || minRateRaw || maxRateRaw || pricingModel);
+  const hasFilters = hasRequestedFilters;
   const activeFilterCount = [
     Boolean(q),
     Boolean(location),
@@ -1628,7 +1720,15 @@ export default async function DesignersPage({
         </CatalogFiltersPanel>
 
         <div>
-          {nearbyFallback && (profiles.length || studios.length) ? (
+          {relaxedMatching ? (
+            <div className="mb-6 rounded-2xl border border-primary/20 bg-primary-soft p-5 text-sm text-foreground">
+              {copy.results.relaxedFallback(location)}
+            </div>
+          ) : locationResolutionUnavailable && (profiles.length || studios.length) ? (
+            <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+              {copy.results.locationUnavailable(location)}
+            </div>
+          ) : nearbyFallback && (profiles.length || studios.length) ? (
             <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
               {copy.results.nearbyFallback(location)}
             </div>

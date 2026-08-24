@@ -649,6 +649,12 @@ function MultiOptionGrid({
   values: string[];
   onChange: (values: string[]) => void;
 }) {
+  const initialOptionCount = 6;
+  const [showAll, setShowAll] = useState(false);
+  const visibleOptions = showAll
+    ? options
+    : options.filter((option, index) => index < initialOptionCount || values.includes(option.value));
+
   return (
     <section>
       <h2 className="text-base font-bold">{label}</h2>
@@ -656,7 +662,7 @@ function MultiOptionGrid({
         {copy.ui.stylesHint}
       </p>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        {options.map((option) => {
+        {visibleOptions.map((option) => {
           const selected = values.includes(option.value);
           return (
             <button
@@ -684,6 +690,15 @@ function MultiOptionGrid({
           );
         })}
       </div>
+      {options.length > initialOptionCount ? (
+        <button
+          type="button"
+          onClick={() => setShowAll((current) => !current)}
+          className="mt-4 text-sm font-semibold text-primary hover:underline"
+        >
+          {showAll ? copy.ui.showFewerStyles : copy.ui.showMoreStyles(options.length - initialOptionCount)}
+        </button>
+      ) : null}
     </section>
   );
 }

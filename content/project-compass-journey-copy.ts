@@ -130,14 +130,14 @@ const journeyCopy: Record<SiteLocale, ProjectCompassJourneyCopy> = {
     matches: {
       title: "Twój brief i dopasowania",
       body:
-        "Gdy zapiszesz brief, ArchiCompass przekaże jego kluczowe sygnały do katalogu projektantów. To punkt wyjścia do porównania portfolio, nie automatyczna decyzja.",
+        "Po zapisaniu briefu ArchiCompass przekaże jego kluczowe sygnały do katalogu projektantów, aby można było wrócić do niego później. Możesz też przejrzeć dopasowania bez zapisywania briefu. To punkt wyjścia do porównania portfolio, nie automatyczna decyzja.",
       ready: "Brief ma wystarczająco dużo informacji, aby otworzyć dopasowania.",
       incomplete: "Dodaj najważniejsze szczegóły projektu, zakres współpracy oraz budżet i termin, aby przejść do dopasowań.",
       backToProject: "Uzupełnij brakujące informacje",
       save: "Zapisz brief na później",
       saving: "Zapisujemy brief…",
-      find: "Zapisz brief i zobacz dopasowania",
-      view: "Zobacz dopasowania bez zapisywania",
+      find: "Zapisz brief i przejdź do dopasowań",
+      view: "Przejrzyj dopasowania bez zapisywania briefu",
       copy: "Kopiuj brief",
       copied: "Brief skopiowany",
       designerNotice:
@@ -208,14 +208,14 @@ const journeyCopy: Record<SiteLocale, ProjectCompassJourneyCopy> = {
     matches: {
       title: "Your brief and matches",
       body:
-        "Once you save the brief, ArchiCompass sends its key signals to the designer directory. It is a starting point for comparing portfolios, not an automatic decision.",
+        "Once you save the brief, ArchiCompass sends its key signals to the designer directory so you can return to it later. You can also preview matches without saving the brief. It is a starting point for comparing portfolios, not an automatic decision.",
       ready: "Your brief now contains enough context to open matches.",
       incomplete: "Add the key project details, collaboration scope, budget and timeline before opening matches.",
       backToProject: "Complete the missing information",
       save: "Save brief for later",
       saving: "Saving brief…",
-      find: "Save brief and view matches",
-      view: "View matches without saving",
+      find: "Save brief and go to matches",
+      view: "Preview matches without saving the brief",
       copy: "Copy brief",
       copied: "Brief copied",
       designerNotice:
