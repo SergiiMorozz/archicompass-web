@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ChangeEvent } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import ShareableStyleResult from "@/components/ShareableStyleResult";
 import { getProjectCompassCopy } from "@/content/project-compass-copy";
 import { getProjectCompassJourneyCopy } from "@/content/project-compass-journey-copy";
@@ -47,6 +47,28 @@ type WorkspaceModule =
 type ProjectCompassVariant = "workspace" | "journey";
 type JourneyPhase = "inspiration" | "project" | "matches";
 
+type ProjectCompassDraft = {
+  projectType: string;
+  goal: string;
+  style: string;
+  scope: string;
+  budget: string;
+  timeline: string;
+  areaM2: string;
+  roomCount: string;
+  selectedRoomTypes: string[];
+  propertyStatus: string;
+  visualizationNeed: string;
+  supervisionNeed: string;
+  location: string;
+  notes: string;
+  selectedVisualCues: string[];
+  styleAnalysis: StyleAnalysis | null;
+  touchedModules: Partial<Record<WorkspaceModule, boolean>>;
+  activeModule: WorkspaceModule | null;
+  journeyPhase: JourneyPhase;
+};
+
 const maxReferencePhotos = 10;
 const maxAnalysisPhotos = 6;
 const maxPreparedPhotoBytes = 425 * 1024;
@@ -70,6 +92,29 @@ const workspaceModuleMarks: Record<WorkspaceModule, string> = {
 };
 
 const paletteFallbacks = ["#f2e7d3", "#dfc393", "#b77c48", "#6f5747", "#40584d", "#9e9ab6"];
+
+function isStyleAnalysis(value: unknown): value is StyleAnalysis {
+  if (!value || typeof value !== "object") return false;
+
+  const analysis = value as Partial<StyleAnalysis>;
+  return (
+    typeof analysis.primaryStyle === "string" &&
+    typeof analysis.styleDirection === "string" &&
+    (analysis.confidence === "low" || analysis.confidence === "medium" || analysis.confidence === "high") &&
+    typeof analysis.summary === "string" &&
+    Array.isArray(analysis.colorPalette) &&
+    Array.isArray(analysis.materials) &&
+    Array.isArray(analysis.styleClues) &&
+    Array.isArray(analysis.visualCues) &&
+    typeof analysis.searchSpecialty === "string" &&
+    typeof analysis.designerPrompt === "string" &&
+    Array.isArray(analysis.watchOuts)
+  );
+}
+
+function stringArray(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
 
 function paletteColor(value: string, index: number) {
   const normalized = value.toLowerCase();
@@ -705,10 +750,12 @@ function MultiOptionGrid({
 
 export default function ProjectCompass({
   isDesigner = false,
+  isAuthenticated = false,
   variant = "workspace",
   entryPath = "/project-compass",
 }: {
   isDesigner?: boolean;
+  isAuthenticated?: boolean;
   variant?: ProjectCompassVariant;
   entryPath?: string;
 }) {
@@ -742,6 +789,7 @@ export default function ProjectCompass({
   const [showFullBrief, setShowFullBrief] = useState(false);
   const [touchedModules, setTouchedModules] = useState<Partial<Record<WorkspaceModule, boolean>>>({});
   const [journeyPhase, setJourneyPhase] = useState<JourneyPhase>("inspiration");
+  const [draftRestored, setDraftRestored] = useState(false);
   const objectUrls = useRef<string[]>([]);
   const journeyPhotoInputRef = useRef<HTMLInputElement>(null);
 
@@ -793,29 +841,42 @@ export default function ProjectCompass({
     ? selectedVisualCues.slice(0, 3).map((item) => optionLabel(visualCues, item)).join(", ")
     : selectedStyle?.label || copy.ui.notSelected;
 
-  const hasProjectDetails = Boolean(areaM2 || roomCount || selectedRoomTypes.length || touchedModules.details);
-  const hasScope = Boolean(touchedModules.scope);
-  const hasBudget = Boolean(touchedModules.budget);
-  const hasPreferences = Boolean(styleAnalysis || selectedVisualCues.length || notes.trim() || touchedModules.preferences);
+  const hasSelectedStyle = selectedStyles.length > 0;
+  const hasStyleDirection = Boolean(styleAnalysis || hasSelectedStyle || selectedVisualCues.length || notes.trim());
+  const hasProjectDetails = Boolean(projectType || areaM2 || roomCount || selectedRoomTypes.length || propertyStatus || location.trim());
+  const hasScope = Boolean(goal || scope || visualizationNeed || supervisionNeed);
+  const hasBudget = Boolean(budget || timeline);
+  const hasPreferences = Boolean(styleAnalysis || hasSelectedStyle || selectedVisualCues.length || notes.trim());
+  const detailReadiness =
+    (projectType ? 5 : 0) +
+    (areaM2 || roomCount || selectedRoomTypes.length ? 8 : 0) +
+    (propertyStatus ? 4 : 0) +
+    (location.trim() ? 8 : 0);
+  const scopeReadiness =
+    (goal ? 7 : 0) +
+    (scope ? 7 : 0) +
+    (visualizationNeed ? 3 : 0) +
+    (supervisionNeed ? 3 : 0);
+  const budgetReadiness = (budget ? 8 : 0) + (timeline ? 7 : 0);
   const readinessParts = [
-    { module: "inspirations" as const, weight: 30, complete: Boolean(referencePhotos.length && styleAnalysis) },
-    { module: "preferences" as const, weight: 15, complete: hasPreferences },
-    { module: "details" as const, weight: 20, complete: hasProjectDetails },
-    { module: "scope" as const, weight: 15, complete: hasScope },
-    { module: "budget" as const, weight: 20, complete: hasBudget },
+    { module: "inspirations" as const, weight: 25, amount: styleAnalysis ? 25 : referencePhotos.length ? 10 : 0, complete: Boolean(styleAnalysis) },
+    { module: "preferences" as const, weight: 15, amount: styleAnalysis || hasSelectedStyle ? 15 : selectedVisualCues.length || notes.trim() ? 8 : 0, complete: hasPreferences },
+    { module: "details" as const, weight: 25, amount: detailReadiness, complete: detailReadiness >= 17 },
+    { module: "scope" as const, weight: 20, amount: scopeReadiness, complete: scopeReadiness >= 14 },
+    { module: "budget" as const, weight: 15, amount: budgetReadiness, complete: budgetReadiness >= 8 },
   ];
   const briefReadiness = readinessParts.reduce(
-    (total, item) => total + (item.complete ? item.weight : 0),
+    (total, item) => total + item.amount,
     0
   );
   const briefStatus =
-    briefReadiness >= 65
+    briefReadiness >= 70
       ? copy.ui.workspace.statusReady
       : briefReadiness > 0
       ? copy.ui.workspace.statusInProgress
       : copy.ui.workspace.statusEmpty;
-  const recommendedModule = readinessParts.find((item) => !item.complete)?.module ?? "budget";
-  const isReadyForMatching = briefReadiness >= 65 && hasProjectDetails && hasScope && hasBudget;
+  const recommendedModule = readinessParts.find((item) => item.amount < item.weight)?.module ?? "budget";
+  const isReadyForMatching = Boolean(hasStyleDirection && (hasProjectDetails || hasScope || hasBudget));
   const workspaceProjectSummary = hasProjectDetails
     ? `${optionLabel(projectTypes, projectType)}${areaM2 ? ` · ${areaM2} m²` : ""}${location.trim() ? ` · ${location.trim()}` : ""}`
     : copy.ui.notProvided;
@@ -979,6 +1040,80 @@ export default function ProjectCompass({
       visualizationNeed,
     ]
   );
+
+  const persistProjectCompassDraft = useCallback(() => {
+    if (typeof window === "undefined") return;
+
+    const draft: ProjectCompassDraft = {
+      projectType,
+      goal,
+      style,
+      scope,
+      budget,
+      timeline,
+      areaM2,
+      roomCount,
+      selectedRoomTypes,
+      propertyStatus,
+      visualizationNeed,
+      supervisionNeed,
+      location,
+      notes,
+      selectedVisualCues,
+      styleAnalysis,
+      touchedModules,
+      activeModule,
+      journeyPhase,
+    };
+    const hasContent = Boolean(
+      draft.projectType ||
+        draft.goal ||
+        draft.style ||
+        draft.scope ||
+        draft.budget ||
+        draft.timeline ||
+        draft.areaM2 ||
+        draft.roomCount ||
+        draft.selectedRoomTypes.length ||
+        draft.propertyStatus ||
+        draft.visualizationNeed ||
+        draft.supervisionNeed ||
+        draft.location.trim() ||
+        draft.notes.trim() ||
+        draft.selectedVisualCues.length ||
+        draft.styleAnalysis
+    );
+
+    try {
+      if (hasContent) {
+        window.sessionStorage.setItem(projectCompassDraftKey, JSON.stringify(draft));
+      } else {
+        window.sessionStorage.removeItem(projectCompassDraftKey);
+      }
+    } catch {
+      // Keep the form usable if browser storage is unavailable.
+    }
+  }, [
+    activeModule,
+    areaM2,
+    budget,
+    goal,
+    journeyPhase,
+    location,
+    notes,
+    projectType,
+    propertyStatus,
+    roomCount,
+    scope,
+    selectedRoomTypes,
+    selectedVisualCues,
+    style,
+    styleAnalysis,
+    supervisionNeed,
+    timeline,
+    touchedModules,
+    visualizationNeed,
+  ]);
 
   const nextStep = useMemo(() => {
     if (scope === "Consultation") {
@@ -1188,26 +1323,7 @@ export default function ProjectCompass({
         payload.code === "AUTH_REQUIRED" ||
         payload.code === "ONBOARDING_REQUIRED"
       ) {
-        window.sessionStorage.setItem(
-          projectCompassDraftKey,
-          JSON.stringify({
-            projectType,
-            goal,
-            style,
-            scope,
-            budget,
-            timeline,
-            areaM2,
-            roomCount,
-            selectedRoomTypes,
-            propertyStatus,
-            visualizationNeed,
-            supervisionNeed,
-            location,
-            notes,
-            selectedVisualCues,
-          })
-        );
+        persistProjectCompassDraft();
         const next = encodeURIComponent(localeAppPath(entryPath));
         window.location.href =
           payload.code === "ONBOARDING_REQUIRED"
@@ -1253,49 +1369,58 @@ export default function ProjectCompass({
     );
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const rawDraft = window.sessionStorage.getItem(projectCompassDraftKey);
     if (rawDraft) {
       try {
-        const draft = JSON.parse(rawDraft) as Partial<{
-          projectType: string;
-          goal: string;
-          style: string;
-          scope: string;
-          budget: string;
-          timeline: string;
-          areaM2: string;
-          roomCount: string;
-          selectedRoomTypes: string[];
-          propertyStatus: string;
-          visualizationNeed: string;
-          supervisionNeed: string;
-          location: string;
-          notes: string;
-          selectedVisualCues: string[];
-        }>;
-        if (draft.projectType) setProjectType(draft.projectType);
-        if (draft.goal) setGoal(draft.goal);
-        if (draft.style) setStyle(draft.style);
-        if (draft.scope) setScope(draft.scope);
-        if (draft.budget) setBudget(draft.budget);
-        if (draft.timeline) setTimeline(draft.timeline);
+        const draft = JSON.parse(rawDraft) as Partial<ProjectCompassDraft>;
+        if (typeof draft.projectType === "string") setProjectType(draft.projectType);
+        if (typeof draft.goal === "string") setGoal(draft.goal);
+        if (typeof draft.style === "string") setStyle(draft.style);
+        if (typeof draft.scope === "string") setScope(draft.scope);
+        if (typeof draft.budget === "string") setBudget(draft.budget);
+        if (typeof draft.timeline === "string") setTimeline(draft.timeline);
         if (typeof draft.areaM2 === "string") setAreaM2(draft.areaM2);
         if (typeof draft.roomCount === "string") setRoomCount(draft.roomCount);
-        if (Array.isArray(draft.selectedRoomTypes)) setSelectedRoomTypes(draft.selectedRoomTypes);
-        if (draft.propertyStatus) setPropertyStatus(draft.propertyStatus);
-        if (draft.visualizationNeed) setVisualizationNeed(draft.visualizationNeed);
-        if (draft.supervisionNeed) setSupervisionNeed(draft.supervisionNeed);
+        setSelectedRoomTypes(stringArray(draft.selectedRoomTypes));
+        if (typeof draft.propertyStatus === "string") setPropertyStatus(draft.propertyStatus);
+        if (typeof draft.visualizationNeed === "string") setVisualizationNeed(draft.visualizationNeed);
+        if (typeof draft.supervisionNeed === "string") setSupervisionNeed(draft.supervisionNeed);
         if (typeof draft.location === "string") setLocation(draft.location);
         if (typeof draft.notes === "string") setNotes(draft.notes);
-        if (Array.isArray(draft.selectedVisualCues)) {
-          setSelectedVisualCues(draft.selectedVisualCues);
+        setSelectedVisualCues(stringArray(draft.selectedVisualCues));
+        if (isStyleAnalysis(draft.styleAnalysis)) {
+          setStyleAnalysis(draft.styleAnalysis);
+        }
+        if (draft.touchedModules && typeof draft.touchedModules === "object") {
+          const restoredTouched: Partial<Record<WorkspaceModule, boolean>> = {};
+          (["inspirations", "preferences", "details", "scope", "budget"] as WorkspaceModule[]).forEach((module) => {
+            if (draft.touchedModules?.[module]) restoredTouched[module] = true;
+          });
+          setTouchedModules(restoredTouched);
+        }
+        if (
+          draft.activeModule === "inspirations" ||
+          draft.activeModule === "preferences" ||
+          draft.activeModule === "details" ||
+          draft.activeModule === "scope" ||
+          draft.activeModule === "budget"
+        ) {
+          setActiveModule(draft.activeModule);
+        }
+        if (
+          draft.journeyPhase === "inspiration" ||
+          draft.journeyPhase === "project" ||
+          draft.journeyPhase === "matches"
+        ) {
+          setJourneyPhase(draft.journeyPhase);
         }
       } catch {
         // Ignore an invalid browser draft and continue with the default brief.
       }
-      window.sessionStorage.removeItem(projectCompassDraftKey);
     }
+
+    setDraftRestored(true);
 
     return () => {
       objectUrls.current.forEach((url) => URL.revokeObjectURL(url));
@@ -1303,10 +1428,16 @@ export default function ProjectCompass({
     };
   }, []);
 
+  useEffect(() => {
+    if (!draftRestored) return;
+    persistProjectCompassDraft();
+  }, [draftRestored, persistProjectCompassDraft]);
+
   const journeyCopy = getProjectCompassJourneyCopy();
   const hasMeaningfulBrief = Boolean(
-    styleAnalysis && (hasProjectDetails || hasScope || hasBudget || selectedVisualCues.length || notes.trim())
+    hasStyleDirection && (hasProjectDetails || hasScope || hasBudget || selectedVisualCues.length || notes.trim())
   );
+  const manualStyleLabel = hasSelectedStyle ? styleLabels(style) : "";
 
   if (variant === "journey") {
     const activeJourneyModule =
@@ -1461,8 +1592,26 @@ export default function ProjectCompass({
 
           {journeyPhase === "matches" ? (
             <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(430px,1.1fr)]">
-              <div className="rounded-[2rem] border border-[#e7e0f2] bg-white p-5 shadow-[0_18px_48px_rgba(57,31,92,0.07)] sm:p-8"><div className="text-xs font-bold uppercase tracking-[0.13em] text-primary">03 · {journeyCopy.rail[2].title}</div><h2 className="mt-3 text-3xl font-bold">{journeyCopy.matches.title}</h2><p className="mt-4 max-w-2xl text-base leading-7 text-muted">{journeyCopy.matches.body}</p><div className={isReadyForMatching ? "mt-7 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900" : "mt-7 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900"}>{isReadyForMatching ? journeyCopy.matches.ready : journeyCopy.matches.incomplete}</div>{isDesigner ? <div className="mt-5 rounded-2xl border border-primary/20 bg-primary-soft p-4 text-sm leading-6 text-muted">{journeyCopy.matches.designerNotice}</div> : null}<div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">{!isReadyForMatching ? <button type="button" onClick={() => openJourneyPhase("project", recommendedModule === "inspirations" ? "details" : recommendedModule)} className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-primary/90">{journeyCopy.matches.backToProject}</button> : null}{isReadyForMatching && !isDesigner ? <button type="button" onClick={() => saveBrief(true)} disabled={isSaving} className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-primary/90 disabled:opacity-60">{isSaving ? journeyCopy.matches.saving : journeyCopy.matches.find}</button> : null}{isReadyForMatching ? <Link href={designerHref} className="rounded-xl border border-primary bg-white px-5 py-3 text-center text-sm font-bold text-primary transition hover:bg-primary hover:text-white">{journeyCopy.matches.view}</Link> : null}{hasMeaningfulBrief && !isDesigner ? <button type="button" onClick={() => saveBrief(false)} disabled={isSaving} className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-bold transition hover:border-primary hover:text-primary disabled:opacity-60">{isSaving ? journeyCopy.matches.saving : journeyCopy.matches.save}</button> : null}{hasMeaningfulBrief ? <button type="button" onClick={copyBrief} className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-bold transition hover:border-primary hover:text-primary">{copied ? journeyCopy.matches.copied : journeyCopy.matches.copy}</button> : null}</div>{savedBriefId ? <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900"><div className="font-semibold">{copy.ui.brief.savedTitle}</div><p className="mt-1">{copy.ui.brief.savedBody(savedReferenceCount ?? 0)}</p><Link href={localeAppPath("/client/briefs")} className="mt-2 inline-flex font-semibold underline">{copy.ui.brief.openSavedBriefs}</Link></div> : null}{saveError ? <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700"><div className="font-semibold">{copy.ui.brief.saveFailed}</div><p className="mt-1">{saveError}</p></div> : null}</div>
-              <aside className="rounded-[2rem] border border-primary/20 bg-[#f8f4ff] p-5 sm:p-7"><div className="flex items-start justify-between gap-3"><div><div className="text-xs font-bold uppercase tracking-[0.12em] text-primary">{journeyCopy.matches.briefLabel}</div><h2 className="mt-2 text-2xl font-bold">{styleAnalysis?.primaryStyle || journeyCopy.matches.noStyle}</h2></div><span className="rounded-full bg-primary px-2.5 py-1 text-xs font-bold text-white">AI</span></div>{styleAnalysis ? <><p className="mt-4 text-sm leading-6 text-muted">{styleAnalysis.summary}</p><div className="mt-5 rounded-2xl border border-line bg-white p-4"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{journeyCopy.analysis.palette}</div><div className="mt-3"><PaletteLegend colors={styleAnalysis.colorPalette} /></div></div><div className="mt-3 rounded-2xl border border-line bg-white p-4"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{journeyCopy.analysis.materials}</div><div className="mt-3 flex flex-wrap gap-1.5">{styleAnalysis.materials.slice(0, 5).map((item) => <span key={item} className="rounded-full bg-[#f5efe7] px-2.5 py-1 text-xs font-semibold">{item}</span>)}</div></div></> : <p className="mt-4 text-sm leading-6 text-muted">{journeyCopy.matches.noStyle}</p>}<div className="mt-5 grid gap-3 border-t border-primary/15 pt-5 text-sm"><div className="flex justify-between gap-4"><span className="text-muted">{copy.ui.workspace.projectLabel}</span><span className="max-w-[60%] text-right font-semibold">{workspaceProjectSummary}</span></div><div className="flex justify-between gap-4"><span className="text-muted">{copy.ui.brief.support}</span><span className="max-w-[60%] text-right font-semibold">{workspaceScopeSummary}</span></div><div className="flex justify-between gap-4"><span className="text-muted">{copy.ui.brief.budget}</span><span className="max-w-[60%] text-right font-semibold">{workspaceBudgetSummary}</span></div><div className="flex justify-between gap-4"><span className="text-muted">{copy.ui.brief.timeline}</span><span className="max-w-[60%] text-right font-semibold">{workspaceTimelineSummary}</span></div></div></aside>
+              <div className="rounded-[2rem] border border-[#e7e0f2] bg-white p-5 shadow-[0_18px_48px_rgba(57,31,92,0.07)] sm:p-8">
+                <div className="text-xs font-bold uppercase tracking-[0.13em] text-primary">03 · {journeyCopy.rail[2].title}</div>
+                <h2 className="mt-3 text-3xl font-bold">{journeyCopy.matches.title}</h2>
+                <p className="mt-4 max-w-2xl text-base leading-7 text-muted">{journeyCopy.matches.body}</p>
+                <div className={isReadyForMatching ? "mt-7 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900" : "mt-7 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900"}>
+                  {isReadyForMatching ? journeyCopy.matches.ready : journeyCopy.matches.incomplete}
+                </div>
+                {isDesigner ? <div className="mt-5 rounded-2xl border border-primary/20 bg-primary-soft p-4 text-sm leading-6 text-muted">{journeyCopy.matches.designerNotice}</div> : null}
+                <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                  {!isReadyForMatching ? <button type="button" onClick={() => openJourneyPhase("project", recommendedModule === "inspirations" ? "details" : recommendedModule)} className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-primary/90">{journeyCopy.matches.backToProject}</button> : null}
+                  {isReadyForMatching ? <Link href={designerHref} onClick={persistProjectCompassDraft} className="rounded-xl bg-primary px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-primary/90">{journeyCopy.matches.view}</Link> : null}
+                  {isReadyForMatching && !isDesigner ? <button type="button" onClick={() => saveBrief(true)} disabled={isSaving} className="rounded-xl border border-primary bg-white px-5 py-3 text-sm font-bold text-primary transition hover:bg-primary hover:text-white disabled:opacity-60">{isSaving ? journeyCopy.matches.saving : isAuthenticated ? journeyCopy.matches.find : journeyCopy.matches.findWithAccount}</button> : null}
+                  {hasMeaningfulBrief && !isReadyForMatching && !isDesigner ? <button type="button" onClick={() => saveBrief(false)} disabled={isSaving} className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-bold transition hover:border-primary hover:text-primary disabled:opacity-60">{isSaving ? journeyCopy.matches.saving : isAuthenticated ? journeyCopy.matches.save : journeyCopy.matches.findWithAccount}</button> : null}
+                  {hasMeaningfulBrief ? <button type="button" onClick={copyBrief} className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-bold transition hover:border-primary hover:text-primary">{copied ? journeyCopy.matches.copied : journeyCopy.matches.copy}</button> : null}
+                </div>
+                {isReadyForMatching && !isDesigner && !isAuthenticated ? <p className="mt-4 text-sm leading-6 text-muted">{copy.ui.saveAccountHint}</p> : null}
+                {savedBriefId ? <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900"><div className="font-semibold">{copy.ui.brief.savedTitle}</div><p className="mt-1">{copy.ui.brief.savedBody(savedReferenceCount ?? 0)}</p><Link href={localeAppPath("/client/briefs")} className="mt-2 inline-flex font-semibold underline">{copy.ui.brief.openSavedBriefs}</Link></div> : null}
+                {saveError ? <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700"><div className="font-semibold">{copy.ui.brief.saveFailed}</div><p className="mt-1">{saveError}</p></div> : null}
+              </div>
+              <aside className="rounded-[2rem] border border-primary/20 bg-[#f8f4ff] p-5 sm:p-7"><div className="flex items-start justify-between gap-3"><div><div className="text-xs font-bold uppercase tracking-[0.12em] text-primary">{journeyCopy.matches.briefLabel}</div><h2 className="mt-2 text-2xl font-bold">{styleAnalysis?.primaryStyle || manualStyleLabel || journeyCopy.matches.noStyle}</h2></div><span className="rounded-full bg-primary px-2.5 py-1 text-xs font-bold text-white">AI</span></div>{styleAnalysis ? <><p className="mt-4 text-sm leading-6 text-muted">{styleAnalysis.summary}</p><div className="mt-5 rounded-2xl border border-line bg-white p-4"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{journeyCopy.analysis.palette}</div><div className="mt-3"><PaletteLegend colors={styleAnalysis.colorPalette} /></div></div><div className="mt-3 rounded-2xl border border-line bg-white p-4"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{journeyCopy.analysis.materials}</div><div className="mt-3 flex flex-wrap gap-1.5">{styleAnalysis.materials.slice(0, 5).map((item) => <span key={item} className="rounded-full bg-[#f5efe7] px-2.5 py-1 text-xs font-semibold">{item}</span>)}</div></div></> : <p className="mt-4 text-sm leading-6 text-muted">{manualStyleLabel ? journeyCopy.matches.manualStyle : journeyCopy.matches.noStyle}</p>}<div className="mt-5 grid gap-3 border-t border-primary/15 pt-5 text-sm"><div className="flex justify-between gap-4"><span className="text-muted">{copy.ui.workspace.projectLabel}</span><span className="max-w-[60%] text-right font-semibold">{workspaceProjectSummary}</span></div><div className="flex justify-between gap-4"><span className="text-muted">{copy.ui.brief.support}</span><span className="max-w-[60%] text-right font-semibold">{workspaceScopeSummary}</span></div><div className="flex justify-between gap-4"><span className="text-muted">{copy.ui.brief.budget}</span><span className="max-w-[60%] text-right font-semibold">{workspaceBudgetSummary}</span></div><div className="flex justify-between gap-4"><span className="text-muted">{copy.ui.brief.timeline}</span><span className="max-w-[60%] text-right font-semibold">{workspaceTimelineSummary}</span></div></div></aside>
             </section>
           ) : null}
         </section>
@@ -1728,7 +1877,7 @@ export default function ProjectCompass({
 
           <aside className="h-fit rounded-3xl border border-primary/20 bg-white p-5 shadow-[0_18px_44px_rgba(57,31,92,0.10)] lg:sticky lg:top-24">
             <div className="flex items-start justify-between gap-4"><div><div className="text-sm font-bold text-primary">{copy.ui.workspace.summaryTitle}</div><h2 className="mt-1 text-xl font-bold">{styleAnalysis?.primaryStyle || (hasPreferences ? styleLabels(style) : copy.ui.notProvided)}</h2></div><span className="rounded-full bg-primary px-2.5 py-1 text-xs font-bold text-white">AI</span></div>
-            <p className="mt-3 text-sm leading-6 text-muted">{styleAnalysis?.summary || copy.ui.workspace.summaryBody}</p>
+            <p className="mt-3 text-sm leading-6 text-muted">{styleAnalysis?.summary || (manualStyleLabel ? copy.ui.workspace.manualStyleBody : copy.ui.workspace.summaryBody)}</p>
             {styleAnalysis?.colorPalette.length ? <div className="mt-4 rounded-2xl border border-line bg-background p-4"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{copy.ui.steps.colors}</div><div className="mt-3"><PaletteLegend colors={styleAnalysis.colorPalette} /></div></div> : null}
             <div className="mt-5 grid gap-3 border-y border-line py-5 text-sm">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
@@ -1740,9 +1889,8 @@ export default function ProjectCompass({
             <div className="mt-5 rounded-2xl bg-primary-soft p-4"><div className="flex items-center justify-between gap-3 text-sm font-bold"><span>{copy.ui.workspace.readinessTitle}</span><span className="text-primary">{briefReadiness}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${briefReadiness}%` }} /></div><p className="mt-3 text-xs leading-5 text-muted">{copy.ui.workspace.readinessBody}</p></div>
             <div className="mt-5 grid gap-3">
               {isDesigner ? <div className="rounded-xl border border-primary/25 bg-primary-soft p-3 text-sm leading-6 text-muted">{copy.ui.designerOnly}</div> : null}
-              {isReadyForMatching ? <><div><div className="text-sm font-bold">{copy.ui.workspace.matchingReadyTitle}</div><p className="mt-1 text-sm leading-6 text-muted">{copy.ui.workspace.matchingReadyBody}</p></div>{!isDesigner ? <button type="button" onClick={() => saveBrief(true)} disabled={isSaving} className="rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white hover:opacity-90 disabled:opacity-60">{isSaving ? copy.ui.saving : copy.ui.saveAndFind}</button> : null}</> : <><div><div className="text-sm font-bold">{copy.ui.workspace.continueTitle}</div><p className="mt-1 text-sm leading-6 text-muted">{copy.ui.workspace.continueBody}</p></div><button type="button" onClick={() => openModule(recommendedModule)} className="rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white hover:opacity-90">{copy.ui.workspace.continue}</button></>}
-              {!isDesigner ? <button type="button" onClick={() => saveBrief(false)} disabled={isSaving} className="rounded-xl border border-primary bg-white px-4 py-3 text-sm font-bold text-primary hover:bg-primary hover:text-white disabled:opacity-60">{isSaving ? copy.ui.saving : copy.ui.workspace.saveAndReturn}</button> : null}
-              {isReadyForMatching ? <Link href={designerHref} className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-bold hover:border-primary hover:text-primary">{copy.ui.viewMatches}</Link> : <button type="button" onClick={() => openModule(recommendedModule)} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-bold hover:border-primary hover:text-primary">{copy.ui.workspace.continue}</button>}
+              {isReadyForMatching ? <><div><div className="text-sm font-bold">{copy.ui.workspace.matchingReadyTitle}</div><p className="mt-1 text-sm leading-6 text-muted">{copy.ui.workspace.matchingReadyBody}</p></div><Link href={designerHref} onClick={persistProjectCompassDraft} className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-bold text-white hover:opacity-90">{copy.ui.viewMatches}</Link>{!isDesigner ? <><button type="button" onClick={() => saveBrief(true)} disabled={isSaving} className="rounded-xl border border-primary bg-white px-4 py-3 text-sm font-bold text-primary hover:bg-primary hover:text-white disabled:opacity-60">{isSaving ? copy.ui.saving : isAuthenticated ? copy.ui.saveAndFind : journeyCopy.matches.findWithAccount}</button>{!isAuthenticated ? <p className="text-xs leading-5 text-muted">{copy.ui.saveAccountHint}</p> : null}</> : null}</> : <><div><div className="text-sm font-bold">{copy.ui.workspace.continueTitle}</div><p className="mt-1 text-sm leading-6 text-muted">{copy.ui.workspace.continueBody}</p></div><button type="button" onClick={() => openModule(recommendedModule)} className="rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white hover:opacity-90">{copy.ui.workspace.continue}</button>{!isDesigner && hasMeaningfulBrief ? <button type="button" onClick={() => saveBrief(false)} disabled={isSaving} className="rounded-xl border border-primary bg-white px-4 py-3 text-sm font-bold text-primary hover:bg-primary hover:text-white disabled:opacity-60">{isSaving ? copy.ui.saving : isAuthenticated ? copy.ui.workspace.saveAndReturn : journeyCopy.matches.findWithAccount}</button> : null}</>}
+              {!isReadyForMatching ? <button type="button" onClick={() => openModule(recommendedModule)} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-bold hover:border-primary hover:text-primary">{copy.ui.workspace.continue}</button> : null}
               <button type="button" onClick={() => setShowFullBrief((current) => !current)} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-bold hover:border-primary hover:text-primary">{showFullBrief ? copy.ui.workspace.hideFullBrief : copy.ui.workspace.showFullBrief}</button>
               <button type="button" onClick={copyBrief} className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-bold hover:border-primary hover:text-primary">{copied ? copy.ui.briefCopied : copy.ui.copyBrief}</button>
             </div>

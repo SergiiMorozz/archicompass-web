@@ -58,12 +58,14 @@ export type ProjectCompassJourneyCopy = {
     save: string;
     saving: string;
     find: string;
+    findWithAccount: string;
     view: string;
     copy: string;
     copied: string;
     designerNotice: string;
     briefLabel: string;
     noStyle: string;
+    manualStyle: string;
     noProject: string;
   };
 };
@@ -131,12 +133,13 @@ const journeyCopy: Record<SiteLocale, ProjectCompassJourneyCopy> = {
       title: "Twój brief i dopasowania",
       body:
         "Po zapisaniu briefu ArchiCompass przekaże jego kluczowe sygnały do katalogu projektantów, aby można było wrócić do niego później. Możesz też przejrzeć dopasowania bez zapisywania briefu. To punkt wyjścia do porównania portfolio, nie automatyczna decyzja.",
-      ready: "Brief ma wystarczająco dużo informacji, aby otworzyć dopasowania.",
-      incomplete: "Dodaj najważniejsze szczegóły projektu, zakres współpracy oraz budżet i termin, aby przejść do dopasowań.",
+      ready: "Możesz już przejrzeć wstępne dopasowania. Uzupełnij pozostałe pola, aby rekomendacje były dokładniejsze.",
+      incomplete: "Wybierz kierunek stylu i dodaj przynajmniej jedną informację o inwestycji, aby przejrzeć wstępne dopasowania.",
       backToProject: "Uzupełnij brakujące informacje",
       save: "Zapisz brief na później",
       saving: "Zapisujemy brief…",
       find: "Zapisz brief i przejdź do dopasowań",
+      findWithAccount: "Zapisz brief — utwórz konto",
       view: "Przejrzyj dopasowania bez zapisywania briefu",
       copy: "Kopiuj brief",
       copied: "Brief skopiowany",
@@ -144,6 +147,7 @@ const journeyCopy: Record<SiteLocale, ProjectCompassJourneyCopy> = {
         "Konto projektanta może korzystać z analizy i podglądu dopasowań, ale nie może zapisywać ani wysyłać briefów klientów.",
       briefLabel: "Podsumowanie briefu",
       noStyle: "Kierunek stylistyczny pojawi się po analizie zdjęć.",
+      manualStyle: "Kierunek został wybrany ręcznie. Dodaj zdjęcia, jeśli chcesz otrzymać także analizę AI palety i materiałów.",
       noProject: "Szczegóły projektu pojawią się po ich uzupełnieniu.",
     },
   },
@@ -209,12 +213,13 @@ const journeyCopy: Record<SiteLocale, ProjectCompassJourneyCopy> = {
       title: "Your brief and matches",
       body:
         "Once you save the brief, ArchiCompass sends its key signals to the designer directory so you can return to it later. You can also preview matches without saving the brief. It is a starting point for comparing portfolios, not an automatic decision.",
-      ready: "Your brief now contains enough context to open matches.",
-      incomplete: "Add the key project details, collaboration scope, budget and timeline before opening matches.",
+      ready: "You can already preview initial matches. Complete the remaining fields to make the recommendations more precise.",
+      incomplete: "Choose a style direction and add at least one detail about your project to preview initial matches.",
       backToProject: "Complete the missing information",
       save: "Save brief for later",
       saving: "Saving brief…",
       find: "Save brief and go to matches",
+      findWithAccount: "Save brief — create an account",
       view: "Preview matches without saving the brief",
       copy: "Copy brief",
       copied: "Brief copied",
@@ -222,6 +227,7 @@ const journeyCopy: Record<SiteLocale, ProjectCompassJourneyCopy> = {
         "A designer account can use the analysis and preview matches, but cannot save or send client briefs.",
       briefLabel: "Brief summary",
       noStyle: "The style direction will appear after image analysis.",
+      manualStyle: "This direction was selected manually. Add photos if you would also like AI analysis of the palette and materials.",
       noProject: "Project details will appear once you add them.",
     },
   },
