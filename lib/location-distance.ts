@@ -12,6 +12,21 @@ type GoogleLocationResponse = {
 const cities: City[] = [
   { names: ["warsaw", "warszawa"], lat: 52.2297, lon: 21.0122 },
   { names: ["piaseczno", "05-500"], lat: 52.0742, lon: 21.026 },
+  {
+    names: [
+      "lesznowola",
+      "kolonia lesznowola",
+      "magdalenka",
+      "mysiadlo",
+      "mysiadło",
+      "jozefoslaw",
+      "józefosław",
+      "nowa iwiczna",
+      "stara iwiczna",
+    ],
+    lat: 52.0742,
+    lon: 21.026,
+  },
   { names: ["konstancin-jeziorna", "konstancin jeziorna", "05-510"], lat: 52.093, lon: 21.117 },
   { names: ["pruszkow", "pruszków", "05-800"], lat: 52.1614, lon: 20.8026 },
   { names: ["legionowo", "05-120"], lat: 52.4016, lon: 20.9464 },
