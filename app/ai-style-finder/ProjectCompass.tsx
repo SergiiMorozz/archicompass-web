@@ -5,6 +5,7 @@ import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ShareableStyleResult from "@/components/ShareableStyleResult";
 import { getProjectCompassCopy } from "@/content/project-compass-copy";
+import { getProjectCompassJourneyCopy } from "@/content/project-compass-journey-copy";
 import { copyText } from "@/lib/copy-text";
 import { localeAppPath, localePublicPath, siteLocale } from "@/lib/site-locale";
 
@@ -42,6 +43,9 @@ type WorkspaceModule =
   | "details"
   | "scope"
   | "budget";
+
+type ProjectCompassVariant = "workspace" | "journey";
+type JourneyPhase = "inspiration" | "project" | "matches";
 
 const maxReferencePhotos = 10;
 const maxAnalysisPhotos = 6;
@@ -684,7 +688,15 @@ function MultiOptionGrid({
   );
 }
 
-export default function ProjectCompass({ isDesigner = false }: { isDesigner?: boolean }) {
+export default function ProjectCompass({
+  isDesigner = false,
+  variant = "workspace",
+  entryPath = "/project-compass",
+}: {
+  isDesigner?: boolean;
+  variant?: ProjectCompassVariant;
+  entryPath?: string;
+}) {
   const [projectType, setProjectType] = useState("");
   const [goal, setGoal] = useState("");
   const [style, setStyle] = useState("");
@@ -714,7 +726,9 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
   const [activeModule, setActiveModule] = useState<WorkspaceModule | null>(null);
   const [showFullBrief, setShowFullBrief] = useState(false);
   const [touchedModules, setTouchedModules] = useState<Partial<Record<WorkspaceModule, boolean>>>({});
+  const [journeyPhase, setJourneyPhase] = useState<JourneyPhase>("inspiration");
   const objectUrls = useRef<string[]>([]);
+  const journeyPhotoInputRef = useRef<HTMLInputElement>(null);
 
   function markModule(module: WorkspaceModule) {
     setTouchedModules((current) => (current[module] ? current : { ...current, [module]: true }));
@@ -728,6 +742,24 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
         block: "start",
       });
     }, 0);
+  }
+
+  function openJourneyPhase(phase: JourneyPhase, module?: WorkspaceModule) {
+    setJourneyPhase(phase);
+    if (module) setActiveModule(module);
+    if (phase === "project" && !module && !activeModule) setActiveModule("details");
+
+    window.setTimeout(() => {
+      document.getElementById("project-compass-journey-flow")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  }
+
+  function startJourneyWithPhotos() {
+    setJourneyPhase("inspiration");
+    window.setTimeout(() => journeyPhotoInputRef.current?.click(), 0);
   }
 
   const selectedStyles = styleValues(style);
@@ -1161,7 +1193,7 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
             selectedVisualCues,
           })
         );
-        const next = encodeURIComponent(localeAppPath("/project-compass"));
+        const next = encodeURIComponent(localeAppPath(entryPath));
         window.location.href =
           payload.code === "ONBOARDING_REQUIRED"
             ? `${localePublicPath(siteLocale, "/onboarding")}?intent=client&next=${next}`
@@ -1255,6 +1287,173 @@ export default function ProjectCompass({ isDesigner = false }: { isDesigner?: bo
       objectUrls.current = [];
     };
   }, []);
+
+  const journeyCopy = getProjectCompassJourneyCopy();
+  const hasMeaningfulBrief = Boolean(
+    styleAnalysis && (hasProjectDetails || hasScope || hasBudget || selectedVisualCues.length || notes.trim())
+  );
+
+  if (variant === "journey") {
+    const activeJourneyModule =
+      activeModule === "preferences" || activeModule === "details" || activeModule === "scope" || activeModule === "budget"
+        ? activeModule
+        : "details";
+
+    return (
+      <main className="bg-[#fbfaff] pb-16 text-foreground">
+        <section className="border-b border-[#ece6f7] bg-[radial-gradient(circle_at_79%_18%,rgba(125,68,232,0.14),transparent_30%),linear-gradient(180deg,#ffffff_0%,#fbfaff_100%)] px-4 py-8 sm:px-6 sm:py-12">
+          <div className="mx-auto max-w-7xl">
+            <Link href={localeAppPath("/")} className="inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-primary">
+              <span aria-hidden="true">&larr;</span>
+              {journeyCopy.hero.back}
+            </Link>
+            <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,0.94fr)_minmax(480px,1.06fr)] lg:items-center">
+              <div>
+                <div className="text-sm font-bold uppercase tracking-[0.15em] text-primary">{journeyCopy.hero.eyebrow}</div>
+                <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-[1.02] tracking-tight sm:text-5xl lg:text-[4.25rem]">
+                  {journeyCopy.hero.titleBefore}{" "}
+                  <span className="text-primary">{journeyCopy.hero.titleHighlight}</span>{" "}
+                  {journeyCopy.hero.titleAfter}
+                </h1>
+                <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">{journeyCopy.hero.body}</p>
+                <div className="mt-6 grid gap-3 text-sm font-semibold text-foreground sm:grid-cols-3">
+                  {journeyCopy.hero.benefits.map((benefit) => (
+                    <div key={benefit} className="flex items-start gap-2"><span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border border-primary/30 bg-primary-soft text-xs text-primary">&#10003;</span><span>{benefit}</span></div>
+                  ))}
+                </div>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <button type="button" onClick={startJourneyWithPhotos} className="inline-flex min-h-12 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white shadow-[0_14px_28px_rgba(103,48,211,0.22)] transition hover:-translate-y-0.5 hover:bg-primary/90">
+                    <span aria-hidden="true" className="mr-2 text-base">+</span>{journeyCopy.hero.start}
+                  </button>
+                  <span className="max-w-sm text-xs leading-5 text-muted">{journeyCopy.hero.photosHint}</span>
+                </div>
+              </div>
+              <div className="relative mx-auto w-full max-w-2xl overflow-visible rounded-[2rem] bg-primary-soft/45 p-3 sm:p-5">
+                <img src="/images/home/hero-warm-minimalist-20260811.png" alt="" className="aspect-[1.24] w-full rounded-[1.45rem] object-cover shadow-[0_24px_60px_rgba(61,34,91,0.18)]" />
+                <div className="absolute left-0 top-4 max-w-[13rem] rounded-2xl border border-primary/20 bg-white/95 p-4 shadow-[0_16px_34px_rgba(61,34,91,0.16)] sm:-left-7 sm:top-10 sm:max-w-[15rem]">
+                  <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">{journeyCopy.analysis.suggestedStyle}</div>
+                  <div className="mt-1 text-xl font-bold">{styleAnalysis?.primaryStyle || "AI"}</div>
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-primary-soft"><div className="h-full w-3/5 rounded-full bg-primary" /></div>
+                </div>
+                <div className="absolute -bottom-5 right-0 rounded-2xl border border-primary/20 bg-white/95 p-4 shadow-[0_16px_34px_rgba(61,34,91,0.16)] sm:-right-5 sm:bottom-7">
+                  <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">{copy.ui.workspace.readinessTitle}</div>
+                  <div className="mt-1 text-3xl font-bold text-primary">{briefReadiness}%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="project-compass-journey-flow" className="mx-auto max-w-7xl scroll-mt-24 px-4 pt-14 sm:px-6 sm:pt-16">
+          <nav aria-label={journeyCopy.hero.eyebrow} className="grid gap-3 rounded-3xl border border-[#e7e0f2] bg-white p-3 shadow-[0_12px_32px_rgba(57,31,92,0.06)] md:grid-cols-3">
+            {journeyCopy.rail.map((step) => {
+              const active = journeyPhase === step.id;
+              return (
+                <button key={step.id} type="button" onClick={() => openJourneyPhase(step.id, step.id === "project" ? activeJourneyModule : undefined)} className={[
+                  "flex min-h-[5.25rem] items-start gap-3 rounded-2xl p-4 text-left transition",
+                  active ? "bg-primary text-white shadow-[0_12px_26px_rgba(103,48,211,0.18)]" : "hover:bg-primary-soft/60",
+                ].join(" ")}>
+                  <span className={active ? "grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/20 text-xs font-bold" : "grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary-soft text-xs font-bold text-primary"}>{step.number}</span>
+                  <span><span className="block text-sm font-bold">{step.title}</span><span className={active ? "mt-1 block text-xs leading-5 text-white/75" : "mt-1 block text-xs leading-5 text-muted"}>{step.body}</span></span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {journeyPhase === "inspiration" ? (
+            <section className="mt-6 grid gap-6 rounded-[2rem] border border-[#e7e0f2] bg-white p-5 shadow-[0_18px_48px_rgba(57,31,92,0.07)] lg:grid-cols-[minmax(0,0.88fr)_minmax(430px,1.12fr)] lg:p-8">
+              <div className="flex flex-col">
+                <div className="inline-flex w-fit items-center rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary">01 · {journeyCopy.rail[0].title}</div>
+                <h2 className="mt-4 max-w-xl text-3xl font-bold tracking-tight">{journeyCopy.inspiration.title}</h2>
+                <p className="mt-4 max-w-xl text-base leading-7 text-muted">{journeyCopy.inspiration.body}</p>
+                <div className="mt-6 rounded-2xl border border-dashed border-primary/35 bg-primary-soft/35 p-5">
+                  <input ref={journeyPhotoInputRef} id="journey-reference-photos" type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={referencePhotos.length >= maxReferencePhotos || isPreparingPhotos} onChange={addReferencePhotos} className="sr-only" />
+                  <label htmlFor="journey-reference-photos" className={[
+                    "flex cursor-pointer flex-col items-center justify-center rounded-xl bg-white px-5 py-7 text-center transition hover:bg-primary hover:text-white",
+                    referencePhotos.length >= maxReferencePhotos || isPreparingPhotos ? "pointer-events-none opacity-60" : "",
+                  ].join(" ")}>
+                    <span className="text-lg font-bold">{isPreparingPhotos ? copy.ui.steps.preparingPhotos : journeyCopy.inspiration.upload}</span>
+                    <span className="mt-2 text-sm leading-6 text-muted group-hover:text-white">{journeyCopy.inspiration.uploadHint}</span>
+                  </label>
+                  <p className="mt-3 text-xs leading-5 text-muted">{journeyCopy.inspiration.selected(referencePhotos.length)}</p>
+                </div>
+                <p className="mt-5 text-xs leading-5 text-muted">{journeyCopy.inspiration.privacy} <Link href={localeAppPath("/privacy")} className="font-semibold underline">{copy.ui.steps.privacy}</Link>.</p>
+              </div>
+              <div>
+                {referencePhotos.length ? (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {referencePhotos.map((photo) => (
+                      <figure key={photo.id} className="overflow-hidden rounded-2xl border border-line bg-background">
+                        <img src={photo.url} alt={photo.name} className="aspect-square w-full object-cover" />
+                        <figcaption className="flex items-center justify-between gap-2 p-2"><span className="min-w-0 truncate text-xs font-semibold">{photo.name}</span><button type="button" onClick={() => removeReferencePhoto(photo.id)} className="shrink-0 text-xs font-bold text-primary hover:underline">{copy.ui.steps.removePhoto}</button></figcaption>
+                      </figure>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid min-h-[21rem] place-items-center rounded-3xl border border-dashed border-[#dbcdf7] bg-[linear-gradient(135deg,#f4efff,#fff)] p-8 text-center">
+                    <div><div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary text-2xl font-bold text-white">AI</div><p className="mt-4 max-w-sm text-sm leading-6 text-muted">{copy.ui.steps.noPhotos}</p></div>
+                  </div>
+                )}
+                <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-primary/25 bg-primary-soft/55 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div><div className="font-bold text-primary">{copy.ui.steps.aiTitle}</div><p className="mt-1 text-sm leading-6 text-muted">{copy.ui.steps.aiBody}</p></div>
+                  <button type="button" onClick={analyzeReferencePhotos} disabled={!referencePhotos.length || isAnalyzing || isPreparingPhotos} className="shrink-0 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60">{isAnalyzing ? journeyCopy.inspiration.analysing : journeyCopy.inspiration.analyse}</button>
+                </div>
+                {referencePhotos.length > maxAnalysisPhotos ? <p className="mt-3 text-xs leading-5 text-muted">{copy.ui.steps.manyPhotos(maxAnalysisPhotos)}</p> : null}
+                {analysisError ? <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700"><div className="font-semibold">{copy.ui.steps.analysisUnavailable}</div><p className="mt-1">{analysisError}</p></div> : null}
+              </div>
+            </section>
+          ) : null}
+
+          {journeyPhase === "inspiration" && styleAnalysis ? (
+            <section className="mt-6 rounded-[2rem] border border-primary/20 bg-[#f8f4ff] p-5 sm:p-8">
+              <div className="flex flex-col gap-4 border-b border-primary/15 pb-5 sm:flex-row sm:items-start sm:justify-between"><div><div className="text-xs font-bold uppercase tracking-[0.13em] text-primary">{journeyCopy.analysis.result}</div><h2 className="mt-2 text-3xl font-bold">{styleAnalysis.primaryStyle}</h2></div><span className="w-fit rounded-full bg-white px-3 py-1.5 text-xs font-bold text-primary">{journeyCopy.analysis.confidence}: {confidenceLabel(styleAnalysis.confidence)}</span></div>
+              <p className="mt-5 max-w-3xl text-base leading-7 text-muted">{styleAnalysis.summary}</p>
+              <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-2xl border border-line bg-white p-4"><div className="text-xs font-bold uppercase tracking-[0.11em] text-muted">{journeyCopy.analysis.palette}</div><div className="mt-3"><PaletteLegend colors={styleAnalysis.colorPalette} /></div></div>
+                <div className="rounded-2xl border border-line bg-white p-4"><div className="text-xs font-bold uppercase tracking-[0.11em] text-muted">{journeyCopy.analysis.materials}</div><div className="mt-3 flex flex-wrap gap-1.5">{styleAnalysis.materials.slice(0, 5).map((item) => <span key={item} className="rounded-full bg-[#f5efe7] px-2.5 py-1 text-xs font-semibold">{item}</span>)}</div></div>
+                <div className="rounded-2xl border border-line bg-white p-4"><div className="text-xs font-bold uppercase tracking-[0.11em] text-muted">{journeyCopy.analysis.cues}</div><div className="mt-3 flex flex-wrap gap-1.5">{styleAnalysis.styleClues.slice(0, 4).map((item) => <span key={item} className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary">{item}</span>)}</div></div>
+                <div className="rounded-2xl border border-line bg-white p-4"><div className="text-xs font-bold uppercase tracking-[0.11em] text-muted">{journeyCopy.analysis.designerPrompt}</div><p className="mt-3 text-sm leading-6 text-muted">{styleAnalysis.designerPrompt}</p></div>
+              </div>
+              <details className="mt-5 rounded-2xl border border-line bg-white p-4"><summary className="cursor-pointer text-sm font-bold text-primary">{journeyCopy.inspiration.refine}</summary><div className="mt-5"><MultiOptionGrid label={copy.ui.steps.style} onChange={(values) => { setStyle(values.join(" | ")); markModule("preferences"); }} options={styles} values={selectedStyles} /></div></details>
+              <details className="mt-4 rounded-2xl border border-line bg-white p-4"><summary className="cursor-pointer text-sm font-bold text-primary">{copy.ui.share.title}</summary><div className="mt-5"><ShareableStyleResult analysis={styleAnalysis} photos={referencePhotos} /></div></details>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs leading-5 text-muted">{copy.ui.steps.aiTransparencyNotice} <Link href={localeAppPath("/ai-transparency")} className="font-semibold text-primary underline">{journeyCopy.inspiration.transparency}</Link>.</p><button type="button" onClick={() => openJourneyPhase("project", "details")} className="shrink-0 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-primary/90">{journeyCopy.inspiration.continue}</button></div>
+            </section>
+          ) : null}
+
+          {journeyPhase === "project" ? (
+            <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+              <div className="rounded-[2rem] border border-[#e7e0f2] bg-white p-5 shadow-[0_18px_48px_rgba(57,31,92,0.07)] sm:p-8">
+                <div className="flex flex-col gap-3 border-b border-line pb-5 sm:flex-row sm:items-end sm:justify-between"><div><div className="text-xs font-bold uppercase tracking-[0.13em] text-primary">02 · {journeyCopy.rail[1].title}</div><h2 className="mt-2 text-3xl font-bold">{journeyCopy.project.title}</h2><p className="mt-3 max-w-3xl text-sm leading-6 text-muted">{journeyCopy.project.body}</p></div><span className="rounded-full bg-primary-soft px-3 py-1.5 text-sm font-bold text-primary">{briefReadiness}%</span></div>
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {([
+                    { id: "details" as const, label: journeyCopy.project.details },
+                    { id: "preferences" as const, label: journeyCopy.project.preferences },
+                    { id: "scope" as const, label: journeyCopy.project.scope },
+                    { id: "budget" as const, label: journeyCopy.project.budget },
+                  ]).map((item) => <button key={item.id} type="button" onClick={() => setActiveModule(item.id)} className={activeJourneyModule === item.id ? "rounded-full bg-primary px-4 py-2 text-sm font-bold text-white" : "rounded-full border border-line bg-background px-4 py-2 text-sm font-bold text-muted transition hover:border-primary hover:text-primary"}>{item.label}</button>)}
+                </div>
+                <div className="mt-7">
+                  {activeJourneyModule === "details" ? <div className="grid gap-7"><OptionGrid label={copy.ui.steps.projectType} onChange={(value) => { setProjectType(value); markModule("details"); }} options={projectTypes} value={projectType} /><section><h3 className="text-base font-bold">{copy.ui.steps.space}</h3><p className="mt-1 text-sm leading-6 text-muted">{copy.ui.steps.spaceBody}</p><div className="mt-4 grid gap-4 sm:grid-cols-2"><label className="text-sm font-semibold">{copy.ui.steps.area}<input type="number" min="1" max="5000" inputMode="decimal" value={areaM2} onChange={(event) => { setAreaM2(event.target.value); markModule("details"); }} placeholder={copy.ui.steps.areaPlaceholder} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label><label className="text-sm font-semibold">{copy.ui.steps.roomsCount}<input type="number" min="1" max="50" inputMode="numeric" value={roomCount} onChange={(event) => { setRoomCount(event.target.value); markModule("details"); }} placeholder={copy.ui.steps.roomsCountPlaceholder} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label></div><div className="mt-4"><div className="text-sm font-semibold">{copy.ui.steps.roomsIncluded}</div><div className="mt-3 flex flex-wrap gap-2">{roomTypes.map((room) => { const selected = selectedRoomTypes.includes(room); return <button key={room} type="button" aria-pressed={selected} onClick={() => { toggleRoomType(room); markModule("details"); }} className={selected ? "rounded-full border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white" : "rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"}>{roomTypeLabels[room] || room}</button>; })}</div></div></section><OptionGrid label={copy.ui.steps.propertyStatus} onChange={(value) => { setPropertyStatus(value); markModule("details"); }} options={propertyStatuses} value={propertyStatus} /><label className="block max-w-xl text-sm font-semibold">{copy.ui.location}<input value={location} onChange={(event) => { setLocation(event.target.value); markModule("details"); }} placeholder={copy.ui.locationPlaceholder} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label></div> : null}
+                  {activeJourneyModule === "preferences" ? <div className="grid gap-7">{styleAnalysis ? <div className="rounded-2xl border border-primary/20 bg-primary-soft/50 p-4 text-sm leading-6 text-muted"><span className="font-bold text-primary">AI</span> {styleAnalysis.primaryStyle}. {copy.ui.workspace.preferences.body}</div> : null}<MultiOptionGrid label={copy.ui.steps.style} onChange={(values) => { setStyle(values.join(" | ")); markModule("preferences"); }} options={styles} values={selectedStyles} /><section><h3 className="text-base font-bold">{copy.ui.steps.visualCues}</h3><div className="mt-3 grid gap-3 sm:grid-cols-2">{visualCues.map((cue) => { const selected = selectedVisualCues.includes(cue.value); return <button key={cue.value} type="button" aria-pressed={selected} onClick={() => { toggleVisualCue(cue.value); markModule("preferences"); }} className={selected ? "rounded-2xl border border-primary bg-primary-soft p-4 text-left" : "rounded-2xl border border-line bg-background p-4 text-left hover:border-primary"}><span className="block text-sm font-bold">{cue.label}</span><span className="mt-1 block text-sm leading-6 text-muted">{cue.description}</span></button>; })}</div></section><label className="block text-sm font-semibold">{copy.ui.notes}<textarea value={notes} onChange={(event) => { setNotes(event.target.value); markModule("preferences"); }} placeholder={copy.ui.notesPlaceholder} rows={4} className="mt-2 w-full resize-y rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label></div> : null}
+                  {activeJourneyModule === "scope" ? <div className="grid gap-7"><OptionGrid label={copy.ui.steps.goal} onChange={(value) => { setGoal(value); markModule("scope"); }} options={goals} value={goal} /><OptionGrid label={copy.ui.steps.scope} onChange={(value) => { setScope(value); markModule("scope"); }} options={scopes} value={scope} /><OptionGrid label={copy.ui.steps.visualization} onChange={(value) => { setVisualizationNeed(value); markModule("scope"); }} options={visualizationNeeds} value={visualizationNeed} /><OptionGrid label={copy.ui.steps.supervision} onChange={(value) => { setSupervisionNeed(value); markModule("scope"); }} options={supervisionNeeds} value={supervisionNeed} /></div> : null}
+                  {activeJourneyModule === "budget" ? <div className="grid gap-7"><OptionGrid label={copy.ui.steps.budget} onChange={(value) => { setBudget(value); markModule("budget"); }} options={budgets} value={budget} /><OptionGrid label={copy.ui.steps.timeline} onChange={(value) => { setTimeline(value); markModule("budget"); }} options={timelines} value={timeline} /></div> : null}
+                </div>
+                <div className="mt-8 flex flex-col gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between"><p className="max-w-xl text-sm leading-6 text-muted">{journeyCopy.project.summary}</p><button type="button" onClick={() => openJourneyPhase("matches")} className="shrink-0 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-primary/90">{journeyCopy.project.continue}</button></div>
+              </div>
+              <aside className="h-fit rounded-[2rem] border border-primary/20 bg-[#f8f4ff] p-5 lg:sticky lg:top-24"><div className="flex items-start justify-between gap-3"><div><div className="text-xs font-bold uppercase tracking-[0.12em] text-primary">{journeyCopy.matches.briefLabel}</div><h2 className="mt-2 text-xl font-bold">{styleAnalysis?.primaryStyle || styleLabels(style) || copy.ui.notProvided}</h2></div><span className="rounded-full bg-primary px-2.5 py-1 text-xs font-bold text-white">AI</span></div><div className="mt-5 grid gap-3 text-sm"><div className="rounded-xl border border-line bg-white p-3"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{copy.ui.workspace.projectLabel}</div><div className="mt-1 font-semibold">{workspaceProjectSummary}</div></div><div className="rounded-xl border border-line bg-white p-3"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{copy.ui.brief.support}</div><div className="mt-1 font-semibold">{workspaceScopeSummary}</div></div><div className="rounded-xl border border-line bg-white p-3"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{copy.ui.brief.budget}</div><div className="mt-1 font-semibold">{workspaceBudgetSummary}</div></div></div><div className="mt-5"><div className="flex items-center justify-between text-sm font-bold"><span>{copy.ui.workspace.readinessTitle}</span><span className="text-primary">{briefReadiness}%</span></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${briefReadiness}%` }} /></div></div></aside>
+            </section>
+          ) : null}
+
+          {journeyPhase === "matches" ? (
+            <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(430px,1.1fr)]">
+              <div className="rounded-[2rem] border border-[#e7e0f2] bg-white p-5 shadow-[0_18px_48px_rgba(57,31,92,0.07)] sm:p-8"><div className="text-xs font-bold uppercase tracking-[0.13em] text-primary">03 · {journeyCopy.rail[2].title}</div><h2 className="mt-3 text-3xl font-bold">{journeyCopy.matches.title}</h2><p className="mt-4 max-w-2xl text-base leading-7 text-muted">{journeyCopy.matches.body}</p><div className={isReadyForMatching ? "mt-7 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-900" : "mt-7 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900"}>{isReadyForMatching ? journeyCopy.matches.ready : journeyCopy.matches.incomplete}</div>{isDesigner ? <div className="mt-5 rounded-2xl border border-primary/20 bg-primary-soft p-4 text-sm leading-6 text-muted">{journeyCopy.matches.designerNotice}</div> : null}<div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">{!isReadyForMatching ? <button type="button" onClick={() => openJourneyPhase("project", recommendedModule === "inspirations" ? "details" : recommendedModule)} className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-primary/90">{journeyCopy.matches.backToProject}</button> : null}{isReadyForMatching && !isDesigner ? <button type="button" onClick={() => saveBrief(true)} disabled={isSaving} className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-primary/90 disabled:opacity-60">{isSaving ? journeyCopy.matches.saving : journeyCopy.matches.find}</button> : null}{isReadyForMatching ? <Link href={designerHref} className="rounded-xl border border-primary bg-white px-5 py-3 text-center text-sm font-bold text-primary transition hover:bg-primary hover:text-white">{journeyCopy.matches.view}</Link> : null}{hasMeaningfulBrief && !isDesigner ? <button type="button" onClick={() => saveBrief(false)} disabled={isSaving} className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-bold transition hover:border-primary hover:text-primary disabled:opacity-60">{isSaving ? journeyCopy.matches.saving : journeyCopy.matches.save}</button> : null}{hasMeaningfulBrief ? <button type="button" onClick={copyBrief} className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-bold transition hover:border-primary hover:text-primary">{copied ? journeyCopy.matches.copied : journeyCopy.matches.copy}</button> : null}</div>{savedBriefId ? <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900"><div className="font-semibold">{copy.ui.brief.savedTitle}</div><p className="mt-1">{copy.ui.brief.savedBody(savedReferenceCount ?? 0)}</p><Link href={localeAppPath("/client/briefs")} className="mt-2 inline-flex font-semibold underline">{copy.ui.brief.openSavedBriefs}</Link></div> : null}{saveError ? <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700"><div className="font-semibold">{copy.ui.brief.saveFailed}</div><p className="mt-1">{saveError}</p></div> : null}</div>
+              <aside className="rounded-[2rem] border border-primary/20 bg-[#f8f4ff] p-5 sm:p-7"><div className="flex items-start justify-between gap-3"><div><div className="text-xs font-bold uppercase tracking-[0.12em] text-primary">{journeyCopy.matches.briefLabel}</div><h2 className="mt-2 text-2xl font-bold">{styleAnalysis?.primaryStyle || journeyCopy.matches.noStyle}</h2></div><span className="rounded-full bg-primary px-2.5 py-1 text-xs font-bold text-white">AI</span></div>{styleAnalysis ? <><p className="mt-4 text-sm leading-6 text-muted">{styleAnalysis.summary}</p><div className="mt-5 rounded-2xl border border-line bg-white p-4"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{journeyCopy.analysis.palette}</div><div className="mt-3"><PaletteLegend colors={styleAnalysis.colorPalette} /></div></div><div className="mt-3 rounded-2xl border border-line bg-white p-4"><div className="text-xs font-bold uppercase tracking-[0.1em] text-muted">{journeyCopy.analysis.materials}</div><div className="mt-3 flex flex-wrap gap-1.5">{styleAnalysis.materials.slice(0, 5).map((item) => <span key={item} className="rounded-full bg-[#f5efe7] px-2.5 py-1 text-xs font-semibold">{item}</span>)}</div></div></> : <p className="mt-4 text-sm leading-6 text-muted">{journeyCopy.matches.noStyle}</p>}<div className="mt-5 grid gap-3 border-t border-primary/15 pt-5 text-sm"><div className="flex justify-between gap-4"><span className="text-muted">{copy.ui.workspace.projectLabel}</span><span className="max-w-[60%] text-right font-semibold">{workspaceProjectSummary}</span></div><div className="flex justify-between gap-4"><span className="text-muted">{copy.ui.brief.support}</span><span className="max-w-[60%] text-right font-semibold">{workspaceScopeSummary}</span></div><div className="flex justify-between gap-4"><span className="text-muted">{copy.ui.brief.budget}</span><span className="max-w-[60%] text-right font-semibold">{workspaceBudgetSummary}</span></div><div className="flex justify-between gap-4"><span className="text-muted">{copy.ui.brief.timeline}</span><span className="max-w-[60%] text-right font-semibold">{workspaceTimelineSummary}</span></div></div></aside>
+            </section>
+          ) : null}
+        </section>
+      </main>
+    );
+  }
 
   const workspaceLayoutEnabled = true;
 
