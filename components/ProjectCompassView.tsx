@@ -20,6 +20,7 @@ export default async function ProjectCompassView({
   return (
     <ProjectCompass
       isDesigner={accountRole === "designer"}
+      isAuthenticated={Boolean(data.user)}
       variant={variant}
       entryPath={entryPath}
     />
