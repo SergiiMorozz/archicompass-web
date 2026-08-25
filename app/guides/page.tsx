@@ -67,7 +67,7 @@ export default async function GuidesPage() {
           <p className="text-sm font-bold uppercase text-primary">{copy.eyebrow}</p>
           <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-6xl">{copy.headline}</h1>
           <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-muted">{copy.body}</p>
-          <Link href="/project-compass" className="mt-8 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">{siteLocale === "pl" ? "Otwórz AI Project Compass" : "Open AI Project Compass"}</Link>
+          <Link href="/AI-project-compass" className="mt-8 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">{siteLocale === "pl" ? "Otwórz AI Project Compass" : "Open AI Project Compass"}</Link>
         </div>
       </section>
 

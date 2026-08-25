@@ -341,7 +341,7 @@ const pl: SiteCopy = {
   },
   header: {
     nav: [
-      { href: "/project-compass", label: "AI Project Compass", featured: true },
+      { href: "/AI-project-compass", label: "AI Project Compass", featured: true },
       { href: "/designers", label: "Katalog projektantów" },
       { href: "/inspiration", label: "Inspiration Hub" },
     ],
@@ -367,7 +367,7 @@ const pl: SiteCopy = {
     copyright: "© 2026 ArchiCompass. Wszelkie prawa zastrzeżone.",
     navigation: [
       { href: "/", label: "Strona główna" },
-      { href: "/project-compass", label: "AI Project Compass" },
+      { href: "/AI-project-compass", label: "AI Project Compass" },
       { href: "/designers", label: "Katalog Projektantów" },
       { href: "/inspiration", label: "Inspiration Hub" },
       { href: "/get-started", label: "Dołącz do ArchiCompass" },
@@ -661,7 +661,7 @@ const pl: SiteCopy = {
       headline: "Znajdź projektanta, który pasuje do Twojego projektu.",
       body: "Porównuj portfolio, poznaj sposób pracy specjalistów i otrzymuj dopasowania na podstawie własnych inspiracji i informacji o inwestycji.",
       checklist: [
-        "Project Compass oparty na Twoich inspiracjach",
+        "AI Project Compass oparty na Twoich inspiracjach",
         "Portfolio i zakres usług w jednym miejscu",
         "Dopasowanie do projektu i lokalizacji",
         "Bezpośredni kontakt ze specjalistą",
@@ -728,7 +728,7 @@ const en: SiteCopy = {
   },
   header: {
     nav: [
-      { href: "/project-compass", label: "AI Project Compass", featured: true },
+      { href: "/AI-project-compass", label: "AI Project Compass", featured: true },
       { href: "/designers", label: "Designer Directory" },
       { href: "/inspiration", label: "Inspiration Hub" },
     ],
@@ -754,7 +754,7 @@ const en: SiteCopy = {
     copyright: "© 2026 ArchiCompass. All rights reserved.",
     navigation: [
       { href: "/", label: "Home" },
-      { href: "/project-compass", label: "AI Project Compass" },
+      { href: "/AI-project-compass", label: "AI Project Compass" },
       { href: "/designers", label: "Designer Directory" },
       { href: "/inspiration", label: "Inspiration Hub" },
       { href: "/get-started", label: "Join ArchiCompass" },
@@ -1048,7 +1048,7 @@ const en: SiteCopy = {
       headline: "Find a designer who fits your project.",
       body: "Compare portfolios, learn how specialists work, and get matches based on your own inspiration and project details.",
       checklist: [
-        "Project Compass built from your inspiration",
+        "AI Project Compass built from your inspiration",
         "Portfolio and services in one place",
         "Matching by project and location",
         "Direct contact with the specialist",

@@ -581,7 +581,7 @@ h) Projektantom – w zakresie wynikającym z Zapytania przesłanego przez Klien
 
 § 12. Zdjęcia i przechowywanie plików
 
-1. Zdjęcia referencyjne używane przez Klienta w ramach Project Compass nie są publikowane jako publiczne Portfolio.
+1. Zdjęcia referencyjne używane przez Klienta w ramach AI Project Compass nie są publikowane jako publiczne Portfolio.
 2. Przed zapisaniem Briefu lub uruchomieniem odpowiedniej funkcji AI część danych może być przechowywana lokalnie w przeglądarce Użytkownika.
 3. Po zapisaniu zdjęć w Serwisie są one przechowywane w prywatnej przestrzeni plików wykorzystywanej przez ArchiCompass.
 4. Dostęp do prywatnych zdjęć może być realizowany za pomocą ograniczonych czasowo, podpisanych adresów URL.

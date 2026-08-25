@@ -31,7 +31,7 @@ import {
 } from "@/lib/profile-system-labels";
 import { getPublicProfileCopy } from "@/content/public-profile-copy";
 import { getDesignerProfileCopy } from "@/content/designer-profile-copy";
-import { siteLocale } from "@/lib/site-locale";
+import { localeAppPath, siteLocale } from "@/lib/site-locale";
 import {
   careerStageLabel,
   localizedProfileList,
@@ -266,7 +266,6 @@ function websiteHref(value: string | null) {
 }
 
 function contactLabel(profile: Profile, copy = getDesignerProfileCopy()) {
-  if (profile.email) return profile.email;
   if (profile.phone) return profile.phone;
   if (profile.website) return profile.website;
   return copy.defaults.contactAfterBrief;
@@ -339,7 +338,7 @@ export default async function DesignerProfilePage({
   const viewerRole = userData.user
     ? await getAccountRole(supabase, userData.user.id)
     : "client";
-  const canSendBrief = !userData.user || viewerRole === "client";
+  const canSendBrief = viewerRole === "client";
 
   const profileQuery = publicSupabase
     .from("profiles")
@@ -426,6 +425,12 @@ export default async function DesignerProfilePage({
     (favoriteData ?? []).map((item) => `${item.entity_type}:${item.entity_key}`)
   );
   const copy = getDesignerProfileCopy();
+  const briefPath = briefRequestHref(profile.id, selectedBriefId);
+  const briefHref = userData.user
+    ? localeAppPath(briefPath)
+    : localeAppPath(`/login?next=${encodeURIComponent(briefPath)}`);
+  const briefAction = userData.user ? copy.actions.sendBrief : copy.actions.signInToSendBrief;
+  const canStartBrief = !profile.is_demo && (!userData.user || canSendBrief);
   const title = profileTitle(profile, copy);
   const profileCopy = getPublicProfileCopy();
   const type = profileType(profile);
@@ -532,7 +537,7 @@ export default async function DesignerProfilePage({
           </div>
         </div>
 
-        <section className="mt-4 grid gap-6 lg:-mt-10 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="self-start rounded-2xl border border-line bg-card p-5 shadow-sm sm:p-6">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex gap-4">
@@ -593,12 +598,12 @@ export default async function DesignerProfilePage({
                   >
                     {copy.actions.viewPortfolio}
                   </a>
-                  {canSendBrief && !profile.is_demo ? (
+                  {canStartBrief ? (
                     <Link
-                      href={briefRequestHref(profile.id, selectedBriefId)}
+                      href={briefHref}
                       className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                     >
-                      {copy.actions.sendBrief}
+                      {briefAction}
                     </Link>
                   ) : profile.is_demo ? (
                     <span className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold text-muted">
@@ -718,12 +723,12 @@ export default async function DesignerProfilePage({
                   {copy.actions.addPortfolioProject}
                 </Link>
               </div>
-            ) : canSendBrief && !profile.is_demo ? (
+            ) : canStartBrief ? (
               <Link
-                href={briefRequestHref(profile.id, selectedBriefId)}
+                href={briefHref}
                 className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
               >
-                <span className="w-full">{copy.actions.sendBrief}</span>
+                <span className="w-full">{briefAction}</span>
               </Link>
             ) : profile.is_demo ? (
               <div className="mt-6 rounded-lg border border-primary/20 bg-primary-soft p-4 text-sm leading-6 text-muted">
@@ -1036,7 +1041,7 @@ export default async function DesignerProfilePage({
                 </p>
               </div>
               <Link
-                href="/project-compass"
+                href="/AI-project-compass"
                 className="rounded-xl bg-white px-5 py-3 text-center text-sm font-semibold text-foreground"
               >
                 {copy.actions.createBrief}
@@ -1094,12 +1099,12 @@ export default async function DesignerProfilePage({
             >
               {copy.actions.manage}
             </Link>
-          ) : canSendBrief && !profile.is_demo ? (
+          ) : canStartBrief ? (
             <Link
-              href={briefRequestHref(profile.id, selectedBriefId)}
+              href={briefHref}
               className="shrink-0 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
             >
-              {copy.actions.sendBrief}
+              {briefAction}
             </Link>
           ) : (
             <span className="shrink-0 rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold text-muted">

@@ -68,13 +68,13 @@ export function pricingLabel(details: PricingDetails, locale: SiteLocale = siteL
   const from = details.price_from;
   const to = details.price_to;
   const unit = locale === "pl"
-    ? model === "Hourly" ? " zł/h" : model === "Per m2" ? " zł/m²" : model === "Fixed package" ? " zł/pakiet" : ""
-    : model === "Hourly" ? " PLN/h" : model === "Per m2" ? " PLN/m²" : model === "Fixed package" ? " PLN/package" : "";
+    ? model === "Hourly" ? " zł/godz." : model === "Per m2" ? " zł/m²" : model === "Fixed package" ? " zł / pakiet" : ""
+    : model === "Hourly" ? " PLN per hour" : model === "Per m2" ? " PLN/m²" : model === "Fixed package" ? " PLN per package" : "";
 
   if (from && to) return `${amount(from, locale)}-${amount(to, locale)}${unit}`;
   if (from) return `${locale === "pl" ? "Od" : "From"} ${amount(from, locale)}${unit}`;
   if (to) return `${locale === "pl" ? "Do" : "Up to"} ${amount(to, locale)}${unit}`;
-  if (details.hourly_rate) return `${amount(details.hourly_rate, locale)}${locale === "pl" ? " zł/h" : " PLN/h"}`;
+  if (details.hourly_rate) return `${amount(details.hourly_rate, locale)}${locale === "pl" ? " zł/godz." : " PLN per hour"}`;
   return model === "Custom quote"
     ? locale === "pl" ? "Wycena indywidualna" : "Custom quote"
     : locale === "pl" ? "Wycena po zapoznaniu się z briefem" : "Quote after reviewing the brief";
