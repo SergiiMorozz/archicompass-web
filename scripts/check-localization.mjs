@@ -53,7 +53,7 @@ const accountFlowSourceFiles = [
   "app/account/inquiries/[id]/page.tsx",
 ];
 const projectCompassSourceFiles = [
-  "app/project-compass/page.tsx",
+  "app/AI-project-compass/page.tsx",
   "app/ai-style-finder/ProjectCompass.tsx",
   "components/ShareableStyleResult.tsx",
 ];
@@ -117,7 +117,7 @@ for (const file of accountFlowSourceFiles) {
 
 for (const file of projectCompassSourceFiles) {
   const source = readFileSync(file, "utf8");
-  if (!source.includes("@/content/project-compass-copy")) {
+  if (!source.includes("@/content/project-compass-copy") && !source.includes("@/content/project-compass-journey-copy")) {
     failures.push(`${file}: missing the shared AI Project Compass locale contract`);
   }
 }

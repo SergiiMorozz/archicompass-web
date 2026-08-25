@@ -458,14 +458,14 @@ export default async function SavedBriefsPage({
               <div className="mt-2 text-3xl font-bold text-primary">{briefs.length}</div>
               {canSendBriefs ? (
                 <Link
-                  href="/project-compass"
+                  href="/AI-project-compass"
                   className="mt-4 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
                 >
                   <span className="w-full">{copy.brief.create}</span>
                 </Link>
               ) : (
                 <Link
-                  href="/project-compass"
+                  href="/AI-project-compass"
                   className="mt-4 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
                 >
                   <span className="w-full">{copy.brief.analyse}</span>
@@ -490,7 +490,7 @@ export default async function SavedBriefsPage({
               {copy.brief.designerModeBody}
             </p>
             <Link
-              href="/project-compass"
+              href="/AI-project-compass"
               className="mt-4 inline-flex rounded-xl border border-line bg-background px-4 py-2.5 font-semibold text-primary hover:border-primary"
             >
               {copy.brief.eyebrow}
@@ -532,7 +532,7 @@ export default async function SavedBriefsPage({
             </p>
             {canSendBriefs ? (
               <Link
-                href="/project-compass"
+                href="/AI-project-compass"
                 className="mt-6 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"
               >
                 {copy.brief.create}
@@ -703,7 +703,7 @@ export default async function SavedBriefsPage({
                     </Link>
                     {canSendBriefs ? (
                       <Link
-                        href="/project-compass"
+                        href="/AI-project-compass"
                         className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
                       >
                         {copy.brief.createAnother}

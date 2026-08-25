@@ -581,7 +581,7 @@ h) Designers – to the extent resulting from the Enquiry sent by the Client.
 
 § 12. Photos and file storage
 
-1. Reference photos used by the Client within Project Compass are not published as a public Portfolio.
+1. Reference photos used by the Client within AI Project Compass are not published as a public Portfolio.
 2. Before saving a Brief or launching the appropriate AI function, some data may be stored locally in the User's browser.
 3. After saving photos in the Service, they are stored in a private file space used by ArchiCompass.
 4. Access to private photos may be implemented using time-limited, signed URLs.

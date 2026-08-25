@@ -39,6 +39,7 @@ type DesignerProfileCopy = {
     manageProjects: string;
     viewPortfolio: string;
     sendBrief: string;
+    signInToSendBrief: string;
     designerAccount: string;
     editPublicDetails: string;
     addPortfolioProject: string;
@@ -155,6 +156,7 @@ const designerProfileCopy: Record<SiteLocale, DesignerProfileCopy> = {
       manageProjects: "Zarządzaj projektami",
       viewPortfolio: "Zobacz portfolio",
       sendBrief: "Wyślij brief",
+      signInToSendBrief: "Zaloguj się, aby wysłać brief",
       designerAccount: "Konto projektanta",
       editPublicDetails: "Edytuj dane publiczne",
       addPortfolioProject: "Dodaj projekt do portfolio",
@@ -266,6 +268,7 @@ const designerProfileCopy: Record<SiteLocale, DesignerProfileCopy> = {
       manageProjects: "Manage projects",
       viewPortfolio: "View portfolio",
       sendBrief: "Send brief",
+      signInToSendBrief: "Sign in to send a brief",
       designerAccount: "Designer account",
       editPublicDetails: "Edit public details",
       addPortfolioProject: "Add a portfolio project",

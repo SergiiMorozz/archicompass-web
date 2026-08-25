@@ -40,6 +40,18 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
+    const legacyProjectCompassRedirects = [
+      {
+        source: "/project-compass",
+        destination: "/AI-project-compass",
+        permanent: true,
+      },
+      {
+        source: "/project-compass-2",
+        destination: "/AI-project-compass",
+        permanent: true,
+      },
+    ];
     const legacyAiDocumentRedirects = [
       {
         source: "/responsible-ai",
@@ -60,6 +72,7 @@ const nextConfig: NextConfig = {
 
     if (!isEnglishZone) {
       return [
+        ...legacyProjectCompassRedirects,
         ...legacyAiDocumentRedirects,
         {
           source: "/en/en",
@@ -75,6 +88,7 @@ const nextConfig: NextConfig = {
     }
 
     return [
+      ...legacyProjectCompassRedirects,
       ...legacyAiDocumentRedirects,
       {
         source: "/",
