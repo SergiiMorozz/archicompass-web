@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { briefTitle } from "@/lib/brief-labels";
+import { locationOptions } from "@/lib/location-options";
 import { getExplicitAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -28,12 +29,23 @@ function stringArrayValue(formData: FormData, key: string) {
   }
 }
 
-function numberValue(formData: FormData, key: string, integer = false) {
+function numberValue(
+  formData: FormData,
+  key: string,
+  { integer = false, minimum, maximum }: { integer?: boolean; minimum: number; maximum: number }
+) {
   const value = textValue(formData, key);
-  if (!value) return null;
+  if (!value) return { value: null, invalid: false };
   const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed <= 0) return null;
-  return integer ? Math.round(parsed) : parsed;
+  if (
+    !Number.isFinite(parsed) ||
+    parsed < minimum ||
+    parsed > maximum ||
+    (integer && !Number.isInteger(parsed))
+  ) {
+    return { value: null, invalid: true };
+  }
+  return { value: integer ? Math.round(parsed) : parsed, invalid: false };
 }
 
 function fileValues(formData: FormData, key: string) {
@@ -84,10 +96,32 @@ export async function POST(request: Request) {
   }
 
   const formData = await request.formData();
+  const isEnglish = textValue(formData, "locale") === "en";
   const briefText = textValue(formData, "brief_text");
+  const projectType = textValue(formData, "project_type");
+  const location = textValue(formData, "location");
+  const areaM2 = numberValue(formData, "area_m2", { minimum: 1, maximum: 2000 });
+  const roomCount = numberValue(formData, "room_count", {
+    integer: true,
+    minimum: 1,
+    maximum: 50,
+  });
+  const allowedLocations = new Set([...locationOptions("pl"), ...locationOptions("en")]);
 
   if (!briefText) {
-    return NextResponse.json({ error: "Treść briefu jest wymagana." }, { status: 400 });
+    return NextResponse.json({ error: isEnglish ? "Brief text is required." : "Treść briefu jest wymagana." }, { status: 400 });
+  }
+
+  if (areaM2.invalid) {
+    return NextResponse.json({ error: isEnglish ? "Enter an area between 1 and 2,000 m²." : "Podaj powierzchnię od 1 do 2000 m²." }, { status: 400 });
+  }
+
+  if (roomCount.invalid) {
+    return NextResponse.json({ error: isEnglish ? "Enter a number of rooms between 1 and 50." : "Podaj liczbę pomieszczeń od 1 do 50." }, { status: 400 });
+  }
+
+  if (location && !allowedLocations.has(location)) {
+    return NextResponse.json({ error: isEnglish ? "Choose a location from the list." : "Wybierz lokalizację z listy." }, { status: 400 });
   }
 
   const referencePhotos = fileValues(formData, "reference_photos");
@@ -148,9 +182,6 @@ export async function POST(request: Request) {
     uploadedNames.push(photo.name);
   }
 
-  const projectType = textValue(formData, "project_type");
-  const location = textValue(formData, "location");
-
   const { error } = await supabase.from("project_briefs").insert({
     id: briefId,
     user_id: user.id,
@@ -161,8 +192,8 @@ export async function POST(request: Request) {
     support_scope: textValue(formData, "support_scope"),
     budget_signal: textValue(formData, "budget_signal"),
     timeline: textValue(formData, "timeline"),
-    area_m2: numberValue(formData, "area_m2"),
-    room_count: numberValue(formData, "room_count", true),
+    area_m2: areaM2.value,
+    room_count: roomCount.value,
     room_types: stringArrayValue(formData, "room_types"),
     property_status: textValue(formData, "property_status"),
     visualization_need: textValue(formData, "visualization_need"),

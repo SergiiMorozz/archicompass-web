@@ -670,7 +670,7 @@ function OptionGrid({
               aria-label={`${option.label}: ${option.description}`}
               onClick={() => onChange(option.value)}
               className={[
-                "rounded-2xl border p-4 text-left transition",
+                "rounded-2xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2",
                 isSelected
                   ? "border-primary bg-primary-soft text-foreground"
                   : "border-line bg-background hover:border-primary",
@@ -730,7 +730,7 @@ function MultiOptionGrid({
                 }
               }}
               className={[
-                "rounded-2xl border p-4 text-left transition",
+                "rounded-2xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2",
                 selected ? "border-primary bg-primary-soft" : "border-line bg-background hover:border-primary",
               ].join(" ")}
             >
@@ -750,6 +750,45 @@ function MultiOptionGrid({
         </button>
       ) : null}
     </section>
+  );
+}
+
+function ProjectLocationSelect({
+  label,
+  options,
+  placeholder,
+  value,
+  invalid,
+  onChange,
+}: {
+  label: string;
+  options: string[];
+  placeholder: string;
+  value: string;
+  invalid: boolean;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="block max-w-xl text-sm font-semibold">
+      {label}
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        autoComplete="address-level2"
+        aria-invalid={invalid || undefined}
+        className={[
+          "mt-2 w-full rounded-xl border bg-background px-4 py-3 font-normal outline-none transition focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2",
+          invalid ? "border-red-400" : "border-line focus:border-primary",
+        ].join(" ")}
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
@@ -813,6 +852,19 @@ export default function ProjectCompass({
   }
 
   function openJourneyPhase(phase: JourneyPhase, module?: WorkspaceModule) {
+    if (phase === "matches" && projectDetailsValidationMessage) {
+      setSaveError(projectDetailsValidationMessage);
+      setJourneyPhase("project");
+      setActiveModule("details");
+      window.setTimeout(() => {
+        document.getElementById("project-compass-journey-flow")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 0);
+      return;
+    }
+
     setJourneyPhase(phase);
     if (module) setActiveModule(module);
     if (phase === "project" && !module && !activeModule) setActiveModule("details");
@@ -855,6 +907,12 @@ export default function ProjectCompass({
   const roomCountIsInvalid =
     Boolean(roomCount.trim()) &&
     (!Number.isInteger(normalizedRoomCount) || normalizedRoomCount < 1 || normalizedRoomCount > 50);
+  const projectCompassLocationList = useMemo(() => locationOptions(siteLocale), [siteLocale]);
+  const locationIsInvalid =
+    Boolean(location.trim()) && !projectCompassLocationList.includes(location.trim());
+  const validAreaM2 = areaM2IsInvalid ? "" : areaM2.trim();
+  const validRoomCount = roomCountIsInvalid ? "" : roomCount.trim();
+  const validLocation = locationIsInvalid ? "" : location.trim();
   const projectDetailsValidationMessage = areaM2IsInvalid
     ? siteLocale === "pl"
       ? "Podaj powierzchnię od 1 do 2000 m²."
@@ -863,18 +921,21 @@ export default function ProjectCompass({
     ? siteLocale === "pl"
       ? "Podaj liczbę pomieszczeń od 1 do 50."
       : "Enter a room count between 1 and 50."
+    : locationIsInvalid
+    ? siteLocale === "pl"
+      ? "Wybierz lokalizację z listy."
+      : "Choose a location from the list."
     : null;
-  const projectCompassLocationList = useMemo(() => locationOptions(siteLocale), [siteLocale]);
   const hasStyleDirection = Boolean(styleAnalysis || hasSelectedStyle || selectedVisualCues.length || notes.trim());
-  const hasProjectDetails = Boolean(projectType || areaM2 || roomCount || selectedRoomTypes.length || propertyStatus || location.trim());
+  const hasProjectDetails = Boolean(projectType || validAreaM2 || validRoomCount || selectedRoomTypes.length || propertyStatus || validLocation);
   const hasScope = Boolean(goal || scope || visualizationNeed || supervisionNeed);
   const hasBudget = Boolean(budget || timeline);
   const hasPreferences = Boolean(styleAnalysis || hasSelectedStyle || selectedVisualCues.length || notes.trim());
   const detailReadiness =
     (projectType ? 5 : 0) +
-    (areaM2 || roomCount || selectedRoomTypes.length ? 8 : 0) +
+    (validAreaM2 || validRoomCount || selectedRoomTypes.length ? 8 : 0) +
     (propertyStatus ? 4 : 0) +
-    (location.trim() ? 8 : 0);
+    (validLocation ? 8 : 0);
   const scopeReadiness =
     (goal ? 7 : 0) +
     (scope ? 7 : 0) +
@@ -901,7 +962,7 @@ export default function ProjectCompass({
   const recommendedModule = readinessParts.find((item) => item.amount < item.weight)?.module ?? "budget";
   const isReadyForMatching = Boolean(hasStyleDirection && (hasProjectDetails || hasScope || hasBudget));
   const workspaceProjectSummary = hasProjectDetails
-    ? `${optionLabel(projectTypes, projectType)}${areaM2 ? ` · ${areaM2} m²` : ""}${location.trim() ? ` · ${location.trim()}` : ""}`
+    ? `${optionLabel(projectTypes, projectType)}${validAreaM2 ? ` · ${validAreaM2} m²` : ""}${validLocation ? ` · ${validLocation}` : ""}`
     : copy.ui.notProvided;
   const workspaceScopeSummary = hasScope ? optionLabel(scopes, scope) : copy.ui.notProvided;
   const workspaceBudgetSummary = hasBudget ? optionLabel(budgets, budget) : copy.ui.notProvided;
@@ -937,7 +998,7 @@ export default function ProjectCompass({
       title: copy.ui.workspace.details.title,
       body: copy.ui.workspace.details.body,
       preview: hasProjectDetails
-        ? `${optionLabel(projectTypes, projectType)}${areaM2 ? ` · ${areaM2} m²` : ""}${location.trim() ? ` · ${location.trim()}` : ""}`
+        ? `${optionLabel(projectTypes, projectType)}${validAreaM2 ? ` · ${validAreaM2} m²` : ""}${validLocation ? ` · ${validLocation}` : ""}`
         : copy.ui.workspace.details.previewEmpty,
       complete: hasProjectDetails,
       touched: Boolean(touchedModules.details),
@@ -979,10 +1040,10 @@ export default function ProjectCompass({
     if (value) designerParams.set(key, value);
   });
 
-  if (areaM2) designerParams.set("area", areaM2);
-  if (roomCount) designerParams.set("roomCount", roomCount);
+  if (validAreaM2) designerParams.set("area", validAreaM2);
+  if (validRoomCount) designerParams.set("roomCount", validRoomCount);
   if (selectedRoomTypes.length) designerParams.set("rooms", selectedRoomTypes.join(","));
-  if (location.trim()) designerParams.set("location", location.trim());
+  if (validLocation) designerParams.set("location", validLocation);
   if (visualSearchSpecialty) designerParams.set("specialty", visualSearchSpecialty);
   if (selectedVisualCues.length) designerParams.set("cues", selectedVisualCues.slice(0, 5).join(","));
   if (savedBriefId) designerParams.set("brief", savedBriefId);
@@ -995,8 +1056,8 @@ export default function ProjectCompass({
       [
         copy.ui.draft.investment(optionLabel(projectTypes, projectType)),
         copy.ui.draft.goal(optionLabel(goals, goal)),
-        copy.ui.draft.area(areaM2 ? `${areaM2} m²` : copy.ui.notProvided.toLowerCase()),
-        copy.ui.draft.roomCount(roomCount || copy.ui.notProvided.toLowerCase()),
+        copy.ui.draft.area(validAreaM2 ? `${validAreaM2} m²` : copy.ui.notProvided.toLowerCase()),
+        copy.ui.draft.roomCount(validRoomCount || copy.ui.notProvided.toLowerCase()),
         selectedRoomTypes.length
           ? copy.ui.draft.rooms(selectedRoomTypes.map((item) => roomTypeLabels[item] || item).join(", "))
           : null,
@@ -1038,21 +1099,21 @@ export default function ProjectCompass({
         copy.ui.draft.timeline(optionLabel(timelines, timeline)),
         copy.ui.draft.visualization(optionLabel(visualizationNeeds, visualizationNeed)),
         copy.ui.draft.supervision(optionLabel(supervisionNeeds, supervisionNeed)),
-        copy.ui.draft.location(location.trim() || copy.ui.notProvided.toLowerCase()),
+        copy.ui.draft.location(validLocation || copy.ui.notProvided.toLowerCase()),
         notes.trim() ? copy.ui.draft.notes(notes.trim()) : null,
       ]
         .filter(Boolean)
         .join("\n"),
     [
       budget,
-      areaM2,
+      validAreaM2,
       goal,
-      location,
+      validLocation,
       notes,
       projectType,
       propertyStatus,
       referencePhotos,
-      roomCount,
+      validRoomCount,
       scope,
       selectedRoomTypes,
       selectedVisualCues,
@@ -1310,19 +1371,20 @@ export default function ProjectCompass({
     setSavedReferenceCount(null);
 
     const formData = new FormData();
+    formData.set("locale", siteLocale);
     formData.set("project_type", projectType);
     formData.set("goal", goal);
     formData.set("style_direction", style);
     formData.set("support_scope", scope);
     formData.set("budget_signal", budget);
     formData.set("timeline", timeline);
-    formData.set("area_m2", areaM2);
-    formData.set("room_count", roomCount);
+    formData.set("area_m2", validAreaM2);
+    formData.set("room_count", validRoomCount);
     formData.set("room_types", JSON.stringify(selectedRoomTypes));
     formData.set("property_status", propertyStatus);
     formData.set("visualization_need", visualizationNeed);
     formData.set("supervision_need", supervisionNeed);
-    formData.set("location", location);
+    formData.set("location", validLocation);
     formData.set("notes", notes);
     formData.set(
       "visual_cues",
@@ -1476,9 +1538,6 @@ export default function ProjectCompass({
 
     return (
       <main className="bg-[#fbfaff] pb-16 text-foreground">
-        <datalist id="project-compass-location-options">
-          {projectCompassLocationList.map((option) => <option key={option} value={option} />)}
-        </datalist>
         <section className="border-b border-[#ece6f7] bg-[radial-gradient(circle_at_79%_18%,rgba(125,68,232,0.14),transparent_30%),linear-gradient(180deg,#ffffff_0%,#fbfaff_100%)] px-4 py-8 sm:px-6 sm:py-12">
           <div className="mx-auto max-w-7xl">
             <Link href={localeAppPath("/")} className="inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-primary">
@@ -1611,7 +1670,107 @@ export default function ProjectCompass({
                   ]).map((item) => <button key={item.id} type="button" onClick={() => setActiveModule(item.id)} className={activeJourneyModule === item.id ? "rounded-full bg-primary px-4 py-2 text-sm font-bold text-white" : "rounded-full border border-line bg-background px-4 py-2 text-sm font-bold text-muted transition hover:border-primary hover:text-primary"}>{item.label}</button>)}
                 </div>
                 <div className="mt-7">
-                  {activeJourneyModule === "details" ? <div className="grid gap-7"><OptionGrid label={copy.ui.steps.projectType} onChange={(value) => { setProjectType(value); markModule("details"); }} options={projectTypes} value={projectType} /><section><h3 className="text-base font-bold">{copy.ui.steps.space}</h3><p className="mt-1 text-sm leading-6 text-muted">{copy.ui.steps.spaceBody}</p><div className="mt-4 grid gap-4 sm:grid-cols-2"><label className="text-sm font-semibold">{copy.ui.steps.area}<input type="number" min="1" max="2000" inputMode="decimal" value={areaM2} onChange={(event) => { setAreaM2(event.target.value); markModule("details"); }} placeholder={copy.ui.steps.areaPlaceholder} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label><label className="text-sm font-semibold">{copy.ui.steps.roomsCount}<input type="number" min="1" max="50" inputMode="numeric" value={roomCount} onChange={(event) => { setRoomCount(event.target.value); markModule("details"); }} placeholder={copy.ui.steps.roomsCountPlaceholder} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label></div><div className="mt-4"><div className="text-sm font-semibold">{copy.ui.steps.roomsIncluded}</div><div className="mt-3 flex flex-wrap gap-2">{roomTypes.map((room) => { const selected = selectedRoomTypes.includes(room); return <button key={room} type="button" aria-pressed={selected} onClick={() => { toggleRoomType(room); markModule("details"); }} className={selected ? "rounded-full border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white" : "rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"}>{roomTypeLabels[room] || room}</button>; })}</div></div></section><OptionGrid label={copy.ui.steps.propertyStatus} onChange={(value) => { setPropertyStatus(value); markModule("details"); }} options={propertyStatuses} value={propertyStatus} /><label className="block max-w-xl text-sm font-semibold">{copy.ui.location}<input value={location} onChange={(event) => { setLocation(event.target.value); markModule("details"); }} list="project-compass-location-options" autoComplete="address-level2" placeholder={copy.ui.locationPlaceholder} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label></div> : null}
+                  {activeJourneyModule === "details" ? (
+                    <div className="grid gap-7">
+                      <OptionGrid
+                        label={copy.ui.steps.projectType}
+                        onChange={(value) => {
+                          setProjectType(value);
+                          markModule("details");
+                        }}
+                        options={projectTypes}
+                        value={projectType}
+                      />
+                      <section>
+                        <h3 className="text-base font-bold">{copy.ui.steps.space}</h3>
+                        <p className="mt-1 text-sm leading-6 text-muted">{copy.ui.steps.spaceBody}</p>
+                        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                          <label className="text-sm font-semibold">
+                            {copy.ui.steps.area}
+                            <input
+                              type="number"
+                              min="1"
+                              max="2000"
+                              inputMode="decimal"
+                              aria-invalid={areaM2IsInvalid || undefined}
+                              value={areaM2}
+                              onChange={(event) => {
+                                setAreaM2(event.target.value);
+                                markModule("details");
+                              }}
+                              placeholder={copy.ui.steps.areaPlaceholder}
+                              className={[
+                                "mt-2 w-full rounded-xl border bg-background px-4 py-3 font-normal outline-none transition focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2",
+                                areaM2IsInvalid ? "border-red-400" : "border-line focus:border-primary",
+                              ].join(" ")}
+                            />
+                          </label>
+                          <label className="text-sm font-semibold">
+                            {copy.ui.steps.roomsCount}
+                            <input
+                              type="number"
+                              min="1"
+                              max="50"
+                              inputMode="numeric"
+                              aria-invalid={roomCountIsInvalid || undefined}
+                              value={roomCount}
+                              onChange={(event) => {
+                                setRoomCount(event.target.value);
+                                markModule("details");
+                              }}
+                              placeholder={copy.ui.steps.roomsCountPlaceholder}
+                              className={[
+                                "mt-2 w-full rounded-xl border bg-background px-4 py-3 font-normal outline-none transition focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2",
+                                roomCountIsInvalid ? "border-red-400" : "border-line focus:border-primary",
+                              ].join(" ")}
+                            />
+                          </label>
+                        </div>
+                        <div className="mt-4">
+                          <div className="text-sm font-semibold">{copy.ui.steps.roomsIncluded}</div>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {roomTypes.map((room) => {
+                              const selected = selectedRoomTypes.includes(room);
+                              return (
+                                <button
+                                  key={room}
+                                  type="button"
+                                  aria-pressed={selected}
+                                  onClick={() => {
+                                    toggleRoomType(room);
+                                    markModule("details");
+                                  }}
+                                  className={selected ? "rounded-full border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white" : "rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted transition hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2"}
+                                >
+                                  {roomTypeLabels[room] || room}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </section>
+                      <OptionGrid
+                        label={copy.ui.steps.propertyStatus}
+                        onChange={(value) => {
+                          setPropertyStatus(value);
+                          markModule("details");
+                        }}
+                        options={propertyStatuses}
+                        value={propertyStatus}
+                      />
+                      <ProjectLocationSelect
+                        label={copy.ui.location}
+                        options={projectCompassLocationList}
+                        placeholder={siteLocale === "pl" ? "Wybierz miasto" : "Choose a city"}
+                        value={location}
+                        invalid={locationIsInvalid}
+                        onChange={(value) => {
+                          setLocation(value);
+                          markModule("details");
+                        }}
+                      />
+                    </div>
+                  ) : null}
                   {activeJourneyModule === "details" && projectDetailsValidationMessage ? <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{projectDetailsValidationMessage}</p> : null}
                   {activeJourneyModule === "preferences" ? <div className="grid gap-7">{styleAnalysis ? <div className="rounded-2xl border border-primary/20 bg-primary-soft/50 p-4 text-sm leading-6 text-muted"><span className="font-bold text-primary">AI</span> {styleAnalysis.primaryStyle}. {copy.ui.workspace.preferences.body}</div> : null}<MultiOptionGrid label={copy.ui.steps.style} onChange={(values) => { setStyle(values.join(" | ")); markModule("preferences"); }} options={styles} values={selectedStyles} /><section><h3 className="text-base font-bold">{copy.ui.steps.visualCues}</h3><div className="mt-3 grid gap-3 sm:grid-cols-2">{visualCues.map((cue) => { const selected = selectedVisualCues.includes(cue.value); return <button key={cue.value} type="button" aria-pressed={selected} onClick={() => { toggleVisualCue(cue.value); markModule("preferences"); }} className={selected ? "rounded-2xl border border-primary bg-primary-soft p-4 text-left" : "rounded-2xl border border-line bg-background p-4 text-left hover:border-primary"}><span className="block text-sm font-bold">{cue.label}</span><span className="mt-1 block text-sm leading-6 text-muted">{cue.description}</span></button>; })}</div></section><label className="block text-sm font-semibold">{copy.ui.notes}<textarea value={notes} onChange={(event) => { setNotes(event.target.value); markModule("preferences"); }} placeholder={copy.ui.notesPlaceholder} rows={4} className="mt-2 w-full resize-y rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label></div> : null}
                   {activeJourneyModule === "scope" ? <div className="grid gap-7"><OptionGrid label={copy.ui.steps.goal} onChange={(value) => { setGoal(value); markModule("scope"); }} options={goals} value={goal} /><OptionGrid label={copy.ui.steps.scope} onChange={(value) => { setScope(value); markModule("scope"); }} options={scopes} value={scope} /><OptionGrid label={copy.ui.steps.visualization} onChange={(value) => { setVisualizationNeed(value); markModule("scope"); }} options={visualizationNeeds} value={visualizationNeed} /><OptionGrid label={copy.ui.steps.supervision} onChange={(value) => { setSupervisionNeed(value); markModule("scope"); }} options={supervisionNeeds} value={supervisionNeed} /></div> : null}
@@ -1880,9 +2039,19 @@ export default function ProjectCompass({
                 {activeModule === "details" ? (
                   <div className="mt-6 grid gap-7">
                     <OptionGrid label={copy.ui.steps.projectType} onChange={(value) => { setProjectType(value); markModule("details"); }} options={projectTypes} value={projectType} />
-                    <section><h3 className="text-base font-bold">{copy.ui.steps.space}</h3><p className="mt-1 text-sm leading-6 text-muted">{copy.ui.steps.spaceBody}</p><div className="mt-4 grid gap-4 sm:grid-cols-2"><label className="text-sm font-semibold">{copy.ui.steps.area}<input type="number" min="1" max="2000" inputMode="decimal" value={areaM2} onChange={(event) => { setAreaM2(event.target.value); markModule("details"); }} placeholder={copy.ui.steps.areaPlaceholder} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label><label className="text-sm font-semibold">{copy.ui.steps.roomsCount}<input type="number" min="1" max="50" inputMode="numeric" value={roomCount} onChange={(event) => { setRoomCount(event.target.value); markModule("details"); }} placeholder={copy.ui.steps.roomsCountPlaceholder} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label></div><div className="mt-4"><div className="text-sm font-semibold">{copy.ui.steps.roomsIncluded}</div><div className="mt-3 flex flex-wrap gap-2">{roomTypes.map((room) => { const selected = selectedRoomTypes.includes(room); return <button key={room} type="button" aria-pressed={selected} onClick={() => { toggleRoomType(room); markModule("details"); }} className={selected ? "rounded-full border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white" : "rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted hover:border-primary hover:text-primary"}>{roomTypeLabels[room] || room}</button>; })}</div></div></section>
+                    <section><h3 className="text-base font-bold">{copy.ui.steps.space}</h3><p className="mt-1 text-sm leading-6 text-muted">{copy.ui.steps.spaceBody}</p><div className="mt-4 grid gap-4 sm:grid-cols-2"><label className="text-sm font-semibold">{copy.ui.steps.area}<input type="number" min="1" max="2000" inputMode="decimal" aria-invalid={areaM2IsInvalid || undefined} value={areaM2} onChange={(event) => { setAreaM2(event.target.value); markModule("details"); }} placeholder={copy.ui.steps.areaPlaceholder} className={areaM2IsInvalid ? "mt-2 w-full rounded-xl border border-red-400 bg-background px-4 py-3 font-normal outline-none transition focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2" : "mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2"} /></label><label className="text-sm font-semibold">{copy.ui.steps.roomsCount}<input type="number" min="1" max="50" inputMode="numeric" aria-invalid={roomCountIsInvalid || undefined} value={roomCount} onChange={(event) => { setRoomCount(event.target.value); markModule("details"); }} placeholder={copy.ui.steps.roomsCountPlaceholder} className={roomCountIsInvalid ? "mt-2 w-full rounded-xl border border-red-400 bg-background px-4 py-3 font-normal outline-none transition focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2" : "mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2"} /></label></div>{projectDetailsValidationMessage ? <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{projectDetailsValidationMessage}</p> : null}<div className="mt-4"><div className="text-sm font-semibold">{copy.ui.steps.roomsIncluded}</div><div className="mt-3 flex flex-wrap gap-2">{roomTypes.map((room) => { const selected = selectedRoomTypes.includes(room); return <button key={room} type="button" aria-pressed={selected} onClick={() => { toggleRoomType(room); markModule("details"); }} className={selected ? "rounded-full border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white" : "rounded-full border border-line bg-background px-4 py-2 text-sm font-semibold text-muted transition hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2"}>{roomTypeLabels[room] || room}</button>; })}</div></div></section>
                     <OptionGrid label={copy.ui.steps.propertyStatus} onChange={(value) => { setPropertyStatus(value); markModule("details"); }} options={propertyStatuses} value={propertyStatus} />
-                    <label className="block max-w-xl text-sm font-semibold">{copy.ui.location}<input value={location} onChange={(event) => { setLocation(event.target.value); markModule("details"); }} list="project-compass-location-options" autoComplete="address-level2" placeholder={copy.ui.locationPlaceholder} className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none focus:border-primary" /></label>
+                    <ProjectLocationSelect
+                      label={copy.ui.location}
+                      options={projectCompassLocationList}
+                      placeholder={siteLocale === "pl" ? "Wybierz miasto" : "Choose a city"}
+                      value={location}
+                      invalid={locationIsInvalid}
+                      onChange={(value) => {
+                        setLocation(value);
+                        markModule("details");
+                      }}
+                    />
                   </div>
                 ) : null}
 
@@ -1987,7 +2156,11 @@ export default function ProjectCompass({
                   value={areaM2}
                   onChange={(event) => setAreaM2(event.target.value)}
                   placeholder={copy.ui.steps.areaPlaceholder}
-                  className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary"
+                  aria-invalid={areaM2IsInvalid || undefined}
+                  className={[
+                    "mt-2 w-full rounded-xl border bg-background px-4 py-3 font-normal outline-none transition focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2",
+                    areaM2IsInvalid ? "border-red-400" : "border-line focus:border-primary",
+                  ].join(" ")}
                 />
               </label>
               <label className="block text-sm font-semibold">
@@ -2000,10 +2173,19 @@ export default function ProjectCompass({
                   value={roomCount}
                   onChange={(event) => setRoomCount(event.target.value)}
                   placeholder={copy.ui.steps.roomsCountPlaceholder}
-                  className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary"
+                  aria-invalid={roomCountIsInvalid || undefined}
+                  className={[
+                    "mt-2 w-full rounded-xl border bg-background px-4 py-3 font-normal outline-none transition focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2",
+                    roomCountIsInvalid ? "border-red-400" : "border-line focus:border-primary",
+                  ].join(" ")}
                 />
               </label>
             </div>
+            {projectDetailsValidationMessage ? (
+              <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                {projectDetailsValidationMessage}
+              </p>
+            ) : null}
             <div className="mt-4">
               <div className="text-sm font-semibold">{copy.ui.steps.roomsIncluded}</div>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -2306,15 +2488,14 @@ export default function ProjectCompass({
           />
 
           <div className="grid gap-4 md:grid-cols-2">
-            <label className="block text-sm font-semibold">
-              {copy.ui.location}
-              <input
-                value={location}
-                onChange={(event) => setLocation(event.target.value)}
-                placeholder={copy.ui.locationPlaceholder}
-                className="mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal outline-none transition focus:border-primary"
-              />
-            </label>
+            <ProjectLocationSelect
+              label={copy.ui.location}
+              options={projectCompassLocationList}
+              placeholder={siteLocale === "pl" ? "Wybierz miasto" : "Choose a city"}
+              value={location}
+              invalid={locationIsInvalid}
+              onChange={setLocation}
+            />
 
             <label className="block text-sm font-semibold">
               {copy.ui.notes}
@@ -2365,13 +2546,13 @@ export default function ProjectCompass({
 
         <aside className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24">
           <div className="text-sm font-semibold text-primary">{copy.ui.brief.title}</div>
-          <h2 className="mt-2 text-2xl font-bold">{optionLabel(projectTypes, projectType)} · {location || copy.ui.notProvided}</h2>
+          <h2 className="mt-2 text-2xl font-bold">{optionLabel(projectTypes, projectType)} · {validLocation || copy.ui.notProvided}</h2>
 
           <div className="mt-5 grid gap-3 text-sm">
             {[
               [copy.ui.brief.goal, optionLabel(goals, goal)],
-              [copy.ui.brief.area, areaM2 ? `${areaM2} m²` : copy.ui.notProvided],
-              [copy.ui.brief.rooms, roomCount || selectedRoomTypes.slice(0, 2).map((item) => roomTypeLabels[item] || item).join(", ") || copy.ui.notProvided],
+              [copy.ui.brief.area, validAreaM2 ? `${validAreaM2} m²` : copy.ui.notProvided],
+              [copy.ui.brief.rooms, validRoomCount || selectedRoomTypes.slice(0, 2).map((item) => roomTypeLabels[item] || item).join(", ") || copy.ui.notProvided],
               [copy.ui.brief.property, optionLabel(propertyStatuses, propertyStatus)],
               [copy.ui.brief.style, styleLabels(style)],
               [

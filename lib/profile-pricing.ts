@@ -68,8 +68,8 @@ export function pricingLabel(details: PricingDetails, locale: SiteLocale = siteL
   const from = details.price_from;
   const to = details.price_to;
   const unit = locale === "pl"
-    ? model === "Hourly" ? " zł/godz." : model === "Per m2" ? " zł/m²" : model === "Fixed package" ? " zł / pakiet" : ""
-    : model === "Hourly" ? " PLN per hour" : model === "Per m2" ? " PLN/m²" : model === "Fixed package" ? " PLN per package" : "";
+    ? model === "Hourly" ? " zł/godz." : model === "Per m2" ? " zł/m²" : model === "Fixed package" ? " zł / pakiet" : " zł"
+    : model === "Hourly" ? " PLN per hour" : model === "Per m2" ? " PLN/m²" : model === "Fixed package" ? " PLN per package" : " PLN";
 
   if (from && to) return `${amount(from, locale)}-${amount(to, locale)}${unit}`;
   if (from) return `${locale === "pl" ? "Od" : "From"} ${amount(from, locale)}${unit}`;

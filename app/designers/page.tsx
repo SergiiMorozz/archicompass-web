@@ -303,6 +303,7 @@ function StudioCard({
   briefContext,
   briefId,
   canSendBrief,
+  isAuthenticated,
   initialSaved,
   matchResult,
   memberCount,
@@ -312,6 +313,7 @@ function StudioCard({
   briefContext: BriefMatchContext | null;
   briefId: string;
   canSendBrief: boolean;
+  isAuthenticated: boolean;
   initialSaved: boolean;
   matchResult: ProfessionalMatch | null;
   memberCount: number;
@@ -330,6 +332,10 @@ function StudioCard({
     availableCapabilities.includes(capability)
   );
   const studioHref = professionalHref("studio", studio.id, briefId);
+  const briefHref = `${localeAppPath("/account/briefs")}?studio=${studio.id}${briefId ? `&brief=${briefId}` : ""}`;
+  const sendBriefHref = isAuthenticated
+    ? briefHref
+    : `${localeAppPath("/login")}?next=${encodeURIComponent(briefHref)}`;
   const careerStage = careerStageLabel(studio.career_stage);
   return (
     <article className="overflow-hidden rounded-lg border border-line bg-card shadow-sm">
@@ -414,8 +420,8 @@ function StudioCard({
             {copy.cards.viewStudio}
           </Link>
           {canSendBrief ? (
-            <Link href={`/account/briefs?studio=${studio.id}${briefId ? `&brief=${briefId}` : ""}`} className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
-              {copy.cards.sendBrief}
+            <Link href={sendBriefHref} className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
+              {isAuthenticated ? copy.cards.sendBrief : copy.cards.signInToSendBrief}
             </Link>
           ) : null}
         </div>
@@ -428,6 +434,7 @@ function DesignerCard({
   briefContext,
   briefId,
   canSendBrief,
+  isAuthenticated,
   profile,
   index,
   matchResult,
@@ -442,6 +449,7 @@ function DesignerCard({
   briefContext: BriefMatchContext | null;
   briefId: string;
   canSendBrief: boolean;
+  isAuthenticated: boolean;
   profile: Profile;
   index: number;
   matchResult: ProfessionalMatch | null;
@@ -513,7 +521,10 @@ function DesignerCard({
     ? matchResult.reasons.map((reason) => [reason.label, reason.value])
     : fallbackMatchItems;
   const profileHref = professionalHref("designer", profile.id, briefId, profile.public_slug);
-  const sendBriefHref = `/account/briefs?designer=${profile.id}${briefId ? `&brief=${briefId}` : ""}`;
+  const briefHref = `${localeAppPath("/account/briefs")}?designer=${profile.id}${briefId ? `&brief=${briefId}` : ""}`;
+  const sendBriefHref = isAuthenticated
+    ? briefHref
+    : `${localeAppPath("/login")}?next=${encodeURIComponent(briefHref)}`;
 
   if (view === "list") {
     return (
@@ -619,7 +630,7 @@ function DesignerCard({
                     href={sendBriefHref}
                     className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
                   >
-                    {copy.cards.sendBrief}
+                    {isAuthenticated ? copy.cards.sendBrief : copy.cards.signInToSendBrief}
                   </Link>
                 ) : null}
               </div>
@@ -708,17 +719,27 @@ function DesignerCard({
           <div className="mt-1 text-muted">{matchItems[2][1]}</div>
         </div>
 
-        <div className="mt-5 flex items-center justify-between gap-3 border-t border-line pt-5">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
           <div>
             <div className="font-bold text-primary">{pricingLabel(profile)}</div>
             <div className="text-xs text-muted">{profile.is_demo ? copy.cards.samplePortfolio : demo?.budgetFit || copy.cards.portfolioProfile}</div>
           </div>
-          <Link
-            href={profileHref}
-            className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
-          >
-            {copy.cards.viewPortfolio}
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href={profileHref}
+              className="rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold hover:border-primary hover:text-primary"
+            >
+              {copy.cards.viewPortfolio}
+            </Link>
+            {canSendBrief && !profile.is_demo ? (
+              <Link
+                href={sendBriefHref}
+                className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white"
+              >
+                {isAuthenticated ? copy.cards.sendBrief : copy.cards.signInToSendBrief}
+              </Link>
+            ) : null}
+          </div>
         </div>
       </div>
     </article>
@@ -1755,6 +1776,7 @@ export default async function DesignersPage({
                     memberCount={visibleStudioMemberCounts.get(studio.id) ?? 0}
                     initialSaved={savedStudioIds.has(studio.id)}
                     canSendBrief={canSendBrief}
+                    isAuthenticated={Boolean(userData.user)}
                     identityImage={studioIdentityImages.get(studio.id) ?? null}
                   />
                 ))}
@@ -1849,6 +1871,7 @@ export default async function DesignersPage({
                   briefContext={briefContext}
                   briefId={briefId}
                   canSendBrief={canSendBrief}
+                  isAuthenticated={Boolean(userData.user)}
                   profile={profile}
                   index={index}
                   matchResult={profileMatchResults.get(profile.id) ?? null}
@@ -1870,6 +1893,7 @@ export default async function DesignersPage({
                   briefContext={briefContext}
                   briefId={briefId}
                   canSendBrief={canSendBrief}
+                  isAuthenticated={Boolean(userData.user)}
                   profile={profile}
                   index={index}
                   matchResult={profileMatchResults.get(profile.id) ?? null}
