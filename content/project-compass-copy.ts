@@ -630,5 +630,19 @@ const projectCompassCopy: Record<SiteLocale, ProjectCompassCopy> = {
 };
 
 export function getProjectCompassCopy(locale: SiteLocale = siteLocale) {
-  return projectCompassCopy[locale];
+  const copy = projectCompassCopy[locale];
+
+  return {
+    ...copy,
+    ui: {
+      ...copy.ui,
+      steps: {
+        ...copy.ui.steps,
+        privacy: locale === "pl" ? "Dowiedz się więcej w Polityce prywatności" : "Learn more in the Privacy Policy",
+        aiPrivacyAfter: locale === "pl"
+          ? "zdjęć do dostawcy usługi AI. Nie przesyłaj wizerunków osób, adresów ani informacji poufnych."
+          : "photos to the AI service provider. Do not upload images of people, addresses, or confidential information.",
+      },
+    },
+  };
 }
