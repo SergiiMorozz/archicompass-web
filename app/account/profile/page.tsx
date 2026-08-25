@@ -167,18 +167,46 @@ async function uploadProfileMedia(
 function Field({
   label,
   hint,
+  badge,
   children,
 }: {
   label: string;
   hint?: string;
+  badge?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <label className="block text-sm font-semibold">
       <span>{label}</span>
       {hint ? <span className="ml-2 font-normal text-muted">{hint}</span> : null}
+      {badge}
       {children}
     </label>
+  );
+}
+
+// Provenance badges: purely informational, private-editor-only markers of
+// where a field's current value came from (never shown on the public
+// designer page). Naming the source even after confirmation is deliberate -
+// confirming shouldn't erase where a value originated.
+type ProvenanceEntry = { source: string; confirmed_by_designer: boolean };
+
+function ProvenanceBadge({ entry, locale }: { entry: ProvenanceEntry | undefined; locale: "pl" | "en" }) {
+  if (!entry) return null;
+  const sourceLabel =
+    entry.source === "website_extracted"
+      ? locale === "pl"
+        ? "Znalezione na stronie"
+        : "Found on your site"
+      : locale === "pl"
+        ? "Sugestia AI"
+        : "AI suggestion";
+  const confirmedSuffix = entry.confirmed_by_designer ? (locale === "pl" ? " · potwierdzone" : " · confirmed") : "";
+  return (
+    <span className="ml-2 inline-block rounded-full bg-primary-soft px-2 py-0.5 align-middle text-xs font-medium text-primary">
+      {sourceLabel}
+      {confirmedSuffix}
+    </span>
   );
 }
 
@@ -320,6 +348,38 @@ async function updateProfile(formData: FormData) {
 
   if (error) redirect(`/account/profile?error=${encodeURIComponent(error.message)}`);
 
+  // Saving the form is the confirmation moment for any Profile-Autocomplete
+  // field that's part of this submission with a real value - scoped to just
+  // those fields (not every unconfirmed field this designer has), and the
+  // provenance row is updated in place, never deleted, so its source stays
+  // visible after confirmation.
+  if (isProfessional) {
+    const confirmableFieldKeys: string[] = [];
+    if (headlinePl ?? headlineEn) confirmableFieldKeys.push("headline");
+    if (bioPl ?? bioEn) confirmableFieldKeys.push("about");
+    if (specialties.length) confirmableFieldKeys.push("specialties");
+    if (serviceCapabilityValues(formData).length) confirmableFieldKeys.push("service_capabilities");
+    if (urlValue(formData, "instagram_url")) confirmableFieldKeys.push("instagram_url");
+    if (urlValue(formData, "facebook_url")) confirmableFieldKeys.push("facebook_url");
+    if (urlValue(formData, "behance_url")) confirmableFieldKeys.push("behance_url");
+    if (urlValue(formData, "linkedin_url")) confirmableFieldKeys.push("linkedin_url");
+    if (commonProfile.full_name) confirmableFieldKeys.push("full_name");
+    if (commonProfile.location) confirmableFieldKeys.push("location");
+    if (commonProfile.phone) confirmableFieldKeys.push("phone");
+    if (commonProfile.email) confirmableFieldKeys.push("email");
+    if (languages.length) confirmableFieldKeys.push("languages");
+    if (workModeValues(formData).length) confirmableFieldKeys.push("work_modes");
+
+    if (confirmableFieldKeys.length) {
+      await supabase
+        .from("profile_field_provenance")
+        .update({ confirmed_by_designer: true, confirmed_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+        .eq("user_id", user.id)
+        .eq("confirmed_by_designer", false)
+        .in("field_key", confirmableFieldKeys);
+    }
+  }
+
   revalidatePath("/account");
   revalidatePath("/client");
   revalidatePath("/designers");
@@ -434,6 +494,12 @@ export default async function EditProfilePage({
   const accountRole = await getExplicitAccountRole(supabase, user.id);
   if (!accountRole) redirect("/onboarding?next=%2Faccount%2Fprofile");
   const isProfessional = accountRole === "designer";
+
+  const { data: provenanceRows } = isProfessional
+    ? await supabase.from("profile_field_provenance").select("field_key, source, confirmed_by_designer").eq("user_id", user.id)
+    : { data: null };
+  const provenance = new Map((provenanceRows ?? []).map((row) => [row.field_key, row as ProvenanceEntry]));
+  const fieldLocale: "pl" | "en" = siteLocale === "en" ? "en" : "pl";
   const hasProfile = Boolean(profile);
   const publicProfilePath = `/designers/${p.public_slug || user.id}`;
   const score = profileReadinessScore(p, isProfessional);
@@ -548,11 +614,18 @@ export default async function EditProfilePage({
             </div>
 
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
-              <Field label={isProfessional ? copy.professionalName : copy.clientName}>
+              <Field
+                label={isProfessional ? copy.professionalName : copy.clientName}
+                badge={<ProvenanceBadge entry={provenance.get("full_name")} locale={fieldLocale} />}
+              >
                 <input name="full_name" required defaultValue={p.full_name ?? ""} className={fieldClass} />
               </Field>
 
-              <Field label={copy.location} hint={copy.locationHint}>
+              <Field
+                label={copy.location}
+                hint={copy.locationHint}
+                badge={isProfessional ? <ProvenanceBadge entry={provenance.get("location")} locale={fieldLocale} /> : null}
+              >
                 <LocationInput
                   name="location"
                   listId="profile-location-options"
@@ -670,7 +743,7 @@ export default async function EditProfilePage({
                 <input name="minimum_project_budget" defaultValue={p.minimum_project_budget ?? ""} inputMode="numeric" placeholder="30000" className={fieldClass} />
               </Field>
 
-              <Field label={copy.email}>
+              <Field label={copy.email} badge={<ProvenanceBadge entry={provenance.get("email")} locale={fieldLocale} />}>
                 <input
                   name="email"
                   type="email"
@@ -679,7 +752,7 @@ export default async function EditProfilePage({
                 />
               </Field>
 
-              <Field label={copy.phone}>
+              <Field label={copy.phone} badge={<ProvenanceBadge entry={provenance.get("phone")} locale={fieldLocale} />}>
                 <input name="phone" required defaultValue={p.phone ?? ""} className={fieldClass} />
               </Field>
 
@@ -700,16 +773,16 @@ export default async function EditProfilePage({
                   {copy.socialsBody}
                 </p>
                 <div className="mt-3 grid gap-4 sm:grid-cols-2">
-                  <Field label="Instagram">
+                  <Field label="Instagram" badge={<ProvenanceBadge entry={provenance.get("instagram_url")} locale={fieldLocale} />}>
                     <input name="instagram_url" defaultValue={p.instagram_url ?? ""} placeholder="https://instagram.com/..." className={fieldClass} />
                   </Field>
-                  <Field label="Facebook">
+                  <Field label="Facebook" badge={<ProvenanceBadge entry={provenance.get("facebook_url")} locale={fieldLocale} />}>
                     <input name="facebook_url" defaultValue={p.facebook_url ?? ""} placeholder="https://facebook.com/..." className={fieldClass} />
                   </Field>
-                  <Field label="Behance">
+                  <Field label="Behance" badge={<ProvenanceBadge entry={provenance.get("behance_url")} locale={fieldLocale} />}>
                     <input name="behance_url" defaultValue={p.behance_url ?? ""} placeholder="https://behance.net/..." className={fieldClass} />
                   </Field>
-                  <Field label="LinkedIn">
+                  <Field label="LinkedIn" badge={<ProvenanceBadge entry={provenance.get("linkedin_url")} locale={fieldLocale} />}>
                     <input name="linkedin_url" defaultValue={p.linkedin_url ?? ""} placeholder="https://linkedin.com/in/..." className={fieldClass} />
                   </Field>
                 </div>
@@ -742,7 +815,10 @@ export default async function EditProfilePage({
               </div>
 
               <fieldset className="sm:col-span-2">
-                <legend className="text-sm font-semibold">{copy.workModes}</legend>
+                <legend className="text-sm font-semibold">
+                  {copy.workModes}
+                  <ProvenanceBadge entry={provenance.get("work_modes")} locale={fieldLocale} />
+                </legend>
                 <div className="mt-3 flex flex-wrap gap-3">
                   {workModes.map((mode) => (
                     <label key={mode} className="flex items-center gap-3 rounded-xl border border-line bg-background px-4 py-3 text-sm font-semibold">
@@ -754,7 +830,10 @@ export default async function EditProfilePage({
               </fieldset>
 
               <fieldset className="sm:col-span-2">
-                <legend className="text-sm font-semibold">{detailsCopy.languages}</legend>
+                <legend className="text-sm font-semibold">
+                  {detailsCopy.languages}
+                  <ProvenanceBadge entry={provenance.get("languages")} locale={fieldLocale} />
+                </legend>
                 <p className="mt-1 text-sm leading-6 text-muted">{detailsCopy.languagesHint}</p>
                 <div className="mt-3 flex flex-wrap gap-3">
                   {profileLanguages.map((language) => (
@@ -798,7 +877,11 @@ export default async function EditProfilePage({
             </div>
 
             <div className="mt-6 grid gap-5">
-              <Field label={copy.headlinePl} hint={copy.headlineHint}>
+              <Field
+                label={copy.headlinePl}
+                hint={copy.headlineHint}
+                badge={fieldLocale === "pl" ? <ProvenanceBadge entry={provenance.get("headline")} locale={fieldLocale} /> : null}
+              >
                 <input
                   name="profile_headline_pl"
                   maxLength={140}
@@ -808,7 +891,11 @@ export default async function EditProfilePage({
                 />
               </Field>
 
-              <Field label={copy.headlineEn} hint={copy.fallbackEnHint}>
+              <Field
+                label={copy.headlineEn}
+                hint={copy.fallbackEnHint}
+                badge={fieldLocale === "en" ? <ProvenanceBadge entry={provenance.get("headline")} locale={fieldLocale} /> : null}
+              >
                 <input
                   name="profile_headline_en"
                   maxLength={140}
@@ -818,7 +905,11 @@ export default async function EditProfilePage({
                 />
               </Field>
 
-              <Field label={detailsCopy.specialtiesPl} hint={detailsCopy.bilingualHintPl}>
+              <Field
+                label={detailsCopy.specialtiesPl}
+                hint={detailsCopy.bilingualHintPl}
+                badge={fieldLocale === "pl" ? <ProvenanceBadge entry={provenance.get("specialties")} locale={fieldLocale} /> : null}
+              >
                 <input
                   name="custom_specialties_pl"
                   defaultValue={p.custom_specialties_pl?.join(", ") ?? p.specialties?.join(", ") ?? ""}
@@ -827,7 +918,11 @@ export default async function EditProfilePage({
                 />
               </Field>
 
-              <Field label={detailsCopy.specialtiesEn} hint={detailsCopy.bilingualHintEn}>
+              <Field
+                label={detailsCopy.specialtiesEn}
+                hint={detailsCopy.bilingualHintEn}
+                badge={fieldLocale === "en" ? <ProvenanceBadge entry={provenance.get("specialties")} locale={fieldLocale} /> : null}
+              >
                 <input
                   name="custom_specialties_en"
                   defaultValue={p.custom_specialties_en?.join(", ") ?? ""}
@@ -837,7 +932,10 @@ export default async function EditProfilePage({
               </Field>
 
               <fieldset>
-                <legend className="text-sm font-semibold">{copy.services}</legend>
+                <legend className="text-sm font-semibold">
+                  {copy.services}
+                  <ProvenanceBadge entry={provenance.get("service_capabilities")} locale={fieldLocale} />
+                </legend>
                 <p className="mt-1 text-sm leading-6 text-muted">
                   {copy.servicesBody}
                 </p>
@@ -866,7 +964,10 @@ export default async function EditProfilePage({
                 <div className="mt-4"><ServiceOfferingsEditor initialValue={p.service_offerings} /></div>
               </div>
 
-              <Field label={copy.bioPl}>
+              <Field
+                label={copy.bioPl}
+                badge={fieldLocale === "pl" ? <ProvenanceBadge entry={provenance.get("about")} locale={fieldLocale} /> : null}
+              >
                 <textarea
                   name="bio_pl"
                   defaultValue={p.bio_pl ?? p.bio ?? ""}
@@ -876,7 +977,11 @@ export default async function EditProfilePage({
                 />
               </Field>
 
-              <Field label={copy.bioEn} hint={copy.fallbackEnHint}>
+              <Field
+                label={copy.bioEn}
+                hint={copy.fallbackEnHint}
+                badge={fieldLocale === "en" ? <ProvenanceBadge entry={provenance.get("about")} locale={fieldLocale} /> : null}
+              >
                 <textarea
                   name="bio_en"
                   defaultValue={p.bio_en ?? ""}
