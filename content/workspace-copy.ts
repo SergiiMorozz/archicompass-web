@@ -581,6 +581,7 @@ type WorkspaceCopy = {
     studioAndTeam: string;
     publicProfile: string;
     portfolio: string;
+    portfolioAutopilot: string;
     defaultProfileName: string;
     ariaLabel: string;
     unreadUpdates: (count: number) => string;
@@ -822,6 +823,7 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       studioAndTeam: "Pracownia i zespół",
       publicProfile: "Profil publiczny",
       portfolio: "Portfolio",
+      portfolioAutopilot: "Portfolio Autopilot",
       defaultProfileName: "Profil projektanta",
       ariaLabel: "Nawigacja Studio projektanta",
       unreadUpdates: (count) => `${count} nowych aktualizacji`,
@@ -1569,6 +1571,7 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       studioAndTeam: "Studio and team",
       publicProfile: "Public profile",
       portfolio: "Portfolio",
+      portfolioAutopilot: "Portfolio Autopilot",
       defaultProfileName: "Designer profile",
       ariaLabel: "Designer Studio navigation",
       unreadUpdates: (count) => `${count} new updates`,

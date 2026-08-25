@@ -19,7 +19,9 @@ import { siteLocale } from "@/lib/site-locale";
 import { serviceCapabilities } from "@/lib/service-capabilities";
 import { visuallyInferableServiceCapabilities } from "@/lib/ai/profile-draft-schema";
 
-const downloadBatchSize = 4;
+// Download a small batch concurrently. This keeps a large portfolio moving
+// without creating an unbounded number of remote requests in one advance.
+const downloadBatchSize = 6;
 // AI cost is controlled per-project, not by a shared job-wide counter - a
 // large gallery discovered early must never be the reason a project
 // discovered later gets no AI analysis at all.
@@ -168,8 +170,17 @@ async function stepFetching(supabase: SupabaseServerClient, job: PortfolioImport
       }
     }
 
-    const { data } = await supabase.from("portfolio_import_jobs").select("*").eq("id", job.id).single();
-    return (data as PortfolioImportJob) ?? job;
+    // Crawling a larger website spans several advances. Keep a heartbeat on
+    // every completed page so the UI only calls it stalled when no work is
+    // actually happening.
+    const { data, error } = await supabase
+      .from("portfolio_import_jobs")
+      .update({ updated_at: new Date().toISOString() })
+      .eq("id", job.id)
+      .select("*")
+      .single();
+    if (error || !data) return fail(supabase, job, "Could not update import progress.");
+    return data as PortfolioImportJob;
   }
 
   const { count: imagesFound } = await supabase
@@ -197,33 +208,38 @@ async function stepExtracting(supabase: SupabaseServerClient, job: PortfolioImpo
     .limit(downloadBatchSize);
   if (pendingError) return fail(supabase, job, "Could not read the pending photo queue.");
 
-  for (const asset of pending ?? []) {
-    if (!asset.source_image_url) {
-      await supabase.from("portfolio_assets").delete().eq("id", asset.id);
-      continue;
-    }
-    const candidate = await downloadPortfolioImage(
-      { src: asset.source_image_url, alt: asset.alt_text },
-      asset.source_page_url ?? job.source_url ?? asset.source_image_url,
-      asset.page_title
-    );
-    if (!candidate) {
-      await supabase.from("portfolio_assets").delete().eq("id", asset.id);
-      continue;
-    }
-    const path = `${job.user_id}/${job.id}/${asset.id}.${extensionFor(candidate.contentType)}`;
-    const { error: uploadError } = await supabase.storage
-      .from(stagingBucket)
-      .upload(path, candidate.bytes, { contentType: candidate.contentType, upsert: true });
-    if (uploadError) {
-      await supabase.from("portfolio_assets").delete().eq("id", asset.id);
-      continue;
-    }
-    await supabase
-      .from("portfolio_assets")
-      .update({ storage_path: path, content_hash: candidate.contentHash })
-      .eq("id", asset.id);
-  }
+  await Promise.all(
+    (pending ?? []).map(async (asset) => {
+      if (!asset.source_image_url) {
+        await supabase.from("portfolio_assets").delete().eq("id", asset.id);
+        return;
+      }
+
+      const candidate = await downloadPortfolioImage(
+        { src: asset.source_image_url, alt: asset.alt_text },
+        asset.source_page_url ?? job.source_url ?? asset.source_image_url,
+        asset.page_title
+      );
+      if (!candidate) {
+        await supabase.from("portfolio_assets").delete().eq("id", asset.id);
+        return;
+      }
+
+      const path = `${job.user_id}/${job.id}/${asset.id}.${extensionFor(candidate.contentType)}`;
+      const { error: uploadError } = await supabase.storage
+        .from(stagingBucket)
+        .upload(path, candidate.bytes, { contentType: candidate.contentType, upsert: true });
+      if (uploadError) {
+        await supabase.from("portfolio_assets").delete().eq("id", asset.id);
+        return;
+      }
+
+      await supabase
+        .from("portfolio_assets")
+        .update({ storage_path: path, content_hash: candidate.contentHash })
+        .eq("id", asset.id);
+    })
+  );
 
   const { count: remaining } = await supabase
     .from("portfolio_assets")
@@ -232,8 +248,16 @@ async function stepExtracting(supabase: SupabaseServerClient, job: PortfolioImpo
     .is("storage_path", null);
 
   if (remaining && remaining > 0) {
-    const { data } = await supabase.from("portfolio_import_jobs").select("*").eq("id", job.id).single();
-    return (data as PortfolioImportJob) ?? job;
+    // A batch may take a while on a portfolio with remote images. Persist a
+    // heartbeat so the browser can distinguish useful work from a stalled job.
+    const { data, error } = await supabase
+      .from("portfolio_import_jobs")
+      .update({ updated_at: new Date().toISOString() })
+      .eq("id", job.id)
+      .select("*")
+      .single();
+    if (error || !data) return fail(supabase, job, "Could not update import progress.");
+    return data as PortfolioImportJob;
   }
 
   const { count: downloaded } = await supabase

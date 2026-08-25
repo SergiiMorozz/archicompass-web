@@ -23,6 +23,7 @@ export default function StudioNav({
     { href: "/studio/analytics", label: copy.analytics },
     { href: "/studio/team", label: copy.studioAndTeam },
     { href: "/studio/billing", label: billingCopy.studioNav },
+    { href: "/studio/portfolio-autopilot", label: copy.portfolioAutopilot },
     { href: "/account/profile", label: copy.publicProfile },
     { href: "/account/projects", label: copy.portfolio },
   ];

@@ -64,8 +64,12 @@ const portfolioAutopilotCopyByLocale = {
       failedHelp: "Nie udało się dokończyć importu. Sprawdź adres strony lub połączenie z internetem i spróbuj ponownie.",
       connectionError: "Połączenie zostało przerwane. Sprawdź internet i spróbuj ponownie.",
       stillProcessing: "Import trwa dłużej niż zwykle. Odśwież stronę — wznowimy go od ostatniego kroku.",
+      stalledTitle: "Import potrzebuje Twojej decyzji",
+      stalledHelp: "Import nie przeszedł do kolejnego etapu od ponad minuty. Możesz spróbować kontynuować albo dodać zdjęcia ręcznie.",
       retryCta: "Spróbuj ponownie",
       backCta: "Wróć do startu",
+      resumeCta: "Kontynuuj import",
+      manualUploadCta: "Dodaj zdjęcia ręcznie",
       continueCta: "Przejdź do przeglądu",
     },
     review: {
@@ -161,6 +165,8 @@ const portfolioAutopilotCopyByLocale = {
       servicesConfirmYourself: "Nie widać na zdjęciach — potwierdź sam",
       socialsLabel: "Znalezione linki społecznościowe",
       alreadySetNote: "Masz już to pole uzupełnione — publikacja go nie zmieni.",
+      savedInProfileBadge: "Zapisane w profilu",
+      existingProfileHint: "Pola zapisane już w Twoim profilu pokazujemy tu tylko do odczytu. Zmienisz je w edycji profilu.",
       publishCta: "Opublikuj do mojego profilu",
       publishBusy: "Publikujemy…",
       publishedSummary: (applied: number, skipped: number) =>
@@ -252,8 +258,12 @@ const portfolioAutopilotCopyByLocale = {
       failedHelp: "We couldn’t finish importing your portfolio. Check the website address or your internet connection and try again.",
       connectionError: "The connection was interrupted. Check your internet connection and try again.",
       stillProcessing: "The import is taking longer than usual. Refresh the page and we’ll continue from the last completed step.",
+      stalledTitle: "Your import needs your attention",
+      stalledHelp: "The import has not moved to the next step for over a minute. You can continue it or add photos manually instead.",
       retryCta: "Try again",
       backCta: "Back to start",
+      resumeCta: "Continue import",
+      manualUploadCta: "Add photos manually",
       continueCta: "Go to review",
     },
     review: {
@@ -349,6 +359,8 @@ const portfolioAutopilotCopyByLocale = {
       servicesConfirmYourself: "Not visible in photos — confirm yourself",
       socialsLabel: "Social links found",
       alreadySetNote: "You already have this field filled in — publishing won't change it.",
+      savedInProfileBadge: "Saved in profile",
+      existingProfileHint: "Fields already saved in your profile are shown here as read-only. Edit them in your profile editor.",
       publishCta: "Publish to my profile",
       publishBusy: "Publishing…",
       publishedSummary: (applied: number, skipped: number) =>
