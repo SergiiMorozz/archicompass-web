@@ -926,6 +926,17 @@ export default function ProjectCompass({
       ? "Wybierz lokalizację z listy."
       : "Choose a location from the list."
     : null;
+
+  useEffect(() => {
+    // A validation error should disappear as soon as the user fixes the last invalid field.
+    if (!projectDetailsValidationMessage && saveError) {
+      const validationErrors = siteLocale === "pl"
+        ? ["Podaj powierzchnię od 1 do 2000 m².", "Podaj liczbę pomieszczeń od 1 do 50.", "Wybierz lokalizację z listy."]
+        : ["Enter an area between 1 and 2,000 m².", "Enter a room count between 1 and 50.", "Choose a location from the list."];
+
+      if (validationErrors.includes(saveError)) setSaveError(null);
+    }
+  }, [projectDetailsValidationMessage, saveError]);
   const hasStyleDirection = Boolean(styleAnalysis || hasSelectedStyle || selectedVisualCues.length || notes.trim());
   const hasProjectDetails = Boolean(projectType || validAreaM2 || validRoomCount || selectedRoomTypes.length || propertyStatus || validLocation);
   const hasScope = Boolean(goal || scope || visualizationNeed || supervisionNeed);
