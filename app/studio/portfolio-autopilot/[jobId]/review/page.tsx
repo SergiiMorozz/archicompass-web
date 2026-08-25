@@ -172,6 +172,7 @@ export default async function PortfolioAutopilotReviewPage({
           draft={draft}
           alreadyPublished={draftView.draftStatus === "published"}
           alreadySet={draftView.alreadySet}
+          liveProfile={draftView.liveProfile}
         />
       ) : null}
 

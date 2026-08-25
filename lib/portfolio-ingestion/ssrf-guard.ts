@@ -82,54 +82,54 @@ export async function safeFetch(rawUrl: string, maxBytes: number): Promise<SafeF
   for (let hop = 0; hop <= maxRedirects; hop += 1) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), fetchTimeoutMs);
-
-    let response: Response;
     try {
-      response = await fetch(currentUrl, {
+      const response = await fetch(currentUrl, {
         redirect: "manual",
         signal: controller.signal,
         headers: { "User-Agent": "ArchiCompassPortfolioBot/1.0" },
       });
-    } finally {
-      clearTimeout(timeout);
-    }
 
-    if (response.status >= 300 && response.status < 400) {
-      const location = response.headers.get("location");
-      if (!location) throw new UnsafeUrlError("Redirect without a location.");
-      currentUrl = await assertSafeUrl(new URL(location, currentUrl).toString());
-      continue;
-    }
+      if (response.status >= 300 && response.status < 400) {
+        const location = response.headers.get("location");
+        if (!location) throw new UnsafeUrlError("Redirect without a location.");
+        currentUrl = await assertSafeUrl(new URL(location, currentUrl).toString());
+        continue;
+      }
 
-    if (!response.ok) {
-      throw new Error(`Request failed with status ${response.status}.`);
-    }
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}.`);
+      }
 
-    const contentLength = response.headers.get("content-length");
-    if (contentLength && Number(contentLength) > maxBytes) {
-      throw new UnsafeUrlError("Response is too large.");
-    }
-
-    const reader = response.body?.getReader();
-    if (!reader) throw new Error("Empty response body.");
-    const chunks: Uint8Array[] = [];
-    let total = 0;
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      total += value.byteLength;
-      if (total > maxBytes) {
-        await reader.cancel();
+      const contentLength = response.headers.get("content-length");
+      if (contentLength && Number(contentLength) > maxBytes) {
         throw new UnsafeUrlError("Response is too large.");
       }
-      chunks.push(value);
-    }
 
-    return {
-      finalUrl: currentUrl.toString(),
-      contentType: response.headers.get("content-type") ?? "application/octet-stream",
-      bytes: Buffer.concat(chunks),
-    };
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("Empty response body.");
+      const chunks: Uint8Array[] = [];
+      let total = 0;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        total += value.byteLength;
+        if (total > maxBytes) {
+          await reader.cancel();
+          throw new UnsafeUrlError("Response is too large.");
+        }
+        chunks.push(value);
+      }
+
+      return {
+        finalUrl: currentUrl.toString(),
+        contentType: response.headers.get("content-type") ?? "application/octet-stream",
+        bytes: Buffer.concat(chunks),
+      };
+    } finally {
+      // Keep the timeout active while the response body streams. A server can
+      // send headers and then never finish the image body.
+      clearTimeout(timeout);
+    }
   }
 
   throw new UnsafeUrlError("Too many redirects.");

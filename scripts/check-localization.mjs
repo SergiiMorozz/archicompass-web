@@ -57,6 +57,18 @@ const projectCompassSourceFiles = [
   "app/ai-style-finder/ProjectCompass.tsx",
   "components/ShareableStyleResult.tsx",
 ];
+const portfolioAutopilotSourceFiles = [
+  "app/studio/portfolio-autopilot/page.tsx",
+  "app/studio/portfolio-autopilot/[jobId]/importing/page.tsx",
+  "app/studio/portfolio-autopilot/[jobId]/review/page.tsx",
+  "app/studio/portfolio-autopilot/[jobId]/profile-draft/page.tsx",
+  "app/studio/portfolio-autopilot/[jobId]/profile-draft/next-steps/page.tsx",
+  "components/portfolio-autopilot/AdminRetryButton.tsx",
+  "components/portfolio-autopilot/ImportProgress.tsx",
+  "components/portfolio-autopilot/ProfileDraftBoard.tsx",
+  "components/portfolio-autopilot/ReviewBoard.tsx",
+  "components/portfolio-autopilot/StartForm.tsx",
+];
 
 const failures = sharedSourceFiles.flatMap((file) => {
   const source = readFileSync(file, "utf8");
@@ -122,9 +134,16 @@ for (const file of projectCompassSourceFiles) {
   }
 }
 
+for (const file of portfolioAutopilotSourceFiles) {
+  const source = readFileSync(file, "utf8");
+  if (!source.includes("@/content/portfolio-autopilot-copy")) {
+    failures.push(`${file}: missing the shared Portfolio Autopilot locale contract`);
+  }
+}
+
 if (failures.length) {
   console.error("Locale architecture check failed:\n- " + failures.join("\n- "));
   process.exit(1);
 }
 
-console.log(`Locale architecture check passed for ${sharedSourceFiles.length + workspaceSourceFiles.length + publicProfileSourceFiles.length + designerProfileSourceFiles.length + studioProfileSourceFiles.length + interactiveSourceFiles.length + accountFlowSourceFiles.length + projectCompassSourceFiles.length} shared source files.`);
+console.log(`Locale architecture check passed for ${sharedSourceFiles.length + workspaceSourceFiles.length + publicProfileSourceFiles.length + designerProfileSourceFiles.length + studioProfileSourceFiles.length + interactiveSourceFiles.length + accountFlowSourceFiles.length + projectCompassSourceFiles.length + portfolioAutopilotSourceFiles.length} shared source files.`);

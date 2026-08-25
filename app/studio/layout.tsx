@@ -10,6 +10,7 @@ import {
   inquiryRecipientFilter,
 } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { localePublicPath, siteLocale } from "@/lib/site-locale";
 
 export const revalidate = 0;
 const workspaceCopy = getWorkspaceCopy();
@@ -25,7 +26,7 @@ export default async function StudioLayout({ children }: { children: React.React
   const user = userData.user;
   const requestedPath = await currentRequestPath("/studio");
 
-  if (!user) redirect(`/login?next=${encodeURIComponent(requestedPath)}`);
+  if (!user) redirect(`${localePublicPath(siteLocale, "/login")}?next=${encodeURIComponent(requestedPath)}`);
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -38,9 +39,9 @@ export default async function StudioLayout({ children }: { children: React.React
     getActiveAdminRole(supabase, user.id),
   ]);
 
-  if (!accountRole && !adminRole) redirect(`/onboarding?next=${encodeURIComponent(requestedPath)}`);
+  if (!accountRole && !adminRole) redirect(`${localePublicPath(siteLocale, "/onboarding")}?next=${encodeURIComponent(requestedPath)}`);
 
-  if (accountRole !== "designer" && !adminRole) redirect("/client");
+  if (accountRole !== "designer" && !adminRole) redirect(localePublicPath(siteLocale, "/client"));
 
   const { data: memberships } = await getStudioMemberships(supabase, user.id, "active");
   const studioIds = memberships.map((membership) => membership.studio_id);

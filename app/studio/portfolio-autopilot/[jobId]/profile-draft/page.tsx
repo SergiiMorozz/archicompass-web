@@ -32,7 +32,7 @@ export default async function PortfolioAutopilotProfileDraftPage({
     redirect(localePublicPath(siteLocale, `/studio/portfolio-autopilot/${jobId}/importing`));
   }
 
-  const { draft, draftStatus, alreadySet } = await loadProfileDraftViewData(supabase, jobId, user.id);
+  const { draft, draftStatus, alreadySet, liveProfile } = await loadProfileDraftViewData(supabase, jobId, user.id);
 
   if (!draft) {
     return (
@@ -47,7 +47,7 @@ export default async function PortfolioAutopilotProfileDraftPage({
     <main className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="text-3xl font-bold text-foreground">{copy.title}</h1>
       <p className="mt-2 text-base text-muted">{copy.subtitle}</p>
-      <ProfileDraftBoard jobId={jobId} draft={draft} alreadyPublished={draftStatus === "published"} alreadySet={alreadySet} />
+      <ProfileDraftBoard jobId={jobId} draft={draft} alreadyPublished={draftStatus === "published"} alreadySet={alreadySet} liveProfile={liveProfile} />
     </main>
   );
 }

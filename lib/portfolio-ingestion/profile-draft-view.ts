@@ -2,7 +2,30 @@ import type { SupabaseServerClient } from "./job-access";
 import type { ProfileDraft } from "@/components/portfolio-autopilot/ProfileDraftBoard";
 
 const liveProfileSelect =
-  "full_name, location, phone, email, languages, work_modes, profile_headline_pl, profile_headline_en, bio_pl, bio_en, custom_specialties_pl, custom_specialties_en, specialties, service_capabilities, instagram_url, facebook_url, behance_url, linkedin_url";
+  "full_name, location, phone, email, languages, work_modes, profile_headline_pl, profile_headline_en, profile_headline, bio_pl, bio_en, bio, custom_specialties_pl, custom_specialties_en, specialties, service_capabilities, instagram_url, facebook_url, behance_url, linkedin_url";
+
+export type ExistingProfileValues = {
+  full_name: string | null;
+  location: string | null;
+  phone: string | null;
+  email: string | null;
+  languages: string[] | null;
+  work_modes: string[] | null;
+  profile_headline_pl: string | null;
+  profile_headline_en: string | null;
+  profile_headline: string | null;
+  bio_pl: string | null;
+  bio_en: string | null;
+  bio: string | null;
+  custom_specialties_pl: string[] | null;
+  custom_specialties_en: string[] | null;
+  specialties: string[] | null;
+  service_capabilities: string[] | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  behance_url: string | null;
+  linkedin_url: string | null;
+};
 
 /** Shared by the unified review page and the legacy standalone profile-draft page so their "already set" logic can't drift apart. */
 export async function loadProfileDraftViewData(supabase: SupabaseServerClient, jobId: string, userId: string) {
@@ -18,8 +41,8 @@ export async function loadProfileDraftViewData(supabase: SupabaseServerClient, j
     email: Boolean(liveProfile?.email),
     languages: Boolean(liveProfile?.languages?.length),
     work_modes: Boolean(liveProfile?.work_modes?.length),
-    headline: Boolean(liveProfile?.profile_headline_pl || liveProfile?.profile_headline_en),
-    about: Boolean(liveProfile?.bio_pl || liveProfile?.bio_en),
+    headline: Boolean(liveProfile?.profile_headline_pl || liveProfile?.profile_headline_en || liveProfile?.profile_headline),
+    about: Boolean(liveProfile?.bio_pl || liveProfile?.bio_en || liveProfile?.bio),
     specialties: Boolean(
       liveProfile?.custom_specialties_pl?.length || liveProfile?.custom_specialties_en?.length || liveProfile?.specialties?.length
     ),
@@ -30,5 +53,10 @@ export async function loadProfileDraftViewData(supabase: SupabaseServerClient, j
     linkedin: Boolean(liveProfile?.linkedin_url),
   };
 
-  return { draft: draft as ProfileDraft | null, draftStatus: draft?.status as string | undefined, alreadySet };
+  return {
+    draft: draft as ProfileDraft | null,
+    draftStatus: draft?.status as string | undefined,
+    alreadySet,
+    liveProfile: liveProfile as ExistingProfileValues | null,
+  };
 }
