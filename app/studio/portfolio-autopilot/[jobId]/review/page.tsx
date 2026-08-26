@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { loadOwnedJob } from "@/lib/portfolio-ingestion/job-access";
 import { stagingAssetPreviewUrls } from "@/lib/portfolio-ingestion/asset-previews";
@@ -7,6 +7,7 @@ import { loadProfileDraftViewData } from "@/lib/portfolio-ingestion/profile-draf
 import { profileReadinessScore } from "@/lib/profile-readiness";
 import { getPortfolioAutopilotCopy } from "@/content/portfolio-autopilot-copy";
 import { localePublicPath, siteLocale } from "@/lib/site-locale";
+import SignOutButton from "@/components/SignOutButton";
 import ReviewBoard, { type ReviewAsset, type ReviewProject } from "@/components/portfolio-autopilot/ReviewBoard";
 import ProfileDraftBoard from "@/components/portfolio-autopilot/ProfileDraftBoard";
 import AutopilotFlowSteps from "@/components/portfolio-autopilot/AutopilotFlowSteps";
@@ -31,13 +32,37 @@ export default async function PortfolioAutopilotReviewPage({
   const { jobId } = await params;
   const copy = getPortfolioAutopilotCopy().review;
   const nextStepsCopy = getPortfolioAutopilotCopy().nextSteps;
+  const reviewPath = `/studio/portfolio-autopilot/${jobId}/review`;
+  const loginHref = localePublicPath(siteLocale, `/login?next=${encodeURIComponent(reviewPath)}`);
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
-  if (!user) redirect(localePublicPath(siteLocale, "/login"));
+  if (!user) redirect(loginHref);
 
   const job = await loadOwnedJob(supabase, jobId, user.id);
-  if (!job) notFound();
+  if (!job) {
+    return (
+      <main className="mx-auto flex min-h-[60vh] max-w-3xl items-center px-6 py-12">
+        <section className="w-full rounded-2xl border border-line bg-card p-7 shadow-[0_18px_50px_rgba(54,31,73,0.10)] sm:p-10">
+          <p className="text-sm font-bold uppercase tracking-[0.16em] text-primary">Portfolio Autopilot</p>
+          <h1 className="mt-3 text-3xl font-bold leading-tight text-foreground sm:text-4xl">{copy.access.title}</h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-muted">{copy.access.body}</p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <SignOutButton
+              redirectTo={loginHref}
+              label={copy.access.loginCta}
+              loadingLabel={copy.access.switchingAccount}
+              className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white transition hover:brightness-95"
+            />
+            <a href={localePublicPath(siteLocale, "/studio")} className="rounded-xl border border-line px-5 py-3 text-sm font-bold text-foreground transition hover:border-primary">
+              {copy.access.studioCta}
+            </a>
+          </div>
+          <p className="mt-5 text-sm leading-6 text-muted">{copy.access.hint}</p>
+        </section>
+      </main>
+    );
+  }
   if (job.status !== "READY_FOR_REVIEW" && job.status !== "PUBLISHED") {
     redirect(localePublicPath(siteLocale, `/studio/portfolio-autopilot/${jobId}/importing`));
   }

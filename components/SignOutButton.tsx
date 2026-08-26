@@ -3,15 +3,31 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { siteLocale } from "@/lib/site-locale";
+import { localePublicPath, siteLocale } from "@/lib/site-locale";
 
-export default function SignOutButton({ className = "" }: { className?: string }) {
+type SignOutButtonProps = {
+  className?: string;
+  redirectTo?: string;
+  label?: string;
+  loadingLabel?: string;
+};
+
+export default function SignOutButton({
+  className = "",
+  redirectTo,
+  label,
+  loadingLabel,
+}: SignOutButtonProps) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const labels =
+  const defaultLabels =
     siteLocale === "en"
       ? { idle: "Sign out", loading: "Signing out..." }
       : { idle: "Wyloguj się", loading: "Wylogowywanie..." };
+  const labels = {
+    idle: label ?? defaultLabels.idle,
+    loading: loadingLabel ?? defaultLabels.loading,
+  };
 
   async function onSignOut() {
     try {
@@ -19,7 +35,7 @@ export default function SignOutButton({ className = "" }: { className?: string }
       const supabase = createSupabaseBrowserClient();
       await supabase.auth.signOut();
       router.refresh();
-      router.push("/login");
+      router.push(redirectTo ?? localePublicPath(siteLocale, "/login"));
     } finally {
       setLoading(false);
     }
