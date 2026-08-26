@@ -9,6 +9,7 @@ import { getPortfolioAutopilotCopy } from "@/content/portfolio-autopilot-copy";
 import { localePublicPath, siteLocale } from "@/lib/site-locale";
 import ReviewBoard, { type ReviewAsset, type ReviewProject } from "@/components/portfolio-autopilot/ReviewBoard";
 import ProfileDraftBoard from "@/components/portfolio-autopilot/ProfileDraftBoard";
+import AutopilotFlowSteps from "@/components/portfolio-autopilot/AutopilotFlowSteps";
 import type { DesignerIntelligenceProfile } from "@/lib/portfolio-ingestion/aggregate-profile";
 
 export const metadata: Metadata = {
@@ -160,10 +161,20 @@ export default async function PortfolioAutopilotReviewPage({
     <main className="mx-auto max-w-5xl px-6 py-12">
       <h1 className="text-3xl font-bold text-foreground">{copy.title}</h1>
       <p className="mt-2 text-base text-muted">{copy.subtitle}</p>
+      <AutopilotFlowSteps active="review" />
 
-      <div className="mt-6 rounded-2xl border border-line bg-card p-5">
-        <p className="text-lg font-bold text-foreground">{nextStepsCopy.title(readinessScore)}</p>
-        <p className="mt-1 text-sm text-muted">{nextStepsCopy.summary(foundCount, aiCount, manualCount)}</p>
+      <div className="mt-6 flex items-center gap-4 rounded-2xl border border-line bg-card p-5">
+        <div
+          aria-label={nextStepsCopy.title(readinessScore)}
+          className="grid h-16 w-16 shrink-0 place-items-center rounded-full"
+          style={{ background: `conic-gradient(var(--color-primary) ${readinessScore * 3.6}deg, var(--color-line) 0deg)` }}
+        >
+          <span className="grid h-12 w-12 place-items-center rounded-full bg-card text-sm font-bold text-foreground">{readinessScore}%</span>
+        </div>
+        <div>
+          <p className="text-lg font-bold text-foreground">{nextStepsCopy.title(readinessScore)}</p>
+          <p className="mt-1 text-sm text-muted">{nextStepsCopy.summary(foundCount, aiCount, manualCount)}</p>
+        </div>
       </div>
 
       {draft ? (

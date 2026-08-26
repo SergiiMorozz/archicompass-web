@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { loadOwnedJob } from "@/lib/portfolio-ingestion/job-access";
 import { getPortfolioAutopilotCopy } from "@/content/portfolio-autopilot-copy";
 import ImportProgress from "@/components/portfolio-autopilot/ImportProgress";
+import AutopilotFlowSteps from "@/components/portfolio-autopilot/AutopilotFlowSteps";
 import { localePublicPath, siteLocale } from "@/lib/site-locale";
 
 export const metadata: Metadata = {
@@ -26,8 +27,9 @@ export default async function PortfolioAutopilotImportingPage({
   if (!job) notFound();
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-12">
+    <main className="mx-auto max-w-4xl px-6 py-12">
       <h1 className="text-3xl font-bold text-foreground">{copy.title}</h1>
+      <AutopilotFlowSteps active="importing" />
       <ImportProgress jobId={jobId} />
     </main>
   );

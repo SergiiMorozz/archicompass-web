@@ -96,6 +96,7 @@ export default function ReviewBoard({
   const [uploadingProjectId, setUploadingProjectId] = useState<string | null>(null);
   const [deletingAssetId, setDeletingAssetId] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState<Record<string, string>>({});
+  const [lightboxAsset, setLightboxAsset] = useState<ReviewAsset | null>(null);
 
   const assetsByProject = useMemo(() => {
     const map = new Map<string, ReviewAsset[]>();
@@ -384,12 +385,15 @@ export default function ReviewBoard({
                 <div className="flex flex-wrap gap-5">
                   {coverAsset?.url ? (
                     <div className="relative h-40 w-56 shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={coverAsset.url}
-                        alt={coverAsset.altText ?? ""}
-                        className="h-full w-full rounded-xl object-cover"
-                      />
+                      <button
+                        type="button"
+                        onClick={() => setLightboxAsset(coverAsset)}
+                        aria-label={copy.openPhotoLabel}
+                        className="group h-full w-full overflow-hidden rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={coverAsset.url} alt={coverAsset.altText ?? ""} className="h-full w-full object-cover transition duration-200 group-hover:scale-[1.02]" />
+                      </button>
                       <button
                         type="button"
                         onClick={() => deleteAsset(coverAsset)}
@@ -426,15 +430,21 @@ export default function ReviewBoard({
                     ) : null}
                     <p className="mt-2 text-xs text-muted">{copy.photoCount(projectAssets.length)}</p>
                     {projectAssets.length === 0 ? (
-                      <p className="mt-1 text-xs font-medium text-red-700">{copy.noPhotosWarning}</p>
+                      <div role="alert" className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-800">
+                        {copy.noPhotosWarning}
+                      </div>
+                    ) : confidence < 0.5 ? (
+                      <div role="alert" className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">
+                        {confidenceLabel}
+                      </div>
                     ) : (
-                      <p className={`mt-1 text-xs font-medium ${confidence < 0.5 ? "text-amber-700" : "text-muted"}`}>{confidenceLabel}</p>
+                      <p className="mt-1 text-xs font-medium text-muted">{confidenceLabel}</p>
                     )}
                     {project.analysis && project.analysis.isInteriorProject === false ? (
-                      <p className="mt-1 text-xs font-medium text-red-700">
+                      <div role="alert" className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-800">
                         {copy.notInteriorProject}
                         {project.analysis.irrelevanceReason ? ` — ${project.analysis.irrelevanceReason}` : ""}
-                      </p>
+                      </div>
                     ) : null}
 
                     <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -517,7 +527,7 @@ export default function ReviewBoard({
                   <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8">
                     {visibleOtherAssets.map((asset) =>
                       asset.url ? (
-                        <div key={asset.id} className="relative aspect-square">
+                        <div key={asset.id} className="group relative aspect-square">
                           <button
                             type="button"
                             onClick={() => toggleAsset(asset)}
@@ -527,6 +537,14 @@ export default function ReviewBoard({
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={asset.url} alt={asset.altText ?? ""} className="h-full w-full object-cover" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setLightboxAsset(asset)}
+                            aria-label={copy.openPhotoLabel}
+                            className="absolute bottom-1.5 left-1.5 rounded-md bg-foreground/75 px-1.5 py-1 text-[10px] font-bold text-white opacity-0 transition hover:bg-foreground focus:opacity-100 group-hover:opacity-100"
+                          >
+                            +
                           </button>
                           <button
                             type="button"
@@ -585,6 +603,29 @@ export default function ReviewBoard({
       >
         {publishing ? copy.publishBusy : copy.publishCta}
       </button>
+
+      {lightboxAsset?.url ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={copy.openPhotoLabel}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/80 p-5"
+          onClick={() => setLightboxAsset(null)}
+        >
+          <div className="relative max-h-full max-w-5xl" onClick={(event) => event.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setLightboxAsset(null)}
+              aria-label={copy.closePhotoLabel}
+              className="absolute -right-3 -top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-card text-lg font-bold text-foreground shadow"
+            >
+              ×
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={lightboxAsset.url} alt={lightboxAsset.altText ?? ""} className="max-h-[85vh] max-w-full rounded-xl object-contain shadow-2xl" />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
