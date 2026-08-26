@@ -94,6 +94,14 @@ const portfolioAutopilotCopyByLocale = {
     review: {
       title: "Twój profil jest prawie gotowy",
       subtitle: "Sprawdź, co znalazło AI. Możesz edytować, ukryć lub wyróżnić każdy projekt przed publikacją.",
+      access: {
+        title: "Otwórz import na właściwym koncie",
+        body: "Ten import jest przypisany do konta, z którego został uruchomiony. Aby zachować prywatność portfolio, zaloguj się na to samo konto przed przejściem do przeglądu.",
+        loginCta: "Zmień konto i zaloguj się",
+        switchingAccount: "Wylogowywanie...",
+        studioCta: "Wróć do Studio projektanta",
+        hint: "Jeśli jesteś już zalogowany(-a), wybierz pierwszą opcję i zaloguj się na konto, z którego uruchomiono import.",
+      },
       dna: {
         title: "Twój profil projektowy",
         primaryStyleLabel: "główny kierunek",
@@ -309,6 +317,14 @@ const portfolioAutopilotCopyByLocale = {
     review: {
       title: "Your profile is almost ready",
       subtitle: "Check what the AI found. You can edit, hide, or feature any project before publishing.",
+      access: {
+        title: "Open this import from the right account",
+        body: "This import belongs to the account that started it. To keep the portfolio private, sign in to that same account before opening the review.",
+        loginCta: "Switch account and sign in",
+        switchingAccount: "Signing out...",
+        studioCta: "Back to Designer Studio",
+        hint: "If you are already signed in, choose the first option and sign in to the account that started the import.",
+      },
       dna: {
         title: "Your design profile",
         primaryStyleLabel: "primary direction",

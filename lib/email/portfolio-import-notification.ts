@@ -34,11 +34,14 @@ export function sendPortfolioImportReadyEmail({
   const body = isEnglish
     ? "We have finished preparing your imported portfolio. Review the proposed projects and profile suggestions before publishing anything publicly."
     : "Zakończyliśmy przygotowywanie zaimportowanego portfolio. Przejrzyj proponowane projekty i sugestie dla profilu, zanim opublikujesz cokolwiek publicznie.";
+  const accountNote = isEnglish
+    ? "For privacy, open the review after signing in to the same ArchiCompass account that started the import."
+    : "Dla ochrony prywatności otwórz przegląd po zalogowaniu na to samo konto ArchiCompass, z którego uruchomiono import.";
   const cta = isEnglish ? "Review portfolio" : "Przejdź do przeglądu";
 
   return sendTransactionalEmail({
     subject,
-    text: `${greeting},\n\n${body}\n\n${cta}: ${reviewUrl}\n\nArchiCompass`,
+    text: `${greeting},\n\n${body}\n\n${accountNote}\n\n${cta}: ${reviewUrl}\n\nArchiCompass`,
     to: recipientEmail,
     html: `
       <div style="margin:0;background:#f8f6fc;padding:32px 16px;color:#27193b;font-family:Arial,sans-serif">
@@ -48,6 +51,7 @@ export function sendPortfolioImportReadyEmail({
           <p style="margin:0 0 12px;font-size:16px;line-height:1.6">${escapeHtml(greeting)},</p>
           <p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#5f5670">${escapeHtml(body)}</p>
           <a href="${reviewUrl}" style="display:inline-block;border-radius:12px;background:#6d28d9;color:#ffffff;padding:14px 20px;font-size:16px;font-weight:700;text-decoration:none">${escapeHtml(cta)}</a>
+          <p style="margin:20px 0 0;font-size:13px;line-height:1.6;color:#756b86">${escapeHtml(accountNote)}</p>
         </div>
       </div>
     `,
