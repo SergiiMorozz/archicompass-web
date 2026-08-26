@@ -27,6 +27,12 @@ const jobStatusLabels = {
 
 const portfolioAutopilotCopyByLocale = {
   pl: {
+    flow: {
+      ariaLabel: "Postęp Portfolio Autopilot",
+      source: "Źródło portfolio",
+      importing: "Import i analiza",
+      review: "Weryfikacja i publikacja",
+    },
     start: {
       eyebrow: "Nowość",
       title: "Zbuduj swój profil z pomocą AI",
@@ -58,6 +64,19 @@ const portfolioAutopilotCopyByLocale = {
     importing: {
       title: "Importujemy Twoje portfolio",
       statusLabels: jobStatusLabels.pl,
+      estimatedTime: "Zwykle zajmuje to 3–5 minut.",
+      elapsedTime: (value: string) => `Czas importu: ${value}`,
+      keepOpenHint: "Pozostaw tę stronę otwartą — import będzie kontynuowany automatycznie.",
+      previewTitle: "Znalezione zdjęcia",
+      stageLabels: {
+        QUEUED: "Przygotowujemy import",
+        FETCHING: "Przeszukujemy portfolio",
+        EXTRACTING: "Pobieramy zdjęcia",
+        GROUPING: "Porządkujemy projekty",
+        ANALYZING: "Analizujemy wnętrza",
+        BUILDING_PROFILE: "Przygotowujemy profil",
+        READY_FOR_REVIEW: "Gotowe do weryfikacji",
+      },
       imagesFound: (count: number) => `Znaleziono ${count} zdjęć`,
       projectsFound: (count: number) => `Wykryto ${count} projektów`,
       failedTitle: "Import się nie powiódł",
@@ -125,6 +144,8 @@ const portfolioAutopilotCopyByLocale = {
       addPhotoLabel: "Dodaj zdjęcie",
       uploadingPhoto: "Wysyłanie…",
       deletePhotoLabel: "Usuń zdjęcie",
+      openPhotoLabel: "Otwórz zdjęcie w pełnym rozmiarze",
+      closePhotoLabel: "Zamknij podgląd zdjęcia",
       addPhotoError: "Nie udało się dodać zdjęcia.",
       deletePhotoError: "Nie udało się usunąć zdjęcia.",
       saveFailed: "Nie udało się zapisać tej zmiany. Odśwież stronę i spróbuj ponownie.",
@@ -221,6 +242,12 @@ const portfolioAutopilotCopyByLocale = {
     },
   },
   en: {
+    flow: {
+      ariaLabel: "Portfolio Autopilot progress",
+      source: "Portfolio source",
+      importing: "Import and analysis",
+      review: "Review and publish",
+    },
     start: {
       eyebrow: "New",
       title: "Build your profile with AI",
@@ -252,6 +279,19 @@ const portfolioAutopilotCopyByLocale = {
     importing: {
       title: "Importing your portfolio",
       statusLabels: jobStatusLabels.en,
+      estimatedTime: "This usually takes 3–5 minutes.",
+      elapsedTime: (value: string) => `Import time: ${value}`,
+      keepOpenHint: "Keep this page open — the import will continue automatically.",
+      previewTitle: "Photos found",
+      stageLabels: {
+        QUEUED: "Preparing the import",
+        FETCHING: "Searching your portfolio",
+        EXTRACTING: "Downloading photos",
+        GROUPING: "Organizing projects",
+        ANALYZING: "Analyzing interiors",
+        BUILDING_PROFILE: "Preparing your profile",
+        READY_FOR_REVIEW: "Ready for review",
+      },
       imagesFound: (count: number) => `${count} photos found`,
       projectsFound: (count: number) => `${count} projects detected`,
       failedTitle: "The import failed",
@@ -319,6 +359,8 @@ const portfolioAutopilotCopyByLocale = {
       addPhotoLabel: "Add photo",
       uploadingPhoto: "Uploading…",
       deletePhotoLabel: "Delete photo",
+      openPhotoLabel: "Open photo at full size",
+      closePhotoLabel: "Close photo preview",
       addPhotoError: "Could not add the photo.",
       deletePhotoError: "Could not delete the photo.",
       saveFailed: "We couldn’t save this change. Refresh the page and try again.",

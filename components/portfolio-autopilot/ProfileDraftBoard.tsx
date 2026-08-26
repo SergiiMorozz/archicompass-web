@@ -45,10 +45,26 @@ type AlreadySet = {
 
 const fieldClass =
   "mt-2 w-full rounded-xl border border-line bg-background px-4 py-3 font-normal text-foreground outline-none transition focus:border-primary";
-const savedFieldClass = `${fieldClass} cursor-not-allowed bg-surface text-muted focus:border-line`;
+const savedFieldClass = `${fieldClass} cursor-not-allowed border-slate-200 bg-slate-50 text-slate-600 focus:border-slate-200`;
+const aiSuggestedFieldClass = `${fieldClass} border-primary/25 bg-primary-soft/20`;
 
-function SourceBadge({ label }: { label: string }) {
-  return <span className="inline-block rounded-full bg-primary-soft px-2.5 py-1 text-xs font-medium text-primary">{label}</span>;
+function SourceBadge({ label, kind = "site" }: { label: string; kind?: "saved" | "ai" | "site" }) {
+  const styles =
+    kind === "saved"
+      ? "border-slate-200 bg-slate-100 text-slate-600"
+      : kind === "ai"
+        ? "border-primary/20 bg-primary-soft text-primary"
+        : "border-accent/20 bg-accent-soft text-accent";
+  const marker = kind === "saved" ? "R" : kind === "ai" ? "AI" : "S";
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${styles}`}>
+      <span aria-hidden className="inline-flex h-3.5 min-w-3.5 items-center justify-center rounded-sm border border-current/25 text-[8px] font-bold leading-none">
+        {marker}
+      </span>
+      {label}
+    </span>
+  );
 }
 
 function savedLocalizedValue(profile: ExistingProfileValues | null, polish: keyof ExistingProfileValues, english: keyof ExistingProfileValues, legacy: keyof ExistingProfileValues) {
@@ -190,12 +206,15 @@ export default function ProfileDraftBoard({
   return (
     <div className="mt-8 grid gap-6">
       {hasSavedValues ? (
-        <p className="rounded-xl border border-line bg-surface px-4 py-3 text-sm text-muted">
-          {copy.existingProfileHint}{" "}
-          <a href={localePublicPath(siteLocale, "/account/profile")} className="font-semibold text-primary underline">
-            {copy.viewProfileEditCta}
-          </a>
-        </p>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          <SourceBadge label={copy.savedInProfileBadge} kind="saved" />
+          <p>
+            {copy.existingProfileHint}{" "}
+            <a href={localePublicPath(siteLocale, "/account/profile")} className="font-semibold text-primary underline">
+              {copy.viewProfileEditCta}
+            </a>
+          </p>
+        </div>
       ) : null}
 
       <section className="rounded-2xl border border-line bg-card p-6">
@@ -210,7 +229,10 @@ export default function ProfileDraftBoard({
             <div key={field.key}>
               <div className="flex items-center justify-between gap-3">
                 <label className="text-sm font-semibold text-foreground">{field.label}</label>
-                <SourceBadge label={alreadySet[field.key] ? copy.savedInProfileBadge : copy.sourceFoundOnSite} />
+                <SourceBadge
+                  label={alreadySet[field.key] ? copy.savedInProfileBadge : copy.sourceFoundOnSite}
+                  kind={alreadySet[field.key] ? "saved" : "site"}
+                />
               </div>
               {alreadySet[field.key] ? (
                 <input value={field.saved} readOnly className={savedFieldClass} />
@@ -232,7 +254,10 @@ export default function ProfileDraftBoard({
           <div className="mt-5">
             <div className="flex items-center justify-between gap-3">
               <span className="text-sm font-semibold text-foreground">{copy.socialsLabel}</span>
-              <SourceBadge label={socials.some((social) => alreadySet[social.key]) ? copy.savedInProfileBadge : copy.sourceFoundOnSite} />
+              <SourceBadge
+                label={socials.some((social) => alreadySet[social.key]) ? copy.savedInProfileBadge : copy.sourceFoundOnSite}
+                kind={socials.some((social) => alreadySet[social.key]) ? "saved" : "site"}
+              />
             </div>
             <ul className="mt-3 grid gap-1 text-sm text-primary">
               {socials.map((social) => (
@@ -250,11 +275,12 @@ export default function ProfileDraftBoard({
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
           <fieldset>
             <legend className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              {copy.languagesLabel} <SourceBadge label={alreadySet.languages ? copy.savedInProfileBadge : copy.sourceFoundOnSite} />
+              {copy.languagesLabel}{" "}
+              <SourceBadge label={alreadySet.languages ? copy.savedInProfileBadge : copy.sourceFoundOnSite} kind={alreadySet.languages ? "saved" : "site"} />
             </legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {profileLanguages.map((language) => (
-                <label key={language} className={`flex items-center gap-2 rounded-lg border border-line bg-background px-3 py-2 text-xs font-semibold ${alreadySet.languages ? "opacity-70" : ""}`}>
+                <label key={language} className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold ${alreadySet.languages ? "border-slate-200 bg-slate-50 text-slate-600" : "border-line bg-background"}`}>
                   <input type="checkbox" checked={selectedLanguages.has(language)} disabled={alreadySet.languages} onChange={() => toggleLanguage(language)} className="h-3.5 w-3.5 rounded border-line" />
                   {language}
                 </label>
@@ -264,11 +290,12 @@ export default function ProfileDraftBoard({
 
           <fieldset>
             <legend className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              {copy.workModesLabel} <SourceBadge label={alreadySet.work_modes ? copy.savedInProfileBadge : copy.sourceFoundOnSite} />
+              {copy.workModesLabel}{" "}
+              <SourceBadge label={alreadySet.work_modes ? copy.savedInProfileBadge : copy.sourceFoundOnSite} kind={alreadySet.work_modes ? "saved" : "site"} />
             </legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {workModes.map((mode) => (
-                <label key={mode} className={`flex items-center gap-2 rounded-lg border border-line bg-background px-3 py-2 text-xs font-semibold ${alreadySet.work_modes ? "opacity-70" : ""}`}>
+                <label key={mode} className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold ${alreadySet.work_modes ? "border-slate-200 bg-slate-50 text-slate-600" : "border-line bg-background"}`}>
                   <input type="checkbox" checked={selectedWorkModes.has(mode)} disabled={alreadySet.work_modes} onChange={() => toggleWorkMode(mode)} className="h-3.5 w-3.5 rounded border-line" />
                   {workModeLabel(mode)}
                 </label>
@@ -284,36 +311,36 @@ export default function ProfileDraftBoard({
         <div className="mt-4">
           <div className="flex items-center justify-between gap-3">
             <label className="text-sm font-semibold text-foreground">{copy.headlineLabel}</label>
-            <SourceBadge label={alreadySet.headline ? copy.savedInProfileBadge : copy.sourceAiSuggestion} />
+            <SourceBadge label={alreadySet.headline ? copy.savedInProfileBadge : copy.sourceAiSuggestion} kind={alreadySet.headline ? "saved" : "ai"} />
           </div>
           {alreadySet.headline ? (
             <input value={savedHeadline} readOnly className={savedFieldClass} />
           ) : (
-            <input defaultValue={draft.headline ?? ""} onBlur={(event) => { setDraft((current) => ({ ...current, headline: event.target.value })); void patchField({ headline: event.target.value }); }} className={fieldClass} />
+            <input defaultValue={draft.headline ?? ""} onBlur={(event) => { setDraft((current) => ({ ...current, headline: event.target.value })); void patchField({ headline: event.target.value }); }} className={aiSuggestedFieldClass} />
           )}
         </div>
 
         <div className="mt-4">
           <div className="flex items-center justify-between gap-3">
             <label className="text-sm font-semibold text-foreground">{copy.aboutLabel}</label>
-            <SourceBadge label={alreadySet.about ? copy.savedInProfileBadge : copy.sourceAiSuggestion} />
+            <SourceBadge label={alreadySet.about ? copy.savedInProfileBadge : copy.sourceAiSuggestion} kind={alreadySet.about ? "saved" : "ai"} />
           </div>
           {alreadySet.about ? (
             <textarea value={savedAbout} readOnly rows={5} className={savedFieldClass} />
           ) : (
-            <textarea defaultValue={draft.about ?? ""} rows={5} onBlur={(event) => { setDraft((current) => ({ ...current, about: event.target.value })); void patchField({ about: event.target.value }); }} className={fieldClass} />
+            <textarea defaultValue={draft.about ?? ""} rows={5} onBlur={(event) => { setDraft((current) => ({ ...current, about: event.target.value })); void patchField({ about: event.target.value }); }} className={aiSuggestedFieldClass} />
           )}
         </div>
 
         <div className="mt-4">
           <div className="flex items-center justify-between gap-3">
             <label className="text-sm font-semibold text-foreground">{copy.specialtiesLabel}</label>
-            <SourceBadge label={alreadySet.specialties ? copy.savedInProfileBadge : copy.sourceAiSuggestion} />
+            <SourceBadge label={alreadySet.specialties ? copy.savedInProfileBadge : copy.sourceAiSuggestion} kind={alreadySet.specialties ? "saved" : "ai"} />
           </div>
           {alreadySet.specialties ? (
             <input value={savedSpecialties.join(", ")} readOnly className={savedFieldClass} />
           ) : (
-            <input defaultValue={draft.specialties.join(", ")} onBlur={(event) => { const values = event.target.value.split(",").map((value) => value.trim()).filter(Boolean); setDraft((current) => ({ ...current, specialties: values })); void patchField({ specialties: values }); }} className={fieldClass} />
+            <input defaultValue={draft.specialties.join(", ")} onBlur={(event) => { const values = event.target.value.split(",").map((value) => value.trim()).filter(Boolean); setDraft((current) => ({ ...current, specialties: values })); void patchField({ specialties: values }); }} className={aiSuggestedFieldClass} />
           )}
         </div>
 
@@ -326,7 +353,7 @@ export default function ProfileDraftBoard({
               const evidenceLabel = alreadySet.services ? copy.savedInProfileBadge : isExplicit ? copy.servicesFoundOnSite : isAiSuggested ? copy.servicesAiSuggested : copy.servicesConfirmYourself;
               return (
                 <div key={capability} className="flex items-center justify-between gap-3">
-                  <label className={`flex items-center gap-3 text-sm ${alreadySet.services ? "opacity-70" : ""}`}>
+                  <label className={`flex items-center gap-3 rounded-lg px-2 py-1.5 text-sm ${alreadySet.services ? "bg-slate-50 text-slate-600" : ""}`}>
                     <input type="checkbox" checked={selectedServices.has(capability)} disabled={alreadySet.services} onChange={() => toggleService(capability)} className="h-4 w-4 rounded border-line" />
                     <span className="text-foreground">{serviceCapabilityLabel(capability)}</span>
                   </label>
