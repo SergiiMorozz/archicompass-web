@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { getPortfolioAutopilotCopy } from "@/content/portfolio-autopilot-copy";
 import { localePublicPath, siteLocale } from "@/lib/site-locale";
 
@@ -38,9 +38,10 @@ type StatusResponse = {
 
 const terminalStatuses = new Set<JobStatus>(["READY_FOR_REVIEW", "FAILED", "PUBLISHED"]);
 const importStages = ["QUEUED", "FETCHING", "EXTRACTING", "GROUPING", "ANALYZING", "BUILDING_PROFILE", "READY_FOR_REVIEW"] as const;
-const maxSteps = 600;
-const stepDelayMs = 700;
-const stalledAfterMs = 90_000;
+// Processing is owned by the server. The page only observes progress, so an
+// import keeps running after this tab is closed or the device is locked.
+const statusPollMs = 4_000;
+const stalledAfterMs = 8 * 60_000;
 const progressByStatus: Record<JobStatus, number> = {
   QUEUED: 8,
   FETCHING: 22,
@@ -70,7 +71,6 @@ export default function ImportProgress({ jobId }: { jobId: string }) {
   const [stalled, setStalled] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [now, setNow] = useState(() => Date.now());
-  const cancelled = useRef(false);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
@@ -78,11 +78,9 @@ export default function ImportProgress({ jobId }: { jobId: string }) {
   }, []);
 
   useEffect(() => {
-    cancelled.current = false;
-    let steps = 0;
+    let cancelled = false;
     let lastSignature = "";
     let lastProgressAt = Date.now();
-    let lastPreviewRefreshAt = 0;
 
     function observe(nextJob: Job, nextPreviews?: Preview[]) {
       const signature = jobSignature(nextJob);
@@ -94,63 +92,30 @@ export default function ImportProgress({ jobId }: { jobId: string }) {
       if (nextPreviews) setPreviews(nextPreviews);
     }
 
-    async function getCurrentJob() {
+    async function refresh() {
       const response = await fetch(localePublicPath(siteLocale, `/api/portfolio-import/${jobId}/status`), {
         cache: "no-store",
       });
       const result = (await response.json().catch(() => ({}))) as StatusResponse;
       if (!response.ok || !result.job) throw new Error(copy.connectionError);
-      return result;
+      if (cancelled) return;
+      observe(result.job, result.previews ?? []);
+      setStalled(!terminalStatuses.has(result.job.status) && Date.now() - lastProgressAt > stalledAfterMs);
     }
 
-    async function advanceLoop() {
+    async function poll() {
       try {
-        const current = await getCurrentJob();
-        if (cancelled.current || !current.job) return;
-        observe(current.job, current.previews ?? []);
-        if (terminalStatuses.has(current.job.status)) return;
-
-        while (!cancelled.current && steps < maxSteps) {
-          if (Date.now() - lastProgressAt > stalledAfterMs) {
-            setStalled(true);
-            return;
-          }
-
-          steps += 1;
-          const response = await fetch(localePublicPath(siteLocale, `/api/portfolio-import/${jobId}/advance`), {
-            method: "POST",
-          });
-          const result = (await response.json().catch(() => ({}))) as StatusResponse;
-          if (!response.ok || !result.job) throw new Error(copy.connectionError);
-          if (cancelled.current) return;
-          observe(result.job);
-
-          // The advance endpoint keeps the import moving; the status endpoint
-          // is where short-lived signed preview URLs are issued. Refresh those
-          // sparingly once photos have actually been discovered.
-          if (result.job.images_found > 0 && Date.now() - lastPreviewRefreshAt > 3_500) {
-            const snapshot = await getCurrentJob();
-            if (cancelled.current || !snapshot.job) return;
-            observe(snapshot.job, snapshot.previews ?? []);
-            lastPreviewRefreshAt = Date.now();
-          }
-
-          if (terminalStatuses.has(result.job.status)) return;
-          await new Promise((resolve) => setTimeout(resolve, stepDelayMs));
-        }
-
-        if (!cancelled.current) setStalled(true);
+        await refresh();
       } catch {
-        if (!cancelled.current) {
-          setError(copy.connectionError);
-          setStalled(true);
-        }
+        if (!cancelled) setError(copy.connectionError);
       }
     }
 
-    void advanceLoop();
+    void poll();
+    const interval = window.setInterval(() => void poll(), statusPollMs);
     return () => {
-      cancelled.current = true;
+      cancelled = true;
+      window.clearInterval(interval);
     };
   }, [copy.connectionError, jobId]);
 
@@ -241,7 +206,7 @@ export default function ImportProgress({ jobId }: { jobId: string }) {
                     {copy.resumeCta}
                   </button>
                   <a href={localePublicPath(siteLocale, "/studio/portfolio-autopilot")} className="rounded-xl border border-line px-5 py-3 text-sm font-semibold text-foreground hover:border-primary">
-                    {copy.manualUploadCta}
+                    {copy.backCta}
                   </a>
                 </div>
               </>
