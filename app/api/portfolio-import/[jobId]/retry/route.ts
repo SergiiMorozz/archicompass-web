@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getActiveAdminRole } from "@/lib/admin";
 import { inferResumeStatus } from "@/lib/portfolio-ingestion/resume-status";
 import type { PortfolioImportJob } from "@/lib/portfolio-ingestion/job-access";
+import { runPortfolioImportWorker } from "@/lib/portfolio-ingestion/background-worker";
 
 export async function POST(request: Request, { params }: { params: Promise<{ jobId: string }> }) {
   const { jobId } = await params;
@@ -37,11 +38,28 @@ export async function POST(request: Request, { params }: { params: Promise<{ job
   }
   const { data: updated, error } = await writer
     .from("portfolio_import_jobs")
-    .update({ status: resumeStatus, error: null })
+    .update({
+      status: resumeStatus,
+      error: null,
+      worker_lease_expires_at: null,
+      completion_email_status: "pending",
+      completion_email_attempts: 0,
+      completion_email_error: null,
+      completion_email_last_attempt_at: null,
+      completion_email_sent_at: null,
+    })
     .eq("id", jobId)
     .select("*")
     .single();
   if (error || !updated) return NextResponse.json({ error: "Could not retry the import." }, { status: 500 });
+
+  after(async () => {
+    try {
+      await runPortfolioImportWorker({ maxDurationMs: 50_000 });
+    } catch {
+      // The scheduled worker will retry this durable job even if this nudge fails.
+    }
+  });
 
   return NextResponse.json({ job: updated });
 }

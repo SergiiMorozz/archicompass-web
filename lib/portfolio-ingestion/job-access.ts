@@ -20,6 +20,7 @@ export type PortfolioImportJob = {
     | "FAILED"
     | "PUBLISHED";
   error: string | null;
+  locale: "pl" | "en" | null;
   images_found: number;
   projects_found: number;
   rights_confirmed_at: string | null;
@@ -33,6 +34,12 @@ export type PortfolioImportJob = {
     workModes?: string[];
     explicitServiceCapabilities?: string[];
   };
+  worker_lease_expires_at: string | null;
+  completion_email_status: "pending" | "sending" | "sent" | "failed" | "skipped" | null;
+  completion_email_attempts: number;
+  completion_email_last_attempt_at: string | null;
+  completion_email_sent_at: string | null;
+  completion_email_error: string | null;
   created_at: string;
   updated_at: string;
 };

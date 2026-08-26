@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getAccountRole } from "@/lib/studios";
@@ -7,9 +7,26 @@ import { allowedAssetContentTypes, maxAssetBytes } from "@/lib/portfolio-ingesti
 import { extensionFor, safeConsumeActionQuota, stagingBucket } from "@/lib/portfolio-ingestion/job-access";
 import { getPortfolioAutopilotCopy } from "@/content/portfolio-autopilot-copy";
 import { logError, logInfo } from "@/lib/observability";
+import { siteLocale } from "@/lib/site-locale";
+import { runPortfolioImportWorker } from "@/lib/portfolio-ingestion/background-worker";
 
 const dailyImportStartLimit = 20;
 const maxUploadFiles = 40;
+
+export const maxDuration = 60;
+
+function continueInBackground(jobId: string) {
+  after(async () => {
+    try {
+      await runPortfolioImportWorker({ maxDurationMs: 50_000 });
+    } catch (error) {
+      logError("portfolio_import_background_start_failed", {
+        jobId,
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+}
 
 function textValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -85,6 +102,7 @@ export async function POST(request: Request) {
         source_type: "website",
         source_url: websiteUrl,
         status: "QUEUED",
+        locale: siteLocale,
         rights_confirmed_at: nowIso,
       })
       .select("id")
@@ -92,6 +110,7 @@ export async function POST(request: Request) {
     if (error || !job) return NextResponse.json({ error: copy.errors.genericFailure }, { status: 500 });
 
     await trackImportStarted(user.id, job.id, "website");
+    continueInBackground(job.id);
     return NextResponse.json({ jobId: job.id });
   }
 
@@ -101,6 +120,7 @@ export async function POST(request: Request) {
       user_id: user.id,
       source_type: "upload",
       status: "GROUPING",
+      locale: siteLocale,
       rights_confirmed_at: nowIso,
     })
     .select("id")
@@ -136,6 +156,7 @@ export async function POST(request: Request) {
 
   await supabase.from("portfolio_import_jobs").update({ images_found: storedCount }).eq("id", job.id);
   await trackImportStarted(user.id, job.id, "upload", storedCount);
+  continueInBackground(job.id);
   return NextResponse.json({ jobId: job.id });
 }
 

@@ -15,7 +15,7 @@ import { clusterAssets, parseProjectTitleFacts, type ProposedCluster } from "./c
 import { aggregateDesignerProfile } from "./aggregate-profile";
 import { maxAssetsDiscoveredPerJob } from "./types";
 import { extensionFor, stagingBucket, type PortfolioImportJob, type SupabaseServerClient } from "./job-access";
-import { siteLocale } from "@/lib/site-locale";
+import { type SiteLocale } from "@/lib/site-locale";
 import { serviceCapabilities } from "@/lib/service-capabilities";
 import { visuallyInferableServiceCapabilities } from "@/lib/ai/profile-draft-schema";
 
@@ -29,6 +29,10 @@ const maxImagesPerAnalysis = 12;
 const maxTotalCrawledPages = 50;
 const oversizedClusterThreshold = 10;
 const lowConfidenceThreshold = 0.4;
+
+function localeForJob(job: PortfolioImportJob): SiteLocale {
+  return job.locale === "en" ? "en" : "pl";
+}
 
 async function trackEvent(actorId: string, eventType: string, entityId: string, metadata: Record<string, unknown> = {}) {
   try {
@@ -290,7 +294,8 @@ async function stepExtracting(supabase: SupabaseServerClient, job: PortfolioImpo
 async function refineOversizedCluster(
   supabase: SupabaseServerClient,
   cluster: ProposedCluster,
-  assetById: Map<string, { storagePath: string | null }>
+  assetById: Map<string, { storagePath: string | null }>,
+  locale: SiteLocale
 ): Promise<ProposedCluster[]> {
   if (cluster.assetIds.length < oversizedClusterThreshold || cluster.confidence > lowConfidenceThreshold) {
     return [cluster];
@@ -310,7 +315,7 @@ async function refineOversizedCluster(
   if (!images.length) return [cluster];
 
   const provider = new GeminiProvider();
-  const response = await provider.suggestSubclusters({ images, locale: siteLocale });
+  const response = await provider.suggestSubclusters({ images, locale });
   if (!response.ok || response.result.groups.length < 2) return [cluster];
 
   const covered = new Set<number>();
@@ -406,7 +411,9 @@ async function stepGrouping(supabase: SupabaseServerClient, job: PortfolioImport
     // AI room-clustering must not be allowed to split it into several. That
     // refinement pass only makes sense for the fallback case - a flat
     // gallery/upload with no page structure to tell projects apart.
-    const refined = hasDedicatedProjectPages ? [cluster] : await refineOversizedCluster(supabase, cluster, assetById);
+    const refined = hasDedicatedProjectPages
+      ? [cluster]
+      : await refineOversizedCluster(supabase, cluster, assetById, localeForJob(job));
     clusters.push(...refined);
   }
 
@@ -511,7 +518,7 @@ async function stepAnalyzing(supabase: SupabaseServerClient, job: PortfolioImpor
       const response = await provider.analyzeDesignerProject({
         images,
         projectTitle: pendingProject.suggested_title,
-        locale: siteLocale,
+        locale: localeForJob(job),
       });
       await supabase.from("project_ai_analysis").upsert(
         {
@@ -629,7 +636,7 @@ async function stepBuildingProfile(supabase: SupabaseServerClient, job: Portfoli
         profile,
         projectSummaries: summaries,
         allowedServiceCapabilities: visuallyInferableServiceCapabilities(serviceCapabilities),
-        locale: siteLocale,
+        locale: localeForJob(job),
       });
       if (draftResponse.ok) {
         draftPayload.headline = draftResponse.result.headline || null;
