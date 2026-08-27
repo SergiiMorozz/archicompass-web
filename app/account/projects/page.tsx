@@ -8,6 +8,7 @@ import ProjectGallery from "@/components/ProjectGallery";
 import ProjectCreateForm from "@/components/ProjectCreateForm";
 import { publicTextError } from "@/lib/content-moderation";
 import { getWorkspaceCopy, type AccountPortfolioCopy } from "@/content/workspace-copy";
+import DesignerProfileNav from "@/components/DesignerProfileNav";
 
 export const revalidate = 0;
 
@@ -543,6 +544,8 @@ export default async function ManageProjectsPage({
           >
             {copy.back}
           </Link>
+
+          <DesignerProfileNav active="portfolio" />
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>

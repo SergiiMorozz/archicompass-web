@@ -44,7 +44,7 @@ export default async function PortfolioAutopilotReviewPage({
     return (
       <main className="mx-auto flex min-h-[60vh] max-w-3xl items-center px-6 py-12">
         <section className="w-full rounded-2xl border border-line bg-card p-7 shadow-[0_18px_50px_rgba(54,31,73,0.10)] sm:p-10">
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-primary">Portfolio Autopilot</p>
+          <p className="text-sm font-bold uppercase tracking-[0.16em] text-primary">{getPortfolioAutopilotCopy().name}</p>
           <h1 className="mt-3 text-3xl font-bold leading-tight text-foreground sm:text-4xl">{copy.access.title}</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-muted">{copy.access.body}</p>
           <div className="mt-7 flex flex-wrap gap-3">

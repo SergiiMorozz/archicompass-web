@@ -577,11 +577,13 @@ type WorkspaceCopy = {
     studio: string;
     dashboard: string;
     enquiries: string;
+    profile: string;
+    profileDetails: string;
+    profilePortfolio: string;
+    profileAssistant: string;
+    profileAriaLabel: string;
     analytics: string;
     studioAndTeam: string;
-    publicProfile: string;
-    portfolio: string;
-    portfolioAutopilot: string;
     defaultProfileName: string;
     ariaLabel: string;
     unreadUpdates: (count: number) => string;
@@ -819,11 +821,13 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       studio: "Studio projektanta",
       dashboard: "Pulpit",
       enquiries: "Zapytania",
+      profile: "Profil",
+      profileDetails: "Dane",
+      profilePortfolio: "Portfolio",
+      profileAssistant: "Asystent portfolio AI",
+      profileAriaLabel: "Sekcje profilu projektanta",
       analytics: "Statystyki",
       studioAndTeam: "Pracownia i zespół",
-      publicProfile: "Profil publiczny",
-      portfolio: "Portfolio",
-      portfolioAutopilot: "Portfolio Autopilot",
       defaultProfileName: "Profil projektanta",
       ariaLabel: "Nawigacja Studio projektanta",
       unreadUpdates: (count) => `${count} nowych aktualizacji`,
@@ -1567,11 +1571,13 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       studio: "Designer Studio",
       dashboard: "Dashboard",
       enquiries: "Enquiries",
+      profile: "Profile",
+      profileDetails: "Details",
+      profilePortfolio: "Portfolio",
+      profileAssistant: "AI Portfolio Assistant",
+      profileAriaLabel: "Designer profile sections",
       analytics: "Analytics",
       studioAndTeam: "Studio and team",
-      publicProfile: "Public profile",
-      portfolio: "Portfolio",
-      portfolioAutopilot: "Portfolio Autopilot",
       defaultProfileName: "Designer profile",
       ariaLabel: "Designer Studio navigation",
       unreadUpdates: (count) => `${count} new updates`,

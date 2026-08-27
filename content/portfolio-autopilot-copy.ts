@@ -27,8 +27,9 @@ const jobStatusLabels = {
 
 const portfolioAutopilotCopyByLocale = {
   pl: {
+    name: "Asystent portfolio AI",
     flow: {
-      ariaLabel: "Postęp Portfolio Autopilot",
+      ariaLabel: "Postęp Asystenta portfolio AI",
       source: "Źródło portfolio",
       importing: "Import i analiza",
       review: "Weryfikacja i publikacja",
@@ -237,7 +238,7 @@ const portfolioAutopilotCopyByLocale = {
     },
     admin: {
       title: "Importy portfolio",
-      intro: "Lista importów Portfolio Autopilot ze wszystkich kont projektantów.",
+      intro: "Lista importów Asystenta portfolio AI ze wszystkich kont projektantów.",
       retryCta: "Ponów",
       columns: {
         designer: "Projektant",
@@ -250,8 +251,9 @@ const portfolioAutopilotCopyByLocale = {
     },
   },
   en: {
+    name: "AI Portfolio Assistant",
     flow: {
-      ariaLabel: "Portfolio Autopilot progress",
+      ariaLabel: "AI Portfolio Assistant progress",
       source: "Portfolio source",
       importing: "Import and analysis",
       review: "Review and publish",
@@ -460,7 +462,7 @@ const portfolioAutopilotCopyByLocale = {
     },
     admin: {
       title: "Portfolio imports",
-      intro: "Portfolio Autopilot import jobs across all designer accounts.",
+      intro: "AI Portfolio Assistant import jobs across all designer accounts.",
       retryCta: "Retry",
       columns: {
         designer: "Designer",
