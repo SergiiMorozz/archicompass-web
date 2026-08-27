@@ -452,6 +452,14 @@ export default async function Home() {
               <h2 className="mt-4 text-3xl font-bold leading-tight sm:text-[2.1rem]">{homeCopy.forDesigners.headline}</h2>
               <p className="mt-4 text-[0.95rem] leading-7 text-muted">{homeCopy.forDesigners.body}</p>
               <div className="mt-6"><Checklist items={homeCopy.forDesigners.checklist.slice(0, 4)} tone="accent" /></div>
+              <Link
+                href={homeCopy.forDesigners.aiAssistant.href}
+                className="group mt-5 flex items-center gap-2.5 rounded-xl border border-primary/20 bg-white/80 px-3 py-3 text-sm font-semibold leading-5 text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              >
+                <AiFeatureBadge className="shrink-0">{homeCopy.forDesigners.aiAssistant.badge}</AiFeatureBadge>
+                <span className="shrink-0 text-primary" aria-hidden="true">·</span>
+                <span className="min-w-0">{homeCopy.forDesigners.aiAssistant.description} — <em className="font-bold text-primary">{homeCopy.forDesigners.aiAssistant.name}</em></span>
+              </Link>
               <p className="mt-4 text-xs font-medium leading-5 text-muted">{homeCopy.forDesigners.pricingNote} <Link href="/services-and-pricing" className="font-bold text-[#207a68] hover:underline">{homeCopy.forDesigners.pricingCta}</Link></p>
               <div className="mt-auto pt-6"><Link href="/get-started" className="group inline-flex min-h-[52px] items-center gap-2 rounded-xl bg-[#1f604d] px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(31,96,77,0.2)] transition hover:-translate-y-0.5 hover:bg-[#19513f]">{homeCopy.forDesigners.primaryCta}<Arrow /></Link></div>
             </div>

@@ -90,6 +90,7 @@ type HomeCopy = {
     headline: string;
     body: string;
     checklist: string[];
+    aiAssistant: { badge: string; description: string; name: string; href: string };
     primaryCta: string;
     secondaryCta: string;
     pricingNote: string;
@@ -682,6 +683,12 @@ const pl: SiteCopy = {
         "Statystyki profilu i zapytań",
         "Pierwsze 3 miesiące bezpłatnie",
       ],
+      aiAssistant: {
+        badge: "AI",
+        description: "Profil zbudowany z pomocą AI w kilka minut",
+        name: "Asystent portfolio AI",
+        href: "/portfolio-assistant",
+      },
       primaryCta: "Dołącz jako specjalista",
       secondaryCta: "Dowiedz się więcej",
       pricingNote: "Pierwsze 3 miesiące bezpłatnie. Szczegóły cen znajdziesz w cenniku.",
@@ -694,7 +701,7 @@ const pl: SiteCopy = {
         { title: "Widoczność", body: "Pokaż portfolio klientom szukającym specjalisty do konkretnego rodzaju inwestycji." },
         { title: "Bez pośredników", body: "Kontakt odbywa się bezpośrednio między klientem a projektantem." },
         { title: "Rozwijaj profil", body: "Dodawaj realizacje, prezentuj zakres usług i buduj swoją obecność w ArchiCompass." },
-        { badge: "AI", href: "/portfolio-assistant", title: "✨ AI · Uzupełnij profil w kilka minut", body: "Wskaż adres swojej strony lub wgraj zdjęcia realizacji — AI pogrupuje je w projekty, rozpozna styl i przygotuje szkic profilu. Ty tylko sprawdzasz i publikujesz." },
+        { badge: "AI", href: "/portfolio-assistant", title: "✨ AI · Uzupełnij profil w kilka minut", body: "Wskaż stronę lub zdjęcia realizacji — AI przygotuje szkic profilu, który tylko zatwierdzasz." },
       ],
     },
     latestProjects: {
@@ -1070,6 +1077,12 @@ const en: SiteCopy = {
         "Profile and enquiry statistics",
         "First 3 months free",
       ],
+      aiAssistant: {
+        badge: "AI",
+        description: "Profile built with AI in minutes",
+        name: "AI Portfolio Assistant",
+        href: "/portfolio-assistant",
+      },
       primaryCta: "Join as a professional",
       secondaryCta: "Learn more",
       pricingNote: "The first 3 months are free. Find pricing details on the pricing page.",
@@ -1082,7 +1095,7 @@ const en: SiteCopy = {
         { title: "Visibility", body: "Show your portfolio to clients looking for a specialist for a specific type of project." },
         { title: "No middlemen", body: "Contact happens directly between the client and the designer." },
         { title: "Grow your profile", body: "Add projects, present your services, and build your presence on ArchiCompass." },
-        { badge: "AI", href: "/portfolio-assistant", title: "✨ AI · Build your profile in minutes", body: "Point us to your website or upload photos of your projects — AI groups them, detects your style, and drafts your profile. You just review and publish." },
+        { badge: "AI", href: "/portfolio-assistant", title: "✨ AI · Build your profile in minutes", body: "Point us to your site or photos — AI drafts your profile for you to approve." },
       ],
     },
     latestProjects: {
