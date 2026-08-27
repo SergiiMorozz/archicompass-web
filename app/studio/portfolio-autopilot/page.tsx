@@ -8,11 +8,12 @@ export const metadata: Metadata = {
 };
 
 export default function PortfolioAutopilotStartPage() {
-  const copy = getPortfolioAutopilotCopy().start;
+  const autopilotCopy = getPortfolioAutopilotCopy();
+  const copy = autopilotCopy.start;
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
-      <p className="text-sm font-semibold uppercase tracking-wide text-primary">{copy.eyebrow}</p>
+      <p className="text-sm font-semibold uppercase tracking-wide text-primary">{autopilotCopy.name}</p>
       <h1 className="mt-2 text-3xl font-bold text-foreground">{copy.title}</h1>
       <p className="mt-3 text-base text-muted">{copy.intro}</p>
       <p className="mt-2 text-sm font-medium text-foreground">{copy.timeNote}</p>

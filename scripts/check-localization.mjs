@@ -33,6 +33,8 @@ const workspaceSourceFiles = [
   "app/admin/users/page.tsx",
   "app/admin/users/[id]/page.tsx",
   "components/AdminNav.tsx",
+  "components/StudioNav.tsx",
+  "components/DesignerProfileNav.tsx",
   "components/ProjectCreateForm.tsx",
 ];
 

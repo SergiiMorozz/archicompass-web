@@ -28,6 +28,7 @@ import {
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
 import { siteLocale } from "@/lib/site-locale";
+import DesignerProfileNav from "@/components/DesignerProfileNav";
 import LocationInput from "@/components/LocationInput";
 import ServiceOfferingsEditor from "@/components/ServiceOfferingsEditor";
 import {
@@ -523,6 +524,8 @@ export default async function EditProfilePage({
           >
             {isProfessional ? copy.backProfessional : copy.backClient}
           </Link>
+
+          {isProfessional ? <DesignerProfileNav active="details" /> : null}
 
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
