@@ -32,7 +32,7 @@ export default async function PortfolioAutopilotReviewPage({
   const { jobId } = await params;
   const copy = getPortfolioAutopilotCopy().review;
   const nextStepsCopy = getPortfolioAutopilotCopy().nextSteps;
-  const reviewPath = `/studio/portfolio-autopilot/${jobId}/review`;
+  const reviewPath = `/studio/portfolio-assistant/${jobId}/review`;
   const loginHref = localePublicPath(siteLocale, `/login?next=${encodeURIComponent(reviewPath)}`);
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -64,7 +64,7 @@ export default async function PortfolioAutopilotReviewPage({
     );
   }
   if (job.status !== "READY_FOR_REVIEW" && job.status !== "PUBLISHED") {
-    redirect(localePublicPath(siteLocale, `/studio/portfolio-autopilot/${jobId}/importing`));
+    redirect(localePublicPath(siteLocale, `/studio/portfolio-assistant/${jobId}/importing`));
   }
 
   const [{ data: projects }, { data: assets }, { data: profile }, draftView, { data: liveProfile }] = await Promise.all([

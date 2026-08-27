@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getExplicitAccountRole } from "@/lib/studios";
 import { localePublicPath, siteLocale } from "@/lib/site-locale";
 import { safeInternalPath, stripLocalePrefix } from "@/lib/safe-next-path";
-import { onboardingPortfolioAutopilotReturnPath, profileSetupPath } from "@/lib/portfolio-autopilot-return";
+import { onboardingPortfolioAssistantReturnPath, profileSetupPath } from "@/lib/portfolio-autopilot-return";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function localizedUrl(origin: string, path: string) {
@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = stripLocalePrefix(safeInternalPath(searchParams.get("next")));
-  const portfolioAutopilotReturn = onboardingPortfolioAutopilotReturnPath(next);
+  const portfolioAssistantReturn = onboardingPortfolioAssistantReturnPath(next);
 
   if (code) {
     const supabase = await createSupabaseServerClient();
@@ -66,7 +66,7 @@ export async function GET(request: Request) {
           .maybeSingle();
         const needsProfileSetup = !profile?.full_name || !profile?.phone || !profile?.location;
         return NextResponse.redirect(
-          localizedUrl(origin, needsProfileSetup ? profileSetupPath(portfolioAutopilotReturn) : portfolioAutopilotReturn || (role === "designer" ? "/studio" : "/client"))
+          localizedUrl(origin, needsProfileSetup ? profileSetupPath(portfolioAssistantReturn) : portfolioAssistantReturn || (role === "designer" ? "/studio" : "/client"))
         );
       }
     }

@@ -157,7 +157,7 @@ export default function ImportProgress({ jobId }: { jobId: string }) {
             >
               {copy.retryCta}
             </button>
-            <a href={localePublicPath(siteLocale, "/studio/portfolio-autopilot")} className="rounded-xl border border-line px-5 py-3 text-sm font-semibold text-foreground">
+            <a href={localePublicPath(siteLocale, "/studio/portfolio-assistant")} className="rounded-xl border border-line px-5 py-3 text-sm font-semibold text-foreground">
               {copy.backCta}
             </a>
           </div>
@@ -205,14 +205,14 @@ export default function ImportProgress({ jobId }: { jobId: string }) {
                   <button onClick={() => window.location.reload()} className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90">
                     {copy.resumeCta}
                   </button>
-                  <a href={localePublicPath(siteLocale, "/studio/portfolio-autopilot")} className="rounded-xl border border-line px-5 py-3 text-sm font-semibold text-foreground hover:border-primary">
+                  <a href={localePublicPath(siteLocale, "/studio/portfolio-assistant")} className="rounded-xl border border-line px-5 py-3 text-sm font-semibold text-foreground hover:border-primary">
                     {copy.backCta}
                   </a>
                 </div>
               </>
             ) : null}
             {isReady ? (
-              <a href={localePublicPath(siteLocale, `/studio/portfolio-autopilot/${jobId}/review`)} className="mt-6 inline-block rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90">
+              <a href={localePublicPath(siteLocale, `/studio/portfolio-assistant/${jobId}/review`)} className="mt-6 inline-block rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90">
                 {copy.continueCta}
               </a>
             ) : null}

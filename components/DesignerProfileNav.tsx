@@ -8,7 +8,7 @@ export default function DesignerProfileNav({ active }: { active: DesignerProfile
   const sections: Array<{ href: string; label: string; key: DesignerProfileSection }> = [
     { href: "/account/profile", label: copy.profileDetails, key: "details" },
     { href: "/account/projects", label: copy.profilePortfolio, key: "portfolio" },
-    { href: "/studio/portfolio-autopilot", label: copy.profileAssistant, key: "assistant" },
+    { href: "/studio/portfolio-assistant", label: copy.profileAssistant, key: "assistant" },
   ];
 
   return (

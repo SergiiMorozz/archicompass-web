@@ -68,7 +68,7 @@ export default function PortfolioAutopilotStartForm() {
       });
       const result = (await response.json()) as { jobId?: string; error?: string };
       if (!response.ok || !result.jobId) throw new Error(result.error || copy.errors.genericFailure);
-      window.location.assign(localePublicPath(siteLocale, `/studio/portfolio-autopilot/${result.jobId}/importing`));
+      window.location.assign(localePublicPath(siteLocale, `/studio/portfolio-assistant/${result.jobId}/importing`));
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : copy.errors.genericFailure);
       setBusy(false);

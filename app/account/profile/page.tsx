@@ -27,7 +27,7 @@ import {
 } from "@/lib/profile-system-labels";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
-import { portfolioAutopilotReturnPath } from "@/lib/portfolio-autopilot-return";
+import { portfolioAssistantReturnPath } from "@/lib/portfolio-autopilot-return";
 import { siteLocale } from "@/lib/site-locale";
 import DesignerProfileNav from "@/components/DesignerProfileNav";
 import LocationInput from "@/components/LocationInput";
@@ -229,7 +229,7 @@ async function updateProfile(formData: FormData) {
   const onboardingDestination = isProfessional
     ? requestedOnboardingDestination === "/studio/team?setup=1"
       ? "/studio/team?setup=1"
-      : portfolioAutopilotReturnPath(requestedOnboardingDestination) || null
+      : portfolioAssistantReturnPath(requestedOnboardingDestination) || null
     : null;
 
   const { data: currentProfile } = await supabase
@@ -512,8 +512,8 @@ export default async function EditProfilePage({
   const backHref = isProfessional ? "/studio" : "/client";
   const isOnboarding = sp.onboarding === "1";
   const isStudioOnboarding = isOnboarding && isProfessional && sp.studio === "1";
-  const portfolioAutopilotReturn = isProfessional ? portfolioAutopilotReturnPath(sp.next) : "";
-  const onboardingDestination = portfolioAutopilotReturn || (isStudioOnboarding ? "/studio/team?setup=1" : "");
+  const portfolioAssistantReturn = isProfessional ? portfolioAssistantReturnPath(sp.next) : "";
+  const onboardingDestination = portfolioAssistantReturn || (isStudioOnboarding ? "/studio/team?setup=1" : "");
   const normalizedProfessionType = profileProfessionTypeValue(p.profession_type);
   const hasCustomProfessionType =
     Boolean(normalizedProfessionType) &&

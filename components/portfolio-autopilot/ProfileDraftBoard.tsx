@@ -192,7 +192,7 @@ export default function ProfileDraftBoard({
           {publishSummary ? copy.publishedSummary(publishSummary.applied, publishSummary.skipped) : null}
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
-          <a href={localePublicPath(siteLocale, `/studio/portfolio-autopilot/${jobId}/profile-draft/next-steps`)} className="inline-block rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90">
+          <a href={localePublicPath(siteLocale, `/studio/portfolio-assistant/${jobId}/profile-draft/next-steps`)} className="inline-block rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:opacity-90">
             {copy.nextStepsCta}
           </a>
           <a href={localePublicPath(siteLocale, "/account/profile")} className="inline-block rounded-xl border border-line px-5 py-3 text-sm font-semibold text-foreground hover:border-primary">

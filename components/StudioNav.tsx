@@ -29,7 +29,7 @@ export default function StudioNav({
   const isProfileSection =
     pathname.startsWith("/account/profile") ||
     pathname.startsWith("/account/projects") ||
-    pathname.startsWith("/studio/portfolio-autopilot");
+    pathname.startsWith("/studio/portfolio-assistant");
 
   return (
     <section className="border-b border-line bg-card">

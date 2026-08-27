@@ -1,23 +1,23 @@
 import { safeInternalPath, stripLocalePrefix } from "@/lib/safe-next-path";
 
-export const portfolioAutopilotPath = "/studio/portfolio-autopilot";
+export const portfolioAssistantPath = "/studio/portfolio-assistant";
 
-export function portfolioAutopilotReturnPath(value: string | null | undefined) {
+export function portfolioAssistantReturnPath(value: string | null | undefined) {
   const path = stripLocalePrefix(safeInternalPath(value, ""));
-  return path === portfolioAutopilotPath ? path : "";
+  return path === portfolioAssistantPath ? path : "";
 }
 
-export function onboardingPortfolioAutopilotReturnPath(value: string | null | undefined) {
+export function onboardingPortfolioAssistantReturnPath(value: string | null | undefined) {
   const path = stripLocalePrefix(safeInternalPath(value, ""));
   if (!path.startsWith("/onboarding")) return "";
 
   const next = new URL(path, "https://archicompass.local").searchParams.get("next");
-  return portfolioAutopilotReturnPath(next);
+  return portfolioAssistantReturnPath(next);
 }
 
 export function profileSetupPath(returnPath = "", studioSetup = false) {
   const params = new URLSearchParams({ onboarding: "1" });
-  const portfolioReturn = portfolioAutopilotReturnPath(returnPath);
+  const portfolioReturn = portfolioAssistantReturnPath(returnPath);
 
   if (portfolioReturn) {
     params.set("next", portfolioReturn);
