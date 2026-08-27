@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { loadOwnedJob } from "@/lib/portfolio-ingestion/job-access";
@@ -30,6 +31,16 @@ export default async function PortfolioAutopilotImportingPage({
     <main className="mx-auto max-w-4xl px-6 py-12">
       <h1 className="text-3xl font-bold text-foreground">{copy.title}</h1>
       <AutopilotFlowSteps active="importing" />
+      <section className="mt-6 overflow-hidden rounded-2xl border border-line bg-[#faf9f7] px-4 py-5 sm:px-8 sm:py-7">
+        <Image
+          src="/images/portfolio-assistant-import-flow.png"
+          alt={copy.illustrationAlt}
+          width={1672}
+          height={941}
+          sizes="(max-width: 640px) 100vw, 896px"
+          className="mx-auto h-auto w-full max-w-[836px]"
+        />
+      </section>
       <ImportProgress jobId={jobId} />
     </main>
   );

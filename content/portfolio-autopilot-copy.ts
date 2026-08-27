@@ -64,6 +64,7 @@ const portfolioAutopilotCopyByLocale = {
     },
     importing: {
       title: "Importujemy Twoje portfolio",
+      illustrationAlt: "Dodaj adres strony, AI znajdzie zdjęcia i przygotuje profil",
       statusLabels: jobStatusLabels.pl,
       estimatedTime: "Zwykle zajmuje to kilka minut. Przy bardzo dużym portfolio może potrwać dłużej.",
       elapsedTime: (value: string) => `Czas importu: ${value}`,
@@ -288,6 +289,7 @@ const portfolioAutopilotCopyByLocale = {
     },
     importing: {
       title: "Importing your portfolio",
+      illustrationAlt: "Add your website address, AI finds photos and prepares your profile",
       statusLabels: jobStatusLabels.en,
       estimatedTime: "This usually takes a few minutes. Very large portfolios can take longer.",
       elapsedTime: (value: string) => `Import time: ${value}`,
