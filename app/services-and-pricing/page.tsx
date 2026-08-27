@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import AiFeatureBadge from "@/components/AiFeatureBadge";
 import { getBillingCopy } from "@/content/billing-copy";
 import { getServicesPricingCopy } from "@/content/services-pricing-copy";
 import { localeAppPath } from "@/lib/site-locale";
@@ -98,6 +99,15 @@ export default function ServicesAndPricingPage() {
               </div>
             </div>
           </div>
+        </section>
+
+        <section className="mt-14 max-w-3xl" aria-labelledby="portfolio-assistant-faq">
+          <AiFeatureBadge>{copy.faq.badge}</AiFeatureBadge>
+          <h2 id="portfolio-assistant-faq" className="mt-4 text-3xl font-bold">{copy.faq.title}</h2>
+          <article className="mt-6 rounded-2xl border border-primary/20 bg-primary-soft/55 p-6 sm:p-7">
+            <h3 className="text-xl font-bold">{copy.faq.question}</h3>
+            <p className="mt-3 leading-7 text-muted">{copy.faq.answer}</p>
+          </article>
         </section>
 
         <div className="mt-8 rounded-2xl border border-line bg-card p-6 text-sm leading-7 text-muted sm:p-7">

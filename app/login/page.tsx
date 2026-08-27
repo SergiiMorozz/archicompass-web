@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { getSiteCopy } from "@/content/site-copy";
 import { localePublicPath, siteLocale } from "@/lib/site-locale";
 import { safeInternalPath, stripLocalePrefix } from "@/lib/safe-next-path";
+import { onboardingPortfolioAutopilotReturnPath, profileSetupPath } from "@/lib/portfolio-autopilot-return";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const authCopy = getSiteCopy().auth;
@@ -44,6 +45,7 @@ function LoginContent() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const searchParams = useSearchParams();
   const requestedNext = stripLocalePrefix(safeInternalPath(searchParams.get("next")));
+  const portfolioAutopilotReturn = onboardingPortfolioAutopilotReturnPath(requestedNext);
   const initialMode: Mode = searchParams.get("mode") === "signup" ? "signup" : "signin";
   const [mode, setMode] = useState<Mode>(initialMode);
   const [intent, setIntent] = useState<Intent>(() => intentFromNext(requestedNext));
@@ -60,7 +62,9 @@ function LoginContent() {
   const [status, setStatus] = useState<Status>({ type: "idle" });
 
   function confirmationRedirectTo() {
-    const next = "/account/profile?onboarding=1";
+    const next = requestedNext.startsWith("/onboarding")
+      ? requestedNext
+      : profileSetupPath(portfolioAutopilotReturn);
     return `${window.location.origin}${localizedDestination("/auth/callback")}?next=${encodeURIComponent(next)}`;
   }
 
@@ -78,7 +82,9 @@ function LoginContent() {
       const onboardingIntent = metadataIntent === "designer" || metadataIntent === "client"
         ? metadataIntent
         : intent;
-      return `/onboarding?intent=${onboardingIntent}`;
+      return requestedNext.startsWith("/onboarding")
+        ? requestedNext
+        : `/onboarding?intent=${onboardingIntent}`;
     }
     const { data: profileData } = await supabase
       .from("profiles")
@@ -87,10 +93,10 @@ function LoginContent() {
       .maybeSingle();
     const needsProfileSetup = !profileData?.full_name || !profileData?.phone || !profileData?.location;
     if (needsProfileSetup && (requestedNext === "/account" || requestedNext.startsWith("/onboarding"))) {
-      return "/account/profile?onboarding=1";
+      return profileSetupPath(portfolioAutopilotReturn);
     }
     if (requestedNext.startsWith("/onboarding") || requestedNext === "/account") {
-      return roleData.role === "designer" ? "/studio" : "/client";
+      return portfolioAutopilotReturn || (roleData.role === "designer" ? "/studio" : "/client");
     }
     return requestedNext;
   }
@@ -129,7 +135,9 @@ function LoginContent() {
       return;
     }
 
-    const next = "/account/profile?onboarding=1";
+    const next = requestedNext.startsWith("/onboarding")
+      ? requestedNext
+      : profileSetupPath(portfolioAutopilotReturn);
     const redirectTo = confirmationRedirectTo();
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,

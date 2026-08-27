@@ -97,7 +97,7 @@ type HomeCopy = {
   };
   designerValue: {
     headline: string;
-    items: Array<{ title: string; body: string }>;
+    items: Array<{ title: string; body: string; badge?: string; href?: string }>;
   };
   latestProjects: {
     eyebrow: string;
@@ -694,6 +694,7 @@ const pl: SiteCopy = {
         { title: "Widoczność", body: "Pokaż portfolio klientom szukającym specjalisty do konkretnego rodzaju inwestycji." },
         { title: "Bez pośredników", body: "Kontakt odbywa się bezpośrednio między klientem a projektantem." },
         { title: "Rozwijaj profil", body: "Dodawaj realizacje, prezentuj zakres usług i buduj swoją obecność w ArchiCompass." },
+        { badge: "AI", href: "/portfolio-assistant", title: "✨ AI · Uzupełnij profil w kilka minut", body: "Wskaż adres swojej strony lub wgraj zdjęcia realizacji — AI pogrupuje je w projekty, rozpozna styl i przygotuje szkic profilu. Ty tylko sprawdzasz i publikujesz." },
       ],
     },
     latestProjects: {
@@ -1081,6 +1082,7 @@ const en: SiteCopy = {
         { title: "Visibility", body: "Show your portfolio to clients looking for a specialist for a specific type of project." },
         { title: "No middlemen", body: "Contact happens directly between the client and the designer." },
         { title: "Grow your profile", body: "Add projects, present your services, and build your presence on ArchiCompass." },
+        { badge: "AI", href: "/portfolio-assistant", title: "✨ AI · Build your profile in minutes", body: "Point us to your website or upload photos of your projects — AI groups them, detects your style, and drafts your profile. You just review and publish." },
       ],
     },
     latestProjects: {

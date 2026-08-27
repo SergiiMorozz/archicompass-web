@@ -27,6 +27,7 @@ import {
 } from "@/lib/profile-system-labels";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getWorkspaceCopy } from "@/content/workspace-copy";
+import { portfolioAutopilotReturnPath } from "@/lib/portfolio-autopilot-return";
 import { siteLocale } from "@/lib/site-locale";
 import DesignerProfileNav from "@/components/DesignerProfileNav";
 import LocationInput from "@/components/LocationInput";
@@ -224,10 +225,12 @@ async function updateProfile(formData: FormData) {
   const accountRole = await getExplicitAccountRole(supabase, user.id);
   if (!accountRole) redirect("/onboarding?next=%2Faccount%2Fprofile");
   const isProfessional = accountRole === "designer";
-  const onboardingDestination =
-    isProfessional && textValue(formData, "onboarding_destination") === "/studio/team?setup=1"
+  const requestedOnboardingDestination = textValue(formData, "onboarding_destination");
+  const onboardingDestination = isProfessional
+    ? requestedOnboardingDestination === "/studio/team?setup=1"
       ? "/studio/team?setup=1"
-      : null;
+      : portfolioAutopilotReturnPath(requestedOnboardingDestination) || null
+    : null;
 
   const { data: currentProfile } = await supabase
     .from("profiles")
@@ -473,7 +476,7 @@ async function deleteClientAccount(formData: FormData) {
 export default async function EditProfilePage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string; notice?: string; onboarding?: string; studio?: string }>;
+  searchParams?: Promise<{ error?: string; notice?: string; onboarding?: string; studio?: string; next?: string }>;
 }) {
   const copy = getWorkspaceCopy().accountProfile;
   const sp = (await searchParams) ?? {};
@@ -509,6 +512,8 @@ export default async function EditProfilePage({
   const backHref = isProfessional ? "/studio" : "/client";
   const isOnboarding = sp.onboarding === "1";
   const isStudioOnboarding = isOnboarding && isProfessional && sp.studio === "1";
+  const portfolioAutopilotReturn = isProfessional ? portfolioAutopilotReturnPath(sp.next) : "";
+  const onboardingDestination = portfolioAutopilotReturn || (isStudioOnboarding ? "/studio/team?setup=1" : "");
   const normalizedProfessionType = profileProfessionTypeValue(p.profession_type);
   const hasCustomProfessionType =
     Boolean(normalizedProfessionType) &&
@@ -570,7 +575,7 @@ export default async function EditProfilePage({
           <input
             type="hidden"
             name="onboarding_destination"
-            value={isStudioOnboarding ? "/studio/team?setup=1" : ""}
+            value={onboardingDestination}
           />
           {sp.error ? (
             <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
