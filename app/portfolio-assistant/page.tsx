@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { portfolioAutopilotPath } from "@/lib/portfolio-autopilot-return";
+import { portfolioAssistantPath } from "@/lib/portfolio-autopilot-return";
 import { getExplicitAccountRole } from "@/lib/studios";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -11,8 +11,8 @@ export default async function PortfolioAssistantEntryPage() {
   const user = data.user;
 
   if (user && await getExplicitAccountRole(supabase, user.id) === "designer") {
-    redirect(portfolioAutopilotPath);
+    redirect(portfolioAssistantPath);
   }
 
-  redirect(`/get-started?next=${encodeURIComponent(portfolioAutopilotPath)}`);
+  redirect(`/get-started?next=${encodeURIComponent(portfolioAssistantPath)}`);
 }

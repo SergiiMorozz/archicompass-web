@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSiteCopy } from "@/content/site-copy";
 import { getExplicitAccountRole } from "@/lib/studios";
-import { portfolioAutopilotReturnPath, profileSetupPath } from "@/lib/portfolio-autopilot-return";
+import { portfolioAssistantReturnPath, profileSetupPath } from "@/lib/portfolio-autopilot-return";
 import { safeInternalPath, stripLocalePrefix } from "@/lib/safe-next-path";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -43,8 +43,8 @@ async function completeOnboarding(formData: FormData) {
       .eq("id", user.id)
       .maybeSingle();
     const needsProfileSetup = !profile?.full_name || !profile?.phone || !profile?.location;
-    const portfolioAutopilotReturn = portfolioAutopilotReturnPath(formValue(formData, "next"));
-    redirect(needsProfileSetup ? profileSetupPath(portfolioAutopilotReturn) : portfolioAutopilotReturn || (existingRole === "designer" ? "/studio" : "/client"));
+    const portfolioAssistantReturn = portfolioAssistantReturnPath(formValue(formData, "next"));
+    redirect(needsProfileSetup ? profileSetupPath(portfolioAssistantReturn) : portfolioAssistantReturn || (existingRole === "designer" ? "/studio" : "/client"));
   }
 
   const role = formValue(formData, "role");
@@ -80,7 +80,7 @@ async function completeOnboarding(formData: FormData) {
   }
 
   const studioSetup = role === "designer" && designerMode === "studio";
-  redirect(profileSetupPath(portfolioAutopilotReturnPath(next), studioSetup));
+  redirect(profileSetupPath(portfolioAssistantReturnPath(next), studioSetup));
 }
 
 export default async function OnboardingPage({
@@ -110,8 +110,8 @@ export default async function OnboardingPage({
       .eq("id", user.id)
       .maybeSingle();
     const needsProfileSetup = !profile?.full_name || !profile?.phone || !profile?.location;
-    const portfolioAutopilotReturn = portfolioAutopilotReturnPath(next);
-    redirect(needsProfileSetup ? profileSetupPath(portfolioAutopilotReturn) : portfolioAutopilotReturn || (existingRole === "designer" ? "/studio" : "/client"));
+    const portfolioAssistantReturn = portfolioAssistantReturnPath(next);
+    redirect(needsProfileSetup ? profileSetupPath(portfolioAssistantReturn) : portfolioAssistantReturn || (existingRole === "designer" ? "/studio" : "/client"));
   }
 
   return (

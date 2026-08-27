@@ -27,7 +27,7 @@ export function sendPortfolioImportReadyEmail({
   recipientName,
 }: PortfolioImportEmailInput): Promise<TransactionalEmailResult> {
   const isEnglish = locale === "en";
-  const reviewUrl = `https://archicompass.pl${isEnglish ? "/en" : ""}/studio/portfolio-autopilot/${jobId}/review`;
+  const reviewUrl = `https://archicompass.pl${isEnglish ? "/en" : ""}/studio/portfolio-assistant/${jobId}/review`;
   const greeting = recipientName ? (isEnglish ? `Hello, ${recipientName}` : `Dzień dobry, ${recipientName}`) : isEnglish ? "Hello" : "Dzień dobry";
   const subject = isEnglish ? "Your portfolio is ready to review" : "Twoje portfolio jest gotowe do przeglądu";
   const heading = isEnglish ? "Your portfolio import is ready" : "Twój import portfolio jest gotowy";

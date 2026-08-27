@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getSiteCopy } from "@/content/site-copy";
 import { getBillingCopy } from "@/content/billing-copy";
-import { portfolioAutopilotReturnPath } from "@/lib/portfolio-autopilot-return";
+import { portfolioAssistantReturnPath } from "@/lib/portfolio-autopilot-return";
 import { pageMetadata } from "@/lib/seo";
 
 const authCopy = getSiteCopy().auth;
@@ -19,7 +19,7 @@ export default async function Page({
 }: {
   searchParams?: Promise<{ next?: string }>;
 }) {
-  const next = portfolioAutopilotReturnPath((await searchParams)?.next);
+  const next = portfolioAssistantReturnPath((await searchParams)?.next);
   const designerOnboarding = new URLSearchParams({ intent: "designer" });
   if (next) designerOnboarding.set("next", next);
   const designerSignupHref = `/login?mode=signup&next=${encodeURIComponent(`/onboarding?${designerOnboarding.toString()}`)}`;

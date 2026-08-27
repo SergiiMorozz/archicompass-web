@@ -29,7 +29,7 @@ export default async function PortfolioAutopilotProfileDraftPage({
   const job = await loadOwnedJob(supabase, jobId, user.id);
   if (!job) notFound();
   if (job.status !== "READY_FOR_REVIEW" && job.status !== "PUBLISHED") {
-    redirect(localePublicPath(siteLocale, `/studio/portfolio-autopilot/${jobId}/importing`));
+    redirect(localePublicPath(siteLocale, `/studio/portfolio-assistant/${jobId}/importing`));
   }
 
   const { draft, draftStatus, alreadySet, liveProfile } = await loadProfileDraftViewData(supabase, jobId, user.id);

@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { getSiteCopy } from "@/content/site-copy";
 import { localePublicPath, siteLocale } from "@/lib/site-locale";
 import { safeInternalPath, stripLocalePrefix } from "@/lib/safe-next-path";
-import { onboardingPortfolioAutopilotReturnPath, profileSetupPath } from "@/lib/portfolio-autopilot-return";
+import { onboardingPortfolioAssistantReturnPath, profileSetupPath } from "@/lib/portfolio-autopilot-return";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const authCopy = getSiteCopy().auth;
@@ -45,7 +45,7 @@ function LoginContent() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const searchParams = useSearchParams();
   const requestedNext = stripLocalePrefix(safeInternalPath(searchParams.get("next")));
-  const portfolioAutopilotReturn = onboardingPortfolioAutopilotReturnPath(requestedNext);
+  const portfolioAssistantReturn = onboardingPortfolioAssistantReturnPath(requestedNext);
   const initialMode: Mode = searchParams.get("mode") === "signup" ? "signup" : "signin";
   const [mode, setMode] = useState<Mode>(initialMode);
   const [intent, setIntent] = useState<Intent>(() => intentFromNext(requestedNext));
@@ -64,7 +64,7 @@ function LoginContent() {
   function confirmationRedirectTo() {
     const next = requestedNext.startsWith("/onboarding")
       ? requestedNext
-      : profileSetupPath(portfolioAutopilotReturn);
+      : profileSetupPath(portfolioAssistantReturn);
     return `${window.location.origin}${localizedDestination("/auth/callback")}?next=${encodeURIComponent(next)}`;
   }
 
@@ -93,10 +93,10 @@ function LoginContent() {
       .maybeSingle();
     const needsProfileSetup = !profileData?.full_name || !profileData?.phone || !profileData?.location;
     if (needsProfileSetup && (requestedNext === "/account" || requestedNext.startsWith("/onboarding"))) {
-      return profileSetupPath(portfolioAutopilotReturn);
+      return profileSetupPath(portfolioAssistantReturn);
     }
     if (requestedNext.startsWith("/onboarding") || requestedNext === "/account") {
-      return portfolioAutopilotReturn || (roleData.role === "designer" ? "/studio" : "/client");
+      return portfolioAssistantReturn || (roleData.role === "designer" ? "/studio" : "/client");
     }
     return requestedNext;
   }
@@ -137,7 +137,7 @@ function LoginContent() {
 
     const next = requestedNext.startsWith("/onboarding")
       ? requestedNext
-      : profileSetupPath(portfolioAutopilotReturn);
+      : profileSetupPath(portfolioAssistantReturn);
     const redirectTo = confirmationRedirectTo();
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,

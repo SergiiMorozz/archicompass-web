@@ -69,11 +69,28 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
     ];
+    // The Studio URL used to expose the implementation name "autopilot".
+    // Keep every existing bookmark and notification link working, but make
+    // Portfolio Assistant the single canonical address. `permanent: true`
+    // instructs Next.js to issue HTTP 308 and preserves any query string.
+    const legacyPortfolioAssistantRedirects = [
+      {
+        source: "/studio/portfolio-autopilot",
+        destination: "/studio/portfolio-assistant",
+        permanent: true,
+      },
+      {
+        source: "/studio/portfolio-autopilot/:path*",
+        destination: "/studio/portfolio-assistant/:path*",
+        permanent: true,
+      },
+    ];
 
     if (!isEnglishZone) {
       return [
         ...legacyProjectCompassRedirects,
         ...legacyAiDocumentRedirects,
+        ...legacyPortfolioAssistantRedirects,
         {
           source: "/en/en",
           destination: "/en",
@@ -90,6 +107,7 @@ const nextConfig: NextConfig = {
     return [
       ...legacyProjectCompassRedirects,
       ...legacyAiDocumentRedirects,
+      ...legacyPortfolioAssistantRedirects,
       {
         source: "/",
         destination: "/en",
