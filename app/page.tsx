@@ -141,12 +141,12 @@ function Palette({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function Checklist({ items, tone = "primary" }: { items: string[]; tone?: "primary" | "accent" }) {
+function Checklist({ items, tone = "primary", compact = false }: { items: string[]; tone?: "primary" | "accent"; compact?: boolean }) {
   const color = tone === "accent" ? "bg-[#d8f4ef] text-[#158c75]" : "bg-primary-soft text-primary";
   return (
-    <div className="grid gap-x-5 gap-y-3 sm:grid-cols-2">
+    <div className={`grid gap-x-5 ${compact ? "gap-y-2" : "gap-y-3"} sm:grid-cols-2`}>
       {items.map((item) => (
-        <span key={item} className="flex items-start gap-2.5 text-sm font-medium leading-5 text-foreground">
+        <span key={item} className={`flex items-start gap-2.5 font-medium text-foreground ${compact ? "text-[13px] leading-5" : "text-sm leading-5"}`}>
           <b className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-xs ${color}`}>&#10003;</b>
           {item}
         </span>
@@ -430,40 +430,40 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:py-8">
-        <div className="grid gap-5 lg:grid-cols-2">
-          <article className="grid overflow-hidden rounded-[2rem] border border-primary/15 bg-primary-soft/55 shadow-[0_16px_44px_rgba(54,31,73,0.07)] md:grid-cols-[1.1fr_0.9fr]">
-            <div className="flex min-h-[470px] flex-col p-6 sm:p-7">
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-6">
+        <div className="grid gap-4 lg:grid-cols-2">
+          <article className="grid overflow-hidden rounded-[2rem] border border-primary/15 bg-primary-soft/55 shadow-[0_16px_44px_rgba(54,31,73,0.07)] md:grid-cols-[1.25fr_0.75fr]">
+            <div className="flex min-h-[400px] flex-col p-5 sm:p-6">
               <p className="text-sm font-bold uppercase tracking-[0.14em] text-primary">— {homeCopy.forClients.eyebrow}</p>
-              <h2 className="mt-4 text-3xl font-bold leading-tight sm:text-[2.1rem]">{homeCopy.forClients.headline}</h2>
-              <p className="mt-4 text-[0.95rem] leading-7 text-muted">{homeCopy.forClients.body}</p>
-              <div className="mt-6"><Checklist items={homeCopy.forClients.checklist.slice(0, 4)} /></div>
-              <div className="mt-auto pt-6"><Link href="/AI-project-compass" className="group inline-flex min-h-[52px] items-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(86,35,168,0.22)] transition hover:-translate-y-0.5 hover:bg-primary/90">{homeCopy.forClients.primaryCta}<Arrow /></Link></div>
+              <h2 className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">{homeCopy.forClients.headline}</h2>
+              <p className="mt-3 text-sm leading-6 text-muted">{homeCopy.forClients.body}</p>
+              <div className="mt-5"><Checklist items={homeCopy.forClients.checklist.slice(0, 4)} compact /></div>
+              <div className="mt-5"><Link href="/AI-project-compass" className="group inline-flex min-h-[52px] items-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(86,35,168,0.22)] transition hover:-translate-y-0.5 hover:bg-primary/90">{homeCopy.forClients.primaryCta}<Arrow /></Link></div>
             </div>
-            <div className="min-h-[250px] bg-primary-soft p-5 md:min-h-0 md:p-0">
+            <div className="min-h-[220px] bg-primary-soft p-4 md:min-h-0 md:p-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={inspirationImages[1]} alt="" className="h-full w-full rounded-2xl object-cover md:rounded-none" />
             </div>
           </article>
 
-          <article className="grid overflow-hidden rounded-[2rem] border border-accent/20 bg-accent-soft/55 shadow-[0_16px_44px_rgba(54,31,73,0.07)] md:grid-cols-[1.1fr_0.9fr]">
-            <div className="flex min-h-[470px] flex-col p-6 sm:p-7">
+          <article className="grid overflow-hidden rounded-[2rem] border border-accent/20 bg-accent-soft/55 shadow-[0_16px_44px_rgba(54,31,73,0.07)] md:grid-cols-[1.25fr_0.75fr]">
+            <div className="flex min-h-[400px] flex-col p-5 sm:p-6">
               <p className="text-sm font-bold uppercase tracking-[0.14em] text-[#207a68]">— {homeCopy.forDesigners.eyebrow}</p>
-              <h2 className="mt-4 text-3xl font-bold leading-tight sm:text-[2.1rem]">{homeCopy.forDesigners.headline}</h2>
-              <p className="mt-4 text-[0.95rem] leading-7 text-muted">{homeCopy.forDesigners.body}</p>
-              <div className="mt-6"><Checklist items={homeCopy.forDesigners.checklist.slice(0, 4)} tone="accent" /></div>
+              <h2 className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">{homeCopy.forDesigners.headline}</h2>
+              <p className="mt-3 text-sm leading-6 text-muted">{homeCopy.forDesigners.body}</p>
+              <div className="mt-5"><Checklist items={homeCopy.forDesigners.checklist.slice(0, 4)} tone="accent" compact /></div>
               <Link
                 href={homeCopy.forDesigners.aiAssistant.href}
-                className="group mt-5 flex items-center gap-2.5 rounded-xl border border-primary/20 bg-white/80 px-3 py-3 text-sm font-semibold leading-5 text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="group mt-4 flex items-center gap-2 rounded-xl border border-primary/20 bg-white/80 px-2.5 py-2.5 text-[13px] font-semibold leading-5 text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 <AiFeatureBadge className="shrink-0">{homeCopy.forDesigners.aiAssistant.badge}</AiFeatureBadge>
                 <span className="shrink-0 text-primary" aria-hidden="true">·</span>
                 <span className="min-w-0">{homeCopy.forDesigners.aiAssistant.description} — <em className="font-bold text-primary">{homeCopy.forDesigners.aiAssistant.name}</em></span>
               </Link>
-              <p className="mt-4 text-xs font-medium leading-5 text-muted">{homeCopy.forDesigners.pricingNote} <Link href="/services-and-pricing" className="font-bold text-[#207a68] hover:underline">{homeCopy.forDesigners.pricingCta}</Link></p>
-              <div className="mt-auto pt-6"><Link href="/get-started" className="group inline-flex min-h-[52px] items-center gap-2 rounded-xl bg-[#1f604d] px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(31,96,77,0.2)] transition hover:-translate-y-0.5 hover:bg-[#19513f]">{homeCopy.forDesigners.primaryCta}<Arrow /></Link></div>
+              <p className="mt-3 text-xs font-medium leading-4 text-muted">{homeCopy.forDesigners.pricingNote} <Link href="/services-and-pricing" className="font-bold text-[#207a68] hover:underline">{homeCopy.forDesigners.pricingCta}</Link></p>
+              <div className="mt-5"><Link href="/get-started" className="group inline-flex min-h-[52px] items-center gap-2 rounded-xl bg-[#1f604d] px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(31,96,77,0.2)] transition hover:-translate-y-0.5 hover:bg-[#19513f]">{homeCopy.forDesigners.primaryCta}<Arrow /></Link></div>
             </div>
-            <div className="min-h-[250px] bg-accent-soft p-5 md:min-h-0 md:p-0">
+            <div className="min-h-[220px] bg-accent-soft p-4 md:min-h-0 md:p-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={inspirationImages[2]} alt="" className="h-full w-full rounded-2xl object-cover md:rounded-none" />
             </div>

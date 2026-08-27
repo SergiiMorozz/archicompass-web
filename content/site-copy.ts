@@ -685,7 +685,7 @@ const pl: SiteCopy = {
       ],
       aiAssistant: {
         badge: "AI",
-        description: "Profil zbudowany z pomocą AI w kilka minut",
+        description: "Profil zbudowany za pomocą AI w kilka minut",
         name: "Asystent portfolio AI",
         href: "/portfolio-assistant",
       },
