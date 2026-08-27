@@ -171,6 +171,9 @@ const portfolioAutopilotCopyByLocale = {
       analyzingNote: "Trwa analiza AI dla części projektów — odśwież za chwilę.",
       noKeptProjects: "Zachowaj przynajmniej jeden projekt, aby opublikować.",
       publishFailed: "Publikacja się nie powiodła. Spróbuj ponownie.",
+      publishPartial: (published: number, total: number) =>
+        `Opublikowaliśmy ${published} z ${total} projektów. Spróbuj ponownie, aby dokończyć.`,
+      publishQuotaReached: "Dzisiejszy limit publikacji z Asystenta portfolio AI został wykorzystany. Spróbuj ponownie jutro.",
       profileDraftCta: "Zobacz sugestie profilu",
     },
     profileDraft: {
@@ -397,6 +400,9 @@ const portfolioAutopilotCopyByLocale = {
       analyzingNote: "AI analysis is still running for some projects - refresh in a moment.",
       noKeptProjects: "Keep at least one project to publish.",
       publishFailed: "Publishing failed. Please try again.",
+      publishPartial: (published: number, total: number) =>
+        `Published ${published} of ${total} projects. Try again to finish.`,
+      publishQuotaReached: "You have reached today's publishing limit for the AI Portfolio Assistant. Please try again tomorrow.",
       profileDraftCta: "View profile suggestions",
     },
     profileDraft: {

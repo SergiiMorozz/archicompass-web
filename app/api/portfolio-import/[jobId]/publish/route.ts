@@ -11,7 +11,38 @@ import {
 import { getPortfolioAutopilotCopy } from "@/content/portfolio-autopilot-copy";
 import { logError } from "@/lib/observability";
 
-const dailyProjectCreateLimit = 20;
+const dailyAssistantPublishLimit = 20;
+
+type TransferableAsset = {
+  id: string;
+  storage_path: string | null;
+};
+
+function errorKind(error: unknown) {
+  if (!error || typeof error !== "object") return "unknown";
+  const details = error as { code?: unknown; statusCode?: unknown; name?: unknown };
+  if (typeof details.code === "string") return details.code;
+  if (typeof details.statusCode === "string" || typeof details.statusCode === "number") return String(details.statusCode);
+  if (typeof details.name === "string") return details.name;
+  return "unknown";
+}
+
+async function removeUploadedImages(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  imagePaths: string[],
+  jobId: string,
+  projectId: string
+) {
+  if (!imagePaths.length) return;
+  const { error } = await supabase.storage.from(publicProjectImagesBucket).remove(imagePaths);
+  if (error) {
+    logError("portfolio_autopilot_publish_cleanup_failed", {
+      jobId,
+      projectId,
+      errorKind: errorKind(error),
+    });
+  }
+}
 
 export async function POST(request: Request, { params }: { params: Promise<{ jobId: string }> }) {
   const { jobId } = await params;
@@ -32,40 +63,81 @@ export async function POST(request: Request, { params }: { params: Promise<{ job
     .select("id, suggested_title, custom_summary, published_project_id, project_ai_analysis(result)")
     .eq("job_id", jobId)
     .eq("status", "kept");
-  if (keptError) return NextResponse.json({ error: copy.publishFailed }, { status: 500 });
+  if (keptError) {
+    logError("portfolio_autopilot_publish_projects_read_failed", { jobId, errorKind: errorKind(keptError) });
+    return NextResponse.json({ error: copy.publishFailed }, { status: 500 });
+  }
   if (!keptProjects?.length) return NextResponse.json({ error: copy.noKeptProjects }, { status: 400 });
 
   const toPublish = keptProjects.filter((project) => !project.published_project_id);
   let publishedCount = keptProjects.length - toPublish.length;
   let quotaExhausted = false;
+  let publishFailed = false;
 
   for (const project of toPublish) {
-    const { allowed } = await safeConsumeActionQuota(user.id, "project_create", dailyProjectCreateLimit);
-    if (!allowed) {
-      quotaExhausted = true;
-      break;
-    }
-
-    const { data: assets } = await supabase
+    const { data: assets, error: assetsError } = await supabase
       .from("portfolio_assets")
       .select("id, storage_path")
       .eq("cluster_project_id", project.id)
       .eq("selected", true)
       .not("storage_path", "is", null);
-    if (!assets?.length) continue;
+    if (assetsError) {
+      publishFailed = true;
+      logError("portfolio_autopilot_publish_assets_read_failed", {
+        jobId,
+        projectId: project.id,
+        errorKind: errorKind(assetsError),
+      });
+      continue;
+    }
+    if (!assets?.length) {
+      publishFailed = true;
+      logError("portfolio_autopilot_publish_project_without_assets", { jobId, projectId: project.id });
+      continue;
+    }
+
+    const preparedAssets: { contentType: string; file: Blob }[] = [];
+    for (const asset of assets as TransferableAsset[]) {
+      if (!asset.storage_path) continue;
+      const { data: file, error: downloadError } = await supabase.storage.from(stagingBucket).download(asset.storage_path);
+      if (!file || downloadError) {
+        publishFailed = true;
+        logError("portfolio_autopilot_publish_asset_download_failed", {
+          jobId,
+          projectId: project.id,
+          errorKind: errorKind(downloadError),
+        });
+        continue;
+      }
+      preparedAssets.push({ contentType: file.type || "image/jpeg", file });
+    }
+    if (!preparedAssets.length) continue;
+
+    // This is a distinct, owner-approved bulk flow. It must not inherit a
+    // previously exhausted manual-project quota, and it runs only after the
+    // selected files proved readable so a failed read cannot consume a slot.
+    const { allowed } = await safeConsumeActionQuota(user.id, "portfolio_autopilot_publish", dailyAssistantPublishLimit);
+    if (!allowed) {
+      quotaExhausted = true;
+      break;
+    }
 
     const imagePaths: string[] = [];
     const imageUrls: string[] = [];
-    for (const asset of assets) {
-      if (!asset.storage_path) continue;
-      const { data: file } = await supabase.storage.from(stagingBucket).download(asset.storage_path);
-      if (!file) continue;
-      const contentType = file.type || "image/jpeg";
-      const publicPath = `${user.id}/${crypto.randomUUID()}.${extensionFor(contentType)}`;
+    for (const asset of preparedAssets) {
+      const publicPath = `${user.id}/${crypto.randomUUID()}.${extensionFor(asset.contentType)}`;
       const { error: uploadError } = await supabase.storage
         .from(publicProjectImagesBucket)
-        .upload(publicPath, file, { contentType, upsert: false });
-      if (uploadError) continue;
+        .upload(publicPath, asset.file, { contentType: asset.contentType, upsert: false });
+      if (uploadError) {
+        publishFailed = true;
+        logError("portfolio_autopilot_publish_asset_upload_failed", {
+          jobId,
+          projectId: project.id,
+          errorKind: errorKind(uploadError),
+        });
+        continue;
+      }
       imagePaths.push(publicPath);
       imageUrls.push(supabase.storage.from(publicProjectImagesBucket).getPublicUrl(publicPath).data.publicUrl);
     }
@@ -86,22 +158,48 @@ export async function POST(request: Request, { params }: { params: Promise<{ job
         image_path: imagePaths[0],
         image_urls: imageUrls,
         image_paths: imagePaths,
-      })
+    })
       .select("id")
       .single();
     if (insertError || !inserted) {
-      logError("portfolio_autopilot_publish_project_insert_failed", { jobId, projectId: project.id });
+      publishFailed = true;
+      logError("portfolio_autopilot_publish_project_insert_failed", {
+        jobId,
+        projectId: project.id,
+        errorKind: errorKind(insertError),
+      });
+      await removeUploadedImages(supabase, imagePaths, jobId, project.id);
       continue;
     }
 
-    await supabase
+    const { error: linkError } = await supabase
       .from("portfolio_projects")
       .update({ published_project_id: inserted.id, status: "published" })
-      .eq("id", project.id);
+      .eq("id", project.id)
+      .eq("job_id", jobId);
+    if (linkError) {
+      publishFailed = true;
+      logError("portfolio_autopilot_publish_project_link_failed", {
+        jobId,
+        projectId: project.id,
+        errorKind: errorKind(linkError),
+      });
+      const { error: rollbackError } = await supabase.from("projects").delete().eq("id", inserted.id).eq("profile_id", user.id);
+      if (rollbackError) {
+        logError("portfolio_autopilot_publish_project_rollback_failed", {
+          jobId,
+          projectId: project.id,
+          errorKind: errorKind(rollbackError),
+        });
+      } else {
+        await removeUploadedImages(supabase, imagePaths, jobId, project.id);
+      }
+      continue;
+    }
     publishedCount += 1;
   }
 
-  const allPublished = !quotaExhausted && publishedCount >= keptProjects.length;
+  const allPublished = !quotaExhausted && !publishFailed && publishedCount >= keptProjects.length;
   if (allPublished) {
     await supabase.from("portfolio_import_jobs").update({ status: "PUBLISHED" }).eq("id", jobId);
     try {
@@ -117,10 +215,22 @@ export async function POST(request: Request, { params }: { params: Promise<{ job
     }
   }
 
-  return NextResponse.json({
-    publishedCount,
-    totalKept: keptProjects.length,
-    allPublished,
-    quotaExhausted,
-  });
+  const error = quotaExhausted
+    ? copy.publishQuotaReached
+    : !allPublished
+      ? publishedCount > 0
+        ? copy.publishPartial(publishedCount, keptProjects.length)
+        : copy.publishFailed
+      : undefined;
+
+  return NextResponse.json(
+    {
+      publishedCount,
+      totalKept: keptProjects.length,
+      allPublished,
+      quotaExhausted,
+      error,
+    },
+    { status: allPublished ? 200 : quotaExhausted ? 429 : 500 }
+  );
 }
