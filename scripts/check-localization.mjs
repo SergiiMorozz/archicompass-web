@@ -71,6 +71,7 @@ const portfolioAutopilotSourceFiles = [
   "components/portfolio-autopilot/ReviewBoard.tsx",
   "components/portfolio-autopilot/StartForm.tsx",
 ];
+const servicesPricingSourceFiles = ["app/services-and-pricing/page.tsx"];
 
 const failures = sharedSourceFiles.flatMap((file) => {
   const source = readFileSync(file, "utf8");
@@ -143,9 +144,16 @@ for (const file of portfolioAutopilotSourceFiles) {
   }
 }
 
+for (const file of servicesPricingSourceFiles) {
+  const source = readFileSync(file, "utf8");
+  if (!source.includes("@/content/services-pricing-copy") || !source.includes("@/content/billing-copy")) {
+    failures.push(`${file}: missing the services and pricing locale contracts`);
+  }
+}
+
 if (failures.length) {
   console.error("Locale architecture check failed:\n- " + failures.join("\n- "));
   process.exit(1);
 }
 
-console.log(`Locale architecture check passed for ${sharedSourceFiles.length + workspaceSourceFiles.length + publicProfileSourceFiles.length + designerProfileSourceFiles.length + studioProfileSourceFiles.length + interactiveSourceFiles.length + accountFlowSourceFiles.length + projectCompassSourceFiles.length + portfolioAutopilotSourceFiles.length} shared source files.`);
+console.log(`Locale architecture check passed for ${sharedSourceFiles.length + workspaceSourceFiles.length + publicProfileSourceFiles.length + designerProfileSourceFiles.length + studioProfileSourceFiles.length + interactiveSourceFiles.length + accountFlowSourceFiles.length + projectCompassSourceFiles.length + portfolioAutopilotSourceFiles.length + servicesPricingSourceFiles.length} shared source files.`);

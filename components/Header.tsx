@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import BrandLogo from "@/components/BrandLogo";
 import { getSiteCopy } from "@/content/site-copy";
 import { isProfessionalProfile } from "@/lib/professional";
@@ -15,6 +15,23 @@ import {
   siteLocale,
 } from "@/lib/site-locale";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
+function subscribeToBrowserLocation(onStoreChange: () => void) {
+  window.addEventListener("hashchange", onStoreChange);
+  window.addEventListener("popstate", onStoreChange);
+  return () => {
+    window.removeEventListener("hashchange", onStoreChange);
+    window.removeEventListener("popstate", onStoreChange);
+  };
+}
+
+function browserLocationSuffix() {
+  return `${window.location.search}${window.location.hash}`;
+}
+
+function emptyLocationSuffix() {
+  return "";
+}
 
 function NavLink({
   href,
@@ -82,7 +99,11 @@ export default function Header() {
   };
   const [isOpen, setIsOpen] = useState(false);
   const [resolvedLanguageHref, setResolvedLanguageHref] = useState<{ path: string; href: string } | null>(null);
-  const browserSuffix = typeof window === "undefined" ? "" : `${window.location.search}${window.location.hash}`;
+  const browserSuffix = useSyncExternalStore(
+    subscribeToBrowserLocation,
+    browserLocationSuffix,
+    emptyLocationSuffix
+  );
   const defaultLanguageHref = alternateHref(currentPath, browserSuffix);
   const languageHref = resolvedLanguageHref?.path === currentPath
     ? resolvedLanguageHref.href

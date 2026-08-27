@@ -8,6 +8,7 @@ export type ServicesPricingCopy = {
   servicesTitle: string;
   servicesBody: string;
   studioCoverage: { title: string; body: string };
+  faq: { badge: string; title: string; question: string; answer: string };
   priceNote: string;
   primaryCta: string;
   pricingCta: string;
@@ -38,6 +39,12 @@ const copy: Record<SiteLocale, ServicesPricingCopy> = {
       title: "Jeden plan pracowni, bez dodatkowych opłat za zespół",
       body: "Aktywna, płatna subskrypcja pracowni obejmuje osobiste profile wszystkich aktywnych członków zespołu. Nie muszą wykupywać odrębnego planu, dopóki pozostają aktywnymi członkami tej pracowni.",
     },
+    faq: {
+      badge: "Asystent portfolio AI",
+      title: "Najczęstsze pytania",
+      question: "Jak szybko mogę uzupełnić swój profil?",
+      answer: "Skorzystaj z Asystenta portfolio AI — wystarczy podać adres swojej strony lub wgrać zdjęcia, a AI pogrupuje je w projekty i przygotuje szkic do Twojej akceptacji. Zwykle zajmuje to kilka minut; nic nie trafia do publicznego profilu bez Twojej zgody.",
+    },
     priceNote: "Wszystkie ceny dla profesjonalistów są cenami netto. VAT naliczamy zgodnie z obowiązującą stawką. Firmy mogą podać dane do faktury oraz NIP lub numer VAT UE.",
     primaryCta: "Załóż konto profesjonalisty",
     pricingCta: "Zobacz pełny cennik",
@@ -65,6 +72,12 @@ const copy: Record<SiteLocale, ServicesPricingCopy> = {
     studioCoverage: {
       title: "One studio plan, with no extra fees for the team",
       body: "An active paid studio subscription includes the personal profiles of all active team members. They do not need a separate plan while they remain active members of that studio.",
+    },
+    faq: {
+      badge: "AI Portfolio Assistant",
+      title: "Frequently asked questions",
+      question: "How quickly can I set up my profile?",
+      answer: "Use the AI Portfolio Assistant — just provide your website address or upload photos, and AI will group them into projects and prepare a draft for your approval. It usually takes a few minutes; nothing goes live without your confirmation.",
     },
     priceNote: "All professional prices are net prices. VAT is charged at the applicable rate. Companies can provide invoice details and a NIP / EU VAT ID.",
     primaryCta: "Create a professional account",

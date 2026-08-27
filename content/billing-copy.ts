@@ -136,7 +136,7 @@ const copy: Record<SiteLocale, BillingCopy> = {
           monthly: "89 zł / miesiąc",
           yearly: "599 zł / rok",
           yearlyNote: "Oszczędzasz przy rozliczeniu rocznym.",
-          features: ["Profil w Katalogu Projektantów", "Portfolio i projekty", "Briefy, wiadomości i statystyki", "Ocena w Google i linki do mediów społecznościowych"],
+          features: ["Profil w Katalogu Projektantów", "Portfolio i projekty", "Asystent portfolio AI — zbuduj profil ze zdjęć", "Briefy, wiadomości i statystyki", "Ocena w Google i linki do mediów społecznościowych"],
         },
         studio: {
           title: "Pracownia",
@@ -144,7 +144,7 @@ const copy: Record<SiteLocale, BillingCopy> = {
           monthly: "199 zł / miesiąc",
           yearly: "1 099 zł / rok",
           yearlyNote: "Lepsza stawka przy rozliczeniu rocznym.",
-          features: ["Wspólny profil pracowni i portfolio", "Zespół projektantów i wspólna skrzynka", "Osobiste profile aktywnych członków zespołu bez dodatkowej opłaty", "Statystyki i rozliczenia dla firmy"],
+          features: ["Wspólny profil pracowni i portfolio", "Asystent portfolio AI dla każdego członka zespołu", "Zespół projektantów i wspólna skrzynka", "Osobiste profile aktywnych członków zespołu bez dodatkowej opłaty", "Statystyki i rozliczenia dla firmy"],
         },
       },
       vatNote: "Wszystkie ceny są cenami netto. VAT naliczamy zgodnie z obowiązującą stawką. Firmy mogą podać dane do faktury oraz NIP lub numer VAT UE.",
@@ -178,8 +178,8 @@ const copy: Record<SiteLocale, BillingCopy> = {
       metadata: { title: "Pricing for designers and studios", description: "Clear ArchiCompass plans for interior designers and design studios." },
       eyebrow: "For professionals", title: "Grow your profile, portfolio, and client relationships.", intro: "ArchiCompass remains free for clients. Designers and studios receive full access for their first 3 months, then choose a plan to keep their profile, portfolio, and enquiries active.", founderTitle: "Your first 3 months are free", founderBody: "No card is required at registration. During your complimentary period, you can complete your profile, publish your portfolio, and test brief matching.", clientNote: "Client accounts, AI Project Compass, saved inspiration, and contacting professionals remain free.", monthlyLabel: "Monthly", yearlyLabel: "Yearly",
       plans: {
-        designer: { title: "Designer", description: "For independent interior designers and architects.", monthly: "PLN 89 / month", yearly: "PLN 599 / year", yearlyNote: "Save with annual billing.", features: ["Profile in the Designer Directory", "Portfolio and projects", "Briefs, messages, and analytics", "Google Business rating and social links"] },
-        studio: { title: "Studio", description: "For teams operating under a shared studio profile.", monthly: "PLN 199 / month", yearly: "PLN 1,099 / year", yearlyNote: "A better rate with annual billing.", features: ["Shared studio profile and portfolio", "Designer team and shared inbox", "Personal profiles for active team members at no extra cost", "Analytics and company billing"] },
+        designer: { title: "Designer", description: "For independent interior designers and architects.", monthly: "PLN 89 / month", yearly: "PLN 599 / year", yearlyNote: "Save with annual billing.", features: ["Profile in the Designer Directory", "Portfolio and projects", "AI Portfolio Assistant — build your profile from photos", "Briefs, messages, and analytics", "Google Business rating and social links"] },
+        studio: { title: "Studio", description: "For teams operating under a shared studio profile.", monthly: "PLN 199 / month", yearly: "PLN 1,099 / year", yearlyNote: "A better rate with annual billing.", features: ["Shared studio profile and portfolio", "AI Portfolio Assistant for every team member", "Designer team and shared inbox", "Personal profiles for active team members at no extra cost", "Analytics and company billing"] },
       },
       vatNote: "All prices are net prices. VAT is charged at the applicable rate. Companies can provide invoice details and a NIP / EU VAT ID.", getStarted: "Create a professional account", signIn: "Sign in to billing", faqTitle: "How billing works", faq: [
         { question: "When does payment start?", answer: "After 90 days of complimentary access. Before the period ends, you will choose a monthly or annual plan." },

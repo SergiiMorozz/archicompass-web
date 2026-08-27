@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { applyPolishArticleCopy } from "@/content/pl/copy";
 import { getSiteCopy } from "@/content/site-copy";
+import AiFeatureBadge from "@/components/AiFeatureBadge";
 import { localizeArticle, type ArticleLocalizationFields } from "@/lib/article-content";
 import { localeAssetPath, siteLocale } from "@/lib/site-locale";
 import { createPublicContentClient } from "@/lib/public-content-client";
@@ -258,6 +259,38 @@ function CompactResult() {
   );
 }
 
+function DesignerValueCard({
+  item,
+  index,
+}: {
+  item: (typeof homeCopy.designerValue.items)[number];
+  index: number;
+}) {
+  const content = (
+    <>
+      {item.badge ? (
+        <AiFeatureBadge>{item.badge}</AiFeatureBadge>
+      ) : (
+        <span className={`grid h-10 w-10 place-items-center rounded-xl text-lg ${index % 2 === 0 ? "bg-primary-soft text-primary" : "bg-accent-soft text-accent"}`} aria-hidden="true">
+          {["◉", "↗", "↔", "✦"][index]}
+        </span>
+      )}
+      <p className="mt-4 font-bold">{item.title}</p>
+      <p className="mt-2 text-sm leading-6 text-muted">{item.body}</p>
+    </>
+  );
+
+  return (
+    <article className="rounded-xl bg-background p-4">
+      {item.href ? (
+        <Link href={item.href} className="group block rounded-lg outline-none transition hover:bg-primary-soft/55 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" aria-label={item.title}>
+          {content}
+        </Link>
+      ) : content}
+    </article>
+  );
+}
+
 export default async function Home() {
   const { featuredArticles, featuredProfessionals, featuredProjects } = await homeData();
   const { stepOne, stepTwo, stepThree } = homeCopy.howItWorks;
@@ -331,7 +364,7 @@ export default async function Home() {
           <article className="relative flex flex-col overflow-hidden rounded-2xl border border-primary/20 bg-primary-soft/45 p-6 shadow-[0_16px_42px_rgba(54,31,73,0.07)] sm:p-7">
             <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full border-[28px] border-primary/10" aria-hidden="true" />
             <div className="relative"><StepTop number={stepTwo.number} icon="✦" /></div>
-            <p className="relative mt-5 text-[10px] font-bold uppercase tracking-[0.14em] text-primary">{stepTwo.badge}</p>
+            <AiFeatureBadge className="relative mt-5">{stepTwo.badge}</AiFeatureBadge>
             <h3 className="relative mt-3 text-2xl font-bold leading-tight">{stepTwo.title}</h3>
             <p className="relative mt-3 text-sm leading-6 text-muted">{stepTwo.body}</p>
             <div className="relative mt-6 rounded-2xl border border-white bg-card p-4 shadow-sm">
@@ -431,9 +464,9 @@ export default async function Home() {
 
         <div className="mt-6 rounded-2xl border border-line bg-card p-6 sm:p-8">
           <h3 className="text-2xl font-bold">{homeCopy.designerValue.headline}</h3>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {homeCopy.designerValue.items.map(({ body, title }, index) => (
-              <article key={title} className="rounded-xl bg-background p-4"><span className={`grid h-10 w-10 place-items-center rounded-xl text-lg ${index % 2 === 0 ? "bg-primary-soft text-primary" : "bg-accent-soft text-accent"}`} aria-hidden="true">{["◉", "↗", "↔", "✦"][index]}</span><p className="mt-4 font-bold">{title}</p><p className="mt-2 text-sm leading-6 text-muted">{body}</p></article>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {homeCopy.designerValue.items.map((item, index) => (
+              <DesignerValueCard key={item.title} item={item} index={index} />
             ))}
           </div>
         </div>

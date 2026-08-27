@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getSiteCopy } from "@/content/site-copy";
 import { getBillingCopy } from "@/content/billing-copy";
+import { portfolioAutopilotReturnPath } from "@/lib/portfolio-autopilot-return";
 import { pageMetadata } from "@/lib/seo";
 
 const authCopy = getSiteCopy().auth;
@@ -13,7 +14,16 @@ export const metadata: Metadata = pageMetadata({
   path: "/get-started",
 });
 
-export default function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams?: Promise<{ next?: string }>;
+}) {
+  const next = portfolioAutopilotReturnPath((await searchParams)?.next);
+  const designerOnboarding = new URLSearchParams({ intent: "designer" });
+  if (next) designerOnboarding.set("next", next);
+  const designerSignupHref = `/login?mode=signup&next=${encodeURIComponent(`/onboarding?${designerOnboarding.toString()}`)}`;
+
   return (
     <main className="px-4 py-16 sm:px-6">
       <section className="mx-auto max-w-3xl rounded-3xl border border-line bg-card p-6 shadow-sm sm:p-8">
@@ -30,7 +40,7 @@ export default function Page() {
             </p>
             <div className="mt-5 text-sm font-semibold text-primary">{authCopy.getStarted.clientCta}</div>
           </Link>
-          <Link href="/login?mode=signup&next=/onboarding?intent=designer" className="rounded-2xl border border-primary bg-primary-soft p-6">
+          <Link href={designerSignupHref} className="rounded-2xl border border-primary bg-primary-soft p-6">
             <div className="text-lg font-semibold text-primary">{authCopy.getStarted.designerTitle}</div>
             <p className="mt-2 text-sm leading-6 text-muted">
               {authCopy.getStarted.designerDescription}
