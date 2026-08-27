@@ -40,6 +40,7 @@ const portfolioAutopilotCopyByLocale = {
       intro:
         "Wskaż swoją stronę z portfolio lub dodaj zdjęcia ręcznie. ArchiCompass pogrupuje je w projekty, przeanalizuje charakter Twojej pracy i przygotuje szkic profilu — Ty go tylko sprawdzisz.",
       timeNote: "To zajmuje kilka minut. Zanim cokolwiek stanie się publiczne, wszystko sprawdzisz i zatwierdzisz.",
+      illustrationAlt: "Podaj adres strony, a AI znajdzie zdjęcia i przygotuje profil",
       sourceTypeLabel: "Skąd wziąć zdjęcia?",
       sourceWebsite: "Strona internetowa lub portfolio online",
       sourceUpload: "Wgraj zdjęcia ręcznie",
@@ -265,6 +266,7 @@ const portfolioAutopilotCopyByLocale = {
       intro:
         "Point us to your portfolio website, or upload photos manually. ArchiCompass will group them into projects, analyze your design character, and prepare a draft profile - you just review it.",
       timeNote: "It takes a few minutes. You review and approve everything before anything becomes public.",
+      illustrationAlt: "Add your website address and AI finds photos and prepares your profile",
       sourceTypeLabel: "Where should we get your photos?",
       sourceWebsite: "Website or online portfolio",
       sourceUpload: "Upload photos manually",
