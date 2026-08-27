@@ -256,10 +256,9 @@ export default function ReviewBoard({
       const response = await fetch(localePublicPath(siteLocale, `/api/portfolio-import/${jobId}/publish`), {
         method: "POST",
       });
-      const result = (await response.json().catch(() => ({}))) as { allPublished?: boolean };
-      if (!response.ok) throw new Error(copy.publishFailed);
+      const result = (await response.json().catch(() => ({}))) as { allPublished?: boolean; error?: string };
       if (result.allPublished) setPublished(true);
-      else setError(copy.publishFailed);
+      else setError(result.error || copy.publishFailed);
     } catch {
       setError(copy.publishFailed);
     } finally {
