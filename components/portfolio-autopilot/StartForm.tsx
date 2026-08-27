@@ -105,12 +105,14 @@ export default function PortfolioAutopilotStartForm() {
 
       {sourceType === "website" ? (
         <label className="block text-sm font-semibold">
-          {copy.websiteUrlLabel} <span className="font-normal text-muted">{copy.websiteUrlHint}</span>
+          <span>{copy.websiteUrlLabel}</span>
+          <span className="mt-1 block font-normal leading-5 text-muted">{copy.websiteUrlHint}</span>
           <input name="source_url" type="text" placeholder={copy.websiteUrlPlaceholder} className={fieldClass} />
         </label>
       ) : (
         <label className="block text-sm font-semibold">
-          {copy.uploadLabel} <span className="font-normal text-muted">{copy.uploadHint(maxUploadFiles)}</span>
+          <span>{copy.uploadLabel}</span>
+          <span className="mt-1 block font-normal leading-5 text-muted">{copy.uploadHint(maxUploadFiles)}</span>
           <input
             name="portfolio_files"
             type="file"

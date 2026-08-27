@@ -19,14 +19,14 @@ export default function PortfolioAutopilotStartPage() {
       <p className="mt-3 text-base text-muted">{copy.intro}</p>
       <p className="mt-2 text-sm font-medium text-foreground">{copy.timeNote}</p>
       <AutopilotFlowSteps active="source" />
-      <section className="mt-6 overflow-hidden rounded-2xl border border-line bg-[#faf9f7] px-4 py-5 sm:px-7 sm:py-6">
+      <section className="mt-5 overflow-hidden rounded-2xl border border-line bg-[#faf9f7] px-4 py-3 sm:px-6 sm:py-4">
         <Image
           src="/images/portfolio-assistant-import-flow.png"
           alt={copy.illustrationAlt}
           width={1672}
           height={941}
-          sizes="(max-width: 640px) 100vw, 672px"
-          className="mx-auto h-auto w-full max-w-[672px]"
+          sizes="(max-width: 640px) 88vw, 560px"
+          className="mx-auto h-auto w-[88%] max-w-[560px]"
         />
       </section>
       <PortfolioAutopilotStartForm />
