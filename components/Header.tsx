@@ -111,6 +111,7 @@ export default function Header() {
   const [account, setAccount] = useState<
     { id: string; isAdmin: boolean; isProfessional: boolean; unreadCount: number } | null
   >(null);
+  const [authResolved, setAuthResolved] = useState(false);
 
   useEffect(() => {
     const path = pathname?.replace(/^\/en(?=\/|$)/, "") || "/";
@@ -138,7 +139,10 @@ export default function Header() {
 
     async function syncAccount(userId: string | null) {
       if (!userId) {
-        if (active) setAccount(null);
+        if (active) {
+          setAccount(null);
+          setAuthResolved(true);
+        }
         return;
       }
 
@@ -214,11 +218,20 @@ export default function Header() {
           isProfessional,
           unreadCount,
         });
+        setAuthResolved(true);
       }
     }
 
-    void supabase.auth.getUser().then(({ data }) => syncAccount(data.user?.id ?? null));
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+    void supabase.auth.getUser()
+      .then(({ data }) => syncAccount(data.user?.id ?? null))
+      .catch(() => {
+        if (active) {
+          setAccount(null);
+          setAuthResolved(true);
+        }
+      });
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && active) setAuthResolved(false);
       void syncAccount(session?.user.id ?? null);
     });
 
@@ -259,7 +272,12 @@ export default function Header() {
           <a href={languageHref} hrefLang={otherLocale()} className="rounded-xl border border-line bg-card px-3 py-2 text-sm font-medium text-foreground">
             {copy.header.languageSwitch}
           </a>
-          {account ? (
+          {!authResolved ? (
+            <div aria-busy="true" className="flex items-center gap-2">
+              <span aria-hidden="true" className="h-10 w-24 animate-pulse rounded-xl bg-primary-soft" />
+              <span aria-hidden="true" className="h-10 w-20 animate-pulse rounded-xl bg-primary-soft" />
+            </div>
+          ) : account ? (
             <div className="flex items-center gap-2">
               <Link
                 href={appHref(account.isProfessional ? "/studio/inbox" : "/client/messages")}
@@ -355,7 +373,11 @@ export default function Header() {
                 {item.label}
               </NavLink>
             ))}
-            {account ? (
+            {!authResolved ? (
+              <div aria-busy="true" className="mt-2 border-t border-line pt-3">
+                <span aria-hidden="true" className="block h-12 animate-pulse rounded-xl bg-primary-soft" />
+              </div>
+            ) : account ? (
               <div className="mt-2 grid gap-2 border-t border-line pt-3">
                 <div className="px-3 text-xs font-semibold uppercase text-muted">{copy.header.userPanel}</div>
                 <NavLink href={account.isProfessional ? "/studio/inbox" : "/client/messages"} onClick={() => setIsOpen(false)}>

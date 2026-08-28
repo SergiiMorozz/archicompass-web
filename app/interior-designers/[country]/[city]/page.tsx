@@ -79,10 +79,10 @@ async function professionalsForLocation(location: SeoLocation) {
   return {
     designers: ((profiles.data ?? []) as Designer[])
       .map((profile) => localizeProfileContent(profile, siteLocale))
-      .filter((profile) => !profile.is_demo && matchesSeoLocation(profile.location, location)),
+      .filter((profile) => matchesSeoLocation(profile.location, location)),
     studios: ((studios.data ?? []) as Studio[])
       .map((studio) => localizeProfileContent(studio, siteLocale))
-      .filter((studio) => !studio.is_demo && matchesSeoLocation(studio.location, location)),
+      .filter((studio) => matchesSeoLocation(studio.location, location)),
   };
 }
 
@@ -103,7 +103,9 @@ export async function cityDirectoryMetadata(country: string, city: string): Prom
   }
   const { designers, studios } = await professionalsForLocation(location);
   const cityName = seoLocationName(location, siteLocale);
-  const count = designers.length + studios.length;
+  // Demo profiles may be useful while the beta catalogue is sparse, but they
+  // must never make a location eligible for search indexing.
+  const indexableCount = [...designers, ...studios].filter((professional) => !professional.is_demo).length;
   const polishPath = locationPath(location, "pl");
   const englishPath = locationPath(location, "en");
   return pageMetadata({
@@ -114,7 +116,7 @@ export async function cityDirectoryMetadata(country: string, city: string): Prom
       ? `Znajdź i porównaj projektantów wnętrz oraz pracownie działające ${cityContext(location)}. Zobacz portfolio, zakres usług, opinie Google i wyślij dobrze przygotowany brief.`
       : `Find and compare interior designers and design studios working ${cityContext(location)}. Review portfolios, services, Google reviews, and send a well-prepared brief.`,
     path: locationPath(location, siteLocale),
-    noIndex: count === 0,
+    noIndex: indexableCount === 0,
     alternates: {
       canonical: absoluteUrl(locationPath(location, siteLocale)),
       languages: { pl: polishUrl(polishPath), en: englishUrl(englishPath), "x-default": polishUrl(polishPath) },
@@ -146,6 +148,7 @@ export async function CityDirectoryPage({ country, city }: { country: string; ci
       rating: studio.google_rating,
       reviewCount: studio.google_review_count,
       googleUrl: studio.google_business_url,
+      isDemo: studio.is_demo,
       href: `/studios/${studio.id}`,
     })),
     ...designers.map((designer) => ({
@@ -158,9 +161,11 @@ export async function CityDirectoryPage({ country, city }: { country: string; ci
       rating: designer.google_rating,
       reviewCount: designer.google_review_count,
       googleUrl: designer.google_business_url,
+      isDemo: designer.is_demo,
       href: `/designers/${designer.id}`,
     })),
   ];
+  const indexableProfessionals = professionals.filter((professional) => !professional.isDemo);
   const relatedLocations = seoLocations
     .filter((item) => item.countrySlug === location.countrySlug && item.citySlug !== location.citySlug)
     .slice(0, 6);
@@ -191,8 +196,8 @@ export async function CityDirectoryPage({ country, city }: { country: string; ci
             },
             mainEntity: {
               "@type": "ItemList",
-              numberOfItems: professionals.length,
-              itemListElement: professionals.map((professional, index) => ({
+              numberOfItems: indexableProfessionals.length,
+              itemListElement: indexableProfessionals.map((professional, index) => ({
                 "@type": "ListItem",
                 position: index + 1,
                 url: absoluteUrl(professional.href),
@@ -245,7 +250,14 @@ export async function CityDirectoryPage({ country, city }: { country: string; ci
           <div className="mt-7 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {professionals.map((professional) => (
               <article key={`${professional.type}-${professional.id}`} className="rounded-lg border border-line bg-card p-6 shadow-sm">
-                <div className="text-xs font-bold uppercase text-primary">{professional.type}</div>
+                <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase text-primary">
+                  <span>{professional.type}</span>
+                  {professional.isDemo ? (
+                    <span className="rounded-full bg-[#fff3df] px-2.5 py-1 text-[10px] font-bold normal-case text-[#b56b08]">
+                      {copy.demoProfile}
+                    </span>
+                  ) : null}
+                </div>
                 <h3 className="mt-2 text-2xl font-bold"><Link href={professional.href} className="hover:text-primary">{professional.name}</Link></h3>
                 <p className="mt-2 text-sm font-semibold text-muted">{professional.location || cityName}</p>
                 <div className="mt-3"><GoogleRating compact rating={professional.rating} count={professional.reviewCount} url={professional.googleUrl} /></div>
