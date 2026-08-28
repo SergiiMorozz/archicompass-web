@@ -33,6 +33,7 @@ export type ProjectCompassJourneyCopy = {
     transparency: string;
   };
   analysis: {
+    ready: string;
     result: string;
     suggestedStyle: string;
     confidence: string;
@@ -114,6 +115,7 @@ const journeyCopy: Record<SiteLocale, ProjectCompassJourneyCopy> = {
       transparency: "Jak działa AI",
     },
     analysis: {
+      ready: "Analiza gotowa — poniżej znajdziesz wynik.",
       result: "Wynik analizy AI",
       suggestedStyle: "Proponowany kierunek",
       confidence: "Pewność analizy",
@@ -196,6 +198,7 @@ const journeyCopy: Record<SiteLocale, ProjectCompassJourneyCopy> = {
       transparency: "How AI works",
     },
     analysis: {
+      ready: "Analysis ready — your result is below.",
       result: "AI analysis result",
       suggestedStyle: "Suggested direction",
       confidence: "Analysis confidence",

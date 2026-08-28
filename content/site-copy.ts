@@ -89,6 +89,7 @@ type HomeCopy = {
     headline: string;
     body: string;
     checklist: string[];
+    aiCompass: { badge: string; description: string; name: string; href: string };
     primaryCta: string;
     secondaryCta: string;
   };
@@ -126,7 +127,7 @@ type HomeCopy = {
     emptyTitle: string;
     emptyCta: string;
   };
-  closingCta: { headline: string; body: string; primaryCta: string; secondaryCta: string; reassurance: string };
+  closingCta: { headline: string; body: string; primaryCta: string; secondaryCta: string };
   projectCategories: Record<string, string>;
 };
 
@@ -672,6 +673,12 @@ const pl: SiteCopy = {
         "Bezpośredni kontakt ze specjalistą",
         "Bez opłat dla klientów",
       ],
+      aiCompass: {
+        badge: "AI",
+        description: "Poznaj styl swoich inspiracji z pomocą AI",
+        name: "AI Project Compass",
+        href: "/AI-project-compass",
+      },
       primaryCta: "Poznaj swój styl z AI",
       secondaryCta: "Katalog projektantów",
     },
@@ -724,7 +731,6 @@ const pl: SiteCopy = {
       body: "ArchiCompass pomoże zamienić je w konkretny kierunek projektu i znaleźć specjalistów, którzy mogą go zrealizować.",
       primaryCta: "Poznaj swój styl i znajdź projektanta z AI",
       secondaryCta: "Katalog projektantów",
-      reassurance: "Zacznij od inspiracji, które już masz.",
     },
     projectCategories: { Apartment: "Mieszkanie", House: "Dom", Loft: "Loft", Hospitality: "Hotelarstwo i gastronomia", "Rental property": "Nieruchomość na wynajem", Kitchen: "Kuchnia", "Dining room": "Jadalnia", "Home office": "Gabinet domowy", Bedroom: "Sypialnia", Penthouse: "Penthouse", Office: "Biuro" },
   },
@@ -1070,6 +1076,12 @@ const en: SiteCopy = {
         "Direct contact with the specialist",
         "No fees for clients",
       ],
+      aiCompass: {
+        badge: "AI",
+        description: "Understand the style behind your inspiration with AI",
+        name: "AI Project Compass",
+        href: "/AI-project-compass",
+      },
       primaryCta: "Discover your style with AI",
       secondaryCta: "Designer Directory",
     },
@@ -1122,7 +1134,6 @@ const en: SiteCopy = {
       body: "ArchiCompass will help turn it into a clear project direction and find specialists who can bring it to life.",
       primaryCta: "Discover your style and find a designer with AI",
       secondaryCta: "Designer Directory",
-      reassurance: "Start with the inspiration you already have.",
     },
     projectCategories: { Apartment: "Apartment", House: "House", Loft: "Loft", Hospitality: "Hospitality", "Rental property": "Rental property", Kitchen: "Kitchen", "Dining room": "Dining room", "Home office": "Home office", Bedroom: "Bedroom", Penthouse: "Penthouse", Office: "Office" },
   },

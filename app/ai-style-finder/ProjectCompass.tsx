@@ -836,6 +836,20 @@ export default function ProjectCompass({
   const [draftRestored, setDraftRestored] = useState(false);
   const objectUrls = useRef<string[]>([]);
   const journeyPhotoInputRef = useRef<HTMLInputElement>(null);
+  const analysisResultRef = useRef<HTMLElement>(null);
+  const shouldScrollToAnalysisRef = useRef(false);
+
+  useEffect(() => {
+    if (!styleAnalysis || !shouldScrollToAnalysisRef.current) return;
+
+    shouldScrollToAnalysisRef.current = false;
+    const timeout = window.setTimeout(() => {
+      analysisResultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      analysisResultRef.current?.focus({ preventScroll: true });
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
+  }, [styleAnalysis]);
 
   function markModule(module: WorkspaceModule) {
     setTouchedModules((current) => (current[module] ? current : { ...current, [module]: true }));
@@ -1337,6 +1351,7 @@ export default function ProjectCompass({
         throw new Error(responseError(payload.error, copy.ui.errors.analysis));
       }
 
+      shouldScrollToAnalysisRef.current = true;
       setStyleAnalysis(payload.analysis);
       markModule("inspirations");
       markModule("preferences");
@@ -1653,7 +1668,8 @@ export default function ProjectCompass({
           ) : null}
 
           {journeyPhase === "inspiration" && styleAnalysis ? (
-            <section className="mt-6 rounded-[2rem] border border-primary/20 bg-[#f8f4ff] p-5 sm:p-8">
+            <section ref={analysisResultRef} tabIndex={-1} className="mt-6 scroll-mt-24 rounded-[2rem] border border-primary/20 bg-[#f8f4ff] p-5 outline-none sm:p-8">
+              <p role="status" className="mb-4 text-sm font-bold text-primary">{journeyCopy.analysis.ready}</p>
               <div className="flex flex-col gap-4 border-b border-primary/15 pb-5 sm:flex-row sm:items-start sm:justify-between"><div><div className="text-xs font-bold uppercase tracking-[0.13em] text-primary">{journeyCopy.analysis.result}</div><h2 className="mt-2 text-3xl font-bold">{styleAnalysis.primaryStyle}</h2></div><span className="w-fit rounded-full bg-white px-3 py-1.5 text-xs font-bold text-primary">{journeyCopy.analysis.confidence}: {confidenceLabel(styleAnalysis.confidence)}</span></div>
               <p className="mt-5 max-w-3xl text-base leading-7 text-muted">{styleAnalysis.summary}</p>
               <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">

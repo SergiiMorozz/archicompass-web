@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getSiteCopy } from "@/content/site-copy";
 import { getBillingCopy } from "@/content/billing-copy";
+import EarlyAccessNotice from "@/components/EarlyAccessNotice";
 import { portfolioAssistantReturnPath } from "@/lib/portfolio-autopilot-return";
 import { pageMetadata } from "@/lib/seo";
 
@@ -45,8 +46,8 @@ export default async function Page({
             <p className="mt-2 text-sm leading-6 text-muted">
               {authCopy.getStarted.designerDescription}
             </p>
+            <EarlyAccessNotice compact className="mt-5 text-left" />
             <div className="mt-5 text-sm font-semibold text-primary">{authCopy.getStarted.designerCta}</div>
-            <div className="mt-3 text-xs font-semibold text-accent">{billingCopy.pricing.founderTitle}</div>
           </Link>
         </div>
         <p className="mt-6 text-center text-sm text-muted"><Link href="/pricing" className="font-semibold text-primary hover:underline">{billingCopy.pricing.metadata.title}</Link></p>
