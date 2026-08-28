@@ -230,6 +230,15 @@ export function localizedText(locale: SiteLocale, polish: string | null | undefi
   return primary || secondary || fallback;
 }
 
+function localizedArticleText(locale: SiteLocale, polish: string | null | undefined, english: string | null | undefined, fallback = "") {
+  // The original article fields are Polish-first legacy content. On Polish
+  // pages, keep that reviewed fallback ahead of an optional English field.
+  // This prevents an English translation from replacing a valid Polish source
+  // merely because the dedicated *_pl column has not been filled yet.
+  if (locale === "pl") return cleanText(polish) || cleanText(fallback) || cleanText(english);
+  return cleanText(english) || cleanText(polish) || cleanText(fallback);
+}
+
 export function localizedBlockText(block: ArticleBlock, locale: SiteLocale, field = "content") {
   return localizedText(
     locale,
@@ -297,17 +306,17 @@ export function articleBlocksToRichHtml(blocks: ArticleBlock[], locale: SiteLoca
 
 export function localizeArticle<T extends ArticleLocalizationFields>(article: T, locale: SiteLocale) {
   const blocks = parseArticleBlocks(article.content_blocks);
-  const title = localizedText(locale, article.title_pl, article.title_en, article.title);
-  const excerpt = localizedText(locale, article.excerpt_pl, article.excerpt_en, article.excerpt);
+  const title = localizedArticleText(locale, article.title_pl, article.title_en, article.title);
+  const excerpt = localizedArticleText(locale, article.excerpt_pl, article.excerpt_en, article.excerpt);
   return {
     ...article,
     title,
     excerpt,
-    author_name: localizedText(locale, article.author_name_pl, article.author_name_en, article.author_name || "") || null,
-    cover_alt: localizedText(locale, article.cover_alt_pl, article.cover_alt_en, title),
-    meta_title: localizedText(locale, article.meta_title_pl, article.meta_title_en, title),
-    meta_description: localizedText(locale, article.meta_description_pl, article.meta_description_en, excerpt),
-    focus_keyword: localizedText(locale, article.focus_keyword_pl, article.focus_keyword_en),
+    author_name: localizedArticleText(locale, article.author_name_pl, article.author_name_en, article.author_name || "") || null,
+    cover_alt: localizedArticleText(locale, article.cover_alt_pl, article.cover_alt_en, title),
+    meta_title: localizedArticleText(locale, article.meta_title_pl, article.meta_title_en, title),
+    meta_description: localizedArticleText(locale, article.meta_description_pl, article.meta_description_en, excerpt),
+    focus_keyword: localizedArticleText(locale, article.focus_keyword_pl, article.focus_keyword_en),
     content_blocks: blocks,
   };
 }

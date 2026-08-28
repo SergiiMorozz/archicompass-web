@@ -321,7 +321,9 @@ export type SiteCopy = {
   home: HomeCopy;
 };
 
-const sharedCompany = "SM Advisory, Sergii Moroz · NIP 5252995634 · REGON 528006413 · ul. Grzybowska 2, lok. 31, 00-131 Warszawa, Polska";
+const companyDetails = "NIP 5252995634 · REGON 528006413 · ul. Grzybowska 2, lok. 31, 00-131 Warszawa, Polska";
+const polishCompany = `Sergii Moroz, prowadzący działalność gospodarczą pod firmą Sergii Moroz Advisory (SM Advisory) · ${companyDetails}`;
+const englishCompany = `Sergii Moroz, trading as Sergii Moroz Advisory (SM Advisory) · ${companyDetails}`;
 
 const pl: SiteCopy = {
   locale: "pl",
@@ -352,7 +354,7 @@ const pl: SiteCopy = {
   },
   footer: {
     brandDescription: "Zamień inspiracje w precyzyjny brief projektowy, a następnie znajdź projektantów i architektów dopasowanych do Twojej inwestycji.",
-    company: `Platforma prowadzona przez ${sharedCompany}`,
+    company: `Platforma prowadzona przez ${polishCompany}`,
     navigationTitle: "Nawigacja",
     popularLocationsTitle: "Popularne lokalizacje",
     legalTitle: "Informacje prawne",
@@ -626,7 +628,7 @@ const pl: SiteCopy = {
         matchCriteria: ["Styl i inspiracje", "Zakres współpracy", "Budżet i lokalizację"],
         designers: [
           { name: "Studio Wątek", tag: "Ciepłe japandi", location: "Warszawa", match: "92%", mark: "SW" },
-          { name: "Marta Wysocka", tag: "Soft minimalism", location: "Warszawa", match: "88%", mark: "MW" },
+          { name: "Marta Wysocka", tag: "soft minimalizm", location: "Warszawa", match: "88%", mark: "MW" },
           { name: "Piotr Zieliński", tag: "Naturalne materiały", location: "Gdańsk", match: "84%", mark: "PZ" },
         ],
       },
@@ -737,7 +739,7 @@ const en: SiteCopy = {
   },
   footer: {
     brandDescription: "Turn inspiration into a precise project brief, then find designers and architects suited to your project.",
-    company: `Platform operated by ${sharedCompany}`,
+    company: `Platform operated by ${englishCompany}`,
     navigationTitle: "Navigation",
     popularLocationsTitle: "Popular locations",
     legalTitle: "Legal information",
