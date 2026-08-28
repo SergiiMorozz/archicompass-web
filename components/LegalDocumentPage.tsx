@@ -29,7 +29,7 @@ export default function LegalDocumentPage({
       {!fullText ? <p className="mt-6 max-w-3xl text-lg leading-8 text-muted">{document.intro}</p> : null}
 
       {fullText ? (
-        <div className="mt-8 grid gap-2.5 text-[0.9375rem] leading-6 text-muted sm:text-base sm:leading-7">
+        <div className="mt-8 grid gap-2 text-[0.9375rem] leading-6 text-muted sm:text-base sm:leading-6">
           {fullTextLines.map((line, index) => {
             if (line === "⸻") return null;
 
@@ -52,7 +52,7 @@ export default function LegalDocumentPage({
           {document.sections.map((section) => (
           <section key={section.title}>
             <h2 className="text-2xl font-bold">{section.title}</h2>
-            <div className="mt-3 grid gap-2.5 text-base leading-7 text-muted">
+            <div className="mt-3 grid gap-2 text-base leading-6 text-muted">
               {section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
               {section.bullets?.length ? (
                 <ul className="ml-5 grid list-disc gap-2">

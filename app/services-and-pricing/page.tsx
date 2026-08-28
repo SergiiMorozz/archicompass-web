@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import AiFeatureBadge from "@/components/AiFeatureBadge";
+import EarlyAccessNotice from "@/components/EarlyAccessNotice";
 import { getBillingCopy } from "@/content/billing-copy";
 import { getServicesPricingCopy } from "@/content/services-pricing-copy";
 import { localeAppPath } from "@/lib/site-locale";
@@ -89,6 +90,8 @@ export default function ServicesAndPricingPage() {
           <p className="mt-3 max-w-4xl leading-7 text-muted">{copy.professionalTrial.body}</p>
         </section>
 
+        <EarlyAccessNotice className="mt-6" />
+
         <section className="mt-14 grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.16em] text-accent">{billing.eyebrow}</p>
@@ -106,7 +109,7 @@ export default function ServicesAndPricingPage() {
           </div>
         </section>
 
-        <section className="mt-14 max-w-3xl" aria-labelledby="portfolio-assistant-faq">
+        <section className="mt-14" aria-labelledby="portfolio-assistant-faq">
           <AiFeatureBadge>{copy.faq.badge}</AiFeatureBadge>
           <h2 id="portfolio-assistant-faq" className="mt-4 text-3xl font-bold">{copy.faq.title}</h2>
           <article className="mt-6 rounded-2xl border border-primary/20 bg-primary-soft/55 p-6 sm:p-7">

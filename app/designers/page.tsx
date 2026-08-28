@@ -536,7 +536,7 @@ function DesignerCard({
             style={{ backgroundImage: `url(${cover})` }}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-[#1f172a]/72 to-transparent" />
-            <div className="absolute bottom-4 left-4 h-14 w-14 overflow-hidden rounded-2xl border-2 border-white bg-primary shadow">
+            <div className="absolute bottom-5 left-5 h-20 w-20 overflow-hidden rounded-[1.35rem] border-[3px] border-white bg-primary shadow-[0_10px_26px_rgba(31,23,42,0.35)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={identityImage || cover} alt={`${title} ${copy.cards.profilePhoto}`} className="h-full w-full object-cover" />
             </div>
@@ -652,7 +652,7 @@ function DesignerCard({
         <div className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-sm font-semibold text-foreground shadow-sm">
           {profile.is_demo ? copy.cards.demoProfile : copy.cards.professional}
         </div>
-        <div className="absolute bottom-4 left-4 h-14 w-14 overflow-hidden rounded-2xl border-2 border-white bg-primary shadow">
+        <div className="absolute bottom-5 left-5 h-16 w-16 overflow-hidden rounded-2xl border-[3px] border-white bg-primary shadow-[0_10px_22px_rgba(31,23,42,0.32)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={identityImage || cover} alt={`${title} ${copy.cards.profilePhoto}`} className="h-full w-full object-cover" />
         </div>

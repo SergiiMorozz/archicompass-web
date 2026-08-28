@@ -438,7 +438,15 @@ export default async function Home() {
               <h2 className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">{homeCopy.forClients.headline}</h2>
               <p className="mt-3 text-sm leading-6 text-muted">{homeCopy.forClients.body}</p>
               <div className="mt-5"><Checklist items={homeCopy.forClients.checklist.slice(0, 4)} compact /></div>
-              <div className="mt-5"><Link href="/AI-project-compass" className="group inline-flex min-h-[52px] items-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(86,35,168,0.22)] transition hover:-translate-y-0.5 hover:bg-primary/90">{homeCopy.forClients.primaryCta}<Arrow /></Link></div>
+              <Link
+                href={homeCopy.forClients.aiCompass.href}
+                className="group mt-4 flex items-center gap-2 rounded-xl border border-primary/20 bg-white/80 px-2.5 py-2.5 text-[13px] font-semibold leading-5 text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              >
+                <AiFeatureBadge className="shrink-0">{homeCopy.forClients.aiCompass.badge}</AiFeatureBadge>
+                <span className="shrink-0 text-primary" aria-hidden="true">·</span>
+                <span className="min-w-0">{homeCopy.forClients.aiCompass.description} — <strong className="font-bold text-primary">{homeCopy.forClients.aiCompass.name}</strong></span>
+              </Link>
+              <div className="mt-auto pt-4"><Link href="/AI-project-compass" className="group inline-flex min-h-[52px] items-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(86,35,168,0.22)] transition hover:-translate-y-0.5 hover:bg-primary/90">{homeCopy.forClients.primaryCta}<Arrow /></Link></div>
             </div>
             <div className="min-h-[220px] bg-primary-soft p-4 md:min-h-0 md:p-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -458,10 +466,10 @@ export default async function Home() {
               >
                 <AiFeatureBadge className="shrink-0">{homeCopy.forDesigners.aiAssistant.badge}</AiFeatureBadge>
                 <span className="shrink-0 text-primary" aria-hidden="true">·</span>
-                <span className="min-w-0">{homeCopy.forDesigners.aiAssistant.description} — <em className="font-bold text-primary">{homeCopy.forDesigners.aiAssistant.name}</em></span>
+                <span className="min-w-0">{homeCopy.forDesigners.aiAssistant.description} — <strong className="font-bold text-primary">{homeCopy.forDesigners.aiAssistant.name}</strong></span>
               </Link>
               <p className="mt-3 text-xs font-medium leading-4 text-muted">{homeCopy.forDesigners.pricingNote} <Link href="/services-and-pricing" className="font-bold text-[#207a68] hover:underline">{homeCopy.forDesigners.pricingCta}</Link></p>
-              <div className="mt-5"><Link href="/get-started" className="group inline-flex min-h-[52px] items-center gap-2 rounded-xl bg-[#1f604d] px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(31,96,77,0.2)] transition hover:-translate-y-0.5 hover:bg-[#19513f]">{homeCopy.forDesigners.primaryCta}<Arrow /></Link></div>
+              <div className="mt-auto pt-4"><Link href="/get-started" className="group inline-flex min-h-[52px] items-center gap-2 rounded-xl bg-[#1f604d] px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(31,96,77,0.2)] transition hover:-translate-y-0.5 hover:bg-[#19513f]">{homeCopy.forDesigners.primaryCta}<Arrow /></Link></div>
             </div>
             <div className="min-h-[220px] bg-accent-soft p-4 md:min-h-0 md:p-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -498,7 +506,7 @@ export default async function Home() {
       </section>
 
       <section className="bg-[#24132f] px-4 py-11 text-white sm:px-6 lg:py-14">
-        <div className="mx-auto max-w-4xl text-center"><span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-xl shadow-[0_14px_34px_rgba(104,40,200,0.5)]" aria-hidden="true">✦</span><h2 className="mt-5 text-3xl font-bold leading-tight sm:text-5xl">{homeCopy.closingCta.headline}</h2><p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-white/72">{homeCopy.closingCta.body}</p><div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/AI-project-compass" className="group inline-flex min-h-[56px] items-center justify-center gap-3 rounded-xl border border-[#caaeff] bg-[#7a35e8] px-6 py-3 font-bold text-white shadow-[0_18px_48px_rgba(74,26,146,0.54)] transition hover:-translate-y-1 hover:bg-[#8c4cf0]"><span className="grid h-7 w-7 place-items-center rounded-full bg-white/16" aria-hidden="true">✦</span>{homeCopy.closingCta.primaryCta}<Arrow /></Link><Link href="/designers" className="group inline-flex min-h-[56px] items-center justify-center gap-2 rounded-xl border border-white/55 bg-white/10 px-6 py-3 font-bold text-white transition hover:-translate-y-1 hover:border-white hover:bg-white/20">{homeCopy.closingCta.secondaryCta}<Arrow /></Link></div><p className="mt-5 text-sm font-medium text-white/62">{homeCopy.closingCta.reassurance}</p></div>
+        <div className="mx-auto max-w-4xl text-center"><span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-xl shadow-[0_14px_34px_rgba(104,40,200,0.5)]" aria-hidden="true">✦</span><h2 className="mt-5 text-3xl font-bold leading-tight sm:text-5xl">{homeCopy.closingCta.headline}</h2><p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-white/72">{homeCopy.closingCta.body}</p><div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/AI-project-compass" className="group inline-flex min-h-[56px] items-center justify-center gap-3 rounded-xl border border-[#caaeff] bg-[#7a35e8] px-6 py-3 font-bold text-white shadow-[0_18px_48px_rgba(74,26,146,0.54)] transition hover:-translate-y-1 hover:bg-[#8c4cf0]"><span className="grid h-7 w-7 place-items-center rounded-full bg-white/16" aria-hidden="true">✦</span>{homeCopy.closingCta.primaryCta}<Arrow /></Link><Link href="/designers" className="group inline-flex min-h-[56px] items-center justify-center gap-2 rounded-xl border border-white/55 bg-white/10 px-6 py-3 font-bold text-white transition hover:-translate-y-1 hover:border-white hover:bg-white/20">{homeCopy.closingCta.secondaryCta}<Arrow /></Link></div></div>
       </section>
     </main>
   );

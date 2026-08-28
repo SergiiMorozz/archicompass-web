@@ -28,18 +28,19 @@ export default async function PortfolioAutopilotImportingPage({
   if (!job) notFound();
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-12">
+    <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-12">
       <h1 className="text-3xl font-bold text-foreground">{copy.title}</h1>
       <AutopilotFlowSteps active="importing" />
-      <section className="mt-6 overflow-hidden rounded-2xl border border-line bg-[#faf9f7] px-4 py-5 sm:px-8 sm:py-7">
-        <Image
-          src="/images/portfolio-assistant-import-flow.png"
-          alt={copy.illustrationAlt}
-          width={1672}
-          height={941}
-          sizes="(max-width: 640px) 100vw, 896px"
-          className="mx-auto h-auto w-full max-w-[836px]"
-        />
+      <section className="mt-5">
+        <div className="relative mx-auto aspect-[2.25] w-full max-w-[1024px] overflow-hidden">
+          <Image
+            src="/images/portfolio-assistant-import-flow.png"
+            alt={copy.illustrationAlt}
+            fill
+            sizes="(max-width: 640px) calc(100vw - 2rem), 1024px"
+            className="object-cover"
+          />
+        </div>
       </section>
       <ImportProgress jobId={jobId} />
     </main>
