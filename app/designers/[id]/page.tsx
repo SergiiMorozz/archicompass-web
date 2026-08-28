@@ -427,6 +427,10 @@ export default async function DesignerProfilePage({
   );
   const copy = getDesignerProfileCopy();
   const briefPath = briefRequestHref(profile.id, selectedBriefId);
+  const publicEmail =
+    !profile.is_demo && profile.id === "2efb9f6f-39b8-4c32-80c4-3bb47068c44e"
+      ? profile.email
+      : null;
   const briefHref = userData.user
     ? localeAppPath(briefPath)
     : localeAppPath(`/login?next=${encodeURIComponent(briefPath)}`);
@@ -683,6 +687,17 @@ export default async function DesignerProfilePage({
                 <span className="text-muted">{profileCopy.labels.contact}</span>
                 <span className="truncate text-right font-semibold">{profile.is_demo ? profileCopy.values.demoContactUnavailable : contactLabel(profile, copy)}</span>
               </div>
+              {publicEmail ? (
+                <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
+                  <span className="text-muted">{siteLocale === "pl" ? "E-mail" : "Email"}</span>
+                  <a
+                    href={`mailto:${publicEmail}`}
+                    className="truncate text-right font-semibold text-primary underline-offset-2 hover:underline"
+                  >
+                    {publicEmail}
+                  </a>
+                </div>
+              ) : null}
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
                 <span className="text-muted">{profileCopy.labels.availability}</span>
                 <span className="text-right font-semibold">{profile.availability_status ? availabilityLabel(profile.availability_status) : profileCopy.values.toBeAgreed}</span>
