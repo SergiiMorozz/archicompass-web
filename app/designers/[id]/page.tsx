@@ -542,8 +542,9 @@ export default async function DesignerProfilePage({
           </div>
         </div>
 
-        <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="self-start rounded-2xl border border-line bg-card p-5 shadow-sm sm:p-6">
+        <div className="mt-6 grid gap-7 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="grid content-start gap-7">
+            <div className="rounded-2xl border border-line bg-card p-5 shadow-sm sm:p-6">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex gap-4">
                 <div className="relative grid h-20 w-20 shrink-0 place-items-center overflow-visible rounded-2xl border-4 border-white bg-primary text-2xl font-bold text-white shadow">
@@ -668,119 +669,8 @@ export default async function DesignerProfilePage({
             ) : null}
           </div>
 
-          <aside
-            id="contact"
-            className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24"
-          >
-            <div className="text-sm font-semibold text-primary">{copy.contact.eyebrow}</div>
-            <h2 className="mt-2 text-2xl font-bold">{copy.contact.heading(title)}</h2>
-            <p className="mt-3 text-sm leading-6 text-muted">
-              {copy.contact.body}
-            </p>
-
-            <div className="mt-5 grid gap-3 text-sm">
-              <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
-                <span className="text-muted">{profileCopy.labels.platformResponses}</span>
-                <span className="text-right font-semibold">{copy.contact.platformResponseValue}</span>
-              </div>
-              <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
-                <span className="text-muted">{profileCopy.labels.contact}</span>
-                <span className="truncate text-right font-semibold">{profile.is_demo ? profileCopy.values.demoContactUnavailable : contactLabel(profile, copy)}</span>
-              </div>
-              {publicEmail ? (
-                <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
-                  <span className="text-muted">{siteLocale === "pl" ? "E-mail" : "Email"}</span>
-                  <a
-                    href={`mailto:${publicEmail}`}
-                    className="truncate text-right font-semibold text-primary underline-offset-2 hover:underline"
-                  >
-                    {publicEmail}
-                  </a>
-                </div>
-              ) : null}
-              <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
-                <span className="text-muted">{profileCopy.labels.availability}</span>
-                <span className="text-right font-semibold">{profile.availability_status ? availabilityLabel(profile.availability_status) : profileCopy.values.toBeAgreed}</span>
-              </div>
-              {contactAvailability ? (
-                <div className="grid gap-1 border-b border-line pb-3">
-                  <span className="text-muted">{siteLocale === "pl" ? "Godziny pracy" : "Working hours"}</span>
-                  <span className="text-right font-semibold">{contactAvailability}</span>
-                </div>
-              ) : null}
-              <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
-                <span className="text-muted">{profileCopy.labels.workMode}</span>
-                <span className="text-right font-semibold">{profile.work_modes?.map((mode) => workModeLabel(mode)).join(" · ") || profileCopy.values.toBeAgreed}</span>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-muted">{profileCopy.labels.minimumProjectBudget}</span>
-                <span className="text-right font-semibold">{profile.minimum_project_budget ? formatMinimumBudget(profile.minimum_project_budget) : profileCopy.values.notSpecified}</span>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-muted">{profileCopy.labels.languages}</span>
-                <span className="font-semibold">
-                  {profile.languages?.map((language) => profileLanguageLabel(language)).join(" / ") || copy.defaults.polishEnglish}
-                </span>
-              </div>
-            </div>
-
-            {isOwner ? (
-              <div className="mt-6 grid gap-3">
-                <Link
-                  href="/account/profile"
-                  className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
-                >
-                  {copy.actions.editPublicDetails}
-                </Link>
-                <Link
-                  href="/account/projects"
-                  className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
-                >
-                  {copy.actions.addPortfolioProject}
-                </Link>
-              </div>
-            ) : canStartBrief ? (
-              <Link
-                href={briefHref}
-                className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
-              >
-                <span className="w-full">{briefAction}</span>
-              </Link>
-            ) : profile.is_demo ? (
-              <div className="mt-6 rounded-lg border border-primary/20 bg-primary-soft p-4 text-sm leading-6 text-muted">
-                {copy.contact.demoNotice}
-              </div>
-            ) : (
-              <div className="mt-6 rounded-lg border border-line bg-background p-4 text-sm leading-6 text-muted">
-                {copy.contact.designerNotice}
-              </div>
-            )}
-
-            {webHref ? (
-              <a
-                href={webHref}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 flex rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
-              >
-                <span className="w-full">{copy.actions.openWebsite}</span>
-              </a>
-            ) : null}
-            <div className="mt-4">
-              <SocialLinks
-                behanceUrl={profile.behance_url}
-                facebookUrl={profile.facebook_url}
-                instagramUrl={profile.instagram_url}
-                linkedinUrl={profile.linkedin_url}
-              />
-            </div>
-            {!isOwner && !profile.is_demo ? <ContentReportButton targetType="profile" targetId={profile.id} /> : null}
-          </aside>
-        </section>
-      </section>
-
       {isOwner ? (
-        <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
+        <section className="lg:col-start-1">
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
             <div className="font-semibold">{copy.owner.title}</div>
             <p className="mt-1">
@@ -791,7 +681,7 @@ export default async function DesignerProfilePage({
       ) : null}
 
       {studios.length ? (
-        <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
+        <section className="lg:col-start-1">
           <div className="rounded-lg border border-line bg-card p-6 shadow-sm">
             <div className="text-sm font-semibold text-primary">{copy.studios.eyebrow}</div>
             <h2 className="mt-1 text-2xl font-bold">
@@ -820,7 +710,6 @@ export default async function DesignerProfilePage({
         </section>
       ) : null}
 
-      <section className="mx-auto grid max-w-7xl gap-7 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="grid gap-7">
           <section className="rounded-2xl border border-line bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -1067,40 +956,154 @@ export default async function DesignerProfilePage({
           </section>
         </div>
 
-        <aside className="hidden h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24 lg:block">
-          <div className="text-sm font-semibold text-primary">{profileCopy.labels.profileSummary}</div>
-          <div className="mt-4 grid gap-4">
-            <div>
-              <div className="text-sm text-muted">{profileCopy.labels.bestMatch}</div>
-              <div className="mt-1 font-semibold">
-                {specialties[0] ? professionalOptionLabel(specialties[0]) : copy.defaults.interiorProjects}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm text-muted">{profileCopy.labels.location}</div>
-              <div className="mt-1 font-semibold">{location}</div>
-            </div>
-            <div>
-              <div className="text-sm text-muted">{profileCopy.labels.experience}</div>
-              <div className="mt-1 font-semibold">
-                {profileExperienceLabel(profile.years_experience)}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm text-muted">{profileCopy.labels.portfolio}</div>
-              <div className="mt-1 font-semibold">
-                {profileProjectCountLabel(projects.length)}
-              </div>
-            </div>
-          </div>
+        </div>
 
-          <div className="mt-6 border-t border-line pt-6">
-            <h3 className="text-lg font-bold">{copy.summary.contractorsHeading}</h3>
-            <p className="mt-2 text-sm leading-6 text-muted">
-              {copy.summary.contractorsBody}
-            </p>
+          <div className="grid content-start gap-7">
+            <aside
+              id="contact"
+              className="h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:sticky lg:top-24"
+            >
+              <div className="text-sm font-semibold text-primary">{copy.contact.eyebrow}</div>
+              <h2 className="mt-2 text-2xl font-bold">{copy.contact.heading(title)}</h2>
+              <p className="mt-3 text-sm leading-6 text-muted">
+                {copy.contact.body}
+              </p>
+
+              <div className="mt-5 grid gap-3 text-sm">
+                <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
+                  <span className="text-muted">{profileCopy.labels.platformResponses}</span>
+                  <span className="text-right font-semibold">{copy.contact.platformResponseValue}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
+                  <span className="text-muted">{profileCopy.labels.contact}</span>
+                  <span className="truncate text-right font-semibold">{profile.is_demo ? profileCopy.values.demoContactUnavailable : contactLabel(profile, copy)}</span>
+                </div>
+                {publicEmail ? (
+                  <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
+                    <span className="text-muted">{siteLocale === "pl" ? "E-mail" : "Email"}</span>
+                    <a
+                      href={`mailto:${publicEmail}`}
+                      className="truncate text-right font-semibold text-primary underline-offset-2 hover:underline"
+                    >
+                      {publicEmail}
+                    </a>
+                  </div>
+                ) : null}
+                <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
+                  <span className="text-muted">{profileCopy.labels.availability}</span>
+                  <span className="text-right font-semibold">{profile.availability_status ? availabilityLabel(profile.availability_status) : profileCopy.values.toBeAgreed}</span>
+                </div>
+                {contactAvailability ? (
+                  <div className="grid gap-1 border-b border-line pb-3">
+                    <span className="text-muted">{siteLocale === "pl" ? "Godziny pracy" : "Working hours"}</span>
+                    <span className="text-right font-semibold">{contactAvailability}</span>
+                  </div>
+                ) : null}
+                <div className="flex items-center justify-between gap-4 border-b border-line pb-3">
+                  <span className="text-muted">{profileCopy.labels.workMode}</span>
+                  <span className="text-right font-semibold">{profile.work_modes?.map((mode) => workModeLabel(mode)).join(" · ") || profileCopy.values.toBeAgreed}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-muted">{profileCopy.labels.minimumProjectBudget}</span>
+                  <span className="text-right font-semibold">{profile.minimum_project_budget ? formatMinimumBudget(profile.minimum_project_budget) : profileCopy.values.notSpecified}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-muted">{profileCopy.labels.languages}</span>
+                  <span className="font-semibold">
+                    {profile.languages?.map((language) => profileLanguageLabel(language)).join(" / ") || copy.defaults.polishEnglish}
+                  </span>
+                </div>
+              </div>
+
+              {isOwner ? (
+                <div className="mt-6 grid gap-3">
+                  <Link
+                    href="/account/profile"
+                    className="rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
+                  >
+                    {copy.actions.editPublicDetails}
+                  </Link>
+                  <Link
+                    href="/account/projects"
+                    className="rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
+                  >
+                    {copy.actions.addPortfolioProject}
+                  </Link>
+                </div>
+              ) : canStartBrief ? (
+                <Link
+                  href={briefHref}
+                  className="mt-6 flex rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-white"
+                >
+                  <span className="w-full">{briefAction}</span>
+                </Link>
+              ) : profile.is_demo ? (
+                <div className="mt-6 rounded-lg border border-primary/20 bg-primary-soft p-4 text-sm leading-6 text-muted">
+                  {copy.contact.demoNotice}
+                </div>
+              ) : (
+                <div className="mt-6 rounded-lg border border-line bg-background p-4 text-sm leading-6 text-muted">
+                  {copy.contact.designerNotice}
+                </div>
+              )}
+
+              {webHref ? (
+                <a
+                  href={webHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-3 flex rounded-xl border border-line bg-background px-4 py-3 text-center text-sm font-semibold hover:border-primary hover:text-primary"
+                >
+                  <span className="w-full">{copy.actions.openWebsite}</span>
+                </a>
+              ) : null}
+              <div className="mt-4">
+                <SocialLinks
+                  behanceUrl={profile.behance_url}
+                  facebookUrl={profile.facebook_url}
+                  instagramUrl={profile.instagram_url}
+                  linkedinUrl={profile.linkedin_url}
+                />
+              </div>
+              {!isOwner && !profile.is_demo ? <ContentReportButton targetType="profile" targetId={profile.id} /> : null}
+            </aside>
+
+            <aside className="hidden h-fit rounded-2xl border border-line bg-card p-6 shadow-sm lg:block">
+              <div className="text-sm font-semibold text-primary">{profileCopy.labels.profileSummary}</div>
+              <div className="mt-4 grid gap-4">
+                <div>
+                  <div className="text-sm text-muted">{profileCopy.labels.bestMatch}</div>
+                  <div className="mt-1 font-semibold">
+                    {specialties[0] ? professionalOptionLabel(specialties[0]) : copy.defaults.interiorProjects}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted">{profileCopy.labels.location}</div>
+                  <div className="mt-1 font-semibold">{location}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted">{profileCopy.labels.experience}</div>
+                  <div className="mt-1 font-semibold">
+                    {profileExperienceLabel(profile.years_experience)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted">{profileCopy.labels.portfolio}</div>
+                  <div className="mt-1 font-semibold">
+                    {profileProjectCountLabel(projects.length)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 border-t border-line pt-6">
+                <h3 className="text-lg font-bold">{copy.summary.contractorsHeading}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  {copy.summary.contractorsBody}
+                </p>
+              </div>
+            </aside>
           </div>
-        </aside>
+        </div>
       </section>
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-card/95 px-4 py-3 shadow-lg backdrop-blur lg:hidden">
