@@ -142,7 +142,7 @@ function Palette({ compact = false }: { compact?: boolean }) {
 }
 
 function Checklist({ items, tone = "primary", compact = false }: { items: string[]; tone?: "primary" | "accent"; compact?: boolean }) {
-  const color = tone === "accent" ? "bg-[#d8f4ef] text-[#158c75]" : "bg-primary-soft text-primary";
+  const color = tone === "accent" ? "bg-accent-soft text-accent" : "bg-primary-soft text-primary";
   return (
     <div className={`grid gap-x-5 ${compact ? "gap-y-2" : "gap-y-3"} sm:grid-cols-2`}>
       {items.map((item) => (
@@ -171,7 +171,7 @@ function HeroVisual() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={heroImage}
-        alt={homeCopy.hero.headline}
+        alt={homeCopy.accessibility.heroImage}
         width="1536"
         height="1024"
         fetchPriority="high"
@@ -191,7 +191,7 @@ function HeroVisual() {
         <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">{visual.professionalLabel}</p>
         <div className="mt-3 flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={inspirationImages[1]} alt="" className="h-10 w-10 rounded-full object-cover" />
+          <img src={inspirationImages[1]} alt={homeCopy.accessibility.inspirationImages[1]} className="h-10 w-10 rounded-full object-cover" />
           <div>
             <p className="font-bold">{visual.professionalValue}</p>
             <p className="text-xs text-muted">{visual.professionalSubtitle}</p>
@@ -224,7 +224,7 @@ function CompactResult() {
         <div className="grid grid-cols-2 gap-2 rounded-2xl bg-primary-soft/55 p-2">
           {inspirationImages.slice(0, 5).map((src, index) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={src} src={src} alt="" className={`w-full rounded-xl object-cover ${index === 0 ? "col-span-2 aspect-[2/1]" : "aspect-[1.12/1]"}`} />
+            <img key={src} src={src} alt={homeCopy.accessibility.inspirationImages[index]} className={`w-full rounded-xl object-cover ${index === 0 ? "col-span-2 aspect-[2/1]" : "aspect-[1.12/1]"}`} />
           ))}
         </div>
         <div className="space-y-3">
@@ -247,7 +247,7 @@ function CompactResult() {
 
       <div className="mt-5 flex items-center gap-3 rounded-2xl border border-primary/15 bg-primary-soft p-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={matchedProfessionalFallbackImages[matchedProfessionalIds[0]]} alt="" className="h-12 w-12 rounded-xl object-cover" />
+        <img src={matchedProfessionalFallbackImages[matchedProfessionalIds[0]]} alt={homeCopy.accessibility.professionalImage(visual.professionalValue)} className="h-12 w-12 rounded-xl object-cover" />
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-wide text-muted">{visual.professionalLabel}</p>
           <p className="truncate font-bold">{visual.professionalValue}</p>
@@ -356,7 +356,7 @@ export default async function Home() {
             <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl bg-primary-soft/70 p-2">
               {inspirationImages.map((src, index) => (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img key={`${src}-${index}`} src={src} alt="" className={`w-full rounded-xl object-cover ${index === 0 ? "col-span-2 aspect-[2.1/1]" : "aspect-[1.32/1]"}`} />
+                <img key={`${src}-${index}`} src={src} alt={homeCopy.accessibility.inspirationImages[index]} className={`w-full rounded-xl object-cover ${index === 0 ? "col-span-2 aspect-[2.1/1]" : "aspect-[1.32/1]"}`} />
               ))}
             </div>
           </article>
@@ -392,7 +392,7 @@ export default async function Home() {
                 {matchedProfessionals.map((designer) => (
                   <div key={designer.name} className="flex items-center gap-3 rounded-xl border border-line bg-background p-3">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={designer.image} alt="" className="h-11 w-11 rounded-xl border border-line bg-white object-cover" />
+                    <img src={designer.image} alt={homeCopy.accessibility.professionalImage(designer.name)} className="h-11 w-11 rounded-xl border border-line bg-white object-cover" />
                     <div className="min-w-0"><p className="truncate text-sm font-bold">{designer.name}</p><p className="truncate text-xs text-muted">{designer.tag} · {designer.location}</p></div>
                     <span className="ml-auto rounded-lg bg-primary-soft px-2 py-1 text-xs font-bold text-primary">{designer.match}</span>
                   </div>
@@ -442,7 +442,7 @@ export default async function Home() {
             </div>
             <div className="min-h-[220px] bg-primary-soft p-4 md:min-h-0 md:p-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={inspirationImages[1]} alt="" className="h-full w-full rounded-2xl object-cover md:rounded-none" />
+              <img src={inspirationImages[1]} alt={homeCopy.accessibility.inspirationImages[1]} className="h-full w-full rounded-2xl object-cover md:rounded-none" />
             </div>
           </article>
 
@@ -465,7 +465,7 @@ export default async function Home() {
             </div>
             <div className="min-h-[220px] bg-accent-soft p-4 md:min-h-0 md:p-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={inspirationImages[2]} alt="" className="h-full w-full rounded-2xl object-cover md:rounded-none" />
+              <img src={inspirationImages[2]} alt={homeCopy.accessibility.inspirationImages[2]} className="h-full w-full rounded-2xl object-cover md:rounded-none" />
             </div>
           </article>
         </div>
@@ -493,7 +493,7 @@ export default async function Home() {
       <section className="border-b border-line bg-primary-soft/35 px-4 py-11 sm:px-6 lg:py-14">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div className="max-w-3xl"><p className="text-sm font-bold uppercase tracking-[0.12em] text-accent">{homeCopy.inspirationHub.eyebrow}</p><h2 className="mt-3 text-4xl font-bold leading-tight">{homeCopy.inspirationHub.headline}</h2><p className="mt-4 text-lg leading-8 text-muted">{homeCopy.inspirationHub.body}</p></div><Link href="/inspiration" className="font-bold text-primary transition hover:underline">{homeCopy.inspirationHub.cta} &#8594;</Link></div>
-          {featuredArticles.length ? <div className="mt-8 grid gap-5 md:grid-cols-3">{featuredArticles.map((article) => <article key={article.slug} className="group overflow-hidden rounded-xl border border-line bg-card shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"><Link href={`/inspiration/${article.slug}`} className="block">{article.image_url ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={article.image_url} alt={article.cover_alt} width="1000" height="700" loading="lazy" className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.03]" /> : <div className="aspect-[4/3] bg-primary-soft" aria-hidden="true" />}<div className="p-5"><div className="text-xs font-bold uppercase tracking-wide text-accent">{article.category}</div><h3 className="mt-2 text-xl font-bold transition group-hover:text-primary">{article.title}</h3><p className="mt-3 line-clamp-3 text-sm leading-6 text-muted">{article.excerpt}</p><div className="mt-5 text-sm font-bold text-primary">{homeCopy.inspirationHub.readCta} &#8594;</div></div></Link></article>)}</div> : <div className="mt-8 rounded-xl border border-dashed border-line bg-card p-7"><h3 className="text-xl font-bold">{homeCopy.inspirationHub.emptyTitle}</h3><Link href="/inspiration" className="mt-3 inline-flex font-bold text-primary hover:underline">{homeCopy.inspirationHub.emptyCta}</Link></div>}
+          {featuredArticles.length ? <div className="mt-8 grid gap-5 md:grid-cols-3">{featuredArticles.map((article) => <article key={article.slug} className="group overflow-hidden rounded-xl border border-line bg-card shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"><Link href={`/inspiration/${article.slug}`} className="block">{article.image_url ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={article.image_url} alt={article.cover_alt || homeCopy.accessibility.articleImage(article.title)} width="1000" height="700" loading="lazy" className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.03]" /> : <div className="aspect-[4/3] bg-primary-soft" aria-hidden="true" />}<div className="p-5"><div className="text-xs font-bold uppercase tracking-wide text-accent">{article.category}</div><h3 className="mt-2 text-xl font-bold transition group-hover:text-primary">{article.title}</h3><p className="mt-3 line-clamp-3 text-sm leading-6 text-muted">{article.excerpt}</p><div className="mt-5 text-sm font-bold text-primary">{homeCopy.inspirationHub.readCta} &#8594;</div></div></Link></article>)}</div> : <div className="mt-8 rounded-xl border border-dashed border-line bg-card p-7"><h3 className="text-xl font-bold">{homeCopy.inspirationHub.emptyTitle}</h3><Link href="/inspiration" className="mt-3 inline-flex font-bold text-primary hover:underline">{homeCopy.inspirationHub.emptyCta}</Link></div>}
         </div>
       </section>
 
