@@ -2,6 +2,13 @@ import { siteLocale, type SiteLocale } from "@/lib/site-locale";
 
 type HomeCopy = {
   metadata: { title: string; description: string };
+  accessibility: {
+    articleImage: (title: string) => string;
+    heroImage: string;
+    inspirationImages: [string, string, string, string, string];
+    professionalImage: (name: string) => string;
+    skipToMain: string;
+  };
   hero: {
     badge: string;
     headline: string;
@@ -547,6 +554,19 @@ const pl: SiteCopy = {
       title: "Katalog projektantów wnętrz z dopasowaniem AI | ArchiCompass",
       description: "Zamień zdjęcia inspiracji w precyzyjny brief i znajdź projektantów wnętrz oraz architektów dopasowanych do Twojego projektu, budżetu i lokalizacji.",
     },
+    accessibility: {
+      articleImage: (title) => `Zdjęcie do artykułu „${title}”`,
+      heroImage: "Jasny salon w ciepłej, naturalnej palecie z drewnianymi meblami i dużym drzewem przy oknie.",
+      inspirationImages: [
+        "Salon z jasną sofą, zielonym fotelem i zabudową z drewna.",
+        "Moodboard z rzutem mieszkania, próbkami tkanin i drewnianymi detalami.",
+        "Jasne mieszkanie z jadalnią, salonem i drewnianą zabudową.",
+        "Moodboard z fotografiami wnętrz, próbkami tkanin i kamienia.",
+        "Osoba analizująca plan mieszkania i próbki materiałów przy stole.",
+      ],
+      professionalImage: (name) => `Obraz profilu ${name}`,
+      skipToMain: "Przejdź do głównej treści",
+    },
     hero: {
       badge: "AI Project Compass",
       headline: "Znajdź projektanta, który zrozumie",
@@ -931,6 +951,19 @@ const en: SiteCopy = {
     metadata: {
       title: "Interior designer directory with AI matching",
       description: "Turn inspiration photos into a precise brief and find interior designers and architects matched to your project, budget, and location.",
+    },
+    accessibility: {
+      articleImage: (title) => `Article image for ${title}`,
+      heroImage: "A bright living room in a warm natural palette, with wooden furniture and a large tree by the window.",
+      inspirationImages: [
+        "A living room with a light sofa, green armchair, and built-in wooden shelving.",
+        "A moodboard with an apartment floor plan, fabric samples, and wooden details.",
+        "A bright apartment with a dining area, living room, and built-in wooden cabinetry.",
+        "A moodboard with interior photographs, fabric samples, and stone.",
+        "A person reviewing an apartment plan and material samples at a table.",
+      ],
+      professionalImage: (name) => `Profile image of ${name}`,
+      skipToMain: "Skip to main content",
     },
     hero: {
       badge: "AI Project Compass",

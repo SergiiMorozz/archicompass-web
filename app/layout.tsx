@@ -142,8 +142,16 @@ export default function RootLayout({
           ]}
         />
         <div className="min-h-screen bg-background text-foreground">
+          <a
+            href="#main-content"
+            className="sr-only fixed left-4 top-0 z-[60] rounded-b-xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-lg focus:not-sr-only focus:outline-none focus:ring-4 focus:ring-primary/35"
+          >
+            {copy.home.accessibility.skipToMain}
+          </a>
           <Header />
-          {children}
+          <div id="main-content" tabIndex={-1}>
+            {children}
+          </div>
           <Footer />
         </div>
         <CookieNotice />
