@@ -27,6 +27,10 @@ const cities: City[] = [
     lat: 52.0742,
     lon: 21.026,
   },
+  // Falenty Nowe is part of the Warsaw metropolitan area. Keep this in the
+  // shared location resolver so directory search, matching and city pages use
+  // the same distance data.
+  { names: ["falenty nowe", "falenty"], lat: 52.151, lon: 20.902 },
   { names: ["konstancin-jeziorna", "konstancin jeziorna", "05-510"], lat: 52.093, lon: 21.117 },
   { names: ["pruszkow", "pruszków", "05-800"], lat: 52.1614, lon: 20.8026 },
   { names: ["legionowo", "05-120"], lat: 52.4016, lon: 20.9464 },
