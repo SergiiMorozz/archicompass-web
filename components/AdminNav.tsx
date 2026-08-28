@@ -22,6 +22,7 @@ export default function AdminNav({
     { href: "/admin", label: copy.dashboard },
     { href: "/admin/users", label: copy.users, permission: "users" },
     { href: "/admin/content", label: copy.content, permission: "content" },
+    { href: "/admin/content-reports", label: copy.reports, permission: "moderation" },
     { href: "/admin/activity", label: copy.activity, permission: "analytics" },
     { href: "/admin/billing", label: billingCopy.admin.navLabel, permission: "finance" },
   ];

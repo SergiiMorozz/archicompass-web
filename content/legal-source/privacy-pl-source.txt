@@ -1,6 +1,6 @@
 POLITYKA PRYWATNOŚCI ARCHICOMPASS
 
-obowiązuje od dnia 16 sierpnia 2026 r.
+obowiązuje od dnia 28 sierpnia 2026 r.
 
 Niniejsza Polityka Prywatności opisuje zasady przetwarzania danych osobowych w związku z korzystaniem z platformy internetowej ArchiCompass, dostępnej w szczególności pod adresem archicompass.pl, w tym z Kont Klientów i Projektantów, Profili i Portfolio, AI Project Compass, Briefów Projektowych, Dopasowania Projektantów, Zapytania, wiadomości oraz pozostałych funkcjonalności Serwisu.
 
@@ -241,13 +241,13 @@ Podstawa prawna: art. 6 ust. 1 lit. b RODO – wykonanie umowy z Projektantem, a
 
 ⸻
 
-3. AI Project Compass
+3. Funkcje AI
 
-Cel: analiza materiałów referencyjnych i informacji dotyczących projektu, określanie cech preferowanego wnętrza oraz wspomaganie tworzenia Briefu Projektowego.
+Cel: analiza materiałów referencyjnych i informacji dotyczących projektu, określanie cech preferowanego wnętrza oraz wspomaganie tworzenia Briefu Projektowego w AI Project Compass, a także — na żądanie Projektanta — analiza materiałów Portfolio i przygotowanie roboczych propozycji do Portfolio lub Profilu w Asystencie portfolio AI.
 
 Podstawa prawna: art. 6 ust. 1 lit. b RODO – wykonanie usługi uruchomionej przez Użytkownika.
 
-Jeżeli określona opcjonalna funkcjonalność wymaga odrębnej zgody, podstawą przetwarzania będzie art. 6 ust. 1 lit. a RODO.
+Aktywacja funkcji AI jest dobrowolna. Nie jest wymagana odrębna zgoda na samo korzystanie z funkcji AI, gdy przetwarzanie jest niezbędne do wykonania funkcji wyraźnie uruchomionej przez Użytkownika; jeżeli określona opcjonalna funkcjonalność wymaga odrębnej zgody, podstawą przetwarzania będzie art. 6 ust. 1 lit. a RODO.
 
 ⸻
 
@@ -445,28 +445,31 @@ e) zdjęcia referencyjne udostępnione w ramach Briefu.
 
 ⸻
 
-§ 8. AI Project Compass i przetwarzanie przez systemy AI
+§ 8. Funkcje AI i przetwarzanie
 
-1. AI Project Compass wykorzystuje technologie sztucznej inteligencji do analizy materiałów i informacji przekazywanych przez Użytkownika.
-2. Analiza AI odbywa się wyłącznie po uruchomieniu odpowiedniej funkcji przez Użytkownika.
-3. Do systemu AI mogą zostać przekazane:
+1. ArchiCompass wykorzystuje funkcje AI wyłącznie po uruchomieniu odpowiedniej funkcji przez Użytkownika. Wyniki są materiałem pomocniczym i mogą być niepełne, niedokładne lub nie odpowiadać rzeczywistym możliwościom realizacji.
 
-a) wybrane obrazy referencyjne;
+2. AI Project Compass
 
-b) informacje dotyczące rodzaju inwestycji;
+a) Do analizy mogą zostać przekazane wybrane obrazy referencyjne oraz informacje o rodzaju inwestycji, stylu, cechach wizualnych i projekcie.
 
-c) wskazane preferencje;
+b) Celem jest przygotowanie pomocniczych wskazówek stylistycznych, materiałów do Briefu i sygnałów używanych przy Dopasowaniu.
 
-d) informacje o stylu i cechach projektu;
+c) W zależności od aktualnej konfiguracji serwerowej analiza może być realizowana przez modele Google Gemini albo OpenAI. Dane są przekazywane wyłącznie w zakresie potrzebnym do wykonania uruchomionej funkcji.
 
-e) inne informacje konieczne do wygenerowania wyniku wybranej funkcji.
+3. Asystent portfolio AI
 
-4. Aktualnie produkcyjna wersja AI Project Compass wykorzystuje modele Google Gemini. Administrator może w przyszłości zmienić dostawcę, jeżeli będzie to uzasadnione technicznie lub organizacyjnie; w takim przypadku odpowiednio zaktualizuje niniejszą Politykę.
-5. Dane są przekazywane dostawcy AI wyłącznie w zakresie potrzebnym do realizacji uruchomionej przez Użytkownika funkcji, zgodnie z umowami i ustawieniami technicznymi stosowanymi przez Administratora.
-6. Administrator nie wykorzystuje prywatnych materiałów Użytkowników do samodzielnego trenowania własnego ogólnego modelu sztucznej inteligencji.
-7. Wyniki analizy AI mogą być niedokładne, niekompletne lub nie odpowiadać rzeczywistym możliwościom realizacyjnym projektu.
-8. Wyniki AI mają charakter pomocniczy.
-9. AI Project Compass nie podejmuje wobec Użytkownika decyzji wywołującej skutki prawne lub w podobny sposób istotnie wpływającej na Użytkownika wyłącznie w sposób zautomatyzowany w rozumieniu art. 22 RODO.
+a) Projektant może przekazać adres swojej strony internetowej lub przesłać zdjęcia. W ramach funkcji ArchiCompass może przetwarzać adres źródłowy, znalezione lub przesłane obrazy, ograniczone metadane plików, tytuły, opisy i inne publicznie dostępne informacje ze wskazanej strony oraz informacje wprowadzone do Profilu lub Portfolio.
+
+b) Materiały są wykorzystywane do automatycznego grupowania obrazów w robocze projekty, klasyfikacji wnętrz, rozpoznawania pomieszczeń, materiałów, kolorów i cech stylu oraz przygotowania propozycji tytułów, opisów, tagów, metadanych i szkicu Profilu.
+
+c) Produkcyjna część analityczna Asystenta portfolio AI korzysta z modeli Google Gemini. Zapytania są wykonywane po stronie serwera; klucz dostawcy AI nie jest przekazywany do przeglądarki.
+
+d) Znalezione i przesłane materiały są najpierw przechowywane w prywatnej przestrzeni roboczej importu. Wynik jest roboczy: Projektant może go edytować, ukryć lub odrzucić. Żaden projekt, obraz ani propozycja Profilu nie jest publikowana publicznie bez wyraźnego działania publikującego Projektanta.
+
+4. Administrator nie wykorzystuje prywatnych materiałów Użytkowników do samodzielnego trenowania własnego ogólnego modelu sztucznej inteligencji. Warunki przechowywania przez zewnętrznych dostawców AI wynikają z ich aktualnej dokumentacji i umów; wymagają odrębnej weryfikacji przed szerszym uruchomieniem funkcji.
+
+5. Funkcje AI nie podejmują wobec Użytkownika decyzji wywołujących skutki prawne lub w podobny sposób istotnie wpływających na niego wyłącznie w sposób zautomatyzowany w rozumieniu art. 22 RODO.
 
 ⸻
 
@@ -487,14 +490,12 @@ e) preferencje stylistyczne;
 
 f) charakter i skalę projektu;
 
-g) informacje zawarte w Profilach Projektantów;
-
-h) inne parametry związane z projektem.
+g) informacje zawarte w Profilach i publicznym Portfolio Projektantów, w tym deklarowane usługi, sposób pracy i dostępność.
 
 3. W wyniku analizy Serwis może utworzyć listę lub ranking Projektantów, których charakterystyka w największym stopniu odpowiada określonym parametrom.
 4. Mechanizm ten może stanowić profilowanie w rozumieniu RODO w zakresie, w jakim wykorzystuje dane osobowe do oceny określonych preferencji lub zainteresowań Użytkownika.
 5. Celem profilowania jest przedstawienie bardziej odpowiednich wyników wyszukiwania i ograniczenie liczby nieadekwatnych propozycji.
-6. Wynik Dopasowania ma charakter rekomendacyjny.
+6. Wynik Dopasowania ma charakter pomocniczy i rekomendacyjny; kolejność wyników nie jest certyfikacją jakości ani gwarancją udanej współpracy.
 7. Klient samodzielnie decyduje, czy skontaktuje się z którymkolwiek z zaproponowanych Projektantów.
 8. Dopasowanie nie powoduje wobec Klienta ani Projektanta skutków prawnych ani skutków w podobny sposób istotnych wyłącznie na podstawie zautomatyzowanego przetwarzania w rozumieniu art. 22 RODO.
 
@@ -538,6 +539,14 @@ Aktualnie wykorzystywany do:
 * analizy informacji tekstowych;
 * analizy obrazów;
 * generowania pomocniczych wyników AI.
+
+OpenAI
+
+Może być wykorzystywany, zależnie od aktualnej konfiguracji serwerowej, do opcjonalnej analizy obrazów w AI Project Compass.
+
+Stripe
+
+Może być wykorzystywany do bezpiecznej obsługi płatności za Subskrypcje, gdy płatności online są aktywne. ArchiCompass nie przechowuje pełnych danych kart płatniczych.
 
 Google
 
@@ -586,7 +595,8 @@ h) Projektantom – w zakresie wynikającym z Zapytania przesłanego przez Klien
 3. Po zapisaniu zdjęć w Serwisie są one przechowywane w prywatnej przestrzeni plików wykorzystywanej przez ArchiCompass.
 4. Dostęp do prywatnych zdjęć może być realizowany za pomocą ograniczonych czasowo, podpisanych adresów URL.
 5. Jeżeli Klient przekazuje Brief Projektantowi, Projektant może otrzymać czasowy dostęp do zdjęć powiązanych z tym Briefem.
-6. Zdjęcia Portfolio przesyłane przez Projektanta są przeznaczone do publicznej prezentacji zgodnie z Regulaminem i ustawieniami Konta.
+6. Materiały Asystenta portfolio AI, w tym kopie obrazów znalezionych na wskazanej stronie oraz przesłane zdjęcia, są przed publikacją przechowywane w prywatnej przestrzeni roboczej importu dostępnej dla właściciela Konta i uprawnionych administratorów. Tylko obrazy wybrane przez Projektanta podczas publikacji są kopiowane do publicznego Portfolio.
+7. Zdjęcia Portfolio przesyłane przez Projektanta są przeznaczone do publicznej prezentacji zgodnie z Regulaminem i ustawieniami Konta.
 
 ⸻
 
@@ -638,6 +648,7 @@ Kategoria danych	Okres przechowywania
 Dane aktywnego Konta	przez okres posiadania Konta
 Dane Profilu Projektanta	przez okres prowadzenia Profilu, a następnie przez okres niezbędny do realizacji obowiązków lub obrony roszczeń
 Portfolio	do czasu jego usunięcia przez Projektanta, usunięcia Profilu lub zakończenia świadczenia odpowiedniej usługi
+Materiały i robocze wyniki Asystenta portfolio AI	do czasu usunięcia powiązanego Konta lub importu, jeżeli usunięcie jest dostępne w danej funkcji, z zastrzeżeniem okresu potrzebnego do bezpieczeństwa, obsługi zgłoszeń i kopii zapasowych
 Briefy i projekty Klienta	do czasu ich usunięcia lub usunięcia Konta, chyba że dalsze przechowywanie jest konieczne z innej podstawy prawnej
 Prywatne zdjęcia referencyjne	przez okres powiązania z aktywnym projektem lub Briefem, a następnie do czasu ich usunięcia zgodnie z mechanizmem Serwisu
 Zapytania i wiadomości	przez okres potrzebny do obsługi komunikacji oraz następnie przez okres niezbędny do ustalenia, dochodzenia lub obrony roszczeń
@@ -815,9 +826,9 @@ admin@archicompass.pl
 
 § 26. Postanowienia końcowe
 
-1. Niniejsza Polityka obowiązuje od dnia 16 sierpnia 2026 r.
+1. Niniejsza Polityka obowiązuje od dnia 28 sierpnia 2026 r.
 2. W sprawach nieuregulowanych Polityką zastosowanie mają odpowiednie przepisy prawa, w szczególności RODO.
 3. Zasady świadczenia usług za pośrednictwem ArchiCompass określa Regulamin ArchiCompass.
 4. Szczegółowe informacje dotyczące technologii zapisywanych w urządzeniu Użytkownika zawiera Polityka plików cookies.
 
-Wersja: 1.0
+Wersja: 1.1

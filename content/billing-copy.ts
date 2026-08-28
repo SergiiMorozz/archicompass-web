@@ -152,7 +152,7 @@ const copy: Record<SiteLocale, BillingCopy> = {
       signIn: "Zaloguj się do rozliczeń",
       faqTitle: "Jak działają rozliczenia",
       faq: [
-        { question: "Kiedy zaczyna się płatność?", answer: "Po 90 dniach bezpłatnego dostępu. Przed końcem okresu wybierzesz plan miesięczny lub roczny." },
+        { question: "Kiedy zaczyna się płatność?", answer: "Po 90 dniach bezpłatnego dostępu wybierzesz plan miesięczny lub roczny. Karta nie jest wymagana przy rejestracji, a opłata nie rozpocznie się bez wybranego planu i uruchomienia płatności przez Ciebie." },
         { question: "Co dzieje się bez opłaty?", answer: "Profil profesjonalisty, portfolio i odbiór nowych zapytań mogą zostać ograniczone do czasu aktywacji planu." },
         { question: "Czy otrzymam fakturę VAT?", answer: "Tak. W panelu rozliczeń podasz dane firmy oraz NIP / VAT UE. Po uruchomieniu płatności faktury będą dostępne w tym samym miejscu." },
         { question: "Czy członkowie pracowni płacą za własne profile?", answer: "Nie. Aktywna subskrypcja pracowni obejmuje osobiste profile wszystkich aktywnych członków jej zespołu." },
@@ -182,7 +182,7 @@ const copy: Record<SiteLocale, BillingCopy> = {
         studio: { title: "Studio", description: "For teams operating under a shared studio profile.", monthly: "PLN 199 / month", yearly: "PLN 1,099 / year", yearlyNote: "A better rate with annual billing.", features: ["Shared studio profile and portfolio", "AI Portfolio Assistant for every team member", "Designer team and shared inbox", "Personal profiles for active team members at no extra cost", "Analytics and company billing"] },
       },
       vatNote: "All prices are net prices. VAT is charged at the applicable rate. Companies can provide invoice details and a NIP / EU VAT ID.", getStarted: "Create a professional account", signIn: "Sign in to billing", faqTitle: "How billing works", faq: [
-        { question: "When does payment start?", answer: "After 90 days of complimentary access. Before the period ends, you will choose a monthly or annual plan." },
+        { question: "When does payment start?", answer: "After 90 days of complimentary access, you choose a monthly or annual plan. No card is required at sign-up, and payment does not start unless you select a plan and start it yourself." },
         { question: "What happens if I do not pay?", answer: "The professional profile, portfolio, and new enquiry reception may be restricted until a plan is activated." },
         { question: "Will I receive a VAT invoice?", answer: "Yes. In Billing, enter your company details and NIP / EU VAT ID. Once payments are enabled, invoices will be available there." },
         { question: "Do studio members pay for their personal profiles?", answer: "No. An active studio subscription includes the personal profiles of all active studio team members." },

@@ -3,12 +3,14 @@ import BrandLogo from "@/components/BrandLogo";
 import { getSiteCopy } from "@/content/site-copy";
 import { getServicesPricingCopy } from "@/content/services-pricing-copy";
 import { getLegalCopy } from "@/content/legal-copy";
+import { getContentGuidelinesCopy } from "@/content/content-guidelines-copy";
 import { localeAppPath } from "@/lib/site-locale";
 
 export default function Footer() {
   const copy = getSiteCopy().footer;
   const servicesPricingCopy = getServicesPricingCopy();
   const legalCopy = getLegalCopy();
+  const contentGuidelinesCopy = getContentGuidelinesCopy();
   const appHref = (path: string) => localeAppPath(path);
 
   return (
@@ -68,6 +70,9 @@ export default function Footer() {
             </Link>
             <Link href={appHref("/ai-transparency")} className="hover:text-white">
               {legalCopy.links.aiTransparency}
+            </Link>
+            <Link href={appHref("/content-guidelines")} className="hover:text-white">
+              {contentGuidelinesCopy.title}
             </Link>
             <a href="mailto:contact@archicompass.pl" className="hover:text-white">
               {copy.contact}

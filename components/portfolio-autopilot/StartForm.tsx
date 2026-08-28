@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 import { getPortfolioAutopilotCopy } from "@/content/portfolio-autopilot-copy";
 import { localePublicPath, siteLocale } from "@/lib/site-locale";
 
@@ -122,6 +123,14 @@ export default function PortfolioAutopilotStartForm() {
           />
         </label>
       )}
+
+      <p className="rounded-xl border border-primary/15 bg-primary-soft/40 px-4 py-3 text-sm leading-6 text-muted">
+        {copy.aiNotice}{" "}
+        <Link href={localePublicPath(siteLocale, "/ai-transparency")} className="font-semibold text-primary underline underline-offset-2">
+          {copy.aiNoticeLink}
+        </Link>
+        .
+      </p>
 
       <label className="flex items-start gap-3 text-sm">
         <input

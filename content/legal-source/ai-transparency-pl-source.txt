@@ -1,6 +1,6 @@
 1. Dlaczego publikujemy tę informację
 
-ArchiCompass wykorzystuje rozwiązania sztucznej inteligencji jako narzędzia wspierające Użytkownika w porządkowaniu inspiracji, przygotowaniu Briefu Projektowego oraz znajdowaniu Projektantów odpowiadających określonym potrzebom.
+ArchiCompass wykorzystuje rozwiązania sztucznej inteligencji jako narzędzia wspierające Użytkownika w porządkowaniu inspiracji, przygotowaniu Briefu Projektowego, budowaniu portfolio oraz znajdowaniu Projektantów odpowiadających określonym potrzebom.
 
 Niniejsza strona wyjaśnia:
 
@@ -39,6 +39,12 @@ Na tej podstawie AI może pomagać w przygotowaniu między innymi:
 * wskazówek do Briefu Projektowego;
 * innych informacji pomocnych podczas rozmowy z Projektantem.
 
+Asystent portfolio AI
+
+Projektant lub pracownia może wskazać adres strony portfolio albo samodzielnie przesłać zdjęcia. Funkcja może pobrać publicznie dostępne materiały ze wskazanej strony lub przeanalizować przesłane pliki, pogrupować je w propozycje realizacji i przygotować szkic profilu oraz opisów.
+
+Import trafia najpierw do prywatnego obszaru roboczego. Projektant samodzielnie sprawdza, poprawia, odrzuca albo wybiera elementy do publikacji. Nic z importu nie jest publikowane automatycznie.
+
 ⸻
 
 3. Dopasowanie Projektantów
@@ -47,18 +53,17 @@ ArchiCompass może wykorzystywać dane zawarte w Briefie oraz inne parametry pro
 
 Dopasowanie może uwzględniać w szczególności:
 
-* lokalizację;
-* zakres projektu;
-* rodzaj inwestycji;
+* styl;
+* typ i skalę inwestycji;
+* zakres usług;
+* lokalizację lub tryb pracy;
 * budżet;
-* preferencje stylistyczne;
-* informacje zawarte w Profilach i Portfolio Projektantów;
-* obszar działania;
-* inne deklarowane parametry projektu.
+* dostępność;
+* informacje dostępne w publicznych Profilach i Portfolio Projektantów, w tym liczbę opublikowanych realizacji.
 
 AI może pomagać w interpretacji niektórych informacji, np. cech stylistycznych wynikających z inspiracji.
 
-Wynik Dopasowania ma charakter rekomendacyjny.
+Wynik Dopasowania ma charakter rekomendacyjny. ArchiCompass nie publikuje wag, progów ani szczegółowej formuły rankingu.
 
 ArchiCompass nie wybiera Projektanta za Klienta.
 
@@ -76,6 +81,8 @@ Użytkownik samodzielnie decyduje:
 * do którego Projektanta się zwróci;
 * czy rozpocznie współpracę.
 
+Projektant korzystający z Asystenta portfolio AI samodzielnie wybiera materiały, może zmienić lub usunąć szkic oraz decyduje, czy i które zaakceptowane treści opublikuje.
+
 Projektant samodzielnie odpowiada za swoją ofertę, poradę, projekt i realizację usług.
 
 AI nie zawiera Umowy Projektowej w imieniu Użytkownika ani Projektanta.
@@ -90,7 +97,7 @@ Funkcje i wyniki bezpośrednio generowane lub istotnie wspierane przez AI są oz
 lub
 „Wynik wygenerowany z wykorzystaniem AI”.
 
-Jeżeli Użytkownik bezpośrednio korzysta z funkcji AI, ArchiCompass informuje o tym w sposób widoczny w kontekście danej funkcjonalności.
+Jeżeli Użytkownik bezpośrednio korzysta z funkcji AI, ArchiCompass informuje o tym w sposób widoczny w kontekście danej funkcjonalności. Przed uruchomieniem Asystenta portfolio AI użytkownik widzi również odnośnik do tej strony oraz potwierdza prawa lub odpowiednie zgody do materiałów.
 
 AI Act wymaga informowania osoby o bezpośredniej interakcji z AI w odpowiednich przypadkach.
 
@@ -104,7 +111,7 @@ Przekazanie następuje dopiero po świadomym uruchomieniu przez Użytkownika fun
 
 Przed rozpoczęciem analizy Użytkownik otrzymuje informację, że wybrane materiały zostaną przekazane zewnętrznemu dostawcy technologii AI.
 
-W jednym żądaniu AI Project Compass analizuje obecnie maksymalnie sześć zdjęć.
+W jednym żądaniu AI Project Compass analizuje obecnie maksymalnie sześć zdjęć. W Asystencie portfolio AI analiza następuje dopiero po uruchomieniu importu przez projektanta; może obejmować wskazany adres strony, pobrane z niej publicznie dostępne materiały albo pliki przesłane ręcznie.
 
 ⸻
 
@@ -113,11 +120,12 @@ W jednym żądaniu AI Project Compass analizuje obecnie maksymalnie sześć zdj�
 W zależności od używanej funkcjonalności mogą to być:
 
 * wybrane zdjęcia;
+* wskazany adres strony i publicznie dostępne materiały pobrane z niej w ramach importu;
 * typ inwestycji;
 * wybrany kierunek stylistyczny;
 * cechy wizualne;
 * informacje dotyczące projektu;
-* inne dane niezbędne do przygotowania wyniku.
+* inne dane i metadane niezbędne do przygotowania wyniku.
 
 ArchiCompass nie przekazuje danych logowania ani numeru telefonu jako elementu standardowej analizy zdjęć AI Project Compass.
 
@@ -133,13 +141,13 @@ Użytkownik nie powinien przesyłać:
 
 8. Dostawcy technologii AI
 
-Aktualnie produkcyjna wersja AI Project Compass wykorzystuje modele Google Gemini dostarczane przez Google.
+W zależności od uruchomionej funkcji ArchiCompass korzysta po stronie serwera z API modeli Gemini lub OpenAI. Asystent portfolio AI wykorzystuje aktualnie integrację Gemini skonfigurowaną na serwerze, a AI Project Compass może korzystać z OpenAI albo Gemini zależnie od konfiguracji serwerowej.
 
-Dostawca lub konfiguracja może ulec zmianie wraz z rozwojem technologii. W takim przypadku ArchiCompass zaktualizuje informacje dla Użytkowników przed lub najpóźniej wraz z wdrożeniem zmiany.
+Dostawca lub konfiguracja może ulec zmianie wraz z rozwojem technologii. Klucze API pozostają po stronie serwera i nie są przesyłane do przeglądarki. W takim przypadku ArchiCompass zaktualizuje informacje dla Użytkowników przed lub najpóźniej wraz z wdrożeniem zmiany.
 
 Informacje dotyczące aktualnych dostawców, przetwarzania danych osobowych oraz ewentualnych transferów danych opisuje Polityka Prywatności.
 
-ArchiCompass nie wykorzystuje prywatnych zdjęć Użytkowników jako publicznej bazy treści.
+ArchiCompass nie wykorzystuje prywatnych zdjęć Użytkowników jako publicznej bazy treści ani nie deklaruje trenowania własnego modelu na przekazanych materiałach.
 
 ⸻
 
@@ -152,7 +160,8 @@ Systemy AI wykorzystują modele statystyczne i mogą:
 * wygenerować niepełną informację;
 * zaproponować rozwiązanie niemożliwe do wykonania;
 * przedstawić wynik, który nie odpowiada wszystkim preferencjom Użytkownika;
-* generować podobne wyniki dla różnych Użytkowników.
+* generować podobne wyniki dla różnych Użytkowników;
+* nieprawidłowo pogrupować materiały, zaproponować opis albo metadane portfolio.
 
 Wynik AI należy traktować jako punkt wyjścia do dalszej pracy, a nie jako gwarantowaną ocenę profesjonalną.
 
@@ -160,7 +169,7 @@ Wynik AI należy traktować jako punkt wyjścia do dalszej pracy, a nie jako gwa
 
 10. AI nie zastępuje profesjonalisty
 
-AI Project Compass nie stanowi:
+Funkcje AI w ArchiCompass nie stanowią:
 
 * projektu architektonicznego;
 * projektu wykonawczego;
@@ -179,7 +188,7 @@ Przed realizacją projektu istotne informacje powinny zostać zweryfikowane z od
 
 11. Brak automatycznych decyzji o istotnych skutkach
 
-ArchiCompass nie wykorzystuje AI Project Compass ani mechanizmu Dopasowania do podejmowania wobec Użytkownika decyzji, które wywołują skutki prawne lub w podobnie istotny sposób wpływają na niego wyłącznie poprzez zautomatyzowane przetwarzanie.
+ArchiCompass nie wykorzystuje AI Project Compass, Asystenta portfolio AI ani mechanizmu Dopasowania do podejmowania wobec Użytkownika decyzji, które wywołują skutki prawne lub w podobnie istotny sposób wpływają na niego wyłącznie poprzez zautomatyzowane przetwarzanie.
 
 Ostateczne decyzje należą do Użytkowników.
 
@@ -187,7 +196,7 @@ Ostateczne decyzje należą do Użytkowników.
 
 12. Zakazane i niepożądane zastosowania
 
-ArchiCompass nie projektuje AI Project Compass w celu:
+ArchiCompass nie projektuje funkcji AI w celu:
 
 * rozpoznawania chronionych cech osoby na podstawie wyglądu;
 * oceny wartości lub wiarygodności człowieka;
@@ -197,7 +206,7 @@ ArchiCompass nie projektuje AI Project Compass w celu:
 * identyfikacji biometrycznej osób;
 * wyciągania wniosków dotyczących zdrowia, orientacji seksualnej, poglądów politycznych lub innych szczególnych cech osoby.
 
-Analiza ma dotyczyć wnętrz, inspiracji i potrzeb projektowych.
+Analiza ma dotyczyć wnętrz, inspiracji, portfolio i potrzeb projektowych.
 
 ⸻
 
@@ -231,9 +240,7 @@ Jeżeli wynik AI:
 * narusza prywatność;
 * powoduje inne zastrzeżenia,
 
-prosimy o kontakt:
-
-contact@archicompass.pl
+prosimy o użycie formularza „Zgłoś treść” dostępnego przy publicznym profilu lub realizacji albo o kontakt: contact@archicompass.pl.
 
 W zgłoszeniu warto podać nazwę funkcji, przybliżony czas jej użycia oraz opis problemu.
 

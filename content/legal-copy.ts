@@ -64,7 +64,7 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
         },
         eyebrow: "Informacje prawne",
         title: "Polityka prywatności",
-        effectiveDate: "Obowiązuje od: 16 sierpnia 2026 r.",
+        effectiveDate: "Obowiązuje od: 28 sierpnia 2026 r.",
         intro: "Ta polityka wyjaśnia, jak ArchiCompass przetwarza dane osobowe w kontach klientów, profilach profesjonalistów, AI Project Compass, zapytaniach, wiadomościach i pozostałych usługach platformy.",
         sections: [
           { title: "1. Administrator danych i kontakt", paragraphs: [
@@ -117,7 +117,7 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
         metadata: { title: "Regulamin", description: "Zasady korzystania z ArchiCompass przez klientów, projektantów, pracownie i odwiedzających." },
         eyebrow: "Informacje prawne",
         title: "Regulamin",
-        effectiveDate: "Obowiązuje od: 16 sierpnia 2026 r.",
+        effectiveDate: "Obowiązuje od: 28 sierpnia 2026 r.",
         intro: "Regulamin określa zasady korzystania z ArchiCompass przez klientów, niezależnych profesjonalistów, członków pracowni i odwiedzających.",
         sections: [
           { title: "1. Zakres platformy", paragraphs: ["ArchiCompass pomaga użytkownikom przygotować brief projektu wnętrza, przeglądać profile i portfolio oraz prowadzić uporządkowaną komunikację projektową. Nie jest stroną umowy o projekt, nadzór, wykonanie, zakup materiałów ani usługi zawartej bezpośrednio między klientem a profesjonalistą."] },
@@ -137,7 +137,7 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
         metadata: { title: "Polityka cookies", description: "Jak ArchiCompass wykorzystuje niezbędne pliki cookies i pamięć przeglądarki." },
         eyebrow: "Informacje prawne",
         title: "Polityka cookies",
-        effectiveDate: "Obowiązuje od: 16 sierpnia 2026 r.",
+        effectiveDate: "Obowiązuje od: 28 sierpnia 2026 r.",
         intro: "Ta polityka wyjaśnia, jakich plików cookies i mechanizmów pamięci przeglądarki używa ArchiCompass.",
         sections: [
           { title: "Niezbędne uwierzytelnianie i bezpieczeństwo", paragraphs: ["ArchiCompass i Supabase używają plików cookies i podobnych mechanizmów, aby utrzymywać zalogowanie, chronić sesje, przeprowadzać uwierzytelnianie, zapobiegać nadużyciom i stosować uprawnienia konta. Technologie te są konieczne do działania funkcji konta."] },
@@ -149,10 +149,10 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
         ],
       },
       aiTransparency: {
-        metadata: { title: "AI i przejrzystość", description: "Jak ArchiCompass oznacza i wyjaśnia wyniki wspierane przez sztuczną inteligencję." },
-        eyebrow: "AI Project Compass",
-        title: "AI i przejrzystość",
-        effectiveDate: "Aktualizacja: 16 sierpnia 2026 r.",
+        metadata: { title: "AI w ArchiCompass", description: "Jak ArchiCompass wykorzystuje i wyjaśnia AI w Project Compass, Asystencie portfolio i Dopasowaniu." },
+        eyebrow: "Przejrzystość AI",
+        title: "AI w ArchiCompass",
+        effectiveDate: "Aktualizacja: 28 sierpnia 2026 r.",
         intro: "Ta strona wyjaśnia, kiedy ArchiCompass korzysta z AI i jak rozpoznać wyniki wspierane przez AI. Nie jest poradą prawną ani klasyfikacją systemu w rozumieniu przepisów o sztucznej inteligencji.",
         sections: [
           { title: "Co robi AI", paragraphs: ["AI Project Compass może analizować przesłane zdjęcia inspiracji oraz przekazany kontekst, np. typ inwestycji, wybrany kierunek stylu i cechy wizualne. Pomaga zaproponować kierunek stylistyczny, paletę, materiały, wskazówki do briefu oraz sygnały pomocne przy szukaniu projektanta."] },
@@ -165,10 +165,10 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
       },
       responsibleAi: {
         metadata: { title: "Odpowiedzialne AI", description: "Zasady odpowiedzialnego korzystania ze sztucznej inteligencji w ArchiCompass." },
-        eyebrow: "AI Project Compass",
+        eyebrow: "AI w ArchiCompass",
         title: "Odpowiedzialne AI",
-        effectiveDate: "Aktualizacja: 16 sierpnia 2026 r.",
-        intro: "W ArchiCompass traktujemy AI jako narzędzie wspierające przygotowanie projektu, a nie zastępstwo dla decyzji użytkownika lub wiedzy projektanta.",
+        effectiveDate: "Aktualizacja: 28 sierpnia 2026 r.",
+        intro: "W ArchiCompass traktujemy AI jako narzędzie wspierające przygotowanie projektu lub portfolio, a nie zastępstwo dla decyzji użytkownika lub wiedzy projektanta.",
         sections: [
           { title: "Cel i proporcjonalność", paragraphs: ["Korzystamy z AI, aby łatwiej przejść od rozproszonych inspiracji do uporządkowanego briefu. Zakres analizy ograniczamy do informacji potrzebnych do tej funkcji."] },
           { title: "Człowiek podejmuje decyzję", paragraphs: ["Użytkownik zachowuje kontrolę nad briefem, zapytaniem i wyborem profesjonalisty. Projektant pozostaje odpowiedzialny za własną ofertę, poradę i realizację usługi."] },
@@ -179,10 +179,10 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
       },
       privacyAndAi: {
         metadata: { title: "Prywatność i AI", description: "Jak ArchiCompass przetwarza zdjęcia i kontekst projektu podczas analizy AI." },
-        eyebrow: "AI Project Compass",
+        eyebrow: "AI w ArchiCompass",
         title: "Prywatność i AI",
-        effectiveDate: "Aktualizacja: 16 sierpnia 2026 r.",
-        intro: "Poniżej opisujemy, co dzieje się z materiałami wysłanymi do analizy AI w AI Project Compass.",
+        effectiveDate: "Aktualizacja: 28 sierpnia 2026 r.",
+        intro: "Ta informacja opisuje materiały przekazane do analizy AI w AI Project Compass i Asystencie portfolio AI.",
         sections: [
           { title: "Kiedy dane są wysyłane", paragraphs: ["Zdjęcia referencyjne nie są wysyłane do analizy automatycznie. Zostają przekazane dopiero po kliknięciu przycisku uruchamiającego analizę. W pojedynczym żądaniu analizujemy maksymalnie sześć zdjęć."] },
           { title: "Jakie dane trafiają do analizy", paragraphs: ["Do dostawcy AI mogą trafić wybrane zdjęcia oraz kontekst podany w formularzu: typ inwestycji, wybrany kierunek stylu i cechy wizualne. Nie wysyłamy danych logowania ani numeru telefonu jako części tej analizy."] },
@@ -193,10 +193,10 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
       },
       aiDisclaimer: {
         metadata: { title: "Zastrzeżenie dotyczące AI", description: "Ważne ograniczenia rekomendacji generowanych przez AI Project Compass." },
-        eyebrow: "AI Project Compass",
+        eyebrow: "AI w ArchiCompass",
         title: "Zastrzeżenie dotyczące AI",
-        effectiveDate: "Aktualizacja: 16 sierpnia 2026 r.",
-        intro: "Wyniki AI Project Compass są pomocą w porządkowaniu inspiracji i przygotowaniu rozmowy z projektantem. Nie stanowią porady zawodowej ani gwarancji rezultatu.",
+        effectiveDate: "Aktualizacja: 28 sierpnia 2026 r.",
+        intro: "Wyniki funkcji AI ArchiCompass są pomocą w porządkowaniu inspiracji lub portfolio. Nie stanowią porady zawodowej ani gwarancji rezultatu.",
         sections: [
           { title: "Charakter pomocniczy", paragraphs: ["Sugestie stylu, materiałów, palety, zakresu i dopasowania projektantów mają charakter informacyjny. Mogą być niepełne, niedokładne lub nieodpowiednie dla konkretnej nieruchomości."] },
           { title: "Decyzje i weryfikacja", paragraphs: ["To użytkownik podejmuje decyzje dotyczące wyboru projektanta, budżetu, harmonogramu i realizacji. Przed rozpoczęciem prac potwierdź ustalenia z wybranym profesjonalistą oraz właściwymi wykonawcami lub doradcami."] },
@@ -232,7 +232,7 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
         metadata: { title: "Privacy Policy", description: "How ArchiCompass processes account, profile, project, message, image and AI feature data." },
         eyebrow: "Legal information",
         title: "Privacy Policy",
-        effectiveDate: "Effective from: 16 August 2026",
+        effectiveDate: "Effective from: 28 August 2026",
         intro: "This policy explains how ArchiCompass processes personal data in client accounts, professional profiles, AI Project Compass, enquiries, messages and other platform services.",
         sections: [
           { title: "1. Data controller and contact", paragraphs: ["ArchiCompass is an online platform operated by SM Advisory, Sergii Moroz, ul. Grzybowska 2, lok. 31, 00-131 Warszawa, NIP 5252995634, REGON 528006413 (" + '"ArchiCompass", "we"' + "). SM Advisory is the controller of personal data processed to operate the platform unless a different controller is identified for a specific service.", "Send privacy requests and rights requests to contact@archicompass.pl. Send security reports to admin@archicompass.pl."] },
@@ -252,7 +252,7 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
         metadata: { title: "Terms of Service", description: "Rules for using ArchiCompass as a client, designer, studio member or visitor." },
         eyebrow: "Legal information",
         title: "Terms of Service",
-        effectiveDate: "Effective from: 16 August 2026",
+        effectiveDate: "Effective from: 28 August 2026",
         intro: "These Terms set out the rules for using ArchiCompass as a client, independent professional, studio member or visitor.",
         sections: [
           { title: "1. Platform scope", paragraphs: ["ArchiCompass helps users prepare an interior-project brief, explore profiles and portfolios, and hold structured project conversations. It is not a party to a design, supervision, construction, material-purchase or other service agreement made directly between a client and a professional."] },
@@ -272,7 +272,7 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
         metadata: { title: "Cookie Policy", description: "How ArchiCompass uses essential cookies and browser storage." },
         eyebrow: "Legal information",
         title: "Cookie Policy",
-        effectiveDate: "Effective from: 16 August 2026",
+        effectiveDate: "Effective from: 28 August 2026",
         intro: "This policy explains the cookies and browser-storage mechanisms used by ArchiCompass.",
         sections: [
           { title: "Essential authentication and security", paragraphs: ["ArchiCompass and Supabase use cookies and similar mechanisms to keep you signed in, protect sessions, perform authentication, prevent abuse and apply account permissions. These technologies are necessary for account features to work."] },
@@ -284,10 +284,10 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
         ],
       },
       aiTransparency: {
-        metadata: { title: "AI and transparency", description: "How ArchiCompass identifies and explains results supported by artificial intelligence." },
-        eyebrow: "AI Project Compass",
-        title: "AI and transparency",
-        effectiveDate: "Updated: 16 August 2026",
+        metadata: { title: "AI at ArchiCompass", description: "How ArchiCompass uses and explains AI in Project Compass, the AI Portfolio Assistant, and Matching." },
+        eyebrow: "AI transparency",
+        title: "AI at ArchiCompass",
+        effectiveDate: "Updated: 28 August 2026",
         intro: "This page explains when ArchiCompass uses AI and how you can recognise AI-supported results. It is not legal advice or a legal classification of the system under AI regulation.",
         sections: [
           { title: "What AI does", paragraphs: ["AI Project Compass can analyse the inspiration images and context you submit, such as project type, selected style direction and visual cues. It can suggest a style direction, palette, materials, brief prompts and signals that may help when looking for a designer."] },
@@ -300,10 +300,10 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
       },
       responsibleAi: {
         metadata: { title: "Responsible AI", description: "Principles for the responsible use of artificial intelligence in ArchiCompass." },
-        eyebrow: "AI Project Compass",
+        eyebrow: "AI at ArchiCompass",
         title: "Responsible AI",
-        effectiveDate: "Updated: 16 August 2026",
-        intro: "At ArchiCompass, we treat AI as a tool that supports project preparation, not a substitute for user decisions or design expertise.",
+        effectiveDate: "Updated: 28 August 2026",
+        intro: "At ArchiCompass, we treat AI as a tool that supports project or portfolio preparation, not a substitute for user decisions or design expertise.",
         sections: [
           { title: "Purpose and proportionality", paragraphs: ["We use AI to make it easier to move from scattered inspiration to a structured brief. We limit analysis to information needed for that feature."] },
           { title: "A person makes the decision", paragraphs: ["You retain control over your brief, enquiry and choice of professional. A designer remains responsible for their own offer, advice and service delivery."] },
@@ -314,10 +314,10 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
       },
       privacyAndAi: {
         metadata: { title: "Privacy and AI", description: "How ArchiCompass processes images and project context during AI analysis." },
-        eyebrow: "AI Project Compass",
+        eyebrow: "AI at ArchiCompass",
         title: "Privacy and AI",
-        effectiveDate: "Updated: 16 August 2026",
-        intro: "This page explains what happens to the material you send for AI analysis in AI Project Compass.",
+        effectiveDate: "Updated: 28 August 2026",
+        intro: "This information explains material submitted for AI analysis in AI Project Compass and AI Portfolio Assistant.",
         sections: [
           { title: "When data is sent", paragraphs: ["Reference images are not sent for analysis automatically. They are transferred only after you click the button that starts analysis. One request analyses no more than six images."] },
           { title: "What is sent for analysis", paragraphs: ["The selected images and context supplied in the form can be sent to the AI provider: project type, selected style direction and visual cues. We do not send your sign-in credentials or telephone number as part of this analysis."] },
@@ -328,10 +328,10 @@ const legalCopy: Record<SiteLocale, LegalCopy> = {
       },
       aiDisclaimer: {
         metadata: { title: "AI disclaimer", description: "Important limitations of recommendations generated by AI Project Compass." },
-        eyebrow: "AI Project Compass",
+        eyebrow: "AI at ArchiCompass",
         title: "AI disclaimer",
-        effectiveDate: "Updated: 16 August 2026",
-        intro: "AI Project Compass results help organise inspiration and prepare a conversation with a designer. They are not professional advice or a guarantee of an outcome.",
+        effectiveDate: "Updated: 28 August 2026",
+        intro: "ArchiCompass AI-function results help organise inspiration or a portfolio. They are not professional advice or a guarantee of an outcome.",
         sections: [
           { title: "Supportive nature", paragraphs: ["Style, material, palette, scope and designer-matching suggestions are for information only. They can be incomplete, inaccurate or unsuitable for a particular property."] },
           { title: "Decisions and verification", paragraphs: ["You make decisions about professional choice, budget, timing and delivery. Before work begins, confirm the relevant arrangements with your selected professional and any appropriate contractors or advisers."] },

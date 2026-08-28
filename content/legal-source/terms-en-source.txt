@@ -1,10 +1,10 @@
 ARCHICOMPASS SERVICE TERMS AND CONDITIONS
 
-effective from 16 August 2026
+effective from 28 August 2026
 
 § 1. General provisions
 
-1. These Terms and Conditions define the rules for using the ArchiCompass website available at archicompass.pl, including the rules for the provision of electronic services, creating and maintaining Accounts, publishing Profiles and Portfolios, using the AI Project Compass functionality, creating Project Briefs, searching for and matching Designers, and communication between Users.
+1. These Terms and Conditions define the rules for using the ArchiCompass website available at archicompass.pl, including the rules for the provision of electronic services, creating and maintaining Accounts, publishing Profiles and Portfolios, using AI Project Compass and the AI Portfolio Assistant, creating Project Briefs, searching for and matching Designers, and communication between Users.
 2. The Service Operator and service provider within the meaning of the regulations on the provision of electronic services is:
 
 Sergii Moroz, conducting business under the name Sergii Moroz Advisory (SM Advisory)
@@ -39,11 +39,12 @@ Terms used in the Terms and Conditions shall mean:
 10. User Content – any information and materials provided, uploaded, saved, or published by a User in the Service, in particular texts, photographs, visualisations, graphics, files, inspiration, project information, Portfolios, and messages.
 11. AI Project Compass – a functionality of the Service using IT solutions, including artificial intelligence models, to analyse materials and information provided by the User and to support the creation of a Project Brief and Matching.
 12. Project Brief or Brief – an organised description of a project, needs, inspiration, preferences, budget, scope of work, or other information related to a planned investment, created by the User independently or with the support of AI Project Compass.
-13. Matching – the result of the operation of the Service's functionality consisting of indicating Designers who, according to the criteria used by the Service, may meet the needs specified by the Client.
-14. Enquiry – information sent via the Service by a Client to a Designer or Studio, or provided to a Designer by the Service in connection with a Client's interest in their services.
-15. Design Agreement – an agreement concerning the Designer's services concluded directly between the Client and the Designer or Studio outside the legal relationship connecting the User with the Operator.
-16. Subscription – paid access to specific functionalities of the Service for a specified billing period.
-17. Privacy Policy – the current ArchiCompass privacy policy made available on the Service.
+13. AI Portfolio Assistant or Portfolio Autopilot – a feature for Designers which may use a specified website or submitted materials to prepare draft project groups, descriptions, tags, classifications, metadata, and suggested Profile information.
+14. Matching – the result of the operation of the Service's functionality consisting of indicating Designers who, according to the criteria used by the Service, may meet the needs specified by the Client.
+15. Enquiry – information sent via the Service by a Client to a Designer or Studio, or provided to a Designer by the Service in connection with a Client's interest in their services.
+16. Design Agreement – an agreement concerning the Designer's services concluded directly between the Client and the Designer or Studio outside the legal relationship connecting the User with the Operator.
+17. Subscription – paid access to specific functionalities of the Service for a specified billing period.
+18. Privacy Policy – the current ArchiCompass privacy policy made available on the Service.
 
 ⸻
 
@@ -153,7 +154,7 @@ d) the use of published materials does not infringe the rights of third parties.
 § 9. User Content and intellectual property
 
 1. The User retains the rights to User Content to the extent that these rights are vested in them.
-2. By submitting User Content to the Service, the User declares that they possess the rights, licenses, consents, or other legal basis allowing them to use it in a manner resulting from the functionalities of the Service.
+2. By submitting User Content to the Service, the User declares that they possess the rights, licenses, consents, or other legal basis allowing them to use it in a manner resulting from the functionalities of the Service, including submission, storage, technical processing, automated or AI analysis, the generation of descriptions and metadata, display and — where publication is chosen — public sharing.
 3. The User may not publish content that infringes, in particular:
 
 a) copyrights;
@@ -187,10 +188,12 @@ f) moderating and securing the Service.
 5. The license does not mean the transfer of copyrights to the Operator.
 6. The Operator does not acquire, on the basis of the Terms and Conditions, the right to use the User's private materials for advertising purposes unrelated to the provision of the service, unless the User grants separate consent for this.
 7. In the case of a public Portfolio, the license covers the public display of materials within the Service for the period during which the Designer makes them publicly available.
+8. The User may not present a third party's work as their own or knowingly make false statements about authorship, rights, qualifications, or the scope of work performed.
+9. The Operator does not certify authorship or verify rights to each uploaded image. If there is a justified suspicion of infringement, the Operator may request clarification, limit visibility, or remove content in accordance with § 17.
 
 ⸻
 
-§ 10. AI Project Compass
+§ 10. AI functions: AI Project Compass and AI Portfolio Assistant
 
 1. AI Project Compass is a tool supporting the User in analyzing inspiration, organizing information concerning a project, and preparing a Brief.
 2. AI Project Compass may analyze, among other things:
@@ -223,6 +226,11 @@ e) does not replace consultation with an appropriate specialist.
 7. The Operator may use the services of external AI technology providers. Information concerning the processing of personal data in connection with such services is specified in the Privacy Policy.
 8. The Operator does not guarantee that the generated result will be unique. Similar input information may lead to similar results.
 9. The Operator may change the models, providers, and technologies used to implement AI functions, provided that this remains in accordance with the Terms and Conditions and applicable law.
+10. At a Designer's express request, the AI Portfolio Assistant may analyse a specified website or submitted materials and prepare draft project groups, descriptions, tags, classifications, suggestions, metadata, and proposed Profile information.
+11. AI Portfolio Assistant results are supportive and may contain errors, inaccuracies, or incomplete information. The Designer should review them and may edit, hide, or reject them before publication.
+12. AI Portfolio Assistant results are not public automatically. Portfolio materials and Profile suggestions become public only after an express publishing action taken by the Designer in the Service.
+13. By publishing content prepared or supported by the AI Portfolio Assistant, the Designer confirms that it is accurate and that they have the rights and consents necessary to use and publish it.
+14. No AI function output constitutes architectural, design, technical, construction, legal, or financial advice, or a guarantee of an outcome. Before making an important decision, the User should verify the relevant information.
 
 ⸻
 
@@ -386,7 +394,7 @@ d) temporary suspension of the Account;
 e) removal of the Account – in cases justified by the nature or recurrence of the violation.
 
 3. When taking moderation actions, the Operator shall take into account, in particular, the nature of the violation, its consequences, frequency, and the possibility of removing the violation in a less intrusive manner.
-4. The User may report content that they believe is illegal or violates the Terms and Conditions to the address:
+4. The User may report content that they believe is illegal or violates the Terms and Conditions through the “Report” link available next to a public Profile or Project, or to the address:
 
 admin@archicompass.pl
 
@@ -409,8 +417,8 @@ d) contact details of the reporter, if required by law or necessary to process t
 
 1. The Client Account is free of charge, unless the User explicitly selects an additional paid service.
 2. The Operator may offer Designers or Studios a free period of access to functionalities, in accordance with the terms presented upon activation.
-3. As of the date of entry into force of these Terms and Conditions, the Operator may offer the first Designers a 3-month period of free access to functionalities including the Profile, Portfolio, and the ability to receive Enquiries, in accordance with the information presented in the Service.
-4. After the end of the free period, further use of functionalities requiring a Subscription may require selecting a paid plan.
+3. As of the date of entry into force of these Terms and Conditions, the Operator offers Designers and Studios a 3-month period of free access to functionalities including the Profile, Portfolio, and the ability to receive Enquiries, in accordance with the information presented in the Service.
+4. Account registration and the start of the free period do not require payment-card details. After the free period, further use of functionalities requiring a Subscription requires the User to select a paid plan and deliberately activate payment where online payments are available.
 5. Before making a purchase, the User receives information at least regarding:
 
 a) the price;
@@ -425,11 +433,11 @@ e) the rules for Subscription renewal;
 
 f) the rules for its termination.
 
-6. Payment is made using the payment methods available in the Service.
-7. If the Subscription renews automatically, information about this will be presented before the purchase is made.
-8. The User may opt out of further Subscription renewal in accordance with the mechanism made available in the Account. Opting out does not result in the loss of paid access before the end of the current billing period, unless applicable regulations require a different solution.
-9. Lack of effective payment may result in the limitation of paid functionalities, in particular the visibility of the Profile, Portfolio, or the ability to receive new Enquiries.
-10. Detailed prices and the scope of individual plans are defined by the current offer presented in the Service.
+6. Payment is made using the payment methods available in the Service. The Operator does not store payment-card details.
+7. If the Subscription renews automatically, information about this, the billing period, and cancellation will be presented before the purchase is made.
+8. The User may opt out of further Subscription renewal through the mechanism made available in the Account or by the payment provider. Opting out does not result in the loss of paid access before the end of the current billing period, unless applicable regulations require a different solution.
+9. Lack of effective payment may result in the limitation of paid functionalities, in particular the visibility of the Profile, Portfolio, or the ability to receive new Enquiries. The Account and data remain available to the extent provided by Service functionality and applicable law.
+10. Detailed prices, monthly or annual billing, taxes, available invoices, and the scope of individual plans are defined by the current offer presented in the Pricing page and by information shown before purchase.
 
 ⸻
 
@@ -611,10 +619,10 @@ REGON (Statistical Identification Number): 528006413
 
 § 28. Final provisions
 
-1. The Terms and Conditions are effective from 16 August 2026.
+1. The Terms and Conditions are effective from 28 August 2026.
 2. The current version of the Terms and Conditions is available on the Website.
 3. In matters not regulated by the Terms and Conditions, the relevant provisions of Polish law and directly applicable provisions of European Union law shall apply.
 4. If any provision of the Terms and Conditions proves to be invalid or ineffective, this does not affect the validity of the remaining provisions, unless applicable law provides otherwise.
 5. The Terms and Conditions shall be interpreted with respect for the mandatory rights of consumers and other Users.
 
-Version: 1.0
+Version: 1.1

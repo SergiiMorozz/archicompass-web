@@ -1792,6 +1792,7 @@ export default async function DesignersPage({
               <h2 className="mt-1 text-2xl font-bold">
                 {briefContext ? copy.results.briefRecommended : copy.results.recommended}
               </h2>
+              {briefContext ? <p className="mt-2 max-w-2xl text-xs leading-5 text-muted">{copy.results.matchingNotice} <Link href={localeAppPath("/ai-transparency")} className="font-semibold text-primary underline">{copy.results.matchingLink}</Link>.</p> : null}
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
