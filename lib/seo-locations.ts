@@ -1,4 +1,5 @@
 import { polishCityGrammar } from "@/content/pl/locations";
+import { distanceBetweenLocations } from "@/lib/location-distance";
 import type { SiteLocale } from "@/lib/site-locale";
 
 export type SeoLocation = {
@@ -10,6 +11,12 @@ export type SeoLocation = {
   city: string;
   city_en?: string;
   citySlug: string;
+  /**
+   * Metro-area radius for established large-city directories. It only applies
+   * to locations with known coordinates, so an unresolvable free-text value
+   * can never be guessed into a city directory.
+   */
+  metroRadiusKm?: number;
   genitive?: string;
   locative?: string;
   marketNote: string;
@@ -28,6 +35,7 @@ export const seoLocations: SeoLocation[] = [
     countrySlug: "poland",
     ...polishCityGrammar.warsaw,
     city_en: "Warsaw",
+    metroRadiusKm: 35,
     marketNote: "Warszawski rynek obejmuje zarówno kompaktowe mieszkania w historycznych dzielnicach, jak i nowe domy oraz wnętrza komercyjne w całej aglomeracji.",
     marketNote_en: "Warsaw's market spans compact apartments in historic districts, new homes, and commercial interiors across the wider metropolitan area.",
     planningNote: "Przed wysłaniem briefu porównaj doświadczenie w projektowaniu układów mieszkań, koordynacji remontów, pracy z zabytkami, nowymi inwestycjami i współpracy zdalnej.",
@@ -42,6 +50,7 @@ export const seoLocations: SeoLocation[] = [
     countrySlug: "poland",
     ...polishCityGrammar.krakow,
     city_en: "Krakow",
+    metroRadiusKm: 30,
     marketNote: "Kraków łączy zabytkowe mieszkania, powojenną zabudowę, nowe inwestycje, obiekty hotelarskie i domy w całej aglomeracji. To rynek, na którym szczególnie liczą się wyczucie kontekstu, doświadczenie remontowe i umiejętność pracy z istniejącą tkanką budynku.",
     marketNote_en: "Krakow brings together historic apartments, post-war buildings, new developments, hospitality spaces, and homes across the metropolitan area. Context, renovation experience, and working sensitively with existing buildings matter here.",
     planningNote: "Zwróć uwagę na doświadczenie w remontach, zakres dokumentacji, znajomość lokalnych wykonawców oraz sposób pracy z ograniczeniami starszych budynków.",
@@ -56,6 +65,7 @@ export const seoLocations: SeoLocation[] = [
     countrySlug: "poland",
     ...polishCityGrammar.wroclaw,
     city_en: "Wroclaw",
+    metroRadiusKm: 30,
     marketNote: "Wrocław łączy mieszkania w kamienicach, nowe osiedla, domy rodzinne, biura i elastyczne przestrzenie miejskie.",
     marketNote_en: "Wroclaw combines period apartments, new residential developments, family homes, offices, and flexible urban spaces.",
     planningNote: "Wykorzystaj brief, aby porównać doświadczenie w planowaniu układów funkcjonalnych, zakres dokumentacji, jakość wizualizacji 3D, wsparcie przy zakupach oraz możliwość nadzoru na budowie.",
@@ -70,6 +80,7 @@ export const seoLocations: SeoLocation[] = [
     countrySlug: "poland",
     ...polishCityGrammar.gdansk,
     city_en: "Gdansk",
+    metroRadiusKm: 35,
     marketNote: "Rynek Gdańska i Trójmiasta obejmuje apartamenty nad morzem, zabytkowe nieruchomości, domy rodzinne, lokale inwestycyjne i wnętrza hotelarskie.",
     marketNote_en: "The Gdansk and Tri-City market includes coastal apartments, historic properties, family homes, investment units, and hospitality interiors.",
     planningNote: "Sprawdź, czy projektant realizuje projekty w Gdańsku, Gdyni i Sopocie oraz czy zakres współpracy obejmuje zakupy, kontakt z wykonawcami i wsparcie na etapie realizacji.",
@@ -84,6 +95,7 @@ export const seoLocations: SeoLocation[] = [
     countrySlug: "poland",
     ...polishCityGrammar.poznan,
     city_en: "Poznan",
+    metroRadiusKm: 30,
     marketNote: "Poznańskie projekty obejmują mieszkania, remontowane domy, nowe inwestycje, biura, lokale handlowe i wnętrza hotelarskie.",
     marketNote_en: "Poznan projects include apartments, renovated homes, new developments, offices, retail spaces, and hospitality interiors.",
     planningNote: "Porównaj portfolio według typu projektu i zapytaj, jak wyceniane są koncepcja, dokumentacja wykonawcza, zakupy i nadzór.",
@@ -98,6 +110,7 @@ export const seoLocations: SeoLocation[] = [
     countrySlug: "poland",
     ...polishCityGrammar.lodz,
     city_en: "Lodz",
+    metroRadiusKm: 30,
     marketNote: "Łódź oferuje charakterystyczne przestrzenie poprzemysłowe, mieszkania w kamienicach, domy rodzinne, nowe inwestycje i kreatywne lokale komercyjne.",
     marketNote_en: "Lodz offers distinctive post-industrial spaces, period apartments, family homes, new developments, and creative commercial venues.",
     planningNote: "Przy złożonym remoncie wybieraj specjalistów, którzy wcześnie wyjaśniają zakres inwentaryzacji, koordynację techniczną, materiały i ryzyka realizacyjne.",
@@ -112,6 +125,7 @@ export const seoLocations: SeoLocation[] = [
     countrySlug: "poland",
     ...polishCityGrammar.katowice,
     city_en: "Katowice",
+    metroRadiusKm: 35,
     marketNote: "Katowice i cały Śląsk łączą mieszkania, domy jednorodzinne, adaptacje, biura i wymagające technicznie remonty.",
     marketNote_en: "Katowice and the wider Silesian region bring together apartments, houses, conversions, offices, and technically demanding renovations.",
     planningNote: "Potwierdź obszar działania projektanta, jego obecność na budowie, zakres dokumentacji i doświadczenie w koordynacji wykonawców w regionie.",
@@ -222,5 +236,13 @@ export function normalizeLocation(value: string | null | undefined) {
 
 export function matchesSeoLocation(value: string | null | undefined, location: SeoLocation) {
   const normalized = normalizeLocation(value);
-  return normalized.includes(normalizeLocation(location.city)) || normalized.includes(location.citySlug);
+  if (!normalized) return false;
+  if (normalized.includes(normalizeLocation(location.city)) || normalized.includes(location.citySlug)) {
+    return true;
+  }
+
+  const distance = location.metroRadiusKm
+    ? distanceBetweenLocations(value || "", location.city)
+    : null;
+  return distance !== null && distance <= (location.metroRadiusKm ?? 0);
 }
