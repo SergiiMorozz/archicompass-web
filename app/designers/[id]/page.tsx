@@ -4,6 +4,7 @@ import Image from "next/image";
 import { notFound, permanentRedirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import FavoriteButton from "@/components/FavoriteButton";
+import ContentReportButton from "@/components/ContentReportButton";
 import ProjectGallery from "@/components/ProjectGallery";
 import ProfileViewTracker from "@/components/ProfileViewTracker";
 import GoogleRating from "@/components/GoogleRating";
@@ -758,6 +759,7 @@ export default async function DesignerProfilePage({
                 linkedinUrl={profile.linkedin_url}
               />
             </div>
+            {!isOwner && !profile.is_demo ? <ContentReportButton targetType="profile" targetId={profile.id} /> : null}
           </aside>
         </section>
       </section>

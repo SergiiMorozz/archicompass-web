@@ -8,6 +8,7 @@ export type ServicesPricingCopy = {
   servicesTitle: string;
   servicesBody: string;
   studioCoverage: { title: string; body: string };
+  professionalTrial: { title: string; body: string };
   faq: { badge: string; title: string; question: string; answer: string };
   priceNote: string;
   primaryCta: string;
@@ -38,6 +39,10 @@ const copy: Record<SiteLocale, ServicesPricingCopy> = {
     studioCoverage: {
       title: "Jeden plan pracowni, bez dodatkowych opłat za zespół",
       body: "Aktywna, płatna subskrypcja pracowni obejmuje osobiste profile wszystkich aktywnych członków zespołu. Nie muszą wykupywać odrębnego planu, dopóki pozostają aktywnymi członkami tej pracowni.",
+    },
+    professionalTrial: {
+      title: "3 miesiące bez opłat, bez karty przy rejestracji",
+      body: "Okres bezpłatny zaczyna się po utworzeniu konta profesjonalisty. Karta nie jest wymagana przy rejestracji. Po jego zakończeniu nie pobieramy opłaty bez wyboru planu i uruchomienia płatności przez Ciebie.",
     },
     faq: {
       badge: "Asystent portfolio AI",
@@ -72,6 +77,10 @@ const copy: Record<SiteLocale, ServicesPricingCopy> = {
     studioCoverage: {
       title: "One studio plan, with no extra fees for the team",
       body: "An active paid studio subscription includes the personal profiles of all active team members. They do not need a separate plan while they remain active members of that studio.",
+    },
+    professionalTrial: {
+      title: "3 months free, with no card at sign-up",
+      body: "The complimentary period begins when you create a professional account. No card is required at sign-up. After it ends, we do not charge you unless you choose a plan and start payment yourself.",
     },
     faq: {
       badge: "AI Portfolio Assistant",

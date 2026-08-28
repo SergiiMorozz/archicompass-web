@@ -1,6 +1,6 @@
 ARCHICOMPASS PRIVACY POLICY
 
-effective from 16 August 2026
+effective from 28 August 2026
 
 This Privacy Policy describes the principles for the processing of personal data in connection with the use of the ArchiCompass online platform, available in particular at the address archicompass.pl, including Client and Designer Accounts, Profiles and Portfolios, AI Project Compass, Project Briefs, Designer Matching, Enquiries, messages, and other functionalities of the Service.
 
@@ -241,13 +241,13 @@ Legal basis: Article 6(1)(b) of the GDPR – performance of a contract with the 
 
 ⸻
 
-3. AI Project Compass
+3. AI functions
 
-Purpose: analysis of reference materials and information concerning the project, determining the characteristics of the preferred interior, and assisting in the creation of a Project Brief.
+Purpose: analysis of reference materials and project information, determining the characteristics of the preferred interior, and assisting with a Project Brief in AI Project Compass, as well as — at a Designer's request — analysing Portfolio materials and preparing draft Portfolio or Profile suggestions in the AI Portfolio Assistant.
 
 Legal basis: Article 6(1)(b) of the GDPR – performance of a service initiated by the User.
 
-If a specific optional functionality requires separate consent, the basis for processing will be Article 6(1)(a) of the GDPR.
+Activation of an AI function is voluntary. Separate consent is not required merely to use an AI function where processing is necessary to perform a feature expressly activated by the User; if a specific optional functionality requires separate consent, the basis for processing will be Article 6(1)(a) of the GDPR.
 
 ⸻
 
@@ -445,28 +445,31 @@ e) reference photos shared as part of the Brief.
 
 ⸻
 
-§ 8. AI Project Compass and processing by AI systems
+§ 8. AI functions and processing
 
-1. AI Project Compass uses artificial intelligence technologies to analyse materials and information provided by the User.
-2. AI analysis takes place only after the User activates the appropriate feature.
-3. The following may be transferred to the AI system:
+1. ArchiCompass uses AI functions only after the User activates the relevant function. Results are supportive material and may be incomplete, inaccurate, or not correspond to actual implementation possibilities.
 
-a) selected reference images;
+2. AI Project Compass
 
-b) information regarding the type of investment;
+a) Selected reference images and information about the type of investment, style, visual cues, and project may be transferred for analysis.
 
-c) indicated preferences;
+b) The purpose is to prepare supportive style guidance, Brief material, and signals used for Matching.
 
-d) information about the style and features of the project;
+c) Depending on the current server configuration, analysis may be performed by Google Gemini or OpenAI models. Data is transferred only to the extent needed to perform the activated function.
 
-e) other information necessary to generate the result of the selected feature.
+3. AI Portfolio Assistant
 
-4. The production version of AI Project Compass currently uses Google Gemini models. The Controller may change the provider in the future where technically or organisationally justified; in that case, this Policy will be updated accordingly.
-5. Data is transferred to the AI provider only to the extent necessary to perform the feature activated by the User, in accordance with the agreements and technical settings applied by the Controller.
-6. The Controller does not use the private materials of Users to independently train its own general artificial intelligence model.
-7. The results of AI analysis may be inaccurate, incomplete, or may not correspond to the actual implementation possibilities of the project.
-8. AI results are of an auxiliary nature.
-9. AI Project Compass does not make decisions towards the User that produce legal effects or similarly significantly affect the User solely by automated means within the meaning of Article 22 of the GDPR.
+a) A Designer may provide their website address or upload photos. Within the feature, ArchiCompass may process the source address, discovered or uploaded images, limited file metadata, titles, descriptions and other publicly available information from the specified website, as well as information entered into the Profile or Portfolio.
+
+b) The materials are used to automatically group images into draft projects, classify interiors, recognise rooms, materials, colours and style features, and prepare proposed titles, descriptions, tags, metadata, and a Profile draft.
+
+c) The production analysis part of the AI Portfolio Assistant uses Google Gemini models. Requests are made server-side; the AI provider key is not passed to the browser.
+
+d) Discovered and uploaded materials are first stored in a private import workspace. The result is a draft: the Designer may edit, hide, or reject it. No project, image, or Profile suggestion is published publicly without an express publishing action by the Designer.
+
+4. The Controller does not use Users' private materials to independently train its own general artificial intelligence model. Retention conditions at external AI providers follow their current documentation and agreements; they require separate verification before wider rollout of the feature.
+
+5. AI functions do not make decisions towards the User that produce legal effects or similarly significantly affect them solely by automated means within the meaning of Article 22 of the GDPR.
 
 ⸻
 
@@ -487,14 +490,12 @@ e) stylistic preferences;
 
 f) nature and scale of the project;
 
-g) information contained in the Designers’ Profiles;
-
-h) other parameters related to the project.
+g) information contained in Designers’ Profiles and public Portfolios, including declared services, ways of working, and availability.
 
 3. As a result of the analysis, the Service may create a list or ranking of Designers whose characteristics most closely correspond to the specified parameters.
 4. This mechanism may constitute profiling within the meaning of the GDPR to the extent that it uses personal data to evaluate specific preferences or interests of the User.
 5. The purpose of profiling is to present more relevant search results and to reduce the number of inadequate proposals.
-6. The result of the Matching is of a recommendatory nature.
+6. The Matching result is supportive and recommendatory; result order is not a certification of quality or a guarantee of successful cooperation.
 7. The Client independently decides whether to contact any of the proposed Designers.
 8. The Matching does not produce legal effects or similarly significant effects for the Client or the Designer based solely on automated processing within the meaning of Article 22 of the GDPR.
 
@@ -538,6 +539,14 @@ Currently used for:
 * analysis of text information;
 * analysis of images;
 * generation of auxiliary AI results.
+
+OpenAI
+
+May be used, depending on the current server configuration, for optional image analysis in AI Project Compass.
+
+Stripe
+
+May be used for secure Subscription payments where online payments are active. ArchiCompass does not store full payment-card details.
 
 Google
 
@@ -586,7 +595,8 @@ h) Designers – to the extent resulting from the Enquiry sent by the Client.
 3. After saving photos in the Service, they are stored in a private file space used by ArchiCompass.
 4. Access to private photos may be implemented using time-limited, signed URLs.
 5. If the Client provides a Brief to a Designer, the Designer may receive temporary access to the photos associated with that Brief.
-6. Portfolio photos uploaded by the Designer are intended for public presentation in accordance with the Terms and Conditions and Account settings.
+6. AI Portfolio Assistant materials, including copies of images discovered on a specified website and uploaded photos, are stored before publication in a private import workspace available to the Account owner and authorised administrators. Only images selected by the Designer during publication are copied into the public Portfolio.
+7. Portfolio photos uploaded by the Designer are intended for public presentation in accordance with the Terms and Conditions and Account settings.
 
 ⸻
 
@@ -638,6 +648,7 @@ Data category	Retention period
 Active Account data	for the period of holding the Account
 Designer Profile data	for the period of maintaining the Profile, and subsequently for the period necessary to fulfill obligations or defend claims
 Portfolio	until its removal by the Designer, removal of the Profile, or termination of the provision of the relevant service
+AI Portfolio Assistant materials and draft results	until deletion of the related Account or import, where deletion is available in the relevant feature, subject to the period needed for security, report handling, and backups
 Client Briefs and projects	until their removal or removal of the Account, unless further storage is necessary on another legal basis
 Private reference photos	for the period of association with an active project or Brief, and subsequently until their removal in accordance with the Service mechanism
 Enquiries and messages	for the period needed to handle communication and subsequently for the period necessary to establish, pursue, or defend claims
@@ -815,9 +826,9 @@ admin@archicompass.pl
 
 § 26. Final provisions
 
-1. This Policy is effective from 16 August 2026.
+1. This Policy is effective from 28 August 2026.
 2. In matters not regulated by the Policy, the relevant provisions of law shall apply, in particular the GDPR.
 3. The rules for the provision of services via ArchiCompass are defined by the ArchiCompass Terms and Conditions.
 4. Detailed information regarding technologies saved on the User's device is contained in the Cookie Policy.
 
-Version: 1.0
+Version: 1.1

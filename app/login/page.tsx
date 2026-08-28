@@ -13,15 +13,13 @@ const authCopy = getSiteCopy().auth;
 
 type Mode = "signin" | "signup";
 type Intent = "client" | "designer";
-type LegalConsentKey = "terms" | "privacy" | "cookies" | "aiTransparency";
 type Status =
   | { type: "idle" }
   | { type: "loading" }
   | { type: "success"; message: string }
   | { type: "error"; message: string; canResetPassword?: boolean };
 
-const LEGAL_DOCUMENT_VERSION = "2026-08-16";
-const legalConsentKeys: LegalConsentKey[] = ["terms", "privacy", "cookies", "aiTransparency"];
+const LEGAL_DOCUMENT_VERSION = "2026-08-28";
 
 function intentFromNext(next: string): Intent {
   if (next.includes("intent=designer") || next.startsWith("/studio")) return "designer";
@@ -51,12 +49,7 @@ function LoginContent() {
   const [intent, setIntent] = useState<Intent>(() => intentFromNext(requestedNext));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [legalConsents, setLegalConsents] = useState<Record<LegalConsentKey, boolean>>({
-    terms: false,
-    privacy: false,
-    cookies: false,
-    aiTransparency: false,
-  });
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const [confirmationEmail, setConfirmationEmail] = useState<string | null>(null);
   const [isResendingConfirmation, setIsResendingConfirmation] = useState(false);
   const [status, setStatus] = useState<Status>({ type: "idle" });
@@ -112,7 +105,7 @@ function LoginContent() {
       setStatus({ type: "error", message: authCopy.form.errors.passwordTooShort });
       return;
     }
-    if (mode === "signup" && legalConsentKeys.some((key) => !legalConsents[key])) {
+    if (mode === "signup" && !legalAccepted) {
       setStatus({ type: "error", message: authCopy.form.errors.legalConsentRequired });
       return;
     }
@@ -151,6 +144,8 @@ function LoginContent() {
             privacy_version: LEGAL_DOCUMENT_VERSION,
             cookies_version: LEGAL_DOCUMENT_VERSION,
             ai_transparency_version: LEGAL_DOCUMENT_VERSION,
+            terms_accepted: true,
+            privacy_acknowledged: true,
             locale: siteLocale,
           },
         },
@@ -269,38 +264,11 @@ function LoginContent() {
                 <label className="flex cursor-pointer items-start gap-3 text-xs leading-5 text-muted">
                   <input
                     type="checkbox"
-                    checked={legalConsents.terms}
-                    onChange={(event) => setLegalConsents((current) => ({ ...current, terms: event.target.checked }))}
+                    checked={legalAccepted}
+                    onChange={(event) => setLegalAccepted(event.target.checked)}
                     className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
                   />
-                  <span>{authCopy.form.termsConsentBefore}{" "}<Link href="/terms" className="font-semibold text-primary underline">{authCopy.form.terms}</Link>{authCopy.form.termsConsentAfter}</span>
-                </label>
-                <label className="flex cursor-pointer items-start gap-3 text-xs leading-5 text-muted">
-                  <input
-                    type="checkbox"
-                    checked={legalConsents.privacy}
-                    onChange={(event) => setLegalConsents((current) => ({ ...current, privacy: event.target.checked }))}
-                    className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
-                  />
-                  <span>{authCopy.form.privacyConsentBefore}{" "}<Link href="/privacy" className="font-semibold text-primary underline">{authCopy.form.privacy}</Link>{authCopy.form.privacyConsentAfter}</span>
-                </label>
-                <label className="flex cursor-pointer items-start gap-3 text-xs leading-5 text-muted">
-                  <input
-                    type="checkbox"
-                    checked={legalConsents.cookies}
-                    onChange={(event) => setLegalConsents((current) => ({ ...current, cookies: event.target.checked }))}
-                    className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
-                  />
-                  <span>{authCopy.form.cookiesConsentBefore}{" "}<Link href="/cookies" className="font-semibold text-primary underline">{authCopy.form.cookies}</Link>{authCopy.form.cookiesConsentAfter}</span>
-                </label>
-                <label className="flex cursor-pointer items-start gap-3 text-xs leading-5 text-muted">
-                  <input
-                    type="checkbox"
-                    checked={legalConsents.aiTransparency}
-                    onChange={(event) => setLegalConsents((current) => ({ ...current, aiTransparency: event.target.checked }))}
-                    className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
-                  />
-                  <span>{authCopy.form.aiTransparencyConsentBefore}{" "}<Link href="/ai-transparency" className="font-semibold text-primary underline">{authCopy.form.aiTransparency}</Link>{authCopy.form.aiTransparencyConsentAfter}</span>
+                  <span>{authCopy.form.legalConsentBefore}{" "}<Link href="/terms" className="font-semibold text-primary underline">{authCopy.form.terms}</Link>{" "}{authCopy.form.legalConsentMiddle}{" "}<Link href="/privacy" className="font-semibold text-primary underline">{authCopy.form.privacy}</Link>{authCopy.form.legalConsentAfter}</span>
                 </label>
               </fieldset>
             ) : null}

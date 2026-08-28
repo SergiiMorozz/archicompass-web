@@ -49,8 +49,10 @@ const portfolioAutopilotCopyByLocale = {
       websiteUrlHint: "Obsługujemy zwykłe strony WWW. Behance i Houzz — eksperymentalnie.",
       uploadLabel: "Zdjęcia projektów",
       uploadHint: (max: number) => `Do ${max} zdjęć naraz (JPG, PNG lub WebP).`,
+      aiNotice: "Asystent portfolio AI używa AI do analizy materiałów i przygotowania propozycji. Wyniki mogą zawierać błędy — sprawdź je przed publikacją.",
+      aiNoticeLink: "Jak ArchiCompass wykorzystuje AI",
       rightsLabel:
-        "Potwierdzam, że mam prawo do wykorzystania tych zdjęć i upoważniam ArchiCompass do ich przetworzenia w celu stworzenia i dopasowania mojego profilu zawodowego.",
+        "Potwierdzam, że mam prawa lub odpowiednie zgody do wskazanej strony i materiałów oraz zezwalam ArchiCompass na ich wykorzystanie, przechowywanie i automatyczną analizę, w tym z użyciem AI. Jeśli wybiorę publikację, zezwalam także na opublikowanie wybranych materiałów w moim profilu.",
       submit: "Stwórz mój profil z AI",
       submitBusy: "Uruchamiamy import…",
       errors: {
@@ -278,8 +280,10 @@ const portfolioAutopilotCopyByLocale = {
       websiteUrlHint: "Works with regular websites. Behance and Houzz are experimental.",
       uploadLabel: "Project photos",
       uploadHint: (max: number) => `Up to ${max} photos at once (JPG, PNG or WebP).`,
+      aiNotice: "AI Portfolio Assistant uses AI to analyze the materials and prepare suggestions. Results can contain errors — review them before publishing.",
+      aiNoticeLink: "How ArchiCompass uses AI",
       rightsLabel:
-        "I confirm that I have the right to use these images and authorize ArchiCompass to process them for creating and matching my professional profile.",
+        "I confirm that I have the rights or appropriate permissions for the website and materials I provide, and authorize ArchiCompass to use, store, and automatically analyze them, including with AI. If I choose to publish, I also authorize publication of the selected materials in my profile.",
       submit: "Create my profile with AI",
       submitBusy: "Starting the import…",
       errors: {

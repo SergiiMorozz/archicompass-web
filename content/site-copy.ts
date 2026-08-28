@@ -239,21 +239,12 @@ export type SiteCopy = {
       resend: string;
       forgotPassword: string;
       resetPasswordCta: string;
-      termsPrefix: string;
       terms: string;
-      and: string;
       privacy: string;
-      cookies: string;
-      aiTransparency: string;
       legalConsentTitle: string;
-      termsConsentBefore: string;
-      termsConsentAfter: string;
-      privacyConsentBefore: string;
-      privacyConsentAfter: string;
-      cookiesConsentBefore: string;
-      cookiesConsentAfter: string;
-      aiTransparencyConsentBefore: string;
-      aiTransparencyConsentAfter: string;
+      legalConsentBefore: string;
+      legalConsentMiddle: string;
+      legalConsentAfter: string;
       confirmationCreated: string;
       confirmationResent: string;
       errors: {
@@ -424,21 +415,12 @@ const pl: SiteCopy = {
       resend: "Wyślij link ponownie",
       forgotPassword: "Nie pamiętasz hasła?",
       resetPasswordCta: "Zresetuj hasło",
-      termsPrefix: "Tworząc konto, akceptujesz",
-      terms: "Regulaminem",
-      and: "i",
+      terms: "Regulamin",
       privacy: "Polityką prywatności",
-      cookies: "Polityką plików cookies",
-      aiTransparency: "informacją „AI i przejrzystość”",
-      legalConsentTitle: "Wymagane potwierdzenia",
-      termsConsentBefore: "Zapoznałem/am się z",
-      termsConsentAfter: " i akceptuję jego postanowienia.",
-      privacyConsentBefore: "Potwierdzam, że zapoznałem/am się z",
-      privacyConsentAfter: ".",
-      cookiesConsentBefore: "Potwierdzam, że zapoznałem/am się z",
-      cookiesConsentAfter: ".",
-      aiTransparencyConsentBefore: "Potwierdzam, że zapoznałem/am się z",
-      aiTransparencyConsentAfter: ".",
+      legalConsentTitle: "Wymagane potwierdzenie",
+      legalConsentBefore: "Akceptuję",
+      legalConsentMiddle: "i potwierdzam, że zapoznałem/am się z",
+      legalConsentAfter: ".",
       confirmationCreated: "Konto zostało utworzone. Otwórz wiadomość potwierdzającą e-mail - po potwierdzeniu przejdziesz od razu do uzupełnienia profilu. Jeśli jej nie widzisz, sprawdź folder Spam lub Oferty.",
       confirmationResent: "Wysłaliśmy nowy link potwierdzający. Otwórz najnowszą wiadomość, a po potwierdzeniu przejdziesz do uzupełnienia profilu.",
       errors: {
@@ -448,7 +430,7 @@ const pl: SiteCopy = {
         emailNotConfirmed: "Potwierdź adres e-mail, korzystając z linku w wiadomości rejestracyjnej. Jeśli go nie widzisz, wyślij link ponownie.",
         emailRateLimit: "Wysłano zbyt wiele wiadomości. Odczekaj kilka minut i spróbuj ponownie.",
         alreadyRegistered: "Konto z tym adresem e-mail już istnieje. Zaloguj się lub zresetuj hasło.",
-        legalConsentRequired: "Aby utworzyć konto, zaznacz wszystkie wymagane potwierdzenia.",
+        legalConsentRequired: "Aby utworzyć konto, zaakceptuj Regulamin i potwierdź zapoznanie się z Polityką prywatności.",
       },
     },
     passwordRecovery: {
@@ -818,21 +800,12 @@ const en: SiteCopy = {
       resend: "Resend confirmation link",
       forgotPassword: "Forgot your password?",
       resetPasswordCta: "Reset password",
-      termsPrefix: "By creating an account, you accept the",
       terms: "Terms of Service",
-      and: "and the",
       privacy: "Privacy Policy",
-      cookies: "Cookie Policy",
-      aiTransparency: "AI & Transparency information",
-      legalConsentTitle: "Required confirmations",
-      termsConsentBefore: "I have read and accept the",
-      termsConsentAfter: ".",
-      privacyConsentBefore: "I confirm that I have read the",
-      privacyConsentAfter: ".",
-      cookiesConsentBefore: "I confirm that I have read the",
-      cookiesConsentAfter: ".",
-      aiTransparencyConsentBefore: "I confirm that I have read the",
-      aiTransparencyConsentAfter: ".",
+      legalConsentTitle: "Required acknowledgement",
+      legalConsentBefore: "I accept the",
+      legalConsentMiddle: "and confirm that I have read the",
+      legalConsentAfter: ".",
       confirmationCreated: "Your account has been created. Open the email confirmation message and you will go directly to complete your profile. If you cannot see it, check Spam or Promotions.",
       confirmationResent: "We sent a new confirmation link. Open the newest email, then you will go directly to complete your profile.",
       errors: {
@@ -842,7 +815,7 @@ const en: SiteCopy = {
         emailNotConfirmed: "Confirm your email address using the link in the registration email. If you cannot see it, send the link again.",
         emailRateLimit: "Too many emails have been sent. Wait a few minutes and try again.",
         alreadyRegistered: "An account with this email address already exists. Sign in or reset your password.",
-        legalConsentRequired: "Select all required confirmations to create an account.",
+        legalConsentRequired: "To create an account, accept the Terms of Service and confirm that you have read the Privacy Policy.",
       },
     },
     passwordRecovery: {

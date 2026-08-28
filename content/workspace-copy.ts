@@ -753,6 +753,7 @@ type WorkspaceCopy = {
     dashboard: string;
     users: string;
     content: string;
+    reports: string;
     activity: string;
     team: string;
     publicSite: string;
@@ -1511,6 +1512,7 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       dashboard: "Pulpit",
       users: "Użytkownicy",
       content: "Treści",
+      reports: "Zgłoszenia",
       activity: "Aktywność",
       team: "Zespół",
       publicSite: "Strona publiczna",
@@ -2261,6 +2263,7 @@ const workspaceCopyByLocale: Record<SiteLocale, WorkspaceCopy> = {
       dashboard: "Dashboard",
       users: "Users",
       content: "Content",
+      reports: "Reports",
       activity: "Activity",
       team: "Team",
       publicSite: "Public site",

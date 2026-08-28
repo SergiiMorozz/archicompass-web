@@ -1,10 +1,10 @@
 REGULAMIN SERWISU ARCHICOMPASS
 
-obowiązuje od dnia 16 sierpnia 2026 r.
+obowiązuje od dnia 28 sierpnia 2026 r.
 
 § 1. Postanowienia ogólne
 
-1. Niniejszy Regulamin określa zasady korzystania z serwisu internetowego ArchiCompass dostępnego pod adresem archicompass.pl, w tym zasady świadczenia usług drogą elektroniczną, zakładania i prowadzenia Kont, publikowania Profili i Portfolio, korzystania z funkcji AI Project Compass, tworzenia Briefów Projektowych, wyszukiwania i dopasowywania Projektantów oraz komunikacji pomiędzy Użytkownikami.
+1. Niniejszy Regulamin określa zasady korzystania z serwisu internetowego ArchiCompass dostępnego pod adresem archicompass.pl, w tym zasady świadczenia usług drogą elektroniczną, zakładania i prowadzenia Kont, publikowania Profili i Portfolio, korzystania z funkcji AI Project Compass i Asystenta portfolio AI, tworzenia Briefów Projektowych, wyszukiwania i dopasowywania Projektantów oraz komunikacji pomiędzy Użytkownikami.
 2. Operatorem Serwisu i usługodawcą w rozumieniu przepisów o świadczeniu usług drogą elektroniczną jest:
 
 Sergii Moroz, prowadzący działalność gospodarczą pod firmą Sergii Moroz Advisory (SM Advisory)
@@ -39,11 +39,12 @@ Użyte w Regulaminie określenia oznaczają:
 10. Treści Użytkownika – wszelkie informacje i materiały przekazywane, przesyłane, zapisywane lub publikowane przez Użytkownika w Serwisie, w szczególności teksty, fotografie, wizualizacje, grafiki, pliki, inspiracje, informacje projektowe, Portfolio i wiadomości.
 11. AI Project Compass – funkcjonalność Serwisu wykorzystującą rozwiązania informatyczne, w tym modele sztucznej inteligencji, do analizy materiałów i informacji przekazanych przez Użytkownika oraz wspomagania tworzenia Briefu Projektowego i Dopasowania.
 12. Brief Projektowy lub Brief – uporządkowany opis projektu, potrzeb, inspiracji, preferencji, budżetu, zakresu prac lub innych informacji związanych z planowaną inwestycją, tworzony przez Użytkownika samodzielnie lub przy wsparciu AI Project Compass.
-13. Dopasowanie – wynik działania funkcjonalności Serwisu polegającej na wskazaniu Projektantów, którzy według kryteriów stosowanych przez Serwis mogą odpowiadać potrzebom określonym przez Klienta.
-14. Zapytanie – informację wysłaną za pośrednictwem Serwisu przez Klienta do Projektanta lub Pracowni albo przekazaną Projektantowi przez Serwis w związku z zainteresowaniem Klienta jego usługami.
-15. Umowa Projektowa – umowę dotyczącą usług Projektanta zawieraną bezpośrednio pomiędzy Klientem a Projektantem lub Pracownią poza stosunkiem prawnym łączącym Użytkownika z Operatorem.
-16. Subskrypcja – odpłatny dostęp do określonych funkcjonalności Serwisu przez wskazany okres rozliczeniowy.
-17. Polityka Prywatności – aktualną politykę prywatności ArchiCompass udostępnioną w Serwisie.
+13. Asystent portfolio AI lub Portfolio Autopilot – funkcjonalność dla Projektantów, która na podstawie wskazanej strony internetowej lub przesłanych materiałów może przygotować robocze grupy projektów, opisy, tagi, klasyfikacje, metadane i propozycje informacji do Profilu.
+14. Dopasowanie – wynik działania funkcjonalności Serwisu polegającej na wskazaniu Projektantów, którzy według kryteriów stosowanych przez Serwis mogą odpowiadać potrzebom określonym przez Klienta.
+15. Zapytanie – informację wysłaną za pośrednictwem Serwisu przez Klienta do Projektanta lub Pracowni albo przekazaną Projektantowi przez Serwis w związku z zainteresowaniem Klienta jego usługami.
+16. Umowa Projektowa – umowę dotyczącą usług Projektanta zawieraną bezpośrednio pomiędzy Klientem a Projektantem lub Pracownią poza stosunkiem prawnym łączącym Użytkownika z Operatorem.
+17. Subskrypcja – odpłatny dostęp do określonych funkcjonalności Serwisu przez wskazany okres rozliczeniowy.
+18. Polityka Prywatności – aktualną politykę prywatności ArchiCompass udostępnioną w Serwisie.
 
 ⸻
 
@@ -153,7 +154,7 @@ d) wykorzystanie publikowanych materiałów nie narusza praw osób trzecich.
 § 9. Treści Użytkownika i własność intelektualna
 
 1. Użytkownik zachowuje prawa do Treści Użytkownika w zakresie, w jakim prawa te mu przysługują.
-2. Przesyłając Treści Użytkownika do Serwisu, Użytkownik oświadcza, że posiada prawa, licencje, zgody lub inną podstawę prawną pozwalającą mu na ich wykorzystanie w sposób wynikający z funkcjonalności Serwisu.
+2. Przesyłając Treści Użytkownika do Serwisu, Użytkownik oświadcza, że posiada prawa, licencje, zgody lub inną podstawę prawną pozwalającą mu na ich wykorzystanie w sposób wynikający z funkcjonalności Serwisu, w tym na przesłanie, przechowywanie, techniczne przetwarzanie, analizę automatyczną lub AI, tworzenie opisów i metadanych, wyświetlanie oraz — jeśli wybierze publikację — publiczne udostępnianie.
 3. Użytkownik nie może publikować treści naruszających w szczególności:
 
 a) prawa autorskie;
@@ -187,10 +188,12 @@ f) moderowania i zabezpieczania Serwisu.
 5. Licencja nie oznacza przeniesienia praw autorskich na Operatora.
 6. Operator nie nabywa na podstawie Regulaminu prawa do wykorzystywania prywatnych materiałów Użytkownika w celach reklamowych niezwiązanych z realizacją usługi, chyba że Użytkownik udzieli na to odrębnej zgody.
 7. W przypadku publicznego Portfolio licencja obejmuje publiczne wyświetlanie materiałów w ramach Serwisu przez okres, w którym Projektant udostępnia je publicznie.
+8. Użytkownik nie może przedstawiać pracy osoby trzeciej jako własnej ani świadomie składać nieprawdziwych oświadczeń o autorstwie, prawach, kwalifikacjach lub zakresie wykonanej pracy.
+9. Operator nie certyfikuje autorstwa ani nie weryfikuje każdorazowo praw do przesyłanych obrazów. Jeżeli istnieje uzasadnione podejrzenie naruszenia, Operator może poprosić o wyjaśnienie, ograniczyć widoczność lub usunąć treść zgodnie z § 17.
 
 ⸻
 
-§ 10. AI Project Compass
+§ 10. Funkcje AI: AI Project Compass i Asystent portfolio AI
 
 1. AI Project Compass jest narzędziem wspomagającym Użytkownika w analizie inspiracji, organizacji informacji dotyczących projektu i przygotowaniu Briefu.
 2. AI Project Compass może analizować między innymi:
@@ -223,6 +226,11 @@ e) nie zastępuje konsultacji z odpowiednim specjalistą.
 7. Operator może korzystać z usług zewnętrznych dostawców technologii AI. Informacje dotyczące przetwarzania danych osobowych w związku z takimi usługami określa Polityka Prywatności.
 8. Operator nie gwarantuje, że wygenerowany wynik będzie unikalny. Podobne informacje wejściowe mogą prowadzić do podobnych wyników.
 9. Operator może zmieniać modele, dostawców i technologie wykorzystywane do realizacji funkcji AI, o ile pozostaje to zgodne z Regulaminem i obowiązującym prawem.
+10. Asystent portfolio AI może, na wyraźne żądanie Projektanta, analizować wskazaną stronę internetową lub przesłane materiały oraz przygotować robocze grupy projektów, opisy, tagi, klasyfikacje, sugestie, metadane i propozycje informacji do Profilu.
+11. Wyniki Asystenta portfolio AI mają charakter pomocniczy i mogą zawierać błędy, nieścisłości lub niepełne informacje. Projektant powinien je sprawdzić i może je zmienić, ukryć albo odrzucić przed publikacją.
+12. Wyniki Asystenta portfolio AI nie są publiczne automatycznie. Materiały Portfolio i propozycje do Profilu stają się publiczne wyłącznie po wyraźnym działaniu publikującym podjętym przez Projektanta w Serwisie.
+13. Publikując treść przygotowaną lub wspieraną przez Asystenta portfolio AI, Projektant potwierdza jej zgodność z rzeczywistością oraz posiadanie praw i zgód niezbędnych do jej wykorzystania i publikacji.
+14. Żaden wynik funkcji AI nie stanowi porady architektonicznej, projektowej, technicznej, budowlanej, prawnej, finansowej ani gwarancji rezultatu. Przed podjęciem istotnej decyzji Użytkownik powinien zweryfikować odpowiednie informacje.
 
 ⸻
 
@@ -386,7 +394,7 @@ d) czasowe zawieszenie Konta;
 e) usunięcie Konta – w przypadkach uzasadnionych charakterem lub powtarzalnością naruszenia.
 
 3. Podejmując działania moderacyjne, Operator uwzględnia w szczególności charakter naruszenia, jego skutki, częstotliwość oraz możliwość usunięcia naruszenia w mniej ingerujący sposób.
-4. Użytkownik może zgłosić treść, która jego zdaniem jest nielegalna lub narusza Regulamin, na adres:
+4. Użytkownik może zgłosić treść, która jego zdaniem jest nielegalna lub narusza Regulamin, za pomocą linku „Zgłoś” dostępnego przy publicznym Profilu lub Projekcie albo na adres:
 
 admin@archicompass.pl
 
@@ -409,8 +417,8 @@ d) dane kontaktowe zgłaszającego, jeżeli są wymagane przez prawo lub koniecz
 
 1. Konto Klienta jest bezpłatne, chyba że Użytkownik wyraźnie wybierze dodatkową odpłatną usługę.
 2. Operator może oferować Projektantom lub Pracowniom bezpłatny okres dostępu do funkcjonalności, zgodnie z warunkami przedstawionymi przy aktywacji.
-3. Na dzień wejścia w życie niniejszego Regulaminu Operator może oferować pierwszym Projektantom 3-miesięczny okres bezpłatnego dostępu do funkcjonalności obejmujących Profil, Portfolio i możliwość otrzymywania Zapytań, zgodnie z informacjami prezentowanymi w Serwisie.
-4. Po zakończeniu okresu bezpłatnego dalsze korzystanie z funkcjonalności wymagających Subskrypcji może wymagać wybrania płatnego planu.
+3. Na dzień wejścia w życie niniejszego Regulaminu Operator oferuje Projektantom i Pracowniom 3-miesięczny okres bezpłatnego dostępu do funkcjonalności obejmujących Profil, Portfolio i możliwość otrzymywania Zapytań, zgodnie z informacjami prezentowanymi w Serwisie.
+4. Rejestracja Konta i rozpoczęcie okresu bezpłatnego nie wymaga podania danych karty płatniczej. Po zakończeniu okresu bezpłatnego dalsze korzystanie z funkcjonalności wymagających Subskrypcji wymaga wybrania płatnego planu i świadomego uruchomienia płatności przez Użytkownika, jeżeli płatności online są dostępne.
 5. Przed dokonaniem zakupu Użytkownik otrzymuje informację co najmniej o:
 
 a) cenie;
@@ -425,11 +433,11 @@ e) zasadach odnawiania Subskrypcji;
 
 f) zasadach jej zakończenia.
 
-6. Płatność następuje przy wykorzystaniu metod płatności dostępnych w Serwisie.
-7. Jeżeli Subskrypcja odnawia się automatycznie, informacja o tym zostanie przedstawiona przed dokonaniem zakupu.
-8. Użytkownik może zrezygnować z dalszego odnawiania Subskrypcji zgodnie z mechanizmem udostępnionym w Koncie. Rezygnacja nie powoduje utraty opłaconego dostępu przed końcem bieżącego okresu rozliczeniowego, chyba że obowiązujące przepisy wymagają innego rozwiązania.
-9. Brak skutecznej płatności może skutkować ograniczeniem funkcjonalności płatnych, w szczególności widoczności Profilu, Portfolio lub możliwości otrzymywania nowych Zapytań.
-10. Szczegółowe ceny i zakres poszczególnych planów określa aktualna oferta prezentowana w Serwisie.
+6. Płatność następuje przy wykorzystaniu metod płatności dostępnych w Serwisie. Operator nie przechowuje danych karty płatniczej.
+7. Jeżeli Subskrypcja odnawia się automatycznie, informacja o tym, okresie rozliczeniowym i sposobie anulowania zostanie przedstawiona przed dokonaniem zakupu.
+8. Użytkownik może zrezygnować z dalszego odnawiania Subskrypcji zgodnie z mechanizmem udostępnionym w Koncie lub przez dostawcę płatności. Rezygnacja nie powoduje utraty opłaconego dostępu przed końcem bieżącego okresu rozliczeniowego, chyba że obowiązujące przepisy wymagają innego rozwiązania.
+9. Brak skutecznej płatności może skutkować ograniczeniem funkcjonalności płatnych, w szczególności widoczności Profilu, Portfolio lub możliwości otrzymywania nowych Zapytań. Konto i dane pozostają dostępne w zakresie przewidzianym przez funkcjonalności Serwisu i obowiązujące prawo.
+10. Szczegółowe ceny, rozliczenia miesięczne lub roczne, podatki, dostępne faktury i zakres poszczególnych planów określa aktualna oferta prezentowana w Cenniku oraz informacje pokazane przed zakupem.
 
 ⸻
 
@@ -611,10 +619,10 @@ REGON: 528006413
 
 § 28. Postanowienia końcowe
 
-1. Regulamin obowiązuje od dnia 16 sierpnia 2026 r.
+1. Regulamin obowiązuje od dnia 28 sierpnia 2026 r.
 2. Aktualna wersja Regulaminu jest dostępna w Serwisie.
 3. W sprawach nieuregulowanych Regulaminem zastosowanie mają właściwe przepisy prawa polskiego oraz bezpośrednio stosowane przepisy prawa Unii Europejskiej.
 4. Jeżeli którekolwiek postanowienie Regulaminu okaże się nieważne lub nieskuteczne, nie wpływa to na ważność pozostałych postanowień, o ile obowiązujące przepisy nie stanowią inaczej.
 5. Regulamin należy interpretować z poszanowaniem bezwzględnie obowiązujących praw konsumentów i innych Użytkowników.
 
-Wersja: 1.0
+Wersja: 1.1

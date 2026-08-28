@@ -12,6 +12,8 @@ create table if not exists public.legal_acceptances (
   privacy_version text not null,
   cookies_version text not null,
   ai_transparency_version text not null,
+  terms_accepted_at timestamptz not null default now(),
+  privacy_acknowledged_at timestamptz not null default now(),
   accepted_locale text not null check (accepted_locale in ('pl', 'en')),
   accepted_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
@@ -20,7 +22,7 @@ create table if not exists public.legal_acceptances (
 
 alter table public.legal_acceptances enable row level security;
 
-revoke all on table public.legal_acceptances from anon, authenticated;
+revoke all on table public.legal_acceptances from public, anon, authenticated;
 grant select on table public.legal_acceptances to authenticated;
 
 drop policy if exists "Users can read own legal acceptances" on public.legal_acceptances;
@@ -38,12 +40,14 @@ set search_path = ''
 as $$
 declare
   acceptance jsonb := coalesce(new.raw_user_meta_data -> 'legal_acceptance', '{}'::jsonb);
-  required_version constant text := '2026-08-16';
+  required_version constant text := '2026-08-28';
 begin
   if acceptance ->> 'terms_version' <> required_version
     or acceptance ->> 'privacy_version' <> required_version
     or acceptance ->> 'cookies_version' <> required_version
     or acceptance ->> 'ai_transparency_version' <> required_version
+    or acceptance ->> 'terms_accepted' <> 'true'
+    or acceptance ->> 'privacy_acknowledged' <> 'true'
     or acceptance ->> 'locale' not in ('pl', 'en') then
     raise exception using
       errcode = 'P0001',
@@ -56,6 +60,8 @@ begin
     privacy_version,
     cookies_version,
     ai_transparency_version,
+    terms_accepted_at,
+    privacy_acknowledged_at,
     accepted_locale
   )
   values (
@@ -64,6 +70,8 @@ begin
     acceptance ->> 'privacy_version',
     acceptance ->> 'cookies_version',
     acceptance ->> 'ai_transparency_version',
+    now(),
+    now(),
     acceptance ->> 'locale'
   )
   on conflict (user_id, terms_version, privacy_version, cookies_version, ai_transparency_version)

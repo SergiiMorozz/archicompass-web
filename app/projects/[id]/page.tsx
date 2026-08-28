@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import FavoriteButton from "@/components/FavoriteButton";
+import ContentReportButton from "@/components/ContentReportButton";
 import ProjectGallery from "@/components/ProjectGallery";
 import JsonLd from "@/components/JsonLd";
 import { getAccountRole } from "@/lib/studios";
@@ -414,6 +415,7 @@ export default async function ProjectDetailPage({
                 {copy.openWebsite}
               </a>
             ) : null}
+            {!isOwner && !demo ? <ContentReportButton targetType="project" targetId={project.id} /> : null}
           </div>
         </aside>
       </section>
