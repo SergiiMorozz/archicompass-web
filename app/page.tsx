@@ -438,15 +438,17 @@ export default async function Home() {
               <h2 className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">{homeCopy.forClients.headline}</h2>
               <p className="mt-3 text-sm leading-6 text-muted">{homeCopy.forClients.body}</p>
               <div className="mt-5"><Checklist items={homeCopy.forClients.checklist.slice(0, 4)} compact /></div>
-              <Link
-                href={homeCopy.forClients.aiCompass.href}
-                className="group mt-4 flex items-center gap-2 rounded-xl border border-primary/20 bg-white/80 px-2.5 py-2.5 text-[13px] font-semibold leading-5 text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-              >
-                <AiFeatureBadge className="shrink-0">{homeCopy.forClients.aiCompass.badge}</AiFeatureBadge>
-                <span className="shrink-0 text-primary" aria-hidden="true">·</span>
-                <span className="min-w-0">{homeCopy.forClients.aiCompass.description} — <strong className="font-bold text-primary">{homeCopy.forClients.aiCompass.name}</strong></span>
-              </Link>
-              <div className="mt-auto pt-4"><Link href="/AI-project-compass" className="group inline-flex min-h-[52px] items-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(86,35,168,0.22)] transition hover:-translate-y-0.5 hover:bg-primary/90">{homeCopy.forClients.primaryCta}<Arrow /></Link></div>
+              <div className="mt-auto grid gap-3 pt-4">
+                <Link
+                  href={homeCopy.forClients.aiCompass.href}
+                  className="group flex min-h-[88px] items-center gap-2 rounded-xl border border-primary/20 bg-white/80 px-2.5 py-2.5 text-[13px] font-semibold leading-5 text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  <AiFeatureBadge className="shrink-0">{homeCopy.forClients.aiCompass.badge}</AiFeatureBadge>
+                  <span className="shrink-0 text-primary" aria-hidden="true">·</span>
+                  <span className="min-w-0">{homeCopy.forClients.aiCompass.description} — <strong className="font-bold text-primary">{homeCopy.forClients.aiCompass.name}</strong></span>
+                </Link>
+                <Link href="/AI-project-compass" className="group inline-flex min-h-[52px] items-center gap-2 self-start rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(86,35,168,0.22)] transition hover:-translate-y-0.5 hover:bg-primary/90">{homeCopy.forClients.primaryCta}<Arrow /></Link>
+              </div>
             </div>
             <div className="min-h-[220px] bg-primary-soft p-4 md:min-h-0 md:p-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -460,16 +462,18 @@ export default async function Home() {
               <h2 className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">{homeCopy.forDesigners.headline}</h2>
               <p className="mt-3 text-sm leading-6 text-muted">{homeCopy.forDesigners.body}</p>
               <div className="mt-5"><Checklist items={homeCopy.forDesigners.checklist.slice(0, 4)} tone="accent" compact /></div>
-              <Link
-                href={homeCopy.forDesigners.aiAssistant.href}
-                className="group mt-4 flex items-center gap-2 rounded-xl border border-primary/20 bg-white/80 px-2.5 py-2.5 text-[13px] font-semibold leading-5 text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-              >
-                <AiFeatureBadge className="shrink-0">{homeCopy.forDesigners.aiAssistant.badge}</AiFeatureBadge>
-                <span className="shrink-0 text-primary" aria-hidden="true">·</span>
-                <span className="min-w-0">{homeCopy.forDesigners.aiAssistant.description} — <strong className="font-bold text-primary">{homeCopy.forDesigners.aiAssistant.name}</strong></span>
-              </Link>
               <p className="mt-3 text-xs font-medium leading-4 text-muted">{homeCopy.forDesigners.pricingNote} <Link href="/services-and-pricing" className="font-bold text-[#207a68] hover:underline">{homeCopy.forDesigners.pricingCta}</Link></p>
-              <div className="mt-auto pt-4"><Link href="/get-started" className="group inline-flex min-h-[52px] items-center gap-2 rounded-xl bg-[#1f604d] px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(31,96,77,0.2)] transition hover:-translate-y-0.5 hover:bg-[#19513f]">{homeCopy.forDesigners.primaryCta}<Arrow /></Link></div>
+              <div className="mt-auto grid gap-3 pt-4">
+                <Link
+                  href={homeCopy.forDesigners.aiAssistant.href}
+                  className="group flex min-h-[88px] items-center gap-2 rounded-xl border border-primary/20 bg-white/80 px-2.5 py-2.5 text-[13px] font-semibold leading-5 text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary-soft/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  <AiFeatureBadge className="shrink-0">{homeCopy.forDesigners.aiAssistant.badge}</AiFeatureBadge>
+                  <span className="shrink-0 text-primary" aria-hidden="true">·</span>
+                  <span className="min-w-0">{homeCopy.forDesigners.aiAssistant.description} — <strong className="font-bold text-primary">{homeCopy.forDesigners.aiAssistant.name}</strong></span>
+                </Link>
+                <Link href="/get-started" className="group inline-flex min-h-[52px] items-center gap-2 self-start rounded-xl bg-[#1f604d] px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(31,96,77,0.2)] transition hover:-translate-y-0.5 hover:bg-[#19513f]">{homeCopy.forDesigners.primaryCta}<Arrow /></Link>
+              </div>
             </div>
             <div className="min-h-[220px] bg-accent-soft p-4 md:min-h-0 md:p-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
