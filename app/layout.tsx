@@ -12,7 +12,7 @@ import { absoluteUrl, siteUrl } from "@/lib/seo";
 import { robotsMetadata } from "@/lib/seo-indexing";
 
 const copy = getSiteCopy();
-const brandMark = localeAssetPath("/brand/archicompass-mark.png");
+const favicon = localeAssetPath("/brand/archicompass-compass-purple.png");
 const outfitLatinFont = localeAssetPath("/fonts/outfit-latin.woff2");
 const outfitFontFaceCss = `
   @font-face {
@@ -92,8 +92,9 @@ export const metadata: Metadata = {
     ? { google: process.env.GOOGLE_SITE_VERIFICATION }
     : undefined,
   icons: {
-    icon: brandMark,
-    apple: brandMark,
+    icon: [{ url: favicon, type: "image/png" }],
+    shortcut: favicon,
+    apple: favicon,
   },
 };
 

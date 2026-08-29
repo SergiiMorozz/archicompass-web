@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import BrandLogo from "@/components/BrandLogo";
 import { getSiteCopy } from "@/content/site-copy";
 import { isProfessionalProfile } from "@/lib/professional";
@@ -98,6 +98,10 @@ export default function Header() {
       : `${localePublicUrl("pl", targetPath)}${suffix}`;
   };
   const [isOpen, setIsOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDetailsElement>(null);
+  const closeAccountMenu = useCallback(() => {
+    accountMenuRef.current?.removeAttribute("open");
+  }, []);
   const [resolvedLanguageHref, setResolvedLanguageHref] = useState<{ path: string; href: string } | null>(null);
   const browserSuffix = useSyncExternalStore(
     subscribeToBrowserLocation,
@@ -132,6 +136,27 @@ export default function Header() {
       .catch(() => undefined);
     return () => controller.abort();
   }, [pathname]);
+
+  useEffect(() => {
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      const menu = accountMenuRef.current;
+      if (menu && event.target instanceof Node && !menu.contains(event.target)) menu.removeAttribute("open");
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeAccountMenu();
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsidePointer);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [closeAccountMenu]);
+
+  useEffect(() => {
+    closeAccountMenu();
+  }, [closeAccountMenu, pathname]);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -290,7 +315,7 @@ export default function Header() {
                   </span>
                 ) : null}
               </Link>
-              <details className="group relative">
+              <details ref={accountMenuRef} onMouseLeave={closeAccountMenu} className="group relative">
                 <summary
                   className={[
                     "flex cursor-pointer list-none items-center gap-2 rounded-xl border border-line bg-card px-3 py-2 text-sm font-semibold transition hover:border-primary/25 hover:bg-primary-soft hover:text-primary [&::-webkit-details-marker]:hidden",
@@ -306,6 +331,7 @@ export default function Header() {
                     <Link
                       key={item.href}
                       href={appHref(item.href)}
+                      onClick={closeAccountMenu}
                       className={[
                         "block rounded-lg px-3 py-2.5 text-sm font-semibold transition",
                         currentPath === item.href || currentPath.startsWith(`${item.href}/`)
@@ -317,7 +343,7 @@ export default function Header() {
                     </Link>
                   ))}
                   <div className="my-2 h-px bg-line" />
-                  <Link href={appHref("/account")} className="block rounded-lg bg-primary px-3 py-2.5 text-center text-sm font-bold text-white transition hover:opacity-90">
+                  <Link href={appHref("/account")} onClick={closeAccountMenu} className="block rounded-lg bg-primary px-3 py-2.5 text-center text-sm font-bold text-white transition hover:opacity-90">
                     {copy.header.accountSettings}
                   </Link>
                 </div>
