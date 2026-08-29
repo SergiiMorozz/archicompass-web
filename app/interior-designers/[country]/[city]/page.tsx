@@ -229,7 +229,7 @@ export async function CityDirectoryPage({ country, city }: { country: string; ci
               <Link href={`/designers?location=${encodeURIComponent(location.city)}`} className="rounded-lg bg-primary px-5 py-3 font-bold text-white">
                 {copy.viewProfessionals(cityOrigin(location))}
               </Link>
-              <Link href="/AI-project-compass" className="rounded-lg border border-primary/25 bg-card px-5 py-3 font-bold text-primary">
+              <Link href="/ai-project-compass" className="rounded-lg border border-primary/25 bg-card px-5 py-3 font-bold text-primary">
                 {copy.createBrief}
               </Link>
             </div>
@@ -294,7 +294,7 @@ export async function CityDirectoryPage({ country, city }: { country: string; ci
         <p className="text-sm font-bold uppercase text-warm">{copy.beforeContactEyebrow}</p>
         <h2 className="mt-2 text-3xl font-bold">{copy.beforeContactTitle}</h2>
         <div className="mt-6 grid gap-5 text-base leading-8 text-muted sm:grid-cols-2"><p>{copy.beforeContactLeft}</p><p>{copy.beforeContactRight}</p></div>
-        <Link href="/AI-project-compass" className="mt-7 inline-flex rounded-lg bg-accent px-5 py-3 font-bold text-white">{copy.beforeContactCta}</Link>
+        <Link href="/ai-project-compass" className="mt-7 inline-flex rounded-lg bg-accent px-5 py-3 font-bold text-white">{copy.beforeContactCta}</Link>
       </section>
 
       {relatedLocations.length ? (

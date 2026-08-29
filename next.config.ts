@@ -43,12 +43,12 @@ const nextConfig: NextConfig = {
     const legacyProjectCompassRedirects = [
       {
         source: "/project-compass",
-        destination: "/AI-project-compass",
+        destination: "/ai-project-compass",
         permanent: true,
       },
       {
         source: "/project-compass-2",
-        destination: "/AI-project-compass",
+        destination: "/ai-project-compass",
         permanent: true,
       },
     ];

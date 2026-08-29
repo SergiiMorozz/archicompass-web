@@ -343,7 +343,7 @@ const pl: SiteCopy = {
   },
   header: {
     nav: [
-      { href: "/AI-project-compass", label: "AI Project Compass", featured: true },
+      { href: "/ai-project-compass", label: "AI Project Compass", featured: true },
       { href: "/designers", label: "Katalog projektantów" },
       { href: "/inspiration", label: "Inspiration Hub" },
     ],
@@ -369,7 +369,7 @@ const pl: SiteCopy = {
     copyright: "© 2026 ArchiCompass. Wszelkie prawa zastrzeżone.",
     navigation: [
       { href: "/", label: "Strona główna" },
-      { href: "/AI-project-compass", label: "AI Project Compass" },
+      { href: "/ai-project-compass", label: "AI Project Compass" },
       { href: "/designers", label: "Katalog Projektantów" },
       { href: "/inspiration", label: "Inspiration Hub" },
       { href: "/get-started", label: "Dołącz do ArchiCompass" },
@@ -510,7 +510,7 @@ const pl: SiteCopy = {
     },
     breadcrumbs: { home: "Strona główna", hub: "Inspiration Hub" },
     hero: {
-      title: "Inspiration Hub",
+      title: "Inspiracje wnętrzarskie i praktyczne poradniki",
       subtitle: "Odkrywaj praktyczne porady, materiały, wnętrza i pomysły przygotowane przez redakcję ArchiCompass.",
       searchPlaceholder: "Szukaj artykułów i inspiracji...",
       searchHelp: "Szukaj po tytule, temacie lub słowie kluczowym, np. „budżet remontu”, „japandi”, „brief”.",
@@ -677,7 +677,7 @@ const pl: SiteCopy = {
         badge: "AI",
         description: "Poznaj styl swoich inspiracji z pomocą AI",
         name: "AI Project Compass",
-        href: "/AI-project-compass",
+        href: "/ai-project-compass",
       },
       primaryCta: "Poznaj swój styl z AI",
       secondaryCta: "Katalog projektantów",
@@ -746,7 +746,7 @@ const en: SiteCopy = {
   },
   header: {
     nav: [
-      { href: "/AI-project-compass", label: "AI Project Compass", featured: true },
+      { href: "/ai-project-compass", label: "AI Project Compass", featured: true },
       { href: "/designers", label: "Designer Directory" },
       { href: "/inspiration", label: "Inspiration Hub" },
     ],
@@ -772,7 +772,7 @@ const en: SiteCopy = {
     copyright: "© 2026 ArchiCompass. All rights reserved.",
     navigation: [
       { href: "/", label: "Home" },
-      { href: "/AI-project-compass", label: "AI Project Compass" },
+      { href: "/ai-project-compass", label: "AI Project Compass" },
       { href: "/designers", label: "Designer Directory" },
       { href: "/inspiration", label: "Inspiration Hub" },
       { href: "/get-started", label: "Join ArchiCompass" },
@@ -913,7 +913,7 @@ const en: SiteCopy = {
     },
     breadcrumbs: { home: "Home", hub: "Inspiration Hub" },
     hero: {
-      title: "Inspiration Hub",
+      title: "Interior design inspiration and practical guides",
       subtitle: "Explore practical advice, materials, interiors, and ideas curated by the ArchiCompass editorial team.",
       searchPlaceholder: "Search articles and inspiration...",
       searchHelp: "Search by title, topic, or keyword, for example “renovation budget”, “Japandi”, or “brief”.",
@@ -1080,7 +1080,7 @@ const en: SiteCopy = {
         badge: "AI",
         description: "Understand the style behind your inspiration with AI",
         name: "AI Project Compass",
-        href: "/AI-project-compass",
+        href: "/ai-project-compass",
       },
       primaryCta: "Discover your style with AI",
       secondaryCta: "Designer Directory",

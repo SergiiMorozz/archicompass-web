@@ -206,7 +206,7 @@ export default async function InspirationPage({
       />
       <section className="px-4 py-16 text-center sm:px-6">
         <h1 className="text-5xl font-bold tracking-tight">
-          Inspiration <span className="text-primary">Hub</span>
+          {inspirationCopy.hero.title}
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-muted">
           {inspirationCopy.hero.subtitle}

@@ -73,7 +73,7 @@ export default async function ClientBriefsPage() {
               {copy.intro}
             </p>
           </div>
-          <Link href="/AI-project-compass" className="w-fit rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">{copy.createAnother}</Link>
+          <Link href="/ai-project-compass" className="w-fit rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">{copy.createAnother}</Link>
         </div>
       </section>
 
@@ -127,7 +127,7 @@ export default async function ClientBriefsPage() {
           <div className="rounded-lg border border-dashed border-line bg-card p-8">
             <h2 className="text-2xl font-bold">{copy.emptyTitle}</h2>
             <p className="mt-2 max-w-xl leading-7 text-muted">{copy.emptyBody}</p>
-            <Link href="/AI-project-compass" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">{copy.emptyCta}</Link>
+            <Link href="/ai-project-compass" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">{copy.emptyCta}</Link>
           </div>
         )}
       </section>

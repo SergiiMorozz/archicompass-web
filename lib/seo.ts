@@ -11,7 +11,8 @@ export function siteUrl() {
 
 export function absoluteUrl(path = "/") {
   if (/^https?:\/\//i.test(path)) return path;
-  return `${siteUrl()}${path.startsWith("/") ? path : `/${path}`}`;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return normalizedPath === "/" ? siteUrl() : `${siteUrl()}${normalizedPath}`;
 }
 
 export function englishUrl(path = "/") {

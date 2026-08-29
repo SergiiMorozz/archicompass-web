@@ -14,6 +14,15 @@ function isProtectedPath(pathname: string) {
 }
 
 export async function proxy(request: NextRequest) {
+  // Redirect rules in next.config match paths case-insensitively, which would
+  // also catch the new lowercase canonical route. Check the raw pathname here
+  // instead so existing mixed-case links receive a true 308 without looping.
+  if (request.nextUrl.pathname === "/AI-project-compass") {
+    const canonicalUrl = request.nextUrl.clone();
+    canonicalUrl.pathname = "/ai-project-compass";
+    return NextResponse.redirect(canonicalUrl, 308);
+  }
+
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(
     "x-archicompass-path",
@@ -64,5 +73,6 @@ export const config = {
     "/studio/:path*",
     "/admin/:path*",
     "/onboarding/:path*",
+    "/AI-project-compass",
   ],
 };

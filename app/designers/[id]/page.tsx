@@ -947,7 +947,7 @@ export default async function DesignerProfilePage({
                 </p>
               </div>
               <Link
-                href="/AI-project-compass"
+                href="/ai-project-compass"
                 className="rounded-xl bg-white px-5 py-3 text-center text-sm font-semibold text-foreground"
               >
                 {copy.actions.createBrief}
