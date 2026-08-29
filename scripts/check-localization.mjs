@@ -55,7 +55,7 @@ const accountFlowSourceFiles = [
   "app/account/inquiries/[id]/page.tsx",
 ];
 const projectCompassSourceFiles = [
-  "app/AI-project-compass/page.tsx",
+  "app/ai-project-compass/page.tsx",
   "app/ai-style-finder/ProjectCompass.tsx",
   "components/ShareableStyleResult.tsx",
 ];

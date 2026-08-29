@@ -14,6 +14,7 @@ export type ProjectCompassJourneyCopy = {
     body: string;
     previewLabel: string;
     previewStyle: string;
+    imageAlt: string;
     benefits: string[];
     start: string;
     photosHint: string;
@@ -90,6 +91,7 @@ const journeyCopy: Record<SiteLocale, ProjectCompassJourneyCopy> = {
         "Dodaj zdjęcia wnętrz, odpowiedz na kilka pytań, a AI Project Compass pomoże uporządkować styl, potrzeby i informacje potrzebne do rozmowy z projektantem.",
       previewLabel: "Przykładowy kierunek",
       previewStyle: "Ciepłe japandi",
+      imageAlt: "Jasny salon w ciepłej, naturalnej palecie z drewnianymi meblami i dużym drzewem przy oknie.",
       benefits: ["Zacznij od inspiracji", "AI pomaga uporządkować kierunek", "Gotowy brief do rozmowy"],
       start: "Dodaj zdjęcia inspiracji",
       photosHint: "JPEG, PNG lub WebP. Możesz dodać do 10 zdjęć wnętrz, detali i materiałów.",
@@ -173,6 +175,7 @@ const journeyCopy: Record<SiteLocale, ProjectCompassJourneyCopy> = {
         "Add interior photos, answer a few questions, and let AI Project Compass help organise your style, needs and the information a designer needs for a first conversation.",
       previewLabel: "Sample direction",
       previewStyle: "Warm Japandi",
+      imageAlt: "A bright living room in a warm, natural palette with wooden furniture and a large tree by the window.",
       benefits: ["Start with inspiration", "AI helps organise the direction", "A brief ready for conversation"],
       start: "Add inspiration photos",
       photosHint: "JPEG, PNG or WebP. Add up to 10 photos of interiors, details and materials.",

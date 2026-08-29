@@ -26,9 +26,9 @@ export default function Footer() {
         </div>
 
         <div>
-          <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
             {copy.navigationTitle}
-          </h2>
+          </p>
           <div className="mt-4 grid gap-3 text-sm text-white/75">
             {copy.navigation.map((item) => (
               <Link key={item.href} href={appHref(item.href)} className="hover:text-white">
@@ -42,9 +42,9 @@ export default function Footer() {
         </div>
 
         <div>
-          <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
             {copy.popularLocationsTitle}
-          </h2>
+          </p>
           <div className="mt-4 grid gap-3 text-sm text-white/75">
             {copy.locations.map((item) => (
               <Link key={item.href} href={appHref(item.href)} className="hover:text-white">
@@ -55,9 +55,9 @@ export default function Footer() {
         </div>
 
         <div>
-          <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
             {copy.legalTitle}
-          </h2>
+          </p>
           <div className="mt-4 grid gap-3 text-sm text-white/75">
             <Link href={appHref("/privacy")} className="hover:text-white">
               {copy.privacy}

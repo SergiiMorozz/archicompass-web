@@ -1365,7 +1365,7 @@ export default async function DesignersPage({
               {copy.hero.body}
             </p>
             <Link
-              href={localeAppPath("/AI-project-compass")}
+              href={localeAppPath("/ai-project-compass")}
               className="mt-6 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white shadow-[0_12px_28px_rgba(104,40,200,0.25)] transition hover:bg-primary/90"
             >
               {copy.hero.cta}
@@ -1443,7 +1443,7 @@ export default async function DesignersPage({
                   {copy.brief.body}
                 </p>
               </div>
-              <Link href={localeAppPath("/AI-project-compass")} className="rounded-xl border border-primary bg-card px-4 py-3 text-center text-sm font-semibold text-primary">
+              <Link href={localeAppPath("/ai-project-compass")} className="rounded-xl border border-primary bg-card px-4 py-3 text-center text-sm font-semibold text-primary">
                 {copy.brief.edit}
               </Link>
             </div>

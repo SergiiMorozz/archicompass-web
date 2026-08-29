@@ -109,7 +109,7 @@ export default async function ClientOverviewPage({
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/AI-project-compass" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
+            <Link href="/ai-project-compass" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
               {copy.createBrief}
             </Link>
             <Link href="/designers" className="rounded-xl border border-line bg-background px-5 py-3 text-sm font-semibold hover:border-primary hover:text-primary">
@@ -134,7 +134,7 @@ export default async function ClientOverviewPage({
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <Link
-                href="/AI-project-compass"
+                href="/ai-project-compass"
                 className="group rounded-xl bg-primary p-5 transition duration-200 hover:-translate-y-0.5 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white/80"
               >
                 <div className="text-xs font-bold uppercase tracking-wide text-white/70">{copy.actionStep}</div>
@@ -207,7 +207,7 @@ export default async function ClientOverviewPage({
                 <p className="mt-2 max-w-xl leading-7 text-muted">
                   {copy.emptyBody}
                 </p>
-                <Link href="/AI-project-compass" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
+                <Link href="/ai-project-compass" className="mt-5 inline-flex rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white">
                   {copy.emptyCta}
                 </Link>
               </div>

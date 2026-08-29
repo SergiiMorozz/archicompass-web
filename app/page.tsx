@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { applyPolishArticleCopy } from "@/content/pl/copy";
 import { getSiteCopy } from "@/content/site-copy";
@@ -168,13 +169,13 @@ function HeroVisual() {
   const visual = homeCopy.hero.visual;
   return (
     <div className="relative mx-auto w-full max-w-[680px] pt-5 lg:pt-0">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={heroImage}
         alt={homeCopy.accessibility.heroImage}
-        width="1536"
-        height="1024"
-        fetchPriority="high"
+        width={1536}
+        height={1024}
+        priority
+        sizes="(max-width: 1023px) 100vw, 50vw"
         className="aspect-[1.22/1] w-full rounded-[2rem] object-cover shadow-[0_26px_70px_rgba(68,37,91,0.16)]"
       />
       <div className="absolute -left-2 top-0 max-w-[218px] rounded-2xl border border-primary/20 bg-white/95 p-4 shadow-[0_14px_38px_rgba(67,31,91,0.16)] backdrop-blur sm:-left-8 sm:top-6 sm:max-w-[260px] sm:p-5">
@@ -316,7 +317,7 @@ export default async function Home() {
             <p className="mt-6 max-w-xl text-lg leading-8 text-muted sm:text-xl">{homeCopy.hero.body}</p>
             <div className="mt-7 max-w-2xl"><Checklist items={homeCopy.hero.checklist} /></div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href="/AI-project-compass" className="group inline-flex min-h-[56px] items-center justify-center gap-3 rounded-xl bg-primary px-6 py-3 text-center font-bold text-white shadow-[0_16px_38px_rgba(90,38,180,0.26)] transition duration-300 hover:-translate-y-1 hover:bg-primary/90 hover:shadow-[0_22px_46px_rgba(90,38,180,0.34)]">
+              <Link href="/ai-project-compass" className="group inline-flex min-h-[56px] items-center justify-center gap-3 rounded-xl bg-primary px-6 py-3 text-center font-bold text-white shadow-[0_16px_38px_rgba(90,38,180,0.26)] transition duration-300 hover:-translate-y-1 hover:bg-primary/90 hover:shadow-[0_22px_46px_rgba(90,38,180,0.34)]">
                 <span className="grid h-7 w-7 place-items-center rounded-full bg-white/18 text-base transition duration-300 group-hover:scale-110 group-hover:rotate-12" aria-hidden="true">✦</span>
                 {homeCopy.hero.primaryCta}<Arrow />
               </Link>
@@ -411,7 +412,7 @@ export default async function Home() {
             </div>
           </article>
         </div>
-        <div className="mt-8 text-center"><Link href="/AI-project-compass" className="group inline-flex min-h-[54px] items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-white shadow-[0_14px_32px_rgba(86,35,168,0.2)] transition hover:-translate-y-0.5 hover:bg-primary/90">{homeCopy.howItWorks.cta}<Arrow /></Link></div>
+        <div className="mt-8 text-center"><Link href="/ai-project-compass" className="group inline-flex min-h-[54px] items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-white shadow-[0_14px_32px_rgba(86,35,168,0.2)] transition hover:-translate-y-0.5 hover:bg-primary/90">{homeCopy.howItWorks.cta}<Arrow /></Link></div>
       </section>
 
       <section className="bg-[#24132f] px-4 py-10 text-white sm:px-6 lg:py-12">
@@ -447,7 +448,7 @@ export default async function Home() {
                   <span className="shrink-0 text-primary" aria-hidden="true">·</span>
                   <span className="min-w-0">{homeCopy.forClients.aiCompass.description} — <strong className="font-bold text-primary">{homeCopy.forClients.aiCompass.name}</strong></span>
                 </Link>
-                <Link href="/AI-project-compass" className="group inline-flex min-h-[52px] items-center gap-2 self-start rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(86,35,168,0.22)] transition hover:-translate-y-0.5 hover:bg-primary/90">{homeCopy.forClients.primaryCta}<Arrow /></Link>
+                <Link href="/ai-project-compass" className="group inline-flex min-h-[52px] items-center gap-2 self-start rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-[0_12px_28px_rgba(86,35,168,0.22)] transition hover:-translate-y-0.5 hover:bg-primary/90">{homeCopy.forClients.primaryCta}<Arrow /></Link>
               </div>
             </div>
             <div className="min-h-[220px] bg-primary-soft p-4 md:min-h-0 md:p-0">
@@ -510,7 +511,7 @@ export default async function Home() {
       </section>
 
       <section className="bg-[#24132f] px-4 py-11 text-white sm:px-6 lg:py-14">
-        <div className="mx-auto max-w-4xl text-center"><span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-xl shadow-[0_14px_34px_rgba(104,40,200,0.5)]" aria-hidden="true">✦</span><h2 className="mt-5 text-3xl font-bold leading-tight sm:text-5xl">{homeCopy.closingCta.headline}</h2><p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-white/72">{homeCopy.closingCta.body}</p><div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/AI-project-compass" className="group inline-flex min-h-[56px] items-center justify-center gap-3 rounded-xl border border-[#caaeff] bg-[#7a35e8] px-6 py-3 font-bold text-white shadow-[0_18px_48px_rgba(74,26,146,0.54)] transition hover:-translate-y-1 hover:bg-[#8c4cf0]"><span className="grid h-7 w-7 place-items-center rounded-full bg-white/16" aria-hidden="true">✦</span>{homeCopy.closingCta.primaryCta}<Arrow /></Link><Link href="/designers" className="group inline-flex min-h-[56px] items-center justify-center gap-2 rounded-xl border border-white/55 bg-white/10 px-6 py-3 font-bold text-white transition hover:-translate-y-1 hover:border-white hover:bg-white/20">{homeCopy.closingCta.secondaryCta}<Arrow /></Link></div></div>
+        <div className="mx-auto max-w-4xl text-center"><span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-xl shadow-[0_14px_34px_rgba(104,40,200,0.5)]" aria-hidden="true">✦</span><h2 className="mt-5 text-3xl font-bold leading-tight sm:text-5xl">{homeCopy.closingCta.headline}</h2><p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-white/72">{homeCopy.closingCta.body}</p><div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/ai-project-compass" className="group inline-flex min-h-[56px] items-center justify-center gap-3 rounded-xl border border-[#caaeff] bg-[#7a35e8] px-6 py-3 font-bold text-white shadow-[0_18px_48px_rgba(74,26,146,0.54)] transition hover:-translate-y-1 hover:bg-[#8c4cf0]"><span className="grid h-7 w-7 place-items-center rounded-full bg-white/16" aria-hidden="true">✦</span>{homeCopy.closingCta.primaryCta}<Arrow /></Link><Link href="/designers" className="group inline-flex min-h-[56px] items-center justify-center gap-2 rounded-xl border border-white/55 bg-white/10 px-6 py-3 font-bold text-white transition hover:-translate-y-1 hover:border-white hover:bg-white/20">{homeCopy.closingCta.secondaryCta}<Arrow /></Link></div></div>
       </section>
     </main>
   );

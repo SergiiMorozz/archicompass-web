@@ -8,10 +8,10 @@ const copy = getProjectCompassJourneyCopy();
 export const metadata: Metadata = pageMetadata({
   title: copy.metadata.title,
   description: copy.metadata.description,
-  path: "/AI-project-compass",
+  path: "/ai-project-compass",
   noIndex: true,
 });
 
 export default function AiProjectCompassPage() {
-  return <ProjectCompassView variant="journey" entryPath="/AI-project-compass" />;
+  return <ProjectCompassView variant="journey" entryPath="/ai-project-compass" />;
 }

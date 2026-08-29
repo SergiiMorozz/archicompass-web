@@ -9,7 +9,7 @@ type ProjectCompassViewProps = {
 
 export default async function ProjectCompassView({
   variant = "workspace",
-  entryPath = "/AI-project-compass",
+  entryPath = "/ai-project-compass",
 }: ProjectCompassViewProps) {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getUser();

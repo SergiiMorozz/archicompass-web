@@ -99,7 +99,7 @@ export default async function PublicArticlePage({
       <article className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
         <div className="mx-auto max-w-[65ch] text-lg leading-9">
           {hasRenderableArticleBlocks(blocks, siteCopy.locale) ? <ArticleRichContent blocks={blocks} locale={siteCopy.locale} /> : <div className="grid gap-6 text-foreground">{paragraphs.map((paragraph, index) => <p key={`${article.id}-${index}`}>{paragraph}</p>)}</div>}
-          <section className="mt-12 rounded-lg border border-line bg-primary-soft p-6"><div className="text-sm font-semibold text-primary">{cta.eyebrow}</div><h2 className="mt-1 text-2xl font-bold">{cta.title}</h2><div className="mt-5 flex flex-wrap gap-3"><Link href="/AI-project-compass" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">{cta.projectCompass}</Link><Link href="/designers" className="rounded-xl border border-line bg-card px-5 py-3 text-sm font-semibold">{cta.directory}</Link></div></section>
+          <section className="mt-12 rounded-lg border border-line bg-primary-soft p-6"><div className="text-sm font-semibold text-primary">{cta.eyebrow}</div><h2 className="mt-1 text-2xl font-bold">{cta.title}</h2><div className="mt-5 flex flex-wrap gap-3"><Link href="/ai-project-compass" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">{cta.projectCompass}</Link><Link href="/designers" className="rounded-xl border border-line bg-card px-5 py-3 text-sm font-semibold">{cta.directory}</Link></div></section>
         </div>
       </article>
     </main>

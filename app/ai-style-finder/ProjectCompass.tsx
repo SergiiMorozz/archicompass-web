@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import NextImage from "next/image";
 import type { ChangeEvent } from "react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import ShareableStyleResult from "@/components/ShareableStyleResult";
@@ -796,7 +797,7 @@ export default function ProjectCompass({
   isDesigner = false,
   isAuthenticated = false,
   variant = "workspace",
-  entryPath = "/AI-project-compass",
+  entryPath = "/ai-project-compass",
 }: {
   isDesigner?: boolean;
   isAuthenticated?: boolean;
@@ -1592,7 +1593,7 @@ export default function ProjectCompass({
                 </div>
               </div>
               <div className="relative mx-auto w-full max-w-2xl overflow-visible rounded-[2rem] bg-primary-soft/45 p-3 sm:p-5">
-                <img src={localeAssetPath("/images/home/hero-warm-minimalist-20260811.png")} alt="" className="aspect-[1.24] w-full rounded-[1.45rem] object-cover shadow-[0_24px_60px_rgba(61,34,91,0.18)]" />
+                <NextImage src={localeAssetPath("/images/home/hero-warm-minimalist-20260811.png")} alt={journeyCopy.hero.imageAlt} width={1536} height={1024} priority sizes="(max-width: 1023px) 100vw, 50vw" className="aspect-[1.24] w-full rounded-[1.45rem] object-cover shadow-[0_24px_60px_rgba(61,34,91,0.18)]" />
                 <div className="absolute left-0 top-4 max-w-[13rem] rounded-2xl border border-primary/20 bg-white/95 p-4 shadow-[0_16px_34px_rgba(61,34,91,0.16)] sm:-left-7 sm:top-10 sm:max-w-[15rem]">
                   <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">{styleAnalysis ? journeyCopy.analysis.suggestedStyle : journeyCopy.hero.previewLabel}</div>
                   <div className="mt-1 text-xl font-bold">{styleAnalysis?.primaryStyle || journeyCopy.hero.previewStyle}</div>

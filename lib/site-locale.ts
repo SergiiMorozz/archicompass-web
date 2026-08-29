@@ -77,7 +77,8 @@ export function localeAssetPath(path: string) {
 }
 
 export function localePublicUrl(locale: SiteLocale, path = "/") {
-  return `${localeSiteUrl("pl")}${localePublicPath(locale, path)}`;
+  const publicPath = localePublicPath(locale, path);
+  return publicPath === "/" ? localeSiteUrl("pl") : `${localeSiteUrl("pl")}${publicPath}`;
 }
 
 export function otherLocale(locale: SiteLocale = siteLocale): SiteLocale {
