@@ -16,8 +16,8 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#6d28d9",
     icons: [
       {
-        src: localeAssetPath("/brand/archicompass-mark.png"),
-        sizes: "any",
+        src: localeAssetPath("/brand/archicompass-compass-purple.png"),
+        sizes: "428x785",
         type: "image/png",
       },
     ],
