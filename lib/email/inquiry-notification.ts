@@ -1,4 +1,5 @@
 import { sendTransactionalEmail } from "@/lib/email/send-transactional-email";
+import { emailSiteUrl, escapeEmailHtml, transactionalEmailHtml } from "@/lib/email/transactional-layout";
 import { briefLabel, briefListLabel, briefStyleLabel, briefTitle } from "@/lib/brief-labels";
 import { polishVisualCues } from "@/lib/visual-cues";
 
@@ -34,21 +35,6 @@ type NotificationResult = {
   sentAt: string | null;
   status: NotificationStatus;
 };
-
-function appUrl() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return "http://localhost:3001";
-}
-
-function escapeHtml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
 
 function briefLine(label: string, value: string | null | undefined) {
   return `${label}: ${value?.trim() || "Nie podano"}`;
@@ -94,7 +80,7 @@ function emailText({
     "Brief:",
     brief.brief_text,
     "",
-    `Otwórz zapytanie: ${appUrl()}/studio/inbox/${inquiryId}`,
+    `Otwórz zapytanie: ${emailSiteUrl()}/studio/inbox/${inquiryId}`,
   ]
     .filter((line): line is string => line !== null)
     .join("\n");
@@ -131,59 +117,30 @@ function emailHtml({
     ["Zdjęcia referencyjne", String(brief.reference_photo_names?.length ?? 0)],
   ];
 
-  return `<!doctype html>
-<html>
-  <body style="margin:0;background:#f7f3ee;color:#1f172a;font-family:Arial,sans-serif;">
-    <div style="max-width:680px;margin:0 auto;padding:28px;">
-      <div style="font-size:14px;font-weight:700;color:#8b5e34;">ArchiCompass</div>
-      <h1 style="margin:12px 0 8px;font-size:28px;line-height:1.2;">Nowe zapytanie AI Project Compass</h1>
-      <p style="margin:0 0 20px;color:#665f68;line-height:1.6;">
-        ${escapeHtml(designer.full_name || "Dzień dobry")}, klient wysłał zapisany brief projektowy.
-      </p>
+  const messageHtml = message
+    ? `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;margin:0 0 16px;border-collapse:separate;border-spacing:0;border:1px solid #e5d7fb;border-radius:16px;background:#faf7ff;"><tr><td style="padding:16px 18px 8px;color:#5c20c2;font-size:13px;font-weight:700;">Wiadomość klienta</td></tr><tr><td style="padding:0 18px 18px;color:#4b3b60;font-size:14px;line-height:1.6;">${escapeEmailHtml(message)}</td></tr></table>`
+    : "";
+  const summaryRows = rows
+    .map(
+      ([label, value]) => `<tr><td style="padding:8px 0;color:#756a85;font-size:13px;line-height:1.45;vertical-align:top;width:42%;">${escapeEmailHtml(label)}</td><td style="padding:8px 0;color:#2c1f42;font-size:13px;font-weight:700;line-height:1.45;vertical-align:top;">${escapeEmailHtml(value || "Nie podano")}</td></tr>`
+    )
+    .join("");
 
-      ${
-        message
-          ? `<div style="margin:0 0 20px;padding:16px;border:1px solid #e2d8ce;border-radius:14px;background:#fff;">
-              <div style="font-size:13px;font-weight:700;color:#8b5e34;">Wiadomość klienta</div>
-              <p style="margin:8px 0 0;line-height:1.6;">${escapeHtml(message)}</p>
-            </div>`
-          : ""
-      }
-
-      <div style="margin:0 0 20px;padding:16px;border:1px solid #e2d8ce;border-radius:14px;background:#fff;">
-        <div style="font-size:13px;font-weight:700;color:#8b5e34;">Podsumowanie briefu</div>
-        <table style="width:100%;margin-top:10px;border-collapse:collapse;">
-          ${rows
-            .map(
-              ([label, value]) => `<tr>
-                <td style="padding:8px 0;color:#665f68;width:150px;">${escapeHtml(label)}</td>
-                <td style="padding:8px 0;font-weight:700;">${escapeHtml(value || "Nie podano")}</td>
-              </tr>`
-            )
-            .join("")}
-        </table>
-      </div>
-
-      <div style="margin:0 0 20px;padding:16px;border-radius:14px;background:#1f172a;color:#fff;">
-        <pre style="margin:0;white-space:pre-wrap;font-family:Arial,sans-serif;font-size:13px;line-height:1.6;">${escapeHtml(
-          brief.brief_text
-        )}</pre>
-      </div>
-
-      ${
-        clientEmail
-          ? `<p style="margin:0 0 20px;color:#665f68;line-height:1.6;">E-mail klienta: <strong>${escapeHtml(
-              clientEmail
-            )}</strong></p>`
-          : ""
-      }
-
-      <a href="${appUrl()}/studio/inbox/${inquiryId}" style="display:inline-block;padding:12px 18px;border-radius:12px;background:#8b5e34;color:#fff;text-decoration:none;font-weight:700;">
-        Otwórz zapytanie
-      </a>
-    </div>
-  </body>
-</html>`;
+  return transactionalEmailHtml({
+    bodyHtml: `${messageHtml}<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border-collapse:separate;border-spacing:0;border:1px solid #e5d7fb;border-radius:16px;background:#ffffff;"><tr><td style="padding:16px 18px 4px;color:#5c20c2;font-size:13px;font-weight:700;">Podsumowanie briefu</td></tr><tr><td style="padding:0 18px 12px;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border-collapse:collapse;">${summaryRows}</table></td></tr></table><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;margin-top:16px;border-collapse:separate;border-spacing:0;border-radius:16px;background:#2a1d43;"><tr><td style="padding:16px 18px;color:#ffffff;font-size:13px;line-height:1.6;white-space:pre-wrap;">${escapeEmailHtml(brief.brief_text)}</td></tr></table>${clientEmail ? `<p style="margin:16px 0 0;color:#756a85;font-size:13px;line-height:1.55;">E-mail klienta: <strong style="color:#3d2d53;">${escapeEmailHtml(clientEmail)}</strong></p>` : ""}`,
+    ctaHref: `${emailSiteUrl()}/studio/inbox/${inquiryId}`,
+    ctaLabel: "Otwórz zapytanie",
+    eyebrow: "Nowe zapytanie",
+    footerNote: "Przejrzyj brief przed odpowiedzią — dzięki temu pierwsza rozmowa będzie od razu bardziej konkretna.",
+    greeting: designer.full_name || "Dzień dobry",
+    intro: "Klient wysłał zapisany brief projektowy przez AI Project Compass.",
+    preheader: `Nowe zapytanie: ${briefTitle(brief)}`,
+    steps: [
+      { title: "Przejrzyj brief", body: "Zobacz potrzeby klienta, zakres, budżet, termin i inspiracje." },
+      { title: "Odpowiedz w rozmowie", body: "Wiadomość i dalsze ustalenia są dostępne w Studio projektanta." },
+    ],
+    title: "Nowe zapytanie AI Project Compass",
+  });
 }
 
 export async function sendInquiryNotificationEmail({
